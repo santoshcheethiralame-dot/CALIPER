@@ -1,0 +1,66 @@
+[
+  {
+    "neuron": 2977,
+    "group": "fail",
+    "direct": 0.4525,
+    "cascade": 0.9995,
+    "delta": 0.547,
+    "r2_cascade": 0.8727
+  },
+  {
+    "neuron": 230,
+    "group": "fail",
+    "direct": 0.8656,
+    "cascade": 0.9987,
+    "delta": 0.1331,
+    "r2_cascade": 0.9179
+  },
+  {
+    "neuron": 1543,
+    "group": "fail",
+    "direct": 0.9364,
+    "cascade": 0.9324,
+    "delta": -0.004,
+    "r2_cascade": 0.9986
+  },
+  {
+    "neuron": 1989,
+    "group": "fail",
+    "direct": 0.9899,
+    "cascade": 0.9858,
+    "delta": -0.0041,
+    "r2_cascade": 0.9557
+  },
+  {
+    "neuron": 824,
+    "group": "ok",
+    "direct": 1.0,
+    "cascade": 0.9962,
+    "delta": -0.0038,
+    "r2_cascade": 1.0
+  },
+  {
+    "neuron": 1561,
+    "group": "ok",
+    "direct": 0.9912,
+    "cascade": 0.9173,
+    "delta": -0.074,
+    "r2_cascade": 0.9998
+  },
+  {
+    "neuron": 2796,
+    "group": "ok",
+    "direct": 0.9991,
+    "cascade": 0.9993,
+    "delta": 0.0003,
+    "r2_cascade": 0.9996
+  },
+  {
+    "neuron": 1945,
+    "group": "ok",
+    "direct": 0.9996,
+    "cascade": 0.9998,
+    "delta": 0.0002,
+    "r2_cascade": 0.9999
+  }
+]

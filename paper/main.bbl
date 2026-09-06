@@ -1,0 +1,56 @@
+\begin{thebibliography}{7}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Dettmers et~al.(2023)Dettmers, Pagnoni, Holtzman, and
+  Zettlemoyer]{dettmers2023qlora}
+Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer.
+\newblock {QLoRA}: Efficient finetuning of quantized {LLMs}.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~36, 2023.
+\newblock arXiv:2305.14314. Source of the NF4 4-bit quantisation used here.
+
+\bibitem[Lederman and Mahowald(2026)]{lederman2026contentagnostic}
+Harvey Lederman and Kyle Mahowald.
+\newblock Emergent introspection in {AI} is content-agnostic.
+\newblock \emph{arXiv preprint arXiv:2603.05414}, March 2026.
+\newblock Submitted 5 March 2026.
+
+\bibitem[Lindsey(2025)]{lindsey2025introspection}
+Jack Lindsey.
+\newblock Emergent introspective awareness in large language models.
+\newblock Transformer Circuits Thread, October 2025.
+\newblock URL
+  \url{https://transformer-circuits.pub/2025/introspection/index.html}.
+\newblock Published 29 October 2025. arXiv version: arXiv:2601.01828 (5 January
+  2026).
+
+\bibitem[Macar et~al.(2026)Macar, Yang, Wang, Wallich, Ameisen, and
+  Lindsey]{macar2026mechanisms}
+Uzay Macar, Li~Yang, Atticus Wang, Peter Wallich, Emmanuel Ameisen, and Jack
+  Lindsey.
+\newblock Mechanisms of introspective awareness.
+\newblock \emph{arXiv preprint arXiv:2603.21396}, March 2026.
+\newblock Submitted 22 March 2026.
+
+\bibitem[Singh et~al.(2026)Singh, Linzen, and Ravfogel]{singh2026realitycheck}
+Shashwat Singh, Tal Linzen, and Shauli Ravfogel.
+\newblock Can {LLMs} introspect? {A} reality check.
+\newblock \emph{arXiv preprint arXiv:2605.26242}, May 2026.
+\newblock v1 25 May 2026; v2 21 August 2026.
+
+\bibitem[Wilcoxon(1945)]{wilcoxon1945individual}
+Frank Wilcoxon.
+\newblock Individual comparisons by ranking methods.
+\newblock \emph{Biometrics Bulletin}, 1\penalty0 (6):\penalty0 80--83, 1945.
+
+\bibitem[Wilson(1927)]{wilson1927probable}
+Edwin~B. Wilson.
+\newblock Probable inference, the law of succession, and statistical inference.
+\newblock \emph{Journal of the American Statistical Association}, 22\penalty0
+  (158):\penalty0 209--212, 1927.
+
+\end{thebibliography}

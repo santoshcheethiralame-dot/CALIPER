@@ -1,0 +1,74 @@
+[
+  {
+    "neuron": 2977,
+    "cold": 0.4631,
+    "warm": 0.4596,
+    "delta": -0.0034,
+    "r2_warm": 0.5501,
+    "k2_gain_warm": 0.4208
+  },
+  {
+    "neuron": 230,
+    "cold": 0.8707,
+    "warm": 0.9457,
+    "delta": 0.0751,
+    "r2_warm": 0.8185,
+    "k2_gain_warm": 0.1802
+  },
+  {
+    "neuron": 1543,
+    "cold": 0.9389,
+    "warm": 0.9394,
+    "delta": 0.0005,
+    "r2_warm": 0.9345,
+    "k2_gain_warm": 0.0549
+  },
+  {
+    "neuron": 1989,
+    "cold": 0.9984,
+    "warm": 0.9793,
+    "delta": -0.0191,
+    "r2_warm": 0.9959,
+    "k2_gain_warm": -0.0109
+  },
+  {
+    "neuron": 1859,
+    "cold": 0.9988,
+    "warm": 0.999,
+    "delta": 0.0001,
+    "r2_warm": 1.0,
+    "k2_gain_warm": -0.0
+  },
+  {
+    "neuron": 536,
+    "cold": 0.978,
+    "warm": 0.9824,
+    "delta": 0.0044,
+    "r2_warm": 0.9995,
+    "k2_gain_warm": -0.0007
+  },
+  {
+    "neuron": 125,
+    "cold": 0.9814,
+    "warm": 0.9981,
+    "delta": 0.0167,
+    "r2_warm": 0.9998,
+    "k2_gain_warm": -0.0016
+  },
+  {
+    "neuron": 824,
+    "cold": 0.9931,
+    "warm": 0.9995,
+    "delta": 0.0064,
+    "r2_warm": 1.0,
+    "k2_gain_warm": -0.0001
+  },
+  {
+    "neuron": 1561,
+    "cold": 0.9937,
+    "warm": 0.9967,
+    "delta": 0.003,
+    "r2_warm": 0.9999,
+    "k2_gain_warm": -0.0011
+  }
+]

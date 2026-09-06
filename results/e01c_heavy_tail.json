@@ -1,0 +1,35 @@
+[
+  {
+    "neuron": 230,
+    "kurtosis": 549.2,
+    "n_events": 202,
+    "align_raw": 0.942,
+    "r2_raw": 0.816,
+    "align_log1p": 0.967,
+    "r2_log1p": 0.874,
+    "align_rank": 0.985,
+    "r2_rank": 0.921
+  },
+  {
+    "neuron": 2977,
+    "kurtosis": 66.5,
+    "n_events": 262,
+    "align_raw": 0.447,
+    "r2_raw": 0.543,
+    "align_log1p": 0.646,
+    "r2_log1p": 0.57,
+    "align_rank": 0.884,
+    "r2_rank": 0.818
+  },
+  {
+    "neuron": 1561,
+    "kurtosis": 31.6,
+    "n_events": 840,
+    "align_raw": 0.995,
+    "r2_raw": 1.0,
+    "align_log1p": 0.999,
+    "r2_log1p": 1.0,
+    "align_rank": 0.982,
+    "r2_rank": 0.946
+  }
+]

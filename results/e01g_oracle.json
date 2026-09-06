@@ -1,0 +1,56 @@
+[
+  {
+    "neuron": 2977,
+    "group": "fail",
+    "r2_at_true_direction": 1.0,
+    "r2_k1": 0.5491,
+    "align_k1": 0.4651,
+    "w_in_k2_subspace": 0.9971,
+    "r2_k2": 0.9989
+  },
+  {
+    "neuron": 230,
+    "group": "fail",
+    "r2_at_true_direction": 1.0,
+    "r2_k1": 0.6845,
+    "align_k1": 0.8607,
+    "w_in_k2_subspace": 0.9961,
+    "r2_k2": 0.9789
+  },
+  {
+    "neuron": 1543,
+    "group": "fail",
+    "r2_at_true_direction": 1.0,
+    "r2_k1": 0.9341,
+    "align_k1": 0.9371,
+    "w_in_k2_subspace": 0.9973,
+    "r2_k2": 0.9919
+  },
+  {
+    "neuron": 1989,
+    "group": "fail",
+    "r2_at_true_direction": 0.9992,
+    "r2_k1": 0.9731,
+    "align_k1": 0.9604,
+    "w_in_k2_subspace": 0.9985,
+    "r2_k2": 0.9985
+  },
+  {
+    "neuron": 824,
+    "group": "ok",
+    "r2_at_true_direction": 1.0,
+    "r2_k1": 1.0,
+    "align_k1": 0.9999,
+    "w_in_k2_subspace": 0.9999,
+    "r2_k2": 0.9999
+  },
+  {
+    "neuron": 1561,
+    "group": "ok",
+    "r2_at_true_direction": 1.0,
+    "r2_k1": 1.0,
+    "align_k1": 0.9931,
+    "w_in_k2_subspace": 0.9973,
+    "r2_k2": 0.9999
+  }
+]

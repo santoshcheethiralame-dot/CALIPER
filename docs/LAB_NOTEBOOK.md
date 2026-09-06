@@ -1,0 +1,1072 @@
+# CALIPER Lab Notebook
+
+Append-only record of every run — done and planned — its config, and what it
+showed. Single source of truth for experimental history. Update after every run
+or finding. Newest entries go at the top of each section; never rewrite a past
+entry, only add a dated follow-up beneath it.
+
+**Definition of done for a run.** Config recorded + seed logged + raw artifact
+archived under `data/` or `results/` + a one-paragraph note in §4 + a row in the
+§3 registry. A run that cannot be reproduced from its recorded config did not
+happen. For Kaggle runs, add: the version stamp printed in the first output line,
+and the artifact downloaded off the session before it expired.
+
+**Scope.** Started 17 Aug 2026. This notebook opens 6 Sep 2026 and back-fills
+everything run before that date from `results/*.json`, `data/s3/*.jsonl`, and the
+session record. Back-filled entries are marked *(reconstructed)* where the
+original config was recovered from the output file rather than logged at the time.
+
+---
+
+## 1. The project in one page — read this before anything else
+
+CALIPER asks whether the instruments used to read a language model's internals
+are correct, by finding places where the true answer is knowable in advance and
+scoring the instrument against it. Three levels, three sources of ground truth:
+
+| Level | Readout under test | Ground truth | Status |
+|---|---|---|---|
+| **L1 — unit** | Rank-K subspace estimator (maximally informative dimensions) | **Free** — an MLP neuron's input weight column *is* its direction for its own layer | Phase 0 closed. Instrument recovers 77/100; the other 23 fail silently |
+| **L2 — trait** | Difference-of-means persona vectors | **Planted** — inject a known direction | Not started. Blocked on K≥2 |
+| **L3 — self** | Concept-injection introspective report | **Planted** — inject a known state | Complete. Detection is mostly a perturbation alarm |
+
+The through-line is not the three levels; it is one calibration discipline
+applied at each, and every study must report the same four quantities:
+
+1. a **random / content-free null** — what does the readout return when there is
+   nothing to find?
+2. a **required-N table** — how much data for a stated precision, indexed by
+   informative events, not positions;
+3. a **pre-registered pass criterion with a confidence interval**, filed before
+   the run;
+4. a **disagreement flag** — two estimation routes; where they diverge the
+   readout is unreliable, and this needs no ground truth, which is why it is the
+   deliverable a practitioner can actually use.
+
+**Publication order (fixed as of 3 Sep 2026).**
+
+| | Content | When | Target |
+|---|---|---|---|
+| **Paper A** | Study 3 alone — the content-free control for injection detection | arXiv ~1 Oct 2026 | preprint, then ICLR 2027 workshop Feb |
+| **Paper B** | Flagship: Studies 1 + 3 under the "preparation" framing, Study 2 if it lands | Jan–Feb 2027 | ICML/ACL 2027 main, BlackboxNLP fallback |
+| **Paper C** | Phase A: what the calibrated instrument measures in unknown units | Sep 2027 | ICLR 2028; **conditional on the E1.4 gate** |
+
+Two papers are committed. The third exists only if E1.4 clears in sem 6.
+
+---
+
+## 2. Environments & reproduction
+
+### 2.1 Local (CPU) — all of Phase 0
+
+- Windows 11, Python 3.12. `pytest` suite in `tests/` (estimator, batched, runtime).
+- Model: `gpt2` (small), layer 6, d_model 768, d_mlp 3072. Downloads on first run.
+- Stimulus: post-LayerNorm residual at `block.ln_2`. Response: pre-activation at
+  `block.mlp.c_fc`. Corpus cached in `results/corpus_cache/` (Gutenberg 11, 84, 1342).
+- `datasets` **hard-crashes the process** on this machine — `sample_corpus()`
+  defaults to the cached Gutenberg files for that reason. Do not "fix" it back.
+- Measured throughput: **63.7 s per neuron** at the gate config (20k tokens,
+  d=768, 3 restarts, 2500 steps, k=1 + k=2, single-threaded). The dual
+  direct+cascade protocol roughly doubles it.
+
+### 2.2 Kaggle (GPU) — Study 3 and everything at ≥7B
+
+The recipe that finally worked after four failed rounds. Deviate at your peril.
+
+- Accelerator **GPU T4 x2**, Internet **On**. One card is not enough: a 32B-class
+  model in 4-bit needs ~20 GB and one T4 has 15.6 GB.
+- **Ship the script as a Kaggle Dataset, never paste it into a cell.** Pasting a
+  400+ line file into a notebook cell failed four consecutive times (the tail of
+  the script landed inside the pip line once). Upload `.py` as dataset
+  `caliper-s3`; patch by uploading a New Version; the notebook never changes.
+- Attach **two** inputs: the model under *Models* (Gemma 3 27B — this is what
+  makes it load with no HF token and no download) and `caliper-s3` under
+  *Datasets*. The loader scans `/kaggle/input` for a folder containing
+  `config.json`, so the `.py` can never be mistaken for the model.
+- Cell 1 (only after a session restart):
+  ```
+  pip install -q -U bitsandbytes accelerate transformers
+  ```
+- Cell 2, the whole notebook:
+  ```python
+  import sys, glob
+  sys.argv = ["run", "--model", "gemma", "--compute-dtype", "fp32", ...]
+  hits = glob.glob("/kaggle/input/**/*.py", recursive=True)
+  print(hits)
+  exec(open(hits[0]).read())
+  ```
+  The glob exists because Kaggle silently renames the upload folder.
+- **The first output line is a version stamp** (`kaggle_s3_positive_control
+  2026-09-03b`). If it is not the version you just uploaded, the dataset did not
+  refresh — remove and re-add the input. Nothing after a stale stamp is worth
+  reading. This one line has saved more time than any other change.
+- **fp32 compute is mandatory on Gemma.** See §8.
+- **Restart the session before every reload.** See §8.
+- Download every `.jsonl` off the session before it dies, and copy it into
+  `data/s3/`. A Kaggle output that expired is gone.
+
+### 2.3 Reproduction commands
+
+```bash
+# Phase 0, any experiment
+python experiments/e01_gate.py --neurons 100 --tokens 20000 --restarts 3
+
+# Study 3 analysis, all of it, no GPU
+python experiments/analyse_s3_full.py
+python experiments/rescore_s3.py
+python paper/make_figures.py
+
+# Paper build
+cd paper && pdflatex main && bibtex main && pdflatex main && pdflatex main
+```
+
+---
+
+## 3. Run registry
+
+Chronological. `C`-numbers are notebook IDs; `E`/`S`/`P` names are the experiment
+families from the specification and the merged design.
+
+### Phase 0 — L1, unit-level estimator (local CPU, GPT-2 small, layer 6)
+
+| ID | Date | Exp | n | Config | Artifact | One-line result |
+|---|---|---|---|---|---|---|
+| C1 | 2026-08-17 | E0.2 random null | 12 units / 2000 dirs | 20k tok, d=768 | `results/e02.json` | Null alignment median 0.0245, p99 0.0913; **detection threshold R² = 0.0443** vs true 0.92 |
+| C2 | 2026-08-17 | E0.3a recovery ceiling | 24 cells | frac_active 0.005→0.8, 3 seeds | `e03a_recovery_ceiling.json` | Alignment 0.946–0.999 at every sparsity — **no information ceiling**; failures are optimisation, not data |
+| C3 | 2026-08-18 | E0.5 classical baselines | 30 | STA / decorrelated STA / STC vs fitted | `e05_classical_baselines.json` | STA 0/30 above 0.95, dSTA 1/30, STC 0/30, **fitted 26/30** |
+| C4 | 2026-08-18 | E0.1 v3 pilot | 20 | 20k tok, 3 restarts, 2500 steps | `e01_v3.json` | 80% pass, median align 0.9958, **min 0.3961** — first sight of silent failure |
+| C5 | 2026-08-18 | E0.1b failure mode | 5 | re-fit failures | `e01b_failure_mode.json` | n1859 0.879→0.999 recovers; **n2977 stays 0.46** — two distinct failure classes |
+| C6 | 2026-08-18 | E0.1c heavy tail | 3 | raw / log1p / rank response transform | `e01c_heavy_tail.json` | Rank transform lifts n2977 0.447→0.884, n230 0.942→0.985. Kurtosis 31–549 |
+| C7 | 2026-08-18 | E0.1e nonlinearity | 8 | gelu/relu/softplus/identity | `e01e_nonlinearity.json` | Failures all sit at **z_mean −1.3 to −1.9** (deep in GELU's non-monotone region); softplus/identity recover them |
+| C8 | 2026-08-18 | E0.1f warm start | 9 | init at STA | `e01f_warm_start.json` | **No gain** — n2977 cold 0.4631, warm 0.4596. Not an initialisation problem |
+| C9 | 2026-08-18 | E0.1g oracle | 6 | R² evaluated at the true direction | `e01g_oracle.json` | **R² = 1.000 at the truth for every failure**; true direction lies in the k=2 subspace at 0.996–0.999. A perfect solution exists and is reachable |
+| C10 | 2026-08-18 | E0.1h cascade | 8 | fit k+1, descend into it | `e01h_cascade.json` | **n2977 0.4525→0.9995, n230 0.8656→0.9987**; mild regression on 3 already-good units |
+| C11 | 2026-08-18 | E0.1i selection rule | 9 | pick direct vs cascade by held-out R² | `e01i_selection.json` | Rule picks correctly with wide margins; **n1989 is the degenerate case** (margin 0.0148, regret 0.043) |
+| C12 | 2026-08-19 | E0.3b operating point | timing grid | tokens × steps × restarts | `e03b_operating_point.json` | 4k/800/2 is the cheap knee: 4.7 s/neuron, median 0.9936 |
+| **C13** | **2026-08-19** | **E0.1 GATE, n=100** | **100** | pre-registered, 20k tok, 3 restarts | `e01_gate_summary.json`, `e01_gate.jsonl` | **77/100, Wilson 95% [0.679, 0.842] — FAILS its own ≥0.90 bar.** Median align 0.9933, **min 0.1445**, 31% of units disagree >0.05 across methods |
+| C14 | 2026-08-20 | E0.3 required-N | K∈{1,2,3} × N | events-indexed | `e03_required_n.json` | **K=1 saturates at ~200 events** (median 0.9979 at N=2000). **K=2 degenerates**: 0.24→0.89; additive K=2 pinned at **0.50**, K=3 at **0.36** — the one-direction-recovered signature |
+
+### Study 3 — L3, self readout (Kaggle, Gemma-3-27B-it, 4-bit NF4, fp32 compute, 2×T4, layer 37 of 62 = 0.60 depth, 30 concepts)
+
+| ID | Date | Stage | α | n | Artifact | One-line result |
+|---|---|---|---|---|---|---|
+| C15 | 2026-09-02 | generation, introspective | 0,2,4,8 | 120 | `data/s3/s3_generation.jsonl` | First clean run after the fp16 NaN failure. Detection 0 / 43.3 / 16.7 / 0% — **non-monotone, wrong shape** |
+| C16 | 2026-09-02 | generation sweep | 3,5,6 | 90 (210 total) | same file | **α=6 gives 10.0% [3.5, 25.6] vs their 10.8%**, 0/30 FPR. Coherence 93%/87% at α=5/6 |
+| C17 | 2026-09-02 | forced choice, real | 0,2,4,5,6,8 × 2 framings | 360 | `s3_forced_real_sweep.jsonl` | **First-token P(YES) 0.00003 → 0.417, Wilcoxon p=9.3e-9, 28/30 concepts rose.** Killed my own post-hoc-inference hypothesis. Neutral prompt was malformed in this run |
+| C18 | 2026-09-02 | forced, **random** control | 0,2,4,6 | 240 | `s3_forced_random.jsonl` | Norm-matched Gaussian: **0.305 at α=6 vs real 0.417, p=0.33 — indistinguishable.** Pre-registered outcome **A2** |
+| C19 | 2026-09-02 | forced, **shuffle** control | 0,2,4,6 | 240 | `s3_forced_shuffle.jsonl` | Coordinate-permuted vector agrees with random at every α (p=0.50/0.27/0.60) |
+| C20 | 2026-09-02 | forced, real, **fixed** neutral prompt | 0,2,4,6 | 240 | `s3_forced_real.jsonl` | Introspective vs neutral **indistinguishable once anything is injected** (p=0.44–0.75); differ only at α=0 (0.000 vs 0.188) |
+| **C21** | **2026-09-03** | **forced, L2-normalised, real** | 0,1,2,4,8,16,32,64,128,512,2048 | 660 | `data/s3/s3_unit_forced_norm1.jsonl` | **RAN BUT NEVER ANALYSED.** Session hit its usage limit; the account was disabled the same day. Archived 6 Sep 2026, sha256 `f465e7304ca5e0a5…`, 118528 bytes. Its random-control twin was never run |
+
+C21 verified on archival: 660 rows = 11 α × 2 framings (`introspective`,
+`neutral_matched`) × 30 concepts, exactly 30 per cell, `control: none`,
+`normalised: true`, and every row carries `trial_seed` — so it is the first run
+made after the trial-randomisation fix. Fields: `alpha, concept, control,
+framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
+the random arm.
+
+**C21 is the open run.** It is run 1 of the pre-arXiv list and the only one that
+decides whether "we reproduce their protocol" is true or false. See §7 A-1.
+
+### Inherited from APERTURE — runs CALIPER leans on but did not run
+
+APERTURE (`projects\mirror`, package `aperture`) is the predecessor programme. It
+was rejected as the capstone in Aug 2026 and continues as separate solo work, but
+CALIPER's Study 3 descends directly from its runs and Study 2 / Phase A plan to
+reuse its intervention machinery. Those runs are recorded here because a CALIPER
+claim resting on one of them inherits its caveats — and, for six of them,
+inherits a missing artifact.
+
+Full detail lives in `projects\mirror\docs\LAB_NOTEBOOK.md`. Do not duplicate it;
+link to it.
+
+| APERTURE ID | Date | What it established | How CALIPER uses it | Raw data |
+|---|---|---|---|---|
+| **R11** | 2026-07-15 | **The steering-vs-access control.** Identical injection, only framing differs. Neutral 0.433 / gamma +2.574 vs introspective 0.302 / gamma +1.988; difference -0.586, 95% CI [-1.148, -0.007], excludes 0 **negatively** | **Load-bearing.** Direct ancestor of Study 3's framing control (C20) and of the L3 row in the merged design. CALIPER's advance is re-running the idea on the defended model with a *preamble-matched* neutral prompt and norm-matched controls | **LOST** |
+| **R12** | 2026-07-22 | **First pre-registered run.** Three framings: neutral +2.574 > introspective +1.988 > informative +1.645. Primary prediction P3 **falsified**; non-replication of Pearson-Vogel on Gemma-2-2B | **Load-bearing for method, not for numbers.** Where the pre-register-then-report-the-failure discipline came from, which Study 3 repeated at C17 | **LOST** |
+| R7 | 2026-07-14 | **Probe-Report Gap = 0.83** - probe 1.00, shuffled control 0.00, verbal report 0.17 | Background evidence that a concept is present in activations even when unreported. Cited, not depended on | **LOST** |
+| R8 | 2026-07-14 | **Activation patching:** self-delta +6.96 [+5.34,+8.56] vs control +0.81 [-0.19,+1.80]; paired +6.15. Injected content is causally wired to the output | Underwrites the injection paradigm Study 3 uses, and is why "output steering" was the hypothesis to beat | **LOST** |
+| R9 | 2026-07-15 | **Naturalistic arm:** injection-derived directions decode *non-injected* states at 0.688 vs 0.062 chance | Answers "injections are OOD damage, not real thoughts" - the central methodological attack on Study 3's paradigm | **LOST** |
+| R10 | 2026-07-15 | Forced choice, first gamma fit +1.988 [+1.476,+2.478]. Naive access reading **rejected** in favour of the control that became R11 | Cautionary provenance: gamma > 0 alone is not evidence. The same trap Study 3's C15 fell into with `said_yes` | **LOST** |
+| R1-R6 | 2026-07-13 | Pipeline smoke; steering demo; coherent-window sweep (alpha ~0.5-1); detection probe; layer sweep; 9B scale check. **Confabulation is depth- and scale-robust at 2B-9B** | Sets the prior that detection is weak in small open models - which is why Study 3 went straight to a 27B defended model | R1, R3 only |
+
+**The inherited liability, stated plainly.** APERTURE's own notebook section 7
+records that the raw data for **R7-R12 was never downloaded off Kaggle and is
+gone**. Six runs, including both runs CALIPER calls load-bearing. Consequences:
+
+1. **No CALIPER paper may report an APERTURE number as its own measurement.** Cite
+   it as prior work by the same author, with its caveats, or re-run it.
+2. **If a reviewer asks for R11's data, we cannot produce it.** Paper B's framing
+   chapter must therefore rest on Study 3's own C20, which *is* archived, and use
+   R11 as motivation only.
+3. If R11/R12 are ever needed as data rather than motivation, they are a **cheap
+   Kaggle re-run** (free tier, Gemma-2-2B), not a free re-analysis. Budget ~2 GPU-h.
+
+This is exactly why section 2.3 makes artifact download part of a run's definition
+of done, and why C21 was moved into `data/s3/` the day this notebook opened.
+
+**What CALIPER reuses as code, not as results:** the concept-injection hooks and
+intervention machinery (`aperture.patching`, the forward-hook injection path).
+Study 2's P1/P2 plant directions with it, Phase A's E1.4 ablates with it, and
+Study 2's fallback - if no clean persona behaviour appears at 7B - is to use the
+concept directions APERTURE already injects, which are documented to shift
+behaviour. That dependency is on tested code held locally, so it carries no
+artifact risk.
+
+---
+
+## 4. Runs in detail
+
+*(Newest first. Append; never rewrite.)*
+
+### C21 — L2-normalised protocol, real vectors (2026-09-03) — **INCOMPLETE**
+Macar et al. L2-normalise concept vectors before scaling by α; we did not. Our
+vectors have median norm 5002, so **our α is not their α** and the "10.0% vs
+10.8%" match in C16 was obtained by sweeping, not by matching protocol. This run
+switches on `--normalise` (unit vectors) and sweeps α log-spaced 1 → 2048,
+because with unit vectors nobody knows where the effect switches on. It also
+prints, for the first time anywhere for this model and layer, the **median
+residual-stream norm at the read position** — the number that decides whether
+their α=4 is a large perturbation or a negligible one.
+
+The run completed and the output was downloaded. It was never analysed: the
+session hit its usage limit mid-analysis and the account lost access the same
+day. The random-vector twin (`--control random`, same α grid) was never run.
+
+**Do not analyse C21 until the addendum in §7 A-1 is filed.** The data already
+exists, so the only remaining protection against reading the answer we want is
+writing the criterion down first, and saying plainly in the paper that the real
+arm was collected before the criterion was filed.
+
+### C20 — Real vectors under the fixed neutral prompt (2026-09-02)
+The neutral prompt in C17 was defective — it said "Read the following situation"
+when no situation followed, so the model was answering a malformed question. This
+run replaces it with a preamble-matched prompt that keeps the base-rate statement
+and never mentions the model, its mind, its activations, or injection.
+
+| α | introspective | neutral | p |
+|---|---|---|---|
+| 0 | 0.000 | 0.188 | <0.0001 |
+| 2 | 0.429 | 0.370 | 0.44 |
+| 4 | 0.504 | 0.481 | 0.75 |
+| 6 | 0.417 | 0.395 | 0.70 |
+
+The introspective rows are bit-identical to C17, which confirms the pipeline is
+deterministic and the new column is directly comparable.
+
+**Reading.** Asking the model about *itself* adds nothing to its sensitivity to
+injection. The two prompts differ only when nothing is injected: the model is
+very sure it detects no injected thought when there isn't one (0.000), and much
+less sure that nothing is unusual (0.188). That is a difference in the
+no-injection condition, not in sensitivity.
+
+**The unexpected finding.** A random vector at α=2 lifts P(YES) by **+0.184**
+under the introspective prompt and only **+0.023** under the neutral one. Telling
+the model "I can inject patterns into your activations" makes it say YES to any
+disturbance at all. The self-directed framing is not merely uninformative — it
+adds a confound of its own, and the neutral prompt is the cleaner instrument.
+
+### C18 / C19 — The two content-free controls (2026-09-02) — **DECISIVE**
+`random` replaces each concept vector with a Gaussian rescaled to the same
+length; `shuffle` permutes the real vector's coordinates. Two independent ways of
+destroying content while preserving norm.
+
+Comparability check first: the α=0 rows are **bit-identical across all three
+files** (elephant = 1.2163171447809873e-07 in each). Same model, same pipeline,
+deterministic decoding. The comparison is sound.
+
+**Pre-registered primary, α=6:** real 0.417 vs random 0.305, p = 0.33, real
+higher on 17/30. **Indistinguishable. Filed as outcome A2 and not moved.**
+
+Pre-specified sweep (secondary, labelled as such):
+
+| α | real | random | shuffle | real vs random | real vs shuffle |
+|---|---|---|---|---|---|
+| 2 | 0.429 | 0.184 | 0.128 | **p=0.0011** | **p=0.0099** |
+| 4 | 0.504 | 0.252 | 0.359 | **p=0.0040** | p=0.13 |
+| 6 | 0.417 | 0.305 | 0.374 | p=0.33 | p=0.76 |
+
+**Reading.** The answer is *both*, and the mix moves with strength. A vector with
+no content at all drives P(YES) from 0.00003 to 0.18–0.37 — a genuine
+perturbation alarm, significant at every strength (p≈1e-9, rose on 28–30 of 30).
+On top of it sits a real concept-specific increment, visible only at low α. The
+content-free share goes **36% → 61% → 82%** at α=2/4/6.
+
+**Why the primary landed in the worst place.** α=6 was chosen because that is
+where the free-generation detection rate matched the published 10.8%. That turns
+out to be exactly where the generic alarm saturates and the specific signal is
+least visible. **Choosing the operating point by matching a published number
+selected against the thing we wanted to measure.** This belongs in the paper as a
+methodological warning, not buried in limitations.
+
+### C17 — Forced-choice first-token readout (2026-09-02) — **MY HYPOTHESIS DIED HERE**
+Measures P(YES) at the **first generated token**: one forward pass, nothing
+generated yet, so there is no output for the model to read back.
+
+I had predicted, from the C16 transcripts, that free-generation detection was the
+model performing post-hoc inference on its own steered output. The evidence
+looked strong — at α=6 the concept-laden text comes *first* and the `YES` after,
+with the model stating its own reasoning: *"betrayal, betrayal, betrayal,
+loyalty... YES. The repeated words suggest the concept of 'betrayal'..."*, and
+the same structure in all three hits.
+
+| introspective | mean P(YES) |
+|---|---|
+| α=0 | 0.00003 |
+| α=6 | 0.417 |
+
+Wilcoxon W=3.0, **p = 9.3×10⁻⁹**, 28 of 30 concepts rose. The injection shifts
+the first token before any output exists to read. **That is outcome A in the
+pre-registration and it falsifies my account.** Recorded as filed; not
+reinterpreted.
+
+Second finding, robust and independent of the above:
+
+| α | generated YES | first-token P(YES) |
+|---|---|---|
+| 2 | 50% | 0.429 |
+| 6 | 27% | 0.417 |
+| 8 | 7% | 0.430 |
+
+The first-token signal is **flat** from α=2 up while the generated-answer rate
+swings 50% → 7%. Same model, same injection, same layer: **the detection rate
+you report is determined by how you read the answer out**, through the decoding
+budget, not by the model's sensitivity.
+
+### C16 — Generation sweep to α=3,5,6 (2026-09-02)
+Filled the curve between the coherent and the flooded regime. Coherence stays
+high at α=5 (93%) and α=6 (87%), unlike α=8. At α=6 detection is 3/30 = **10.0%
+[3.5, 25.6]** against the published 10.8%, with 0/30 at α=0.
+
+The whole α curve is explained by a Goldilocks zone rather than a faculty:
+detection needs enough steering to produce something *and* enough coherence to
+read it back. At α=8 ten of thirty responses contain the concept (`eagles`,
+`Dolphins.`, `volcanoes and lava`) and **none** say YES — 77% never emit YES or
+NO at all. Note that half is confounded by the model being too disrupted to
+answer, and is not leaned on.
+
+### C15 — First clean generation run (2026-09-02)
+Detection 0 / 43.3 / 16.7 / 0% at α = 0/2/4/8. Wrong shape: the published claim
+is that detection rises with α.
+
+Rescoring the saved text — no re-run — showed the table was measuring the scorer,
+not the model:
+
+| α | old scorer | says YES | names the concept | **YES *and* names it** |
+|---|---|---|---|---|
+| 0 | 0% | 0% | 0% | **0%** |
+| 2 | 43% | 50% | 0% | **0%** |
+| 4 | 17% | 23% | 3% | **0%** |
+| 8 | 0% | 7% | 33% | **0%** |
+
+The paper's claim is a detection report that is *about the injected concept*.
+That happened **zero times in 120 trials**. Of the 15 YES answers at α=2, seven
+described the experiment the model had just been told about ("a researcher
+studying my activations"), and five said **red apple** — never injected. Red
+apple is what Gemma reaches for when asked to name a concept it has no access to,
+and it is a replication of Lederman & Mahowald's 74.8% "apple" on other models,
+not a discovery of ours.
+
+Also caught here: the run-time scorer required three or more words, so a bare
+`NO.` was classed incoherent, which is why coherence read 73.3% at α=0 where
+nothing was injected. That flaw fed straight into the headline through
+`detected = said_yes AND coherent`.
+
+### C13 — The E0.1 gate at n=100 (2026-08-19) — **FAILED ITS OWN BAR**
+The pre-registered criterion, filed before the run
+(`docs/preregistration-e01-n100.md`): *the lower bound of the 95% Wilson interval
+on the pass rate exceeds 0.90.*
+
+Result: **77/100, Wilson 95% [0.6785, 0.8416]. FAIL.** Median alignment 0.9933,
+minimum **0.1445**, median regret 0.0 but maximum regret 0.2112, methods disagree
+by >0.05 on **31%** of units, 63.7 s/neuron.
+
+This is the most useful number in the project and it is reported as a failure.
+Three things make it a finding rather than a bug:
+
+1. **The failures are invisible in aggregate.** Median alignment 0.9933 — anyone
+   reporting a median would call this instrument excellent.
+2. **They are confidently wrong.** Restart agreement on the failures is 0.85–0.99.
+   The standard sanity check gives no warning at all.
+3. **A perfect solution exists** (C9: R² = 1.000 at the true direction, and the
+   true direction lies in the k=2 subspace at 0.996+), and the cascade reaches it
+   for the worst cases (C10: 0.4525 → 0.9995).
+
+So the honest description of the instrument is not "it works" but **"it is
+characterised, and it fails silently on 23% of units, and a ground-truth-free
+disagreement test predicts which."** That is what Paper B says.
+
+### C14 — Required-N, and the K≥2 wall (2026-08-20)
+K=1 saturates at **~200 informative events** (median 0.9979 at N=2000, and N=16000
+adds nothing: 0.9989). Indexed by events, not positions, because these units sit
+90–99% of the time below GELU's zero and a position count overstates the
+information by an order of magnitude.
+
+K≥2 does not saturate — it **degenerates**:
+
+| | N=1000 | 2000 | 4000 | 8000 | 16000 |
+|---|---|---|---|---|---|
+| K=2 | 0.2409 | 0.3547 | 0.4189 | 0.5175 | 0.8896 |
+| K=2 additive | — | 0.5022 | 0.5093 | 0.5213 | — |
+| K=3 additive | — | 0.3563 | 0.3620 | 0.3768 | — |
+
+The additive rows pinned at 0.50 (K=2) and 0.36 (K=3) are the arithmetic
+signature of **recovering exactly one direction and missing the rest** — 1/2 and
+~1/3. It is not a sample-size problem; more data does not move it.
+
+**This blocks Study 2.** Any multi-trait matrix needs the cascade generalised to
+K>1 (find one, project out, find the next) or every claim restricted to one
+direction at a time. It is the November go/no-go.
+
+---
+
+## 5. Findings so far (running conclusions)
+
+1. **The unit-level instrument fails silently on ~23% of real neurons**, with
+   restart agreement giving no warning, while a perfect solution exists and is
+   reachable by fitting one extra dimension. (C4, C9, C10, C13)
+2. **A disagreement flag predicts the failures without ground truth** — 87% vs
+   55% success, p = 7.7e-4. This is the exportable deliverable. (C13)
+3. **Classical spike-triggered estimators fail almost completely** on LM
+   activations — 1/30 vs 26/30 — because the residual stream is non-Gaussian and
+   GELU is non-monotone over the occupied range, driving Bussgang's constant
+   toward zero. (C3, C7)
+4. **The random-direction null is tight** in LM residual streams: R² ≤ 0.044,
+   against the ~60% the vision literature warns of. Sharpee's correlated-stimulus
+   warning does not transfer. (C1)
+5. **K≥2 joint estimation degenerates to K=1** at every N. (C14)
+6. **"Detection" of an injected thought is mostly a perturbation alarm.** A
+   norm-matched vector with no content produces 36/61/82% of the effect at
+   α=2/4/6, and all of it at the published operating point. (C18, C19)
+7. **A small concept-specific residual survives** at α=2–4 (p≈0.001–0.009 against
+   both controls, under both prompts) and is gone by α=6. Neither published
+   critique's method could see this; ours puts a number on it. (C18, C20)
+8. **It is not self-specific.** A prompt that never mentions the model is
+   indistinguishable from the introspective one once anything is injected, and
+   the introspective preamble inflates the response to content-free vectors
+   eightfold. (C20)
+9. **The reported detection rate is a property of the readout**, swinging 50% →
+   7% over strengths where the first-token signal is flat. (C17)
+10. **The published false-positive control cannot see any of this.** Their control
+    is *no injection*; the control that matters is *an injection with no content*.
+    Between those two sits 0.00003 → 0.305.
+
+Items 1–5 are Paper B's Study 1 chapter. Items 6–10 are Paper A.
+
+---
+
+## 6. Open questions & confounds
+
+- **Trial-number confound (standing, known, partially fixed).** Concept is
+  perfectly confounded with trial index — elephant is always "Trial 1", freedom
+  always "Trial 30" — and the trial number appears in the prompt. Every reported
+  test was paired by concept, which controls it, and the script now assigns trial
+  numbers by seeded permutation (`--trial-seed`, version 2026-09-03a). **All
+  reported runs predate the fix.** Limitations says so. A-2 closes it.
+- **α scale is not their α.** Ours are unnormalised, median norm 5002; theirs are
+  L2-normalised. C21 exists to settle this and has not been analysed.
+- **One model, one layer, one quantisation.** Gemma-3-27B, L=37, 4-bit NF4. A-3
+  adds Qwen.
+- **One neutral prompt.** The framing conclusion rests on a single alternative
+  phrasing. A-4 adds two more.
+- **Rule-based scoring.** Macar et al. use a GPT-4.1-mini judge. A-6 checks ours
+  against one.
+- **First-token pooling.** P(YES) sums six YES token ids and six NO ids. Not
+  obviously wrong, not validated. Low priority, but it is an unexamined choice in
+  the primary endpoint.
+- **The α=8 "content without report" half is confounded** — 77% of responses emit
+  no YES/NO at all, so the model may simply be too disrupted to answer. Do not
+  lean on that half of the dissociation.
+- **On/off-manifold alternative.** A random norm-matched vector is off-manifold in
+  a way a real concept vector is not. "The model detects off-manifold states"
+  and "the model detects perturbation" are not yet separated. A shuffled vector
+  is also off-manifold, so C19 does not separate them either. This is the
+  strongest remaining objection to Paper A and it currently has no run.
+- **Two projects, one author, overlapping controls.** APERTURE's planned F8
+  owns "confabulation rate under random norm-matched injection" as its headline;
+  CALIPER's C18/C19 have now measured exactly that at the self-report level. This
+  is not a scientific confound but a publication one, and it is unresolved. See
+  section 7.7.
+- **Study 1: is the 23% failure class predictable from the flag alone?** The
+  disagreement flag correlates with failure, but the run that tests whether it is
+  a usable *decision rule* (with a threshold and an operating characteristic) has
+  not been done. S1-1.
+- **Study 1 selection-rule degeneracy.** C11's n1989 case: both fits at R²≈1.000
+  with materially different alignments, so held-out R² cannot arbitrate and
+  selection is a coin flip. Reported as a finding; needs a tie-break rule.
+- **Batching speedup is 4.5×, not the 20–40× estimated.** Saturates by batch 32.
+  Phase A's feasibility arithmetic was written against the estimate. Redo it
+  against 4.5× before committing to E1.1's scale.
+
+---
+
+## 6b. Decisions log (non-experimental)
+
+| Date | Decision | Where |
+|---|---|---|
+| 2026-09-06 | **Repo goes PRIVATE until the arXiv date-stamp, then public.** `github.com/santoshcheethiralame-dot/CALIPER` was created public. It now holds the complete Study 3 finding, its raw data, the paper draft, and a notebook laying out every planned run — roughly 3.5 weeks before Paper A reaches arXiv. The risk register rates L3 scoop risk High and prescribes the arXiv stamp before anything else, so publishing the roadmap first inverts that order for no gain. **Flip to public on the day Paper A is announced (~1 Oct 2026)**; nothing else about the repo changes | `risk-and-scope.md`; this notebook |
+| 2026-09-06 | **Lab notebook opened**, back-filling 21 runs from `results/*.json` and `data/s3/*.jsonl`. **C21 archived** into `data/s3/` and verified (660 rows, 11 alpha x 2 framings x 30 concepts, sha256 `f465e730…`) — it had been sitting loose in `Downloads` since the session died on 3 Sep | this notebook |
+| 2026-09-06 | **APERTURE dependency recorded, and it carries a liability.** CALIPER's Study 3 descends from APERTURE R11/R12, whose **raw data is lost**. Binding consequence: no CALIPER paper reports an APERTURE number as its own measurement; Paper B's framing chapter rests on C20, which is archived, and cites R11 as motivation only | section 3, Inherited |
+| 2026-09-06 | **Cross-project overlap flagged: CALIPER C18/C19 supersede APERTURE F8 at the self-report level.** Two projects, one author, adjacent claims about norm-matched injection. Required before Paper A: cite R11/R12 as prior work by the same author; re-scope F8 to verbalizer methods; settle the ownership split at the September mentor meeting | section 7.7 |
+| 2026-09-06 | **APERTURE's F9 is no longer compute-blocked.** It was the programme's only run gated on 32B access; CALIPER ran a 27B-class model end to end on free 2x T4 Kaggle. The recipe transfers | section 2.2, section 7.7 |
+| 2026-09-03 | **Paper A positioning CORRECTED after the reference check; the old draft framing must not be restated.** Filling four placeholder references meant reading the full papers, and three draft claims did not survive: (1) "critiques attack identification and leave detection standing" is false — Lederman & Mahowald and Singh et al. attack detection's interpretation directly, by inference; (2) "the original does not state its normalisation" is false — Macar et al. L2-normalise, so our α is not theirs and 10.0 vs 10.8 is rate-matched not protocol-matched; (3) "the content-free control had not been run" is overstated — Godet has one informal sentence on Mistral-22B. Honest contribution restated: a **systematic, pre-registered, norm-matched, two-control manipulation on the defended model/layer/prompt**, plus a concept-specific residual neither critique's method could see, plus the preamble-matched neutral prompt, plus the readout swing | `paper/PLAN.md` §0 |
+| 2026-09-03 | **Venue: arXiv ~1 Oct, then an ICLR 2027 workshop in Feb.** Every fitting NeurIPS 2026 workshop is closed (Interpretability-as-a-Science, the ideal fit, closed 1 Sep). ICLR 2027 main is feasible on paper but rejected: the work is one model / one layer / 30 concepts (workshop-shaped), a main-track rejection costs three months of shelf life, it needs a reciprocal reviewer with a top-venue paper (the mentor's decision), and it **mandates an AI-use statement** | `paper/PLAN.md` §1 |
+| 2026-09-03 | **Two papers committed, a third conditional.** Paper A now (scoop risk), Paper B Jan–Feb 2027, Paper C only if E1.4 clears in April 2027. Not three: Study 2 does not exist and has a known blocker; promising it would be planning around fiction | `semester-plan.md` |
+| 2026-09-02 | **Study 3 CLOSED; every cell of the pre-registered design ran.** Primary outcome A2 | §4 C15–C20 |
+| 2026-09-02 | **Blindsight framing proposed and WITHDRAWN within the hour.** "Knows that, cannot say what" requires identification at chance; measured, identification where it occurs is 58×/145× chance (p=1.4e-5, 1.7e-7). The analogy was reached for before the baseline was built. Do not reintroduce it | §4 C15 |
+| 2026-09-02 | **The merged three-level design is the flagship**, superseding the three separate strand documents. Thesis: every model readout — unit, trait, self — is validated without ground truth; we construct ground truth at all three levels under one calibration discipline | `merged-paper-design.md` |
+| 2026-08-19 | **Batching is the top engineering priority and a prerequisite for Phase A**, not an optimisation. Phase A as specified is 583 CPU-hours for one model, one layer, one variable | `plan.md` §3.1 |
+| 2026-08-19 | **PCA truncation and whitening are both OUT.** MLP read-directions retain 0.352 of their norm in the top-64 PCA subspace against 0.267 for random — barely above chance; whitening round-trips at 1.000 synthetic and 0.02 on the real residual stream. Raw space is the protocol | `plan.md` §2.1–2.2 |
+| 2026-08-19 | **Any cheap screen is a screen.** Equal-count binned R² produced two phantom findings and one bad candidate selection. Shortlist with the screen, decide with the real objective. Encoded in `fit_cascade` | `plan.md` §8 |
+| 2026-08-19 | **No diagnostic below n=100 gets a conclusion attached to it.** Four separate n=20 tests all returned p ≈ 0.13 | `plan.md` §8 |
+| 2026-08-18 | **APERTURE is not the capstone**; it remains valid completed work and preliminary evidence. Programme direction moved to CALIPER | memory `capstone-pivot-iii-v` |
+| 2026-08-18 | **Two novelty claims corrected and must not be restated:** tuning curves have been done in vision models (Distill Circuits 2020–21) — the LM application is what is new; capture–recapture has 30+ years of use in software defect estimation — the AI-security application is new | audit verdict |
+
+---
+
+## 7. Planned runs
+
+Every run below has: what it answers, its config, its pre-registered endpoint,
+its cost, and **what to do when it fails**. A run without a failure branch is not
+planned, it is hoped for.
+
+Two standing rules, learned the hard way:
+
+- **File the criterion before the run.** For C21 the data already exists, so file
+  it before the *analysis* and say so in the paper.
+- **A null from an unswept parameter is not a result.** C15's α=8 zero looked like
+  a finding until the sweep showed the window was between 4 and 8.
+
+### 7.1 Paper A — the seven pre-arXiv runs (Sep 2026)
+
+Ranked. Runs A-1 to A-3 before arXiv; A-4 to A-7 for the workshop version. Total
+if all run: about 7 GPU-hours, inside one week of free Kaggle quota.
+
+---
+
+#### **A-1 · L2-normalised protocol — THE ONE THAT MATTERS** ⚠ half-run
+
+**Question.** Macar et al. normalise; we did not. At which α does the normalised
+protocol reproduce their 10.8%, and does the real vector beat a norm-matched
+random one *there*?
+
+**State.** The real arm is **already collected** (C21,
+`Downloads/s3_unit_forced_norm1.jsonl.txt`, 660 forward passes, α ∈ {0,1,2,4,8,
+16,32,64,128,512,2048}). The random arm was never run. Nothing has been analysed.
+
+**Do this, in order.**
+1. Move the file into `data/s3/s3_unit_forced_norm1.jsonl` and record its hash.
+2. **File a pre-registration addendum** naming: the onset criterion, the α at
+   which real-vs-random is tested, the test (Wilcoxon signed-rank, paired by
+   concept), and what each outcome means. State in it — and later in the paper —
+   that the real arm was collected before the criterion was filed and the random
+   arm after. That disclosure costs nothing and is the only thing that keeps the
+   analysis honest given the data is sitting on disk.
+3. Read the two lines the run printed that nobody has looked at:
+   `30 vectors, median norm 1.00` (normalisation took) and **`residual norm at
+   last token: median ...`**. That second number has not been reported for this
+   model and layer by anyone, and it converts their α=4 into a relative
+   perturbation size.
+4. Run the random arm: same grid, `--control random`, `--normalise`. ~30 min.
+5. Analyse both together.
+
+**Built-in consistency check.** Our unnormalised vectors have median norm 5002,
+so **α_unit ≈ 5002 × α_unnorm**. Unit α=2048 should behave close to unnormalised
+α≈0.41, and unit α≈10000 should reproduce the unnormalised α=2 result. If the
+grid's top end does not line up with the old curve, `--normalise` is broken and
+nothing else in the run means anything. **Check this before interpreting.**
+
+**Failure branches.**
+
+| What happens | What it means | Do this |
+|---|---|---|
+| No onset anywhere in 1→2048 | Either the effect needs α above 2048 on the unit scale, or the injection path is broken under `--normalise` | Run the consistency check above. If α=2048 unit ≉ α=0.41 unnorm, it is a bug — fix and re-run. If the check passes, extend the grid to 4096/8192/16384 using the measured residual norm to bracket it |
+| Onset found; real ≈ random there | **Strengthens A2 under the published protocol** | §4.1 says plainly: we do not reproduce their protocol's *specificity*, and the reproduction in C16 was rate-matched. Paper gets stronger |
+| Onset found; **real ≫ random** at the 10.8% point | **This reverses the headline** | Report it as the headline. The honest story becomes: the effect *is* content-specific under the published protocol, and our unnormalised sweep surfaced the generic component because unnormalised vectors have wildly varying norms across concepts. Rewrite §4.4 and the abstract. Do not bury it |
+| Onset lands between two grid steps | Expected; the addendum authorises one fine sweep | Run one sweep between those two steps and **label it as post-hoc in the paper** |
+| The α=0 rows are not bit-identical to C17–C20 | The pipeline is no longer deterministic across versions | Stop. Do not pool. Find the divergence (library version, dtype, seed) before any comparison |
+
+**If A-1 cannot be run at all** (no GPU access): arXiv anyway, with §4.1 stating
+that the reproduction is rate-matched not protocol-matched, and the normalised
+run named as the first item of future work. The A2 result does not depend on it.
+**A-1 improves Paper A; it does not gate it.**
+
+---
+
+#### **A-2 · Trial-randomised replication**
+
+**Question.** Does anything change once trial index is decoupled from concept?
+
+**Config.** The four forced conditions (real, random, shuffle, real+neutral),
+`--trial-seed 1`, α ∈ {0,2,4,6}. ~2 GPU-h. Script version 2026-09-03a already
+does seeded assignment.
+
+**Endpoint.** Every reported number, recomputed. Pre-register: *no reported
+conclusion changes sign or loses significance.*
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| Numbers reproduce within CI | Limitations shortens to one sentence. Best case, most likely |
+| A conclusion weakens but holds | Report both seeds side by side; the paired tests already controlled the confound, so this is expected drift |
+| **A conclusion flips** | The pairing did *not* control it. That is a serious finding about the design and it goes in the results, not limitations. Re-run with two more seeds before writing anything, because a single flip on one seed is noise |
+| Session dies partway | The results file appends; restart and it continues. Do **not** add the delete line |
+
+---
+
+#### **A-3 · Second model — Qwen2.5-32B-Instruct**
+
+**Question.** Is this a finding about Gemma or a pattern?
+
+**Config.** Same script, `--model qwen`, ungated so no token needed. Depth 0.60 →
+**L=38 of 64**. fp32 compute, 4-bit, 2×T4. Forced stage, real + random,
+α ∈ {0,2,4,6}. ~1.5 GPU-h.
+
+**Why Qwen specifically.** It is Vogel's family, where detection is independently
+reported to work. A null on Qwen means something; a null on an arbitrary model
+would not.
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| Reproduces the Gemma pattern | Turns a finding into a pattern. Add a column to every table |
+| **α=0 baseline is not near zero** under the introspective prompt | The chat template is wrong for Qwen. Gemma's baseline is 0.00003; anything above ~0.05 means the prompt is not being applied. Fix the template before reading any other number |
+| `find_layers` fails | Qwen's stack is not `model.language_model.layers`. Print the module tree and add the path. Ten minutes |
+| OOM on load | 32B in 4-bit is ~20 GB; check the "GB free before load" lines print ~15.5/15.5. If not, restart the session (§8) |
+| No detection at any α | Suspect vector construction before the model. Sanity gate: does α=8 steering actually put the concept in the output, as it does on Gemma? If not, the concept vectors are wrong for this tokenizer |
+| Detection reproduces but random ≈ real again | Best outcome. Two models, same conclusion |
+
+---
+
+#### **A-4 · Two more neutral phrasings**
+
+**Question.** Does the framing conclusion survive a different neutral wording, or
+is it a property of one sentence?
+
+**Config.** Add "Is this trial different from the others?" and "Has anything been
+changed?" as third and fourth framings. Real + random, α ∈ {0,2,4,6}. ~1 GPU-h.
+
+**Failure branch.** If the three neutral prompts disagree with each other, the
+framing claim is about wording, not about self-reference — say exactly that and
+downgrade §4.5 from a finding to an observation. That is a real possibility and
+it is cheap to check, which is why it is on the list.
+
+---
+
+#### **A-5 · Second and third layer (L=25, L=50)**
+
+**Question.** Is L=37 special, or does the content-free share hold across depth?
+
+**Config.** Real + random at α ∈ {0,2,4,6}, layers 25 and 50. ~1.5 GPU-h.
+Appendix figure.
+
+**Failure branch.** If the content-free share varies strongly with layer, that is
+more interesting than the appendix figure it was budgeted as — promote it. If
+injection at L=25 destroys coherence entirely, report the working depth range and
+move on; do not force the sweep.
+
+---
+
+#### **A-6 · Judge check**
+
+**Question.** Does a GPT-4.1-mini judge, which is what the original used, agree
+with our rule-based scorer on the 210 generated responses?
+
+**Config.** API only, no GPU. Score all 210 with the judge; compare per-trial
+against the rule-based labels; report agreement and the confusion matrix.
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| Agreement high | Table A2 becomes a validation. Removes an obvious reviewer objection |
+| **Judge finds more detections than the rules** | Our detection numbers are conservative. Re-report with the judge as primary and the rules as secondary, and say the direction of the disagreement |
+| Judge finds fewer | Our C16 reproduction was inflated. This would weaken §4.1 and it must be reported that way |
+| No API budget | Skip. State in limitations that scoring is rule-based and differs from the original's judge. Do **not** hand-score and call it a judge |
+
+---
+
+#### **A-7 · Macar's exact "Unprompted" text as a third framing**
+
+**Question.** Their own no-preamble variant changed two things at once (framing
+*and* preamble). Ours changes one. Run theirs alongside ours and compare.
+
+**Config.** Third framing using their published text. ~0.5 GPU-h.
+
+**Failure branch.** If their variant behaves like our neutral one, the
+"preamble-matched" contribution shrinks to a clarification — still worth a
+paragraph, not a contribution bullet. Adjust §0 of `paper/PLAN.md` accordingly.
+
+---
+
+#### **A-8 · The on-manifold control** *(not yet scheduled — see §6)*
+
+**Question.** Is the model detecting *perturbation*, or *off-manifold-ness*?
+Random and shuffled vectors are both off-manifold, so neither existing control
+separates these.
+
+**Design sketch.** Inject a **real concept vector for a different concept** at
+matched norm, and ask about concept X while injecting Y. That vector is
+on-manifold and content-bearing but wrong. If P(YES) matches the real-vector
+condition, "detection" is not about the queried concept. Cost ~1 GPU-h.
+
+**Why it is not in the ranked list.** It was identified after the design closed.
+It is the strongest remaining objection to Paper A and it is cheap. **Decide
+before arXiv whether it goes in v1 or is named as future work.** Recommendation:
+name it as future work in v1 and run it for the workshop version — adding a new
+control after the pre-registration closed, and before the preprint, invites
+exactly the "you kept running controls until one worked" reading that the
+pre-registration exists to prevent.
+
+---
+
+### 7.2 Study 1 residual — sem 5, Sep–Oct 2026 (local CPU)
+
+#### **S1-1 · Is the disagreement flag a usable decision rule?**
+
+**Question.** C13 shows the flag correlates with failure (87% vs 55%, p=7.7e-4).
+That is not the same as a rule. What is its ROC, and at what threshold?
+
+**Config.** Re-analysis of `results/e01_gate.jsonl` — **no new compute**. For each
+of the 100 units compute the disagreement statistic and the true alignment;
+sweep the threshold; report sensitivity/specificity, the operating point that
+catches ≥80% of failures, and how many good units it discards to do so.
+
+**Endpoint.** A number a practitioner can act on: "flag at disagreement > t;
+expect to catch X% of silent failures at a cost of Y% false alarms."
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| Clean separation | This is the deliverable of Paper B. Lead with it |
+| Overlapping distributions, AUC ~0.6–0.7 | Report the AUC honestly and say the flag is a screen, not a test. Still useful, much weaker claim. **Do not pick the threshold that maximises the headline** |
+| No separation | The 87%/55% result was driven by a few extreme units. Re-check it, and if it does not survive, retract the flag as a deliverable — this would be the single biggest hit to Paper B and it costs nothing to find out now |
+
+**Run this first.** It is free, it is a re-analysis, and Paper B's main claim
+depends on it.
+
+---
+
+#### **S1-2 · Generalise the cascade to K>1 — the Study 2 gate**
+
+**Question.** Can iterative deflation (find one direction, project it out, find
+the next) beat joint K≥2 estimation, which pins at 0.50/0.36?
+
+**Config.** Implement deflation in `estimator.py`. Test on the synthetic
+planted-K units already used in E0.3 at K ∈ {2,3}, N ∈ {2000, 8000}. Compare
+against the joint fits in `e03_required_n.json` — the baseline already exists.
+
+**Pre-registered criterion, file before running:** *median subspace alignment at
+K=2 exceeds 0.80 at N=8000*, where joint estimation gives 0.5213.
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| Deflation clears 0.80 | **Study 2 is green-lit for sem 6.** Say so in November |
+| Deflation improves but misses (0.6–0.8) | Study 2 is restricted to **one planted direction per trait**. P4's multitrait matrix becomes a one-direction-at-a-time matrix, which is weaker but publishable. Decide in November, not later |
+| Deflation does not improve on joint | **Cut Study 2 from Paper B.** Paper B ships as Studies 1 + 3. Report the K≥2 degeneracy as a limitation of the estimator family, which is itself a real finding — it constrains every multi-dimensional readout built this way |
+| Deflation works synthetically but not on real neurons | Real neurons may genuinely be K=1. That is a *result*, not a failure — report the dimensionality distribution and drop the multi-direction claims |
+
+**Deadline: end of November 2026.** Do not let this drift into sem 6 undecided.
+
+---
+
+#### **S1-3 · Characterise the 23% failure class**
+
+**Question.** What distinguishes the units the estimator fails on? C7 says they
+sit at z_mean −1.3 to −1.9 (deep in GELU's non-monotone region) and C6 says a rank
+transform helps. Is that the whole story on all 23?
+
+**Config.** Re-analysis of the gate run plus targeted re-fits of the 23 failures
+under: rank-transformed response, softplus surrogate, cascade, and all three.
+No new corpus passes needed.
+
+**Endpoint.** A predictive account: given a unit's activation statistics, can we
+say in advance whether the estimator will fail?
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| z_mean / kurtosis predict failure | Excellent — the flag gets a mechanistic story and Paper B's Study 1 chapter writes itself |
+| The 23 split into several distinct classes | Report the classes. C5 already hints at two (n1859 recovers, n2977 does not) |
+| No predictor found | Report that the failures are not predictable from response statistics, which makes the *ground-truth-free* disagreement flag (S1-1) more valuable, not less |
+
+---
+
+#### **S1-4 · Re-run E0.1 at n=100 with the dual protocol as default**
+
+**Question.** C13's 77% was the direct fit. What is the pass rate with
+fit-both-keep-better as the default, and does it clear 0.90?
+
+**Config.** n=100, same seed and units as C13 so it is paired, dual protocol,
+selection by held-out R². ~2 h batched. Pre-register: *lower bound of the 95%
+Wilson interval exceeds 0.90*, the same bar as C13.
+
+**Failure branches.**
+
+| What happens | Do this |
+|---|---|
+| Clears 0.90 | The instrument is fixed and both numbers get reported — the 77% for the naive protocol, the new one for ours. That contrast **is** the paper |
+| Improves but misses | Report both. "Characterised instrument with a known residual failure rate" remains the honest description and the paper does not change shape |
+| **Does not improve** | C11's degenerate-selection case generalises: held-out R² cannot arbitrate. That is a sharper finding than a clean pass — *the objective cannot identify the correct direction even when the correct direction is reachable* — and it bears on every method in this family. Report it, add the tie-break (prefer higher restart stability, else the direct fit), and move on |
+| Gets **worse** than 77% | Selection is actively harmful. Check for the C11 failure mode across all 100 units before concluding; if confirmed, the default stays direct-only and the cascade becomes a manual rescue for flagged units |
+
+---
+
+#### **S1-5 · Finish the batched engine**
+
+Not an experiment; the prerequisite for Phase A. Currently ~30% done, and the
+measured speedup is **4.5×, not the 20–40× estimated**, saturating by batch 32.
+
+**Required before Phase A:** a regression test asserting batched and unbatched
+fits agree to numerical precision on a fixed seed. If they do not agree exactly,
+batching is unusable and Phase A must be re-scoped, not fudged.
+
+**Consequence to face now.** Phase A's E1.1 was costed at 583 CPU-hours ÷ 20–40×.
+At 4.5× it is ~130 hours. **Redo the Phase A arithmetic against 4.5× before
+committing to 300 units × 4 depths**, and if it does not fit, cut depths before
+cutting units.
+
+---
+
+### 7.3 Study 2 — planted personas (sem 6, conditional on S1-2)
+
+Gated on the November decision. Needs a ≥7B instruct model → Kaggle.
+
+| ID | Run | Question | Cost |
+|---|---|---|---|
+| **P1** | Recovery at the plant layer | Plant `v` at L, extract at L by difference of means over N generations, score \|extracted·v\|. **Positive control** | ~1 GPU-h |
+| **P2** | The depth curve | Extract at L+1…L+k. How fast does the extracted "persona vector" drift from the true cause, and does the disagreement flag catch the drift? **The headline figure** | ~3 GPU-h |
+| **P3** | Strength × N sweep | Required-N for trait extraction — the P-series analogue of E0.3 | ~3 GPU-h |
+| **P4** | Multitrait–multimethod matrix | Difference-of-means vs probe vs subspace estimator, several planted traits. Convergent, discriminant, **and the ground-truth column psychology never gets** | ~4 GPU-h |
+| **P5** | AIPsy-Affect stimulus set | Use the released 480-item keyword-free battery instead of designing our own prompts | none |
+| **P6** | Poisson transfer *(CPU, runs in parallel)* | LNP model neurons under natural stimuli with known filters. **Does the 23% silent failure appear, and does disagreement flag it?** Decides whether the reciprocity arm is a headline or a paragraph | CPU only |
+| **P7** | Detector on real neural data *(stretch)* | Allen Brain Observatory / CRCNS. Report the flagged fraction. Cannot be validated — that is the point | CPU only |
+
+**Failure branches.**
+
+| Run | If it fails | Do this |
+|---|---|---|
+| **P1** | Extraction cannot recover a planted direction *at the plant layer* | **Stop. Do not proceed to P2.** This is a linear read of a linear plant and it must work. Debug in this order: (1) span mismatch — is injection over response positions while extraction reads the last token only? (2) the difference-of-means baseline includes generated content that drifts; (3) plant strength below the noise floor at N generations — sweep N before concluding anything |
+| **P2** | Recovery stays at 0.99 at every depth | **Persona vectors are validated.** Publish that — it is the first correctness validation of a deployed safety tool, and a positive result the field needs. Part 2 becomes a validation rather than a critique. The project is not invested in the method failing |
+| **P4** | Blocked by K≥2 | Restrict to one planted direction at a time (per S1-2's middle branch) |
+| **P6** | No silent failure on Poisson neurons | The flaw is specific to LLM-style units. Part 3 becomes "here is the assumption that protects biology," which is the reciprocal finding in a different form. Still publishable, differently framed |
+| — | No clean persona behaviour at ~7B | Fall back to the concept directions APERTURE already injects, which are documented to shift behaviour. State the substitution |
+| — | Someone publishes injection-based persona validation first | Parts 1 and 3 stand alone. This is the reason Paper A goes out first |
+
+---
+
+### 7.4 Phase A — unit-level measurement (sem 6, Feb–May 2027)
+
+Order chosen so the cheapest decisive experiment runs first.
+
+| ID | Run | Why this order | Cost |
+|---|---|---|---|
+| **E1.1** | Stimulus depth sweep, ~300 units × 4 depths | The boundary condition is known exactly (K=1 at distance 1), so it doubles as a correctness check on real data. Produces the dimensionality-vs-computational-distance curve, a novel object in itself | ~22 GPU-h *(re-cost at 4.5× batching)* |
+| **E1.4** | **Causal validation — THE HARD GATE** | Ablate the recovered subspace against matched-random and top-K-PC controls. Until this passes every K is a curve fit, not a measurement | ~8 GPU-h |
+| **E1.2/3** | Dimensionality distribution | The headline descriptive artefact. Only meaningful after E1.4 | ~15 GPU-h |
+| **E1.8** | Absorption-notch test | Cheap, quotable, the one component a frontier lab would adopt. Pulled early per the audit | ~2 GPU-h |
+| **E1.6/7** | Kurtosis heuristic; response characterisation | Rounds out the paper | ~5 GPU-h |
+
+**E1.4 is the gate for the entire second year. Think about its failure carefully,
+because the obvious reading is wrong.**
+
+| What happens | What it might mean | Do this |
+|---|---|---|
+| Ablating the recovered subspace collapses the response; random and top-K-PC ablation do not | The measurement is causal | Proceed. Paper C is live |
+| Ablation collapses the response **and so does matched-random ablation** | The ablation is too destructive to be diagnostic — you are removing whatever else lives in those directions | **Do not conclude failure.** Reduce to a rank-1 projection removal at the read position only, and re-test. Only if the specificity still does not appear does the gate fail |
+| Nothing collapses, including the true subspace | Either the ablation is not reaching the computation, or K is a curve fit | Verify the ablation works at all using the *known* case: ablate a neuron's own weight direction at distance 1, where the answer is exact. If that does not collapse it, the intervention is broken, not the measurement |
+| Specificity is real but weak | Honest partial pass | Report the effect size and treat Paper C as conditional. Say so in July 2027, not September |
+| **Gate genuinely fails** | Every K in Phase A is observational | **Phase A stops.** Paper C becomes a workshop paper in sem 8 instead of an ICLR 2028 submission. Phase B is cut outright (it is already the default cut). This costs a chapter, not the thesis — which is why the gate is placed in April 2027 with a year still to run |
+
+---
+
+### 7.5 Phase C — calibration (CPU, no dependency on anyone else)
+
+The separable track to hand to a teammate. None of it needs a GPU.
+
+| ID | Run | Question |
+|---|---|---|
+| E3.1 | FDR on enumerated ground truth | False-discovery rate against InterpBench-style known circuits |
+| E3.2 | Planted-latent networks | Ground truth for dimensionality — train a network with a known latent rank, then measure it |
+| E3.3 | Training-trajectory null | Does the estimator find structure in a randomly initialised or early-checkpoint network? |
+| E3.4 | Adversarial self-check | **Can we make our own pipeline hallucinate a structure that is not there?** |
+
+**E3.4 is the one to run first if a teammate takes this track.** A pipeline that
+cannot be made to hallucinate has not been tested; one that can, and whose flag
+catches it, is the strongest possible demonstration of the calibration discipline.
+
+**Failure branch for E3.3.** If the estimator finds apparently-real structure in
+an untrained network, that is not a bug in the run — it invalidates the null for
+every other experiment and must be fixed before any Phase A number is reported.
+Treat a positive result here as a stop-the-line event.
+
+---
+
+### 7.6 Cut, deferred, and why
+
+| Item | Status | Reason |
+|---|---|---|
+| **Phase B — communication subspaces (E2.1–E2.6)** | **Default: cut** | Gated on E2.5 and it is the one component the thesis can lose without damage. Decision point July 2027 |
+| **Phase D — planted-prior manipulation (E4.1)** | Deferred to sem 8, conditional | Only if the delta against Cacioli's 2026 papers still holds. **Re-check the literature first**; that lane moved fast in 2026 |
+| **E0.4 retrodiction on the weekday feature** | Skipped | EXTENDED; no slack |
+| **Efficient-coding framing** | **Killed 18 Aug 2026** | Verified collisions: arXiv 2603.20642 has "Efficient Coding" in its title and counts the corpus prior; Benjamin et al. 2022 shows gradient descent generically produces frequency-tracking. Do not restate |
+| **Grid-code probe** | Cut | Audit; battery reduced from 6 variables to 2 |
+| **Voice / any non-core arm** | Not in scope | — |
+
+### 7.7 APERTURE's planned runs — adopt, supersede, coordinate, or drop
+
+APERTURE's own run programme (its notebook section 6, the F-series) is recorded
+here because the two projects now overlap at the self-report level and share one
+author, one machine, and one Kaggle quota. Anything marked **SUPERSEDED** or
+**COORDINATE** is a live cross-project issue, not bookkeeping.
+
+| APERTURE ID | The run | Status for CALIPER |
+|---|---|---|
+| **F8** | E13 confabulation: false-positive rate at null injection **and at random norm-matched injection**. APERTURE calls this "the headline number" | **SUPERSEDED at the self-report level.** CALIPER's C18/C19 already ran the norm-matched control on a 27B defended model with two independent content-destroying methods and a pre-registration. F8's remaining unclaimed ground is the *verbalizer* methods (logit lens, Patchscopes-style, SelfIE-style), not self-report. **See the coordination note below** |
+| **F1** | Confound hardening: neutral-vs-introspective across seeds, >=8 paraphrases, >=3 layers, >=3 alphas. 11 of 24 configs in as of 2026-08-23 | **COORDINATE.** CALIPER's A-4 (two more neutral phrasings) and A-5 (layers 25/50) are the same idea on a different model. Run them knowing F1 exists; do not present them as independent replications of each other |
+| **F9** | Scale / threshold arm at 32B. APERTURE calls it "the only compute-blocked run" | **UNBLOCKED BY CALIPER.** Study 3 ran a 27B-class model in 4-bit on free 2x T4 Kaggle, start to finish. The recipe in section 2.2 of this notebook is the unblock. Tell APERTURE's plan that its stated blocker is gone |
+| **F10** | Second model family (Qwen or Llama) | **SAME RUN as CALIPER A-3.** One Kaggle session serves both. Do not run it twice |
+| **F11** | Human grading, ~200 stratified transcripts, >=2 labellers, human-human and rules-vs-human kappa. Labour, no GPU | **ADOPT as a shared teammate track.** CALIPER's A-6 (judge check) is the cheap automated cousin, not a substitute. This is the single best item to hand to one of the other three capstone members alongside Phase C |
+| **F4** | The audit arm: which published introspection claims decorrelate framing from construct. No GPU | **ADOPT for Paper A's related work.** It is the systematic version of the reference check that forced the 3 Sep repositioning |
+| **F2** | Real covariates (infini-gram counts, Brysbaert concreteness) + a 120-concept domain-stratified bank | **ADOPT the bank if Study 3 gets a v2.** CALIPER used 30 concepts; "30 concepts, mostly concrete nouns" is a real limitation in Paper A and F2's bank fixes it for both projects |
+| F3 | PRG hardening: leave-one-prompt-out CV probe accuracy with CIs | Not CALIPER's. Leave in APERTURE |
+| F5 | Null robustness: multi-seed/paraphrase sweep of the behavioural null | Not CALIPER's |
+| F6, F7 | E13 recovery and attribution for verbalizer methods; needs `aperture/readouts.py`, the biggest unbuilt item | Not CALIPER's, and the honest remaining core of APERTURE |
+| F12 | Confirmatory freeze from clean seeds | Not CALIPER's |
+| F13, F14, F15 | H8 explained-variance; E11-pilot Assistant Axis; naturalistic extension | **DROP for CALIPER.** Already APERTURE's own "cut first under bandwidth pressure" tier |
+
+**Engineering backlog transfers, both directions:**
+
+- APERTURE backlog item 6, **"random norm-matched vector generator"**, is listed
+  as unbuilt and gating F8. **CALIPER already built it** — `--control random` and
+  `--control shuffle` in `kaggle_s3_positive_control.py`, tested, with the
+  bit-identical alpha=0 check that proves the arms are comparable. Port it back
+  rather than writing it twice.
+- APERTURE items 2 and 3 (activation capture, `archive_run`/`verify_archive`) are
+  **done and CALIPER should adopt them**. CALIPER currently downloads Kaggle
+  artifacts by hand, which is the discipline that failed six times in APERTURE.
+  Adopting `archive_run` makes it code instead of memory.
+- APERTURE item 7, **the PLANTED harness**, and CALIPER's disagreement flag are
+  both bidding to be "the reusable deliverable". They should not compete. Decide
+  which project owns the released artifact before either paper claims it.
+
+**COORDINATION NOTE — read before submitting Paper A.**
+
+The same author now has two projects making adjacent claims about concept
+injection and self-report. Paper A's contribution is a norm-matched content-free
+control on the defended model; APERTURE's F8 was planned to own "the
+confabulation rate under random norm-matched injection" as its headline. Those
+are close enough that a reviewer of the second one to appear could reasonably ask
+why it is not the same paper.
+
+Three things follow, none of them optional:
+
+1. **Paper A must cite APERTURE's prior runs (R11/R12) as prior work by the same
+   author**, not silently reuse the idea. Self-plagiarism and undisclosed overlap
+   are the failure mode here, and both are avoidable by one paragraph.
+2. **APERTURE's F8 must be re-scoped** to the verbalizer methods (F6/F7's
+   readouts), where it is genuinely unclaimed, rather than to self-report, where
+   CALIPER has now measured it.
+3. **Decide the ownership split explicitly and write it down** — ideally in the
+   September mentor meeting, since Paper A's authorship for a 4-person capstone is
+   already on that agenda. Two papers, one author, overlapping controls, is a
+   question that is much cheaper to answer now than at review.
+
+---
+
+## 8. Gotchas solved (so we never lose the time again)
+
+### Kaggle: paste the script and it will bite you (cost: 4 rounds, ~3 h)
+Pasting a 400+ line file into a notebook cell failed four consecutive times. Once
+the tail of the script landed *inside* the pip command
+(`pip install ... transformers(f"\n TARGET (Macar et al...`). Twice the traceback
+line numbers proved an older copy was running while I debugged the new one.
+
+**Fix, now standard:** upload the `.py` as a Kaggle **Dataset**; the notebook is
+four lines that glob for it and `exec` it. Patch by uploading a New Version. And
+**print a version stamp as the very first line** — if it is not the version you
+just uploaded, stop reading the output. That single line is the cheapest thing in
+the whole pipeline.
+
+### Gemma-3-27B overflows fp16 on a T4 — silently, as NaN
+Measured `max|h| = 51436` at layer 37 against the fp16 ceiling of 65504. Some
+prompts tip over and others do not, so `concept − baseline` becomes `inf − inf =
+nan`, and **one bad value in the shared baseline mean poisons all 30 vectors**.
+The only visible symptom was `median norm nan` on the vectors line, 14 minutes
+before a table of zeros.
+
+**Fix:** `--compute-dtype fp32` is mandatory for this model. The script now
+probes `max|h|` after loading, reports whether it is finite, reloads in fp32
+automatically if not, and hard-stops if any vector is non-finite rather than
+feeding NaN into 120 trials. fp32 costs ~2× per trial (25–30 s vs 13 s).
+
+### `bitsandbytes` is not preinstalled, and installing it late does not help
+`transformers` checks for `bitsandbytes` **once, at import**, and caches the
+answer. Installing it afterwards in the same kernel changes nothing without a
+restart — which is what makes the error look unfixable.
+
+**Fix:** the script installs it itself at module load, before anything imports
+`transformers`, and corrects the cached flag if `transformers` got there first.
+
+### Stale GPU memory across sessions
+A run OOMed at 6% loaded with GPU 0 already holding 14.5 GB — the previous
+session's weights. The identical load had succeeded twice before.
+
+**Fix:** **Restart the session before every reload.** The script now prints free
+memory per GPU *before* loading, gives each card an explicit 13 GiB budget
+instead of letting `device_map="auto"` pack GPU 0 first, and sets
+`expandable_segments`. Both cards should read ~15.5 of 15.6 GB free on a fresh
+session; if not, stop rather than letting it load.
+
+### `apply_chat_template` returns a dict on transformers 5.x
+It returns `BatchEncoding` (not a `dict` subclass, so a `isinstance(x, dict)`
+check silently fails) on current versions and a plain tensor on older ones. Check
+for a tensor instead. Cost: two failed Kaggle rounds.
+
+### With `device_map="auto"`, the injection vector must go where the layer is
+Layer 37 lives on `cuda:1` while the vector was built on `cuda:0`. Would have
+crashed on the first trial. Move the vector to the layer's own device.
+
+### `FileLink` 404s on Kaggle
+It emits a relative path the editor does not serve. Use the sidebar: **View →
+Output → /kaggle/working**, download arrow. (If the sidebar is collapsed, "Show
+sidebar" is in the same menu.)
+
+### `datasets` hard-crashes the process locally
+`sample_corpus()` defaults to cached Gutenberg files because of this. Not a
+workaround to be cleaned up later — it is the protocol.
+
+### Cheap proxies produced three phantom findings
+Equal-count binned R² produced two phantom findings and one bad candidate
+selection. `fit_cascade` now shortlists on the binned screen and **decides with
+the real objective**. Standing rule: a screen is a screen.
+
+### Orphaned background jobs skew every timing number
+Use `nohup`, not foreground `timeout`, and check for orphans before quoting any
+throughput figure.
+
+### Download Kaggle artifacts before the session dies
+Learned on APERTURE, where the raw data for six runs was lost. Every Study 3
+`.jsonl` is in `data/s3/`. **C21's file is still sitting in `Downloads` and is
+not yet in the repo — move it.**
+
+---
+
+## 9. Standing maintenance rule
+
+This notebook is updated **in the same session as the work**, not afterwards:
+
+- Before a run: add its planned row to §7 with the criterion and the failure
+  branches, and file the pre-registration if one is required.
+- After a run: add a §3 registry row, a §4 detail entry, archive the artifact,
+  and update §5 and §6 if a conclusion or a confound moved.
+- After a non-experimental decision: add a dated row to §6b with a pointer to
+  where the reasoning lives.
+- Never rewrite a past entry. Corrections are dated follow-ups beneath the
+  original, so that the record shows what was believed and when.

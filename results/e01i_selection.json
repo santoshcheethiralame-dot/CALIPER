@@ -1,0 +1,90 @@
+[
+  {
+    "neuron": 2977,
+    "align_direct": 0.4597,
+    "r2_direct": 0.5496667623519897,
+    "align_cascade": 0.9952,
+    "r2_cascade": 0.868912239414793,
+    "picked": "cascade",
+    "align_selected": 0.9952,
+    "best_available": 0.9952,
+    "r2_margin": 0.31924547706280326
+  },
+  {
+    "neuron": 230,
+    "align_direct": 0.8634,
+    "r2_direct": 0.6861875057220459,
+    "align_cascade": 0.9997,
+    "r2_cascade": 0.9994269013404846,
+    "picked": "cascade",
+    "align_selected": 0.9997,
+    "best_available": 0.9997,
+    "r2_margin": 0.3132393956184387
+  },
+  {
+    "neuron": 1543,
+    "align_direct": 0.938,
+    "r2_direct": 0.934883713722229,
+    "align_cascade": 0.9895,
+    "r2_cascade": 0.9988429546356201,
+    "picked": "cascade",
+    "align_selected": 0.9895,
+    "best_available": 0.9895,
+    "r2_margin": 0.06395924091339111
+  },
+  {
+    "neuron": 1989,
+    "align_direct": 0.9644,
+    "r2_direct": 0.973531186580658,
+    "align_cascade": 0.9217,
+    "r2_cascade": 0.9883052706718445,
+    "picked": "cascade",
+    "align_selected": 0.9217,
+    "best_available": 0.9644,
+    "r2_margin": 0.014774084091186523
+  },
+  {
+    "neuron": 824,
+    "align_direct": 1.0,
+    "r2_direct": 0.9999946355819702,
+    "align_cascade": 0.9935,
+    "r2_cascade": 0.9999515414237976,
+    "picked": "direct",
+    "align_selected": 1.0,
+    "best_available": 1.0,
+    "r2_margin": 4.309415817260742e-05
+  },
+  {
+    "neuron": 1561,
+    "align_direct": 0.9913,
+    "r2_direct": 0.9999675750732422,
+    "align_cascade": 0.9994,
+    "r2_cascade": 0.9997512698173523,
+    "picked": "direct",
+    "align_selected": 0.9913,
+    "best_available": 0.9994,
+    "r2_margin": 0.00021630525588989258
+  },
+  {
+    "neuron": 2796,
+    "align_direct": 0.9884,
+    "r2_direct": 0.9999967813491821,
+    "align_cascade": 0.9835,
+    "r2_cascade": 0.9999234080314636,
+    "picked": "direct",
+    "align_selected": 0.9884,
+    "best_available": 0.9884,
+    "r2_margin": 7.337331771850586e-05
+  },
+  {
+    "neuron": 1945,
+    "align_direct": 0.9998,
+    "r2_direct": 0.9999788403511047,
+    "align_cascade": 0.9999,
+    "r2_cascade": 0.9999169707298279,
+    "picked": "direct",
+    "align_selected": 0.9998,
+    "best_available": 0.9999,
+    "r2_margin": 6.186962127685547e-05
+  }
+]

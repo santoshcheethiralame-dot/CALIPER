@@ -1,0 +1,236 @@
+{
+  "config": {
+    "model": "gpt2",
+    "layer": 6,
+    "neurons": 20,
+    "tokens": 20000,
+    "restarts": 3,
+    "steps": 2500,
+    "seed": 0,
+    "out": "results/e01_v3.json"
+  },
+  "summary": {
+    "n_neurons": 20,
+    "median_raw_alignment": 0.9958,
+    "min_raw_alignment": 0.3961,
+    "median_k2_gain": -0.0003,
+    "median_raw_r2_k1": 0.9999,
+    "median_restart_stability": 0.9816,
+    "fraction_passing": 0.8,
+    "verdict": "FAIL",
+    "elapsed_s": 3203
+  },
+  "pca_ceiling_curve": [
+    {
+      "d": 16,
+      "variance_kept": 0.2977,
+      "median_weight_retained": 0.172,
+      "median_random_retained": 0.1346,
+      "isotropic_expectation": 0.1443
+    },
+    {
+      "d": 32,
+      "variance_kept": 0.3932,
+      "median_weight_retained": 0.2569,
+      "median_random_retained": 0.1867,
+      "isotropic_expectation": 0.2041
+    },
+    {
+      "d": 64,
+      "variance_kept": 0.509,
+      "median_weight_retained": 0.3518,
+      "median_random_retained": 0.2668,
+      "isotropic_expectation": 0.2887
+    },
+    {
+      "d": 128,
+      "variance_kept": 0.648,
+      "median_weight_retained": 0.4475,
+      "median_random_retained": 0.3875,
+      "isotropic_expectation": 0.4082
+    },
+    {
+      "d": 256,
+      "variance_kept": 0.8037,
+      "median_weight_retained": 0.6006,
+      "median_random_retained": 0.5676,
+      "isotropic_expectation": 0.5774
+    },
+    {
+      "d": 512,
+      "variance_kept": 0.9466,
+      "median_weight_retained": 0.8203,
+      "median_random_retained": 0.8107,
+      "isotropic_expectation": 0.8165
+    },
+    {
+      "d": 768,
+      "variance_kept": 1.0,
+      "median_weight_retained": 1.0,
+      "median_random_retained": 1.0,
+      "isotropic_expectation": 1.0
+    }
+  ],
+  "records": [
+    {
+      "neuron": 2796,
+      "raw_alignment": 0.9890466928482056,
+      "raw_r2_k1": 0.9999950528144836,
+      "raw_r2_k2": 0.9998040199279785,
+      "k2_gain": -0.00019103288650512695,
+      "raw_stability": 0.9975200891494751
+    },
+    {
+      "neuron": 941,
+      "raw_alignment": 0.9538846015930176,
+      "raw_r2_k1": 0.9949594736099243,
+      "raw_r2_k2": 0.9977543354034424,
+      "k2_gain": 0.0027948617935180664,
+      "raw_stability": 0.7431991100311279
+    },
+    {
+      "neuron": 824,
+      "raw_alignment": 0.9986813068389893,
+      "raw_r2_k1": 0.9999935626983643,
+      "raw_r2_k2": 0.9999675154685974,
+      "k2_gain": -2.6047229766845703e-05,
+      "raw_stability": 0.9991261959075928
+    },
+    {
+      "neuron": 2872,
+      "raw_alignment": 0.9997878670692444,
+      "raw_r2_k1": 0.9999937415122986,
+      "raw_r2_k2": 0.9995193481445312,
+      "k2_gain": -0.000474393367767334,
+      "raw_stability": 0.7554830312728882
+    },
+    {
+      "neuron": 1561,
+      "raw_alignment": 0.9994386434555054,
+      "raw_r2_k1": 0.9999743700027466,
+      "raw_r2_k2": 0.9987091422080994,
+      "k2_gain": -0.0012652277946472168,
+      "raw_stability": 0.9951859712600708
+    },
+    {
+      "neuron": 1859,
+      "raw_alignment": 0.9999418258666992,
+      "raw_r2_k1": 0.9999955296516418,
+      "raw_r2_k2": 0.999973475933075,
+      "k2_gain": -2.205371856689453e-05,
+      "raw_stability": 0.8892089128494263
+    },
+    {
+      "neuron": 1719,
+      "raw_alignment": 0.9931772947311401,
+      "raw_r2_k1": 0.9997991323471069,
+      "raw_r2_k2": 0.9943896532058716,
+      "k2_gain": -0.0054094791412353516,
+      "raw_stability": 0.998076319694519
+    },
+    {
+      "neuron": 2977,
+      "raw_alignment": 0.3961217701435089,
+      "raw_r2_k1": 0.5531615018844604,
+      "raw_r2_k2": 0.9982327818870544,
+      "k2_gain": 0.445071280002594,
+      "raw_stability": 0.8908924460411072
+    },
+    {
+      "neuron": 1945,
+      "raw_alignment": 0.999909520149231,
+      "raw_r2_k1": 0.9999682307243347,
+      "raw_r2_k2": 0.999778151512146,
+      "k2_gain": -0.0001900792121887207,
+      "raw_stability": 0.9980600476264954
+    },
+    {
+      "neuron": 1989,
+      "raw_alignment": 0.9656962156295776,
+      "raw_r2_k1": 0.9732020497322083,
+      "raw_r2_k2": 0.992834210395813,
+      "k2_gain": 0.019632160663604736,
+      "raw_stability": 0.9609254598617554
+    },
+    {
+      "neuron": 536,
+      "raw_alignment": 0.9976829290390015,
+      "raw_r2_k1": 0.999942421913147,
+      "raw_r2_k2": 0.9992233514785767,
+      "k2_gain": -0.0007190704345703125,
+      "raw_stability": 0.1337178349494934
+    },
+    {
+      "neuron": 2490,
+      "raw_alignment": 0.9974557757377625,
+      "raw_r2_k1": 0.9999750256538391,
+      "raw_r2_k2": 0.9994899034500122,
+      "k2_gain": -0.0004851222038269043,
+      "raw_stability": 0.9878095388412476
+    },
+    {
+      "neuron": 1940,
+      "raw_alignment": 0.9927607774734497,
+      "raw_r2_k1": 0.9901105165481567,
+      "raw_r2_k2": 0.9889654517173767,
+      "k2_gain": -0.0011450648307800293,
+      "raw_stability": 0.9998788237571716
+    },
+    {
+      "neuron": 50,
+      "raw_alignment": 0.994184136390686,
+      "raw_r2_k1": 0.9999802708625793,
+      "raw_r2_k2": 0.9990772008895874,
+      "k2_gain": -0.0009030699729919434,
+      "raw_stability": 0.9936588406562805
+    },
+    {
+      "neuron": 1668,
+      "raw_alignment": 0.9886115789413452,
+      "raw_r2_k1": 0.998916745185852,
+      "raw_r2_k2": 0.9998582005500793,
+      "k2_gain": 0.0009414553642272949,
+      "raw_stability": 0.9832846522331238
+    },
+    {
+      "neuron": 230,
+      "raw_alignment": 0.8668448328971863,
+      "raw_r2_k1": 0.6848065853118896,
+      "raw_r2_k2": 0.9971033334732056,
+      "k2_gain": 0.3122967481613159,
+      "raw_stability": 0.99631267786026
+    },
+    {
+      "neuron": 2596,
+      "raw_alignment": 0.9999290704727173,
+      "raw_r2_k1": 0.9998412132263184,
+      "raw_r2_k2": 0.994962215423584,
+      "k2_gain": -0.004878997802734375,
+      "raw_stability": 0.8942080140113831
+    },
+    {
+      "neuron": 1543,
+      "raw_alignment": 0.8975832462310791,
+      "raw_r2_k1": 0.9105468392372131,
+      "raw_r2_k2": 0.9981791377067566,
+      "k2_gain": 0.08763229846954346,
+      "raw_stability": 0.8409464359283447
+    },
+    {
+      "neuron": 2238,
+      "raw_alignment": 0.9998302459716797,
+      "raw_r2_k1": 0.9999223947525024,
+      "raw_r2_k2": 0.9995334148406982,
+      "k2_gain": -0.0003889799118041992,
+      "raw_stability": 0.9428670406341553
+    },
+    {
+      "neuron": 125,
+      "raw_alignment": 0.9989515542984009,
+      "raw_r2_k1": 0.9999758005142212,
+      "raw_r2_k2": 0.999081015586853,
+      "k2_gain": -0.0008947849273681641,
+      "raw_stability": 0.9799091815948486
+    }
+  ]
+}

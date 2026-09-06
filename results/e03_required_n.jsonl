@@ -1,0 +1,17 @@
+{"K": 1, "N": 1000, "events_per_unit": 100, "median": 0.8964, "p10": 0.7122, "min": 0.6141, "events_over_D": 0.13, "seconds": 42.3, "_key": "K1_N1000"}
+{"K": 1, "N": 2000, "events_per_unit": 200, "median": 0.9979, "p10": 0.9905, "min": 0.9714, "events_over_D": 0.26, "seconds": 80.0, "_key": "K1_N2000"}
+{"K": 1, "N": 4000, "events_per_unit": 400, "median": 0.9989, "p10": 0.9913, "min": 0.9273, "events_over_D": 0.521, "seconds": 155.4, "_key": "K1_N4000"}
+{"K": 1, "N": 8000, "events_per_unit": 800, "median": 0.999, "p10": 0.9944, "min": 0.9847, "events_over_D": 1.042, "seconds": 373.7, "_key": "K1_N8000"}
+{"K": 1, "N": 16000, "events_per_unit": 1600, "median": 0.9989, "p10": 0.9916, "min": 0.976, "events_over_D": 2.083, "seconds": 766.5, "_key": "K1_N16000"}
+{"K": 2, "N": 1000, "events_per_unit": 100, "median": 0.2409, "p10": 0.1806, "min": 0.0345, "events_over_D": 0.13, "seconds": 10.5, "_key": "K2_N1000"}
+{"K": 2, "N": 2000, "events_per_unit": 200, "median": 0.3547, "p10": 0.3064, "min": 0.2237, "events_over_D": 0.26, "seconds": 38.8, "_key": "K2_N2000"}
+{"K": 2, "N": 4000, "events_per_unit": 400, "median": 0.4189, "p10": 0.3891, "min": 0.3792, "events_over_D": 0.521, "seconds": 80.8, "_key": "K2_N4000"}
+{"K": 2, "N": 8000, "events_per_unit": 799, "median": 0.5175, "p10": 0.4621, "min": 0.4591, "events_over_D": 1.04, "seconds": 313.9, "_key": "K2_N8000"}
+{"K": 2, "N": 16000, "events_per_unit": 1600, "median": 0.8896, "p10": 0.5255, "min": 0.4694, "events_over_D": 2.083, "seconds": 1228.8, "_key": "K2_N16000"}
+{"K": 3, "N": 1000, "events_per_unit": 100, "median": 0.0835, "p10": 0.0492, "min": 0.0286, "events_over_D": 0.13, "seconds": 11.0, "_key": "K3_N1000"}
+{"K": 2, "N": 2000, "coupling": "additive", "events_per_unit": 200, "median": 0.5022, "p10": 0.4924, "min": 0.4902, "events_over_D": 0.26, "seconds": 86.5, "_key": "additive_K2_N2000"}
+{"K": 2, "N": 4000, "coupling": "additive", "events_per_unit": 400, "median": 0.5093, "p10": 0.4964, "min": 0.4928, "events_over_D": 0.521, "seconds": 161.4, "_key": "additive_K2_N4000"}
+{"K": 2, "N": 8000, "coupling": "additive", "events_per_unit": 800, "median": 0.5213, "p10": 0.5043, "min": 0.4989, "events_over_D": 1.042, "seconds": 250.1, "_key": "additive_K2_N8000"}
+{"K": 3, "N": 2000, "coupling": "additive", "events_per_unit": 200, "median": 0.3563, "p10": 0.3418, "min": 0.3333, "events_over_D": 0.26, "seconds": 88.5, "_key": "additive_K3_N2000"}
+{"K": 3, "N": 4000, "coupling": "additive", "events_per_unit": 400, "median": 0.362, "p10": 0.3503, "min": 0.3454, "events_over_D": 0.521, "seconds": 164.8, "_key": "additive_K3_N4000"}
+{"K": 3, "N": 8000, "coupling": "additive", "events_per_unit": 800, "median": 0.3768, "p10": 0.3523, "min": 0.3499, "events_over_D": 1.042, "seconds": 301.9, "_key": "additive_K3_N8000"}

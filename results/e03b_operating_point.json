@@ -1,0 +1,164 @@
+[
+  {
+    "tokens": 4000,
+    "steps": 400,
+    "restarts": 1,
+    "seconds": 22.7,
+    "sec_per_neuron": 1.417,
+    "median_alignment": 0.9837,
+    "min_alignment": 0.0589
+  },
+  {
+    "tokens": 4000,
+    "steps": 400,
+    "restarts": 2,
+    "seconds": 37.8,
+    "sec_per_neuron": 2.361,
+    "median_alignment": 0.9837,
+    "min_alignment": 0.5322
+  },
+  {
+    "tokens": 4000,
+    "steps": 800,
+    "restarts": 1,
+    "seconds": 37.9,
+    "sec_per_neuron": 2.372,
+    "median_alignment": 0.9936,
+    "min_alignment": 0.1292
+  },
+  {
+    "tokens": 4000,
+    "steps": 800,
+    "restarts": 2,
+    "seconds": 75.7,
+    "sec_per_neuron": 4.732,
+    "median_alignment": 0.9936,
+    "min_alignment": 0.7524
+  },
+  {
+    "tokens": 4000,
+    "steps": 1600,
+    "restarts": 1,
+    "seconds": 82.5,
+    "sec_per_neuron": 5.156,
+    "median_alignment": 0.9985,
+    "min_alignment": 0.6388
+  },
+  {
+    "tokens": 4000,
+    "steps": 1600,
+    "restarts": 2,
+    "seconds": 160.7,
+    "sec_per_neuron": 10.043,
+    "median_alignment": 0.9985,
+    "min_alignment": 0.7341
+  },
+  {
+    "tokens": 8000,
+    "steps": 400,
+    "restarts": 1,
+    "seconds": 30.1,
+    "sec_per_neuron": 1.882,
+    "median_alignment": 0.9957,
+    "min_alignment": 0.1515
+  },
+  {
+    "tokens": 8000,
+    "steps": 400,
+    "restarts": 2,
+    "seconds": 59.9,
+    "sec_per_neuron": 3.744,
+    "median_alignment": 0.9957,
+    "min_alignment": 0.5399
+  },
+  {
+    "tokens": 8000,
+    "steps": 800,
+    "restarts": 1,
+    "seconds": 59.8,
+    "sec_per_neuron": 3.738,
+    "median_alignment": 0.9987,
+    "min_alignment": 0.1123
+  },
+  {
+    "tokens": 8000,
+    "steps": 800,
+    "restarts": 2,
+    "seconds": 120.9,
+    "sec_per_neuron": 7.554,
+    "median_alignment": 0.9987,
+    "min_alignment": 0.765
+  },
+  {
+    "tokens": 8000,
+    "steps": 1600,
+    "restarts": 1,
+    "seconds": 122.5,
+    "sec_per_neuron": 7.654,
+    "median_alignment": 0.9995,
+    "min_alignment": 0.3112
+  },
+  {
+    "tokens": 8000,
+    "steps": 1600,
+    "restarts": 2,
+    "seconds": 198.8,
+    "sec_per_neuron": 12.422,
+    "median_alignment": 0.9995,
+    "min_alignment": 0.9621
+  },
+  {
+    "tokens": 16000,
+    "steps": 400,
+    "restarts": 1,
+    "seconds": 44.2,
+    "sec_per_neuron": 2.761,
+    "median_alignment": 0.998,
+    "min_alignment": 0.0544
+  },
+  {
+    "tokens": 16000,
+    "steps": 400,
+    "restarts": 2,
+    "seconds": 88.7,
+    "sec_per_neuron": 5.545,
+    "median_alignment": 0.998,
+    "min_alignment": 0.4512
+  },
+  {
+    "tokens": 16000,
+    "steps": 800,
+    "restarts": 1,
+    "seconds": 88.4,
+    "sec_per_neuron": 5.527,
+    "median_alignment": 0.9994,
+    "min_alignment": 0.0077
+  },
+  {
+    "tokens": 16000,
+    "steps": 800,
+    "restarts": 2,
+    "seconds": 177.4,
+    "sec_per_neuron": 11.086,
+    "median_alignment": 0.9994,
+    "min_alignment": 0.7381
+  },
+  {
+    "tokens": 16000,
+    "steps": 1600,
+    "restarts": 1,
+    "seconds": 178.8,
+    "sec_per_neuron": 11.173,
+    "median_alignment": 0.9998,
+    "min_alignment": 0.4207
+  },
+  {
+    "tokens": 16000,
+    "steps": 1600,
+    "restarts": 2,
+    "seconds": 353.2,
+    "sec_per_neuron": 22.072,
+    "median_alignment": 0.9998,
+    "min_alignment": 0.8482
+  }
+]
