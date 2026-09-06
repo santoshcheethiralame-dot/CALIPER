@@ -6,7 +6,15 @@ near 14% of *its own* norm, injection strength becomes reportable as a fraction 
 the residual norm and the paper gets a calibration rule instead of a list of
 findings. If it lands somewhere else, we report that it varies by model.
 
-Script version required: **2026-09-07a**.
+Script version required: **2026-09-07b**. (`a` fails to load Qwen — see the note below.)
+
+> **Re-upload `kaggle_s3_positive_control.py` as a New Version of `caliper-s3` before
+> starting.** Version `2026-09-07a` loads Gemma fine but dies on Qwen with
+> *"Some modules are dispatched on the CPU or the disk"*. Two bugs, both fixed in `b`:
+> the per-GPU budget was hardcoded to 13 GiB (tuned for Gemma at ~19 GB; Qwen needs
+> ~21 GB) and is now measured from free memory, and the loader offered accelerate a
+> 12 GiB CPU budget, which let it place modules on CPU — something bitsandbytes 4-bit
+> refuses outright. The CPU budget is gone.
 
 ---
 
@@ -19,6 +27,8 @@ either exhaust the container or eat most of the session.
 
 1. In the notebook, right panel -> **Add Input** -> **Models** -> search
    `Qwen2.5-32B-Instruct` -> add the **transformers** variant.
+   *(Confirmed working: it mounts at
+   `/kaggle/input/models/qwen-lm/qwen2.5/transformers/32b-instruct/1`.)*
 2. Keep **caliper-s3** attached under *Datasets* (refresh to `2026-09-07a`).
 3. You may leave Gemma attached or remove it; the loader picks by `--model-path`.
 
@@ -56,7 +66,8 @@ exec(open(hits[0]).read())
 
 | Line | Must read | If not |
 |---|---|---|
-| 1st line | `kaggle_s3_positive_control 2026-09-07a` | dataset didn't refresh; remove and re-add the input |
+| 1st line | `kaggle_s3_positive_control 2026-09-07b` | dataset didn't refresh; remove and re-add the input |
+| device budget | `device budget: {0: '14.5GiB', 1: '14.5GiB'} (no cpu offload)` |
 | layer stack | `model.layers (64 layers)` then `layer 38 of 64` | tell me the printed path; `find_layers` needs Qwen's tree added |
 | vectors | `30 vectors, median norm 1.00, non-finite 0` | `--normalise` didn't take, or fp16 overflowed |
 | **residual norm** | `residual norm at last token: median ...` | **write this number down; it drives cell 3** |
@@ -170,4 +181,5 @@ re-running the same cell continues rather than restarting.
 | `could not locate decoder layers` | Qwen's module path missing | send me the error; one-line fix |
 | OOM at load | stale GPU memory, or the model is not 4-bit | Restart session; confirm both cards read ~15.5/15.6 GB free |
 | download starts instead of mounting | Qwen attached from HF not Kaggle Models | stop it; go back to step 0 |
+| `Some modules are dispatched on the CPU or the disk` | running version `a` | re-upload the script; `b` fixes it |
 | `median norm nan` | fp16 overflow | `--compute-dtype fp32` missing |

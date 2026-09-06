@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-07a"
+VERSION = "2026-09-07b"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -258,10 +258,24 @@ def load(model_id, compute_dtype=torch.float16):
                   f"anything. Restart the session (Run -> Restart session) if the load "
                   f"fails.", flush=True)
 
-    # An explicit budget per device, rather than letting "auto" decide. Without it the
-    # loader packs GPU 0 first; this model needs ~19 GB and both cards to hold it.
-    budget = {i: "13GiB" for i in range(torch.cuda.device_count())}
-    budget["cpu"] = "12GiB"
+    # An explicit budget per device, rather than letting "auto" decide, because "auto"
+    # packs GPU 0 first and dies partway. Two things this got wrong once (C25):
+    #
+    #   1. A hard "13GiB" was tuned for Gemma-3-27B at ~19 GB. Qwen2.5-32B in 4-bit is
+    #      ~21 GB, and 13+13 minus accelerate's own headroom no longer fits it. The
+    #      budget is now measured from free memory instead of hardcoded, so it adapts
+    #      to whatever card and model it meets.
+    #   2. Offering a "cpu" budget is what actually broke the Qwen load. It gives
+    #      accelerate permission to place modules on CPU, and bitsandbytes then refuses
+    #      the whole model with "Some modules are dispatched on the CPU or the disk".
+    #      With no cpu entry the model either fits on the GPUs or fails loudly, which
+    #      is the behaviour we want. Do not add it back.
+    reserve_gb = 1.0        # activations, workspace, fragmentation
+    budget = {}
+    for i in range(torch.cuda.device_count()):
+        free, _ = torch.cuda.mem_get_info(i)
+        budget[i] = f"{max(free / 1e9 - reserve_gb, 1.0):.1f}GiB"
+    print(f"  device budget: {budget} (no cpu offload)", flush=True)
     kw = dict(quantization_config=quant, device_map="auto", attn_implementation="eager",
               token=hf_token, max_memory=budget)
     try:
