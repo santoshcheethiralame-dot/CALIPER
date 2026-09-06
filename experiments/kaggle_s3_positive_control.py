@@ -33,6 +33,8 @@ import json
 import os
 import re
 import time
+import sys
+from pathlib import Path
 
 import torch
 
@@ -87,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-03b"
+VERSION = "2026-09-07a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -336,11 +338,21 @@ def build_vectors(model, tok, layers, layer, normalise):
     bad = int((~torch.isfinite(stacked)).any(dim=1).sum())
     print(f"  {len(vecs)} vectors, median norm {stacked.norm(dim=1).median():.2f}, "
           f"non-finite {bad}", flush=True)
+    # These scalars decide how alpha is to be read, so they are returned to be written
+    # to disk. A number printed to a Kaggle log dies with the session (C22).
+    scalars = {
+        "residual_norm_at_read_median": float(hn.median()),
+        "residual_norm_at_read_min": float(hn.min()),
+        "residual_norm_at_read_max": float(hn.max()),
+        "vector_norm_median": float(stacked.norm(dim=1).median()),
+        "n_vectors": len(vecs),
+        "non_finite_vectors": bad,
+    }
     if bad:
         raise SystemExit(
             f"{bad}/{len(vecs)} concept vectors contain inf or nan - the activations "
             "overflowed. Re-run with --compute-dtype fp32.")
-    return vecs
+    return vecs, scalars
 
 
 @torch.no_grad()
@@ -511,7 +523,18 @@ def main():
         if not probe_finite(model, tok, layers, a.layer):
             raise SystemExit("activations non-finite even in fp32 - do not trust this model")
 
-    vecs = build_vectors(model, tok, layers, a.layer, a.normalise)
+    vecs, run_scalars = build_vectors(model, tok, layers, a.layer, a.normalise)
+
+    # Run-level provenance sidecar. Per-trial rows go to the JSONL; anything measured
+    # once per run goes here, or it is lost with the session (C22, section 8).
+    sidecar = Path(str(a.out).replace(".jsonl", "") + ".config.json")
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text(json.dumps(
+        {"version": VERSION, "argv": sys.argv[1:], "model_id": model_id,
+         "layer": a.layer, "n_layers": len(layers), "normalise": bool(a.normalise),
+         "control": a.control, "alphas": a.alphas, "trial_seed": a.trial_seed,
+         **run_scalars}, indent=2))
+    print(f"  wrote {sidecar}", flush=True)
 
     if a.control != "none":
         # Seeded, so the control is reproducible and comparable across runs.

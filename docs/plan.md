@@ -3,6 +3,27 @@
 **Written 19 August 2026, day 2 of execution. Supersedes the timeline in the project
 specification; the experiment definitions there still stand except where noted.**
 
+> **STATUS BANNER — added 7 September 2026. Read before acting on anything below.**
+>
+> This document is the plan as it stood on **19 August 2026, day 2**. It is kept intact
+> as a record of what was believed then. Three weeks of measurement have superseded
+> parts of it, and the live record is now **`docs/LAB_NOTEBOOK.md`**.
+>
+> | Section | Status |
+> |---|---|
+> | §1 status table | **Superseded.** E0.1 ran at n=100 and scored 77/100, failing its own >=0.90 bar (notebook C13). Phase 0 is closed |
+> | §2 six corrections | **Stand.** All still true |
+> | §3.1 batching, "20-40x", "highest-value engineering task" | **CORRECTED — see the inline block. Measured 1.63x. Demoted from Phase A prerequisite to optional** |
+> | §3.2 secondary levers | **Reordered — the operating point is the primary lever at 13.5x, not a secondary one** |
+> | §4 Phase 0 completion, steps 1-4 | **All resolved.** See the inline marks |
+> | §5 Phase A order | Stands, but re-scoped to 300 units x 4 depths by the 3 Sep semester plan |
+> | §6 publication strategy | **Superseded** by the 3 Sep semester plan: Paper A (Study 3) now leads, then Paper B, then conditional Paper C |
+> | §9 decision points | **All four resolved.** See the inline marks |
+>
+> The project also gained a third level after this was written: Study 3 (self-report)
+> was designed, run, and closed between 2 and 3 September. Nothing here anticipates it.
+
+
 ---
 
 # 1. Where we actually are
@@ -93,11 +114,50 @@ The nonlinearities are tiny (64-wide, k inputs) and run as a grouped batch. Expe
 64 neurons per batch is **20–40×**, which turns 583 hours into 15–30 hours. That is the
 difference between infeasible and routine.
 
+> **CORRECTED 7 September 2026 — measured, and the estimate above was wrong.**
+>
+> Benchmarked at the width Phase A actually uses (`results/batching_speedup_d768.json`):
+> **1.41x at batch 8, 1.63x at batch 32** — still climbing, so the design is
+> directionally right, but nowhere near the 20-40x estimated here. At d=128 it is flat
+> at ~1.15x across batches 4-64 (`results/batching_speedup.json`), and the per-neuron
+> cost barely falls with batch size, which is the signature of the shared `X @ V`
+> projection *not* being the dominant cost. `test_batching_is_faster_per_neuron`
+> currently fails because it asserts a win at batch 8, d=128, where there is none.
+>
+> **Two claims in this section do not survive.** "Expected speedup 20-40x" is measured
+> at 1.63x. **"This is the highest-value engineering task in the project"** is wrong by
+> about 8x: E0.3b had already measured the cheap operating point at 4.73 s/neuron with
+> median alignment 0.9936 against the gate config's 63.7 s/neuron — a **13.5x**
+> reduction available for free, from choosing tokens/steps/restarts. See §3.2.
+>
+> **Batching is demoted from Phase A prerequisite to optional.** The correctness test
+> (`test_batched_matches_single_neuron_path`) passes, so this is throughput only. Before
+> spending the person-week, profile where the time goes: if the per-neuron Adam steps
+> dominate, batching cannot be made to pay at any batch size.
+>
+> **Phase A is not blocked either way.** The 583-hour figure below is for 1000 units x 7
+> depths; the 3 Sep semester plan re-scoped E1.1 to 300 x 4 = 1200 fits, which is
+> **21 hours with no speedup at all** and 1.6 hours at the cheap operating point.
+
 **This is the highest-value engineering task in the project and it is now the top priority.**
 It is roughly one person-week and it unblocks every subsequent phase. Nothing in Phase A should
 start before it lands.
 
 ### 3.2 Secondary levers, in order of payoff
+
+> **REORDERED 7 September 2026.** On measurement, lever 1 below is the *primary* lever
+> and batching is secondary. Ranked by measured payoff:
+>
+> | | Lever | Measured | Source |
+> |---|---|---|---|
+> | **1** | **Operating point** — 4k tokens, 800 steps, 2 restarts | **13.5x** (63.7 -> 4.73 s/neuron, median alignment 0.9936) | `e03b_operating_point.json` |
+> | 2 | Batching at d=768, batch 32 | 1.63x | `batching_speedup_d768.json` |
+> | 3 | Float32 + thread tuning | untested | — |
+> | 4 | Free cloud GPU for the Pythia ladder | untested | — |
+>
+> Levers 1 and 2 multiply to ~22x, which is inside the range this section originally
+> hoped for from batching alone. The difference is that lever 1 is already measured,
+> already in the repository, and costs nothing to adopt.
 
 1. **Float32 throughout and torch threading** — the fits are already fp32 but thread settings
    are untuned. Cheap check, possibly 2×.
@@ -114,7 +174,15 @@ start before it lands.
 
 Four steps, in strict order. Nothing in Phase A begins until step 4.
 
-### Step 1 — close the estimator protocol (in flight, ~30 min)
+### Step 1 — close the estimator protocol ~~(in flight, ~30 min)~~ · **RESOLVED**
+
+> **7 Sep 2026.** Ran as E0.1i (notebook C11). Held-out R2 picks the better fit with
+> wide margins on most units. The degenerate case this section warned about is real:
+> **n1989** has both fits at R2 ~ 1.000 with materially different alignments
+> (direct 0.9644 vs cascade 0.9217, margin 0.0148), so the objective cannot arbitrate
+> and selection is a coin flip there. Per this section's own instruction that is the
+> sharper finding, and it is reported rather than smoothed. Tie-break rule still to be
+> added; S1-4 in the notebook re-runs the gate with the dual protocol as default.
 
 E0.1i tests whether **held-out R² selects the better of the direct and cascade fits without
 using ground truth**, which matters because Phase A will not have any. Two neurons in so far and
@@ -131,19 +199,34 @@ n1561 is the suspect (0.991 direct vs 0.917 cascade, both R² ≈ 1.000).
   It bears on every method in this family. Report it, add a tie-break rule (prefer the fit with
   higher restart stability, or the direct fit on ties), and proceed.
 
-### Step 2 — batching (1 person-week)
+### Step 2 — batching (1 person-week) · **DEMOTED, see the §3.1 correction**
+
+> **7 Sep 2026.** ~30% built. Correctness test passes, speed test fails. Measured
+> 1.63x, not 20-40x. No longer a Phase A prerequisite.
 
 Section 3.1. Build it, verify it reproduces single-neuron results exactly on a fixed seed, and
 add a regression test asserting batched and unbatched fits agree to numerical precision.
 
-### Step 3 — E0.1 at n = 100, properly (≈2 h batched, ≈8 h unbatched)
+### Step 3 — E0.1 at n = 100, properly · **RAN 19 Aug — FAILED ITS BAR**
+
+> **Result (notebook C13).** 77/100, Wilson 95% [0.6785, 0.8416]. The criterion this
+> section pre-registered — lower bound above 0.90 — is **not met**. Median alignment
+> 0.9933, minimum 0.1445, 31% of units disagree across methods, 63.7 s/neuron.
+> Per §9's branch this is not a bug but the headline: the instrument fails silently on
+> ~23% of units and a ground-truth-free disagreement flag predicts which.
 
 The gate run. Report **pass rate with a Wilson confidence interval**, not a bare fraction.
 Pre-register the criterion before running: *the lower bound of the 95% CI on the pass rate
 exceeds 0.90.* At n = 100 that requires ~95 passes, which is a real test rather than an
 artefact of sample granularity.
 
-### Step 4 — E0.3 sample-complexity table (2–3 person-weeks)
+### Step 4 — E0.3 sample-complexity table · **DONE**
+
+> **Result (notebook C14).** K=1 saturates at **~200 informative events** (median
+> 0.9979 at N=2000; N=16000 adds nothing). K>=2 does not saturate, it **degenerates**:
+> additive K=2 pins at 0.50 and K=3 at 0.36 at every N — the arithmetic signature of
+> recovering exactly one direction. This is what blocks Study 2 and it is the
+> November go/no-go. Phase 0 is closed.
 
 Extend E0.3a's ceiling sweep into the deliverable the spec promises: **required N for a given
 recovery precision, indexed by events rather than positions**, across K ∈ {1,2,3} and D. Settles
@@ -251,6 +334,16 @@ Not a status update — a decision request on three things.
 
 # 9. Decision points
 
+> **ALL FOUR RESOLVED as of 7 September 2026.**
+>
+> | Question | Answer |
+> |---|---|
+> | Does held-out R2 select the better fit? | **Mostly yes, with one degenerate case (n1989).** Dual protocol adopted; tie-break still owed |
+> | Does batched == unbatched to precision? | **Yes** — the correctness test passes. But the *speed* premise failed (1.63x, not 20-40x), so batching was demoted rather than blocking Phase A |
+> | Is the E0.1 CI lower bound above 0.90? | **No — 77/100, [0.679, 0.842].** Per the branch written here, the residual failure rate became a headline result rather than a bug |
+> | Does ablating the recovered subspace collapse the response? | **Not yet run.** This is E1.4, now the hard gate for all of year two, scheduled Apr-May 2027 |
+
+
 | When | Question | Branch |
 |---|---|---|
 | **~30 min** | Does held-out R² select the better fit? | Yes → dual protocol is the default. Degenerate → publish that, add a tie-break, continue. |
@@ -261,6 +354,15 @@ Not a status update — a decision request on three things.
 ---
 
 ## Immediate queue
+
+> **SUPERSEDED 7 September 2026.** Items 1, 4 and 5 are done; item 3 is demoted.
+> The live queue is `docs/LAB_NOTEBOOK.md` §7, where the ranked next actions are
+> **A-1b** (extend the unit-norm grid to alpha=32768) and **A-1c** (its random-vector
+> control), both Kaggle, then **S1-1** (is the disagreement flag a usable decision
+> rule? — a free re-analysis, and Paper B's main claim depends on it).
+
+The 19 August queue, for the record:
+
 
 1. E0.1i completes → protocol decision *(in flight)*
 2. Update spec and README with §2's six corrections *(1 hour, no compute)*

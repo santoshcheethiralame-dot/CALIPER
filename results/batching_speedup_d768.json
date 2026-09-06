@@ -1,0 +1,16 @@
+[
+  {
+    "n_neurons": 8,
+    "batched_s": 14.64,
+    "single_s": 20.59,
+    "speedup": 1.41,
+    "batched_s_per_neuron": 1.83
+  },
+  {
+    "n_neurons": 32,
+    "batched_s": 50.44,
+    "single_s": 81.97,
+    "speedup": 1.63,
+    "batched_s_per_neuron": 1.576
+  }
+]

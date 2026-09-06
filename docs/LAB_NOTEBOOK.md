@@ -157,6 +157,7 @@ families from the specification and the merged design.
 | C19 | 2026-09-02 | forced, **shuffle** control | 0,2,4,6 | 240 | `s3_forced_shuffle.jsonl` | Coordinate-permuted vector agrees with random at every α (p=0.50/0.27/0.60) |
 | C20 | 2026-09-02 | forced, real, **fixed** neutral prompt | 0,2,4,6 | 240 | `s3_forced_real.jsonl` | Introspective vs neutral **indistinguishable once anything is injected** (p=0.44–0.75); differ only at α=0 (0.000 vs 0.188) |
 | **C21** | **2026-09-03** | **forced, L2-normalised, real** | 0,1,2,4,8,16,32,64,128,512,2048 | 660 | `data/s3/s3_unit_forced_norm1.jsonl` | **RAN BUT NEVER ANALYSED.** Session hit its usage limit; the account was disabled the same day. Archived 6 Sep 2026, sha256 `f465e7304ca5e0a5…`, 118528 bytes. Its random-control twin was never run |
+| **C22** | **2026-09-07** | onset analysis of C21 (local, no GPU) | — | 660 rows rescored | `results/s3_unit_onset.json` | **alpha\* = None; the sweep fell 4.9x short of the onset.** Top of sweep = alpha_unnorm 0.409 vs an effect that starts at 2. Signal switching on at alpha=2048: W=432, **p=3.0e-06**, 27/30 rose. Not a null — a mis-scaled grid |
 
 C21 verified on archival: 660 rows = 11 α × 2 framings (`introspective`,
 `neutral_matched`) × 30 concepts, exactly 30 per cell, `control: none`,
@@ -164,6 +165,9 @@ C21 verified on archival: 660 rows = 11 α × 2 framings (`introspective`,
 made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
+
+| **C23** | **2026-09-07** | **forced, unit-norm, real, extended grid** | 2048…32768 | 300 | `data/s3/s3_unit_ext_forced_norm1.jsonl` | Onset alpha*=**8192**. Signal switches on at ~14% of the residual norm |
+| **C24** | **2026-09-07** | **forced, unit-norm, random, same grid** | 2048…32768 | 300 | `data/s3/s3_unit_ext_forced_random_norm1.jsonl` | **OUTCOME A1: real > random**, p=0.036 at alpha*, **p=9.5e-4** at 16384. Residual norm measured at **58,932** |
 
 **C21 is the open run.** It is run 1 of the pre-arXiv list and the only one that
 decides whether "we reproduce their protocol" is true or false. See §7 A-1.
@@ -218,6 +222,147 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C23 / C24 — Extended unit-norm grid, real and random (2026-09-07) — **OUTCOME A1**
+
+The A-1b/A-1c pair, run on Kaggle at version `2026-09-07a`. Real
+(`s3_unit_ext_forced_norm1.jsonl`, sha256 `3a77bba4c890aeaa`, 300 rows) and
+norm-matched random (`..._random_norm1.jsonl`, sha256 `7f52c1a8940c2bb6`, 300
+rows), alpha in {2048, 4096, 8192, 16384, 32768}, both framings, 30 concepts.
+
+**The number nobody had.** Residual-stream norm at the read position, Gemma-3-27B
+layer 37: **median 58,932** (min 54,757, max 62,169). Vectors confirmed at unit
+norm (median 1.0000), zero non-finite.
+
+| alpha | alpha/\|\|h\|\| | real intro | rand intro | real neut | rand neut |
+|---|---|---|---|---|---|
+| 2,048 | 3.5% | 0.0003 | 0.0005 | 0.2391 | 0.2194 |
+| 4,096 | 7.0% | 0.0312 | 0.0133 | 0.3506 | 0.2646 |
+| **8,192** | **13.9%** | **0.3639** | 0.1596 | 0.4733 | 0.3031 |
+| **16,384** | **27.8%** | **0.5232** | 0.1765 | 0.4619 | 0.1572 |
+| 32,768 | 55.6% | 0.4434 | 0.3356 | 0.4221 | 0.3412 |
+
+**Filed onset criterion** (Addendum 2: smallest alpha where mean introspective real
+P(YES) exceeds 0.10): **alpha\* = 8,192.**
+
+**Filed primary** (real vs random at alpha\* and the next step, Wilcoxon signed-rank
+paired by concept, two-sided, 0.05):
+
+| alpha | real | random | W | p | real higher |
+|---|---|---|---|---|---|
+| 8,192 | 0.3639 | 0.1596 | 131.0 | **0.036** | 17/30 |
+| 16,384 | 0.5232 | 0.1765 | 78.0 | **9.5e-4** | 22/30 |
+
+**Outcome A1 — real significantly above random.** Both filed tests fire. Under the
+published normalised protocol there *is* a concept-specific component, and at
+alpha=16,384 it is large and robust. **This is the branch section 7 flagged as
+reversing the headline, and it must be reported as the headline.**
+
+Read the alpha\*=8,192 row honestly: p=0.036 is marginal and real beats random on
+only 17 of 30 concepts, barely above half. The 16,384 row carries the claim
+(22/30, p=9.5e-4); 8,192 supports it.
+
+**Pre-specified secondary sweep.** The effect is a window, not a threshold —
+absent at 2,048 (nothing is happening), significant at 4,096 / 8,192 / 16,384,
+and gone again at 32,768 where both conditions saturate. Same Goldilocks
+structure as the unnormalised runs, two orders of magnitude up the scale.
+
+**And it is still not self-specific.** Neutral framing shows the same pattern:
+real above random at 8,192 (p=0.033) and 16,384 (p=0.0015). A prompt that never
+mentions the model recovers the concept-specific component just as well, which
+strengthens rather than weakens the C20 conclusion.
+
+**Filed secondary — where their alpha=4 sits, and this is the finding with legs.**
+Against a residual-stream norm of 58,932, their published alpha=4 is a
+perturbation of **0.0068%**. Our onset sits at **13.9%** of the residual norm, and
+alpha\* is **2,048x their alpha=4**. On this model, at their strength, nothing
+whatsoever happens: alpha=2,048 (500x theirs) still gives P(YES)=0.0003.
+
+Two readings, and the run cannot separate them: either their model's residual
+stream is far smaller in norm so their alpha=4 is a meaningful perturbation there,
+or the scaling convention differs. Gemma-3-27B is an extreme case — we measured
+max|h| = 51,436 against fp16's 65,504 ceiling, which is why fp32 is mandatory
+here. **Either way the methodological point stands and is the most portable thing
+in the study: an injection strength is meaningless without the residual-stream
+norm it is injected into, and no paper in this debate reports one.**
+
+
+### C22 — Onset analysis of the unit-norm protocol (2026-09-07) — **the sweep was mis-scaled**
+
+Follow-up to C21. No GPU; `experiments/analyse_s3_unit.py`, result in
+`results/s3_unit_onset.json`. Scored against Addendum 2, filed 3 Sep **before**
+C21 ran.
+
+**Correction to this notebook's own section 7.1 A-1, as first written (6 Sep):** it
+said a pre-registration addendum still needed filing before C21 could be analysed.
+That was wrong — Addendum 2 was already filed, before the run, and it names the
+onset criterion, the test, and the branches. No disclosure about post-hoc criteria
+is required. The analysis below is confirmatory, not exploratory.
+
+**The measured dose-response, real vectors, unit norm:**
+
+| alpha (unit) | introspective | >0.5 | neutral_matched | >0.5 |
+|---|---|---|---|---|
+| 0 | 0.0000 | 0% | 0.1882 | 16.7% |
+| 1 → 64 | 0.0000 | 0% | 0.1882–0.1890 | 16.7% |
+| 128 | 0.0000 | 0% | 0.1899 | 20.0% |
+| 512 | 0.0000 | 0% | 0.1957 | 23.3% |
+| 2048 | 0.0003 | 0% | 0.2391 | 23.3% |
+
+**alpha\* = None.** No strength reaches the 0.10 threshold. The filed criterion
+says: *report that the unit-norm protocol does not produce detection at any tested
+strength on this model and quantisation, and stop.*
+
+**Do not do that. The criterion's stop clause assumed the sweep bracketed the
+onset, and it demonstrably did not.** Two independent things say so:
+
+1. **The scale arithmetic.** Unnormalised vectors have median norm 5002.36, so
+   `alpha_unit = 5002 x alpha_unnorm`. The top of the sweep, alpha_unit = 2048, is
+   therefore **alpha_unnorm = 0.409** — five times *below* alpha_unnorm = 2, the
+   lowest unnormalised strength that ever produced an effect. Matching
+   alpha_unnorm = 2 needs **alpha_unit = 10,005**. The sweep fell **4.9x short**.
+2. **The signal is switching on at the top.** alpha=2048 vs alpha=0, introspective,
+   Wilcoxon paired by concept: **W = 432, p = 3.0e-06, rose on 27 of 30 concepts.**
+   Tiny in absolute terms (0.0000 → 0.0003) but monotone from alpha=128 up and
+   highly significant. That is what approaching an onset from below looks like, not
+   what its absence looks like.
+
+Reporting "the unit-norm protocol produces no detection" would be a **false
+negative from an unswept parameter** — the exact error C15 taught us, and the
+standing rule at the head of section 7 exists because of it.
+
+**The bigger finding, and it is about their protocol, not ours.** On a literal
+unit-norm reading, Macar et al.'s headline strength alpha=4 is
+`alpha_unnorm = 4/5002 = 0.0008` — roughly **2,500x below** the weakest
+perturbation that does anything in our setup, against a residual stream whose
+measured peak is |h| = 51,436 (C17 probe). A perturbation of magnitude 4 against a
+stream of that scale cannot plausibly do anything.
+
+So one of these is true, and they are separable by measurement:
+
+- **(a) We have misread their alpha convention.** Most likely they scale relative to
+  the residual-stream norm — `alpha x ||h||`, or a vector normalised to activation
+  scale — not to unit length. Suggestive: our unnormalised difference-of-means
+  vectors have median norm 5002, which is the order of magnitude a residual norm
+  would take, and difference-of-means vectors inherit the scale of the activations
+  they are built from. **If (a) holds, our unnormalised runs C17–C20 are closer to
+  their protocol than this "corrected" one, and C16's alpha=6 reproduction was less
+  accidental than the 3 Sep repositioning assumed.**
+- **(b) Their residual stream is scaled differently** — different normalisation
+  convention at that layer, or a different quantisation.
+- **(c) The reading is right and their effect is genuinely tiny**, in which case the
+  onset must still be found and (1) above says it is above 2048.
+
+**The number that settles it was printed and lost.** Addendum 2 required the script
+to print `residual norm at last token: median ...`. It went to the Kaggle log, not
+into the JSONL, and the session expired. **This is the artifact-persistence failure
+from section 8 recurring in a new form: a scalar printed to stdout is not
+archived.** Fix in code — write run-level scalars into the output file's first
+record or a sidecar — before the next run.
+
+**Status.** The primary test of Addendum 2 (real vs random at alpha\*) **cannot be
+run**: there is no alpha\*, and the random arm was never collected. A-1 is not
+closed. See the revised plan in section 7.1.
 
 ### C21 — L2-normalised protocol, real vectors (2026-09-03) — **INCOMPLETE**
 Macar et al. L2-normalise concept vectors before scaling by α; we did not. Our
@@ -435,6 +580,24 @@ direction at a time. It is the November go/no-go.
    against the ~60% the vision literature warns of. Sharpee's correlated-stimulus
    warning does not transfer. (C1)
 5. **K≥2 joint estimation degenerates to K=1** at every N. (C14)
+> **FINDINGS 6-8 REVISED 7 Sep 2026 by C23/C24 — read this before quoting them.**
+> The unnormalised results below stand exactly as measured, but they were taken at
+> one narrow band of a scale that turns out to span four orders of magnitude, and
+> the normalised protocol tells a fuller story:
+>
+> - **There IS a concept-specific component** (real 0.5232 vs random 0.1765,
+>   p=9.5e-4, 22/30 concepts). Finding 6's "mostly a perturbation alarm" is true at
+>   the unnormalised operating points tested and **not true in general**.
+> - **It switches on at ~14% of the residual-stream norm** and is gone by 56%.
+>   A window, not a threshold.
+> - **Their published alpha=4 is 0.0068% of that norm** — 2,048x below our onset.
+>   At their strength, on this model, nothing happens at all.
+> - **Finding 8 survives and strengthens**: the neutral prompt recovers the
+>   concept-specific component just as well (p=0.033, 0.0015).
+> - **Finding 10 survives unchanged** and is now the paper's spine: the field's
+>   false-positive control is *no injection*; the control that matters is *an
+>   injection with no content*, and it was never run.
+
 6. **"Detection" of an injected thought is mostly a perturbation alarm.** A
    norm-matched vector with no content produces 36/61/82% of the effect at
    α=2/4/6, and all of it at the published operating point. (C18, C19)
@@ -451,7 +614,16 @@ direction at a time. It is the November go/no-go.
     is *no injection*; the control that matters is *an injection with no content*.
     Between those two sits 0.00003 → 0.305.
 
-Items 1–5 are Paper B's Study 1 chapter. Items 6–10 are Paper A.
+11. **The unit-norm sweep never reached the onset.** Its top strength equals
+    alpha_unnorm 0.409 against an effect that starts at 2, and the signal is
+    switching on at the top (p = 3.0e-06, 27/30). No conclusion about the
+    normalised protocol can be drawn from C21 alone. (C22)
+12. **Their alpha convention is probably not unit-norm.** Read literally it puts
+    their headline strength 2,500x below anything that moves this model. Unresolved
+    and decidable by one captured scalar. (C22)
+
+Items 1–5 are Paper B's Study 1 chapter. Items 6–10 are Paper A. Items 11–12 are
+open and block the wording of Paper A section 4.1.
 
 ---
 
@@ -477,11 +649,36 @@ Items 1–5 are Paper B's Study 1 chapter. Items 6–10 are Paper A.
 - **The α=8 "content without report" half is confounded** — 77% of responses emit
   no YES/NO at all, so the model may simply be too disrupted to answer. Do not
   lean on that half of the dissociation.
+- **Why is the concept-specific window closed at alpha=32,768?** Real and random
+  converge (0.4434 vs 0.3356, p=0.19) at 56% of the residual norm. Plausibly the
+  model is simply overwhelmed, as at unnormalised alpha=8 — but that was diagnosed
+  from *generated text* being incoherent, and the forced-choice readout generates
+  nothing, so the same diagnosis is not available. Unexplained. (7 Sep)
+- **Is alpha* a property of the model or of the concept set?** alpha*=8,192 was
+  found on 30 concepts on one model. Whether the onset tracks the residual norm
+  across models is exactly what A-3 (Qwen) would answer, and it is now the most
+  valuable run in the queue rather than a robustness check. (7 Sep)
 - **On/off-manifold alternative.** A random norm-matched vector is off-manifold in
   a way a real concept vector is not. "The model detects off-manifold states"
   and "the model detects perturbation" are not yet separated. A shuffled vector
   is also off-manifold, so C19 does not separate them either. This is the
   strongest remaining objection to Paper A and it currently has no run.
+- **What is Macar et al.'s alpha actually scaled to?** Unit-norm read literally
+  makes their headline perturbation negligible against a residual stream with peak
+  |h| = 51,436. Relative scaling would fit our data. **This is now the single
+  highest-value unknown in Paper A** — it decides whether our reproduction is
+  rate-matched or protocol-matched. One captured number settles it. (C22)
+- **Run-level scalars are not archived.** The median residual norm was printed to
+  a Kaggle log and lost with the session. Per-trial rows are archived; run-level
+  values are not. Fix in code before the next run.
+- **Is the batching speedup real?** The regression test for *correctness* passes;
+  the test for *speed* fails, at 1.0x on batch 8 against a recorded 4.5x at batch 32.
+  Phase A's feasibility is a direct function of this number and it is currently
+  **resolved: 1.63x** at d=768/batch 32, still climbing, versus a recorded 4.5x.
+  Phase A is not blocked by it at the current scope. Open sub-question: where does
+  the time actually go? If per-neuron Adam steps dominate the shared projection,
+  batching cannot be made to pay and the lever is steps/restarts or a GPU. Profile
+  before investing another person-week. (7 Sep)
 - **Two projects, one author, overlapping controls.** APERTURE's planned F8
   owns "confabulation rate under random norm-matched injection" as its headline;
   CALIPER's C18/C19 have now measured exactly that at the self-report level. This
@@ -504,6 +701,15 @@ Items 1–5 are Paper B's Study 1 chapter. Items 6–10 are Paper A.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 | **A-3 run sheet written as a two-stage probe-then-sweep** (`kaggle/NEXT_SESSION_QWEN.md`). Qwen's residual norm is unknown, so a blind log grid would waste the session; instead a cheap alpha=0 probe measures the norm, writes it to the sidecar **before** any trials, and the sweep cells read that number and build the grid at the same *fractions of the norm* that bracketed Gemma's onset (1%-56%). The probe's alpha=0 rows double as the chat-template sanity gate. Weights must be mounted from Kaggle Models — a HuggingFace pull of Qwen2.5-32B is ~65 GB in bf16 and would exhaust the container | `kaggle/NEXT_SESSION_QWEN.md` |
+| 2026-09-07 (C23/C24) | **PAPER A'S HEADLINE CHANGES — outcome A1, not A2.** Under the published normalised protocol real beats norm-matched random at p=9.5e-4 (22/30) at alpha=16384. The pure content-free story does not survive and the abstract must be rewritten. What replaces it is stronger and more honest: a concept-specific component exists, it needs a perturbation ~14% of the residual-stream norm, it sits on a large content-free alarm, it is not self-specific, and **the published alpha=4 is 0.0068% of that norm — 2,048x below our onset**. The A2 result at unnormalised strengths stands as measured and becomes a section, not the thesis | notebook C23/C24 |
+| 2026-09-07 | **Report the residual-stream norm with every injection strength, always.** Measured 58,932 at Gemma-3-27B L37. No paper in this debate reports one, which makes alpha values incomparable across models and is why "we reproduced 10.8%" was never a protocol match. This is the most portable contribution in the study | notebook C23/C24 |
+| 2026-09-07 | **`plan.md` marked up rather than rewritten.** The 19 Aug plan of record now carries a status banner, an inline correction at §3.1 (batching demoted), a reordered §3.2 (operating point promoted to primary lever), resolution marks on all four Phase 0 steps and all four §9 decision points, and a pointer from its Immediate Queue to this notebook. Kept intact as a record of what was believed on day 2 | `plan.md` |
+| 2026-09-07 | **A-1b/A-1c run sheet written** so the next Kaggle session needs no reconstruction: `kaggle/NEXT_SESSION.md` carries the cells, the four pre-flight checks, the artifacts to return including the new `.scalars.json` sidecars, and a symptom-to-fix table | `kaggle/NEXT_SESSION.md` |
+| 2026-09-07 (later) | **CORRECTION to the row below, and a reprioritisation.** The alarm was costed against the superseded 1000x7 scope. E1.1 is now 300x4 = 1200 fits, and its ~22 GPU-h estimate already assumes no speedup, so **Phase A is not blocked**. Measured: batching 1.63x at d=768/batch 32 (not 4.5x), against the e03b operating point's **13.5x**. **Batching is demoted from Phase A prerequisite to optional**; the 19 Aug call that it was "the highest-value engineering task" does not survive the measurement | section 7.5 |
+| 2026-09-07 | **Phase A scale is NOT committable until the batching speedup is re-established.** The speed test fails (1.0x at batch 8, three clean reps) against a recorded 4.5x at batch 32. E1.1 costs 15-30 h at 20-40x, 130 h at 4.5x, and 583 h at 1x. The correctness test passes, so this is throughput, not validity. **The test must not be tuned to green** | section 7.5 |
+| 2026-09-07 | **C22: the filed stop clause is NOT triggered, and saying otherwise would be a false negative.** Addendum 2 said to report no detection and stop if no alpha reached 0.10. No alpha did — but the grid topped out 4.9x below the known effect threshold and the signal is switching on at its top (p=3.0e-06, 27/30). The stop clause assumed a bracketing grid. **Extend upward under a new Addendum 3, labelled as an extension.** Do not report a null | section 4 C22; section 7.1 |
+| 2026-09-07 | **Paper A section 4.1 is frozen pending A-1a.** Its concession that the reproduction is rate-matched rather than protocol-matched rests on unit-norm being their convention, which C22 makes doubtful. Do not finalise that section until the residual norm is captured | section 7.1 A-1 |
 | 2026-09-06 | **Repo goes PRIVATE until the arXiv date-stamp, then public.** `github.com/santoshcheethiralame-dot/CALIPER` was created public. It now holds the complete Study 3 finding, its raw data, the paper draft, and a notebook laying out every planned run — roughly 3.5 weeks before Paper A reaches arXiv. The risk register rates L3 scoop risk High and prescribes the arXiv stamp before anything else, so publishing the roadmap first inverts that order for no gain. **Flip to public on the day Paper A is announced (~1 Oct 2026)**; nothing else about the repo changes | `risk-and-scope.md`; this notebook |
 | 2026-09-06 | **Lab notebook opened**, back-filling 21 runs from `results/*.json` and `data/s3/*.jsonl`. **C21 archived** into `data/s3/` and verified (660 rows, 11 alpha x 2 framings x 30 concepts, sha256 `f465e730…`) — it had been sitting loose in `Downloads` since the session died on 3 Sep | this notebook |
 | 2026-09-06 | **APERTURE dependency recorded, and it carries a liability.** CALIPER's Study 3 descends from APERTURE R11/R12, whose **raw data is lost**. Binding consequence: no CALIPER paper reports an APERTURE number as its own measurement; Paper B's framing chapter rests on C20, which is archived, and cites R11 as motivation only | section 3, Inherited |
@@ -545,6 +751,55 @@ if all run: about 7 GPU-hours, inside one week of free Kaggle quota.
 ---
 
 #### **A-1 · L2-normalised protocol — THE ONE THAT MATTERS** ⚠ half-run
+
+> **REVISED 7 Sep 2026 after C22. Act on this block; the text below it is kept for
+> provenance and two of its statements are now wrong.**
+>
+> **Wrong statement 1:** "file a pre-registration addendum." Addendum 2 was already
+> filed, on 3 Sep, before C21 ran. No new criterion is needed and no post-hoc
+> disclosure is required.
+>
+> **Wrong statement 2:** the branch table's first row treated "no onset" as
+> ambiguous between a bug and a too-low grid. C22 settled it: the grid is 4.9x too
+> low and `--normalise` is working correctly.
+>
+> **What C22 established.** alpha\* = None, but the sweep topped out at the
+> equivalent of alpha_unnorm = 0.409 against an effect that starts at 2, and the
+> signal is switching on at the top of the grid (p = 3.0e-06, 27/30 concepts). The
+> filed stop clause does not apply, because it assumed a grid that bracketed the
+> onset.
+>
+> **Revised plan — three runs, ~1.5 GPU-h total, in this order.**
+>
+> **A-1a · Capture the residual norm.** Before anything else, fix the script to
+> write run-level scalars (median residual norm at the read position, median vector
+> norm, version stamp) into a sidecar or the first record, not just stdout. C22 lost
+> the one number that decides the interpretation. This is a code change, not a run.
+>
+> **A-1b · Extend the grid upward.** Real vectors, unit norm, alpha in {2048, 4096,
+> 8192, 16384, 32768}. This brackets alpha_unnorm 0.41 → 6.6, which spans the entire
+> range where the unnormalised runs showed the effect appear and saturate. Addendum 2
+> authorises "a single fine sweep between two steps" if the onset falls between them;
+> **an upward extension is not that**, so file a one-paragraph Addendum 3 stating the
+> new grid and why, and label the extension as such in the paper. ~40 min.
+>
+> **A-1c · The random arm at the new alpha\*.** Once alpha\* exists, run
+> `--control random --normalise` at alpha\* and the next step up. This is the
+> primary test of Addendum 2 and it is still unrun. ~30 min.
+>
+> **The interpretive fork this opens, which is now the more important question.**
+> On a literal unit-norm reading their alpha=4 is 2,500x below anything that moves
+> this model. Either we have misread their convention — most likely they scale
+> relative to the residual-stream norm, in which case **our unnormalised C17–C20 are
+> closer to their protocol than this run is**, and the 3 Sep repositioning
+> overcorrected — or their effect is genuinely tiny. A-1a's captured norm decides it
+> in one number.
+>
+> **What this does to Paper A.** Nothing yet, and possibly something good. Section 4.1
+> currently says our reproduction is rate-matched, not protocol-matched, and that
+> concession was made on the assumption that unit-norm is their protocol. If A-1a
+> shows relative scaling, that concession is withdrawn and the reproduction is
+> stronger than the draft claims. **Do not finalise section 4.1 until A-1a lands.**
 
 **Question.** Macar et al. normalise; we did not. At which α does the normalised
 protocol reproduce their 10.8%, and does the real vector beat a norm-matched
@@ -616,6 +871,15 @@ conclusion changes sign or loses significance.*
 ---
 
 #### **A-3 · Second model — Qwen2.5-32B-Instruct**
+
+> **PROMOTED 7 Sep 2026 — this is now the most valuable run in the queue, not a
+> robustness check.** C23/C24 measured Gemma's residual norm at 58,932 and found the
+> onset at 14% of it. The open question that decides how the paper generalises is
+> whether **alpha\* tracks the residual norm across models**. Qwen answers it in one
+> session. Add to the run: record Qwen's residual norm at its read position, then
+> test whether its onset lands near 14% of that norm. If it does, "report alpha as a
+> fraction of the residual norm" goes from a methodological suggestion to a
+> calibrated rule, which is a materially stronger contribution.
 
 **Question.** Is this a finding about Gemma or a pattern?
 
@@ -825,7 +1089,103 @@ measured speedup is **4.5×, not the 20–40× estimated**, saturating by batch 
 
 **Required before Phase A:** a regression test asserting batched and unbatched
 fits agree to numerical precision on a fixed seed. If they do not agree exactly,
-batching is unusable and Phase A must be re-scoped, not fudged.
+batching is unusable and Phase A must be re-scoped, not fudged. That test exists
+and **passes** (`test_batched_matches_single_neuron_path`); correctness is not the
+problem.
+
+> **MEASURED 7 Sep 2026 — the speed test fails and the 4.5x figure is unconfirmed.**
+> `test_batching_is_faster_per_neuron` fails: at 8 neurons, batched 14.9s vs single
+> 16.3s. Re-measured three times on an idle machine (the section 8 gotcha about
+> orphaned jobs applies, so this was checked): **0.9x, 1.0x, 1.1x.** Batching buys
+> nothing at batch 8.
+>
+> The 4.5x on record was measured "saturating by batch 32", so batch 8 is below the
+> point where the shared `X @ V` projection is meant to amortise, and the test may
+> simply assert a win at a batch size too small to show one. That reading is now
+> **refuted at d=128** (`results/batching_speedup.json`, 7 Sep):
+>
+> | n_neurons | batched | single | speedup | batched s/neuron |
+> |---|---|---|---|---|
+> | 4 | 7.5s | 6.5s | 0.87x | 1.882 |
+> | 8 | 12.7s | 15.1s | 1.19x | 1.582 |
+> | 16 | 25.5s | 29.0s | 1.14x | 1.593 |
+> | 32 | 49.4s | 58.6s | **1.19x** | 1.544 |
+> | 64 | 97.2s | 112.7s | 1.16x | 1.519 |
+>
+> There is no saturation curve. The speedup is **flat at ~1.15x** from batch 8 to 64,
+> and at batch 32 — where 4.5x was recorded — it is 1.19x. **The per-neuron column is
+> the diagnostic:** 1.58 at n=8, 1.52 at n=64. If the shared `X @ V` projection were
+> being amortised as section 3.1 of the plan of record describes, that column would
+> fall roughly as 1/n. It is flat, so either the projection is not being shared, or it
+> is not the dominant cost.
+>
+> **The caveat that decides which, and it is not small.** This ran at **d=128**. Phase
+> A runs at **d=768**. Section 3.1's entire argument is that the projection over
+> `16,000 x 768` dominates; at d=128 that term is ~36x cheaper while the per-neuron
+> Adam steps and the 64-wide nonlinearity are unchanged, so the optimiser could
+> dominate here and not there. **The 4.5x may have been measured at d=768 and be
+> real.** A d=768 run is in flight (`results/batching_speedup_d768.json`); until it
+> lands the honest statement is "batching buys ~1.15x at d=128 and is unmeasured at
+> the width Phase A uses".
+>
+>
+> **d=768 RESULT, and a correction to what I wrote three hours earlier
+> (7 Sep, `results/batching_speedup_d768.json`).**
+>
+> | n_neurons | batched | single | speedup | batched s/neuron |
+> |---|---|---|---|---|
+> | 8 | 14.6s | 20.6s | 1.41x | 1.830 |
+> | 32 | 50.4s | 82.0s | **1.63x** | 1.576 |
+>
+> Width helps and batch size helps, so section 3.1's design is directionally right:
+> 1.19x at d=128 n=32 becomes 1.63x at d=768 n=32, and unlike the d=128 curve this one
+> is still climbing. But **1.63x is not 4.5x**, and the recorded figure is not
+> reproduced at the configuration where it was claimed. Two honest possibilities: the
+> 4.5x was measured at a different operating point (steps, restarts, sample count, or
+> including the k=2 cascade path), or on different thread settings. My benchmark used
+> steps=400, n_restarts=1, n=8000, synthetic data.
+>
+> **CORRECTION — the "Phase A is not committable" alarm above was overstated, and the
+> arithmetic that follows it is against a superseded scope.** The 583-hour figure comes
+> from the 19 Aug plan of record, which costed E1.1 at **1000 units x 7 depths**. The
+> 3 Sep semester plan already scoped E1.1 down to **300 units x 4 depths = 1200 fits**,
+> and its "~22 GPU-h" estimate assumes **no batching benefit at all**. So:
+>
+> | E1.1, 1200 fits | s/neuron | hours |
+> |---|---|---|
+> | gate config, no batching | 63.7 | **21.2** |
+> | gate config + batching at 1.63x | 63.7 | 13.0 |
+> | cheap knee (e03b: 4k tokens, 800 steps, 2 restarts) | 4.73 | **1.6** |
+> | cheap knee + batching | 4.73 | 1.0 |
+>
+> **Phase A as currently scoped is not blocked.** 21 hours fits inside one week of free
+> Kaggle quota even with zero speedup.
+>
+> **And the real lever was never batching.** E0.3b already measured the cheap operating
+> point at **4.73 s/neuron with median alignment 0.9936** against the gate config's
+> 63.7 s/neuron — a **13.5x** reduction from choosing tokens/steps/restarts, against
+> batching's 1.63x. The 19 Aug plan called batching "the highest-value engineering task
+> in the project" and made it a Phase A prerequisite. On these numbers that was wrong:
+> **the operating point is worth 8x more than batching, it is already measured, and it
+> costs nothing to adopt.**
+>
+> **Revised position on S1-5.** Batching is no longer a Phase A prerequisite. Finish it
+> or shelve it on its merits, and fix the test to assert what is actually true
+> (a win at d=768, batch >= 32) rather than deleting it. Before spending another
+> person-week on it, profile where the time goes — if the per-neuron Adam steps
+> dominate rather than the shared projection, no amount of batching will help and the
+> lever is steps, restarts, or a GPU.
+
+> **Why this matters more than a red test.** Phase A's E1.1 was costed at 583 CPU-hours
+> divided by the speedup. At 20-40x that is 15-30 hours. At 4.5x it is 130 hours. **At
+> 1x it is 583 hours — 24 days of continuous CPU for one model, one layer, one
+> variable**, which is the number the 19 Aug plan of record called infeasible and built
+> batching to fix. Phase A's scale cannot be committed to until the sweep lands.
+>
+> **Do not "fix" the test by lowering its threshold or raising its batch size to make
+> it green.** Either batching earns its speedup at a batch size Phase A will actually
+> use, in which case the test should assert that at that size, or it does not, in which
+> case Phase A is re-scoped. Both are honest; a tuned assertion is not.
 
 **Consequence to face now.** Phase A's E1.1 was costed at 583 CPU-hours ÷ 20–40×.
 At 4.5× it is ~130 hours. **Redo the Phase A arithmetic against 4.5× before
@@ -982,6 +1342,21 @@ Three things follow, none of them optional:
 
 ## 8. Gotchas solved (so we never lose the time again)
 
+### Two runs sharing one `--out` overwrite each other's config sidecar
+C23 and C24 both used `--out /kaggle/working/s3_unit_ext.jsonl`. The `.jsonl`
+outputs are correctly distinguished by the `_norm1` / `_random_norm1` suffixes the
+script appends, but the **config sidecar is not suffixed** — so the real run's
+`s3_unit_ext.config.json` was silently clobbered by the random run's, and only the
+random run's config survives.
+
+No harm this time: the residual norm is measured pre-injection so it is a property
+of the model and prompts, identical across the two, and every per-row field needed
+for the analysis is in the `.jsonl` itself. But the archived sidecar is now named
+`s3_unit_ext_random.config.json` to stop anyone reading it as the real run's.
+
+**Fix before the next paired run:** suffix the sidecar the same way the `.jsonl` is
+suffixed, or pass a distinct `--out` per condition.
+
 ### Kaggle: paste the script and it will bite you (cost: 4 rounds, ~3 h)
 Pasting a 400+ line file into a notebook cell failed four consecutive times. Once
 the tail of the script landed *inside* the pip command
@@ -1050,6 +1425,18 @@ the real objective**. Standing rule: a screen is a screen.
 ### Orphaned background jobs skew every timing number
 Use `nohup`, not foreground `timeout`, and check for orphans before quoting any
 throughput figure.
+
+### Run-level scalars printed to stdout are lost with the session (found 2026-09-07)
+Addendum 2 required the median residual-stream norm at the read position to be
+printed. It was — to the Kaggle log — and the session expired. Per-trial rows are
+safely in the JSONL; run-level values are not, because nothing writes them there.
+That single scalar is what decides how to read Macar et al.'s alpha, so its loss
+blocks an interpretation, not just a table.
+
+**Fix:** write run-level scalars — version stamp, median vector norm, median
+residual norm, device map, dtype — into a `<out>.config.json` sidecar at run
+start. Same lesson as section 8's artifact rule, one level down: **if a number
+matters, it goes in a file, not a print statement.**
 
 ### Download Kaggle artifacts before the session dies
 Learned on APERTURE, where the raw data for six runs was lost. Every Study 3

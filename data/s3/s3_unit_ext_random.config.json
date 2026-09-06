@@ -1,0 +1,41 @@
+{
+  "version": "2026-09-07a",
+  "argv": [
+    "--model",
+    "gemma",
+    "--compute-dtype",
+    "fp32",
+    "--stage",
+    "forced",
+    "--normalise",
+    "--control",
+    "random",
+    "--alphas",
+    "2048",
+    "4096",
+    "8192",
+    "16384",
+    "32768",
+    "--out",
+    "/kaggle/working/s3_unit_ext.jsonl"
+  ],
+  "model_id": "/kaggle/input/models/google/gemma-3/transformers/gemma-3-27b-it/1",
+  "layer": 37,
+  "n_layers": 62,
+  "normalise": true,
+  "control": "random",
+  "alphas": [
+    2048.0,
+    4096.0,
+    8192.0,
+    16384.0,
+    32768.0
+  ],
+  "trial_seed": 0,
+  "residual_norm_at_read_median": 58932.1171875,
+  "residual_norm_at_read_min": 54757.3984375,
+  "residual_norm_at_read_max": 62168.6796875,
+  "vector_norm_median": 0.9999999403953552,
+  "n_vectors": 30,
+  "non_finite_vectors": 0
+}

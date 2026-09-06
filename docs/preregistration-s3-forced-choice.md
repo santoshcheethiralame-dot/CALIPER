@@ -177,3 +177,82 @@ says so rather than claiming a reproduction.
 **Committed.** The log-spaced sweep is the whole design. No fine sweep is added after
 seeing results unless the onset falls between two steps, in which case a single fine sweep
 between those two steps is run and reported as such.
+
+---
+
+# Addendum 3 — extending the unit-norm sweep upward
+
+**Filed 7 September 2026, after the C21 onset analysis, before the extension run.**
+
+## Why the Addendum 2 stop clause does not apply
+
+Addendum 2 said: if no alpha in the sweep reaches mean introspective P(YES) of 0.10,
+report that the unit-norm protocol does not produce detection at any tested strength
+and stop. No alpha reached it — the sweep runs 0.0000 flat to alpha=512 and hits
+0.0003 at alpha=2048.
+
+That clause assumed a grid that bracketed the onset. It did not, and two measurements
+say so.
+
+**The grid was 4.9x too low.** Unnormalised vectors have median norm 5002.36, so
+`alpha_unit = 5002 x alpha_unnorm`. The top of the sweep, alpha_unit = 2048, is
+alpha_unnorm = 0.409. The lowest unnormalised strength that produced any effect was
+alpha_unnorm = 2, which is alpha_unit = 10,005.
+
+**The signal is switching on at the top of the grid.** alpha=2048 against alpha=0,
+introspective framing, Wilcoxon signed-rank paired by concept: W = 432,
+p = 3.0e-06, rose on 27 of 30 concepts. Monotone from alpha=128 upward.
+
+Reporting a null here would be a false negative from an unswept parameter. Study 3
+already made that error once, at alpha=8 in the free-generation run, and the fix was
+the same: sweep the range the effect actually occupies.
+
+## What this addendum authorises, and what it does not
+
+**Authorised:** one upward extension of the grid. It is an extension, not the "single
+fine sweep between two steps" that Addendum 2 permits, and it will be labelled as an
+extension wherever it is reported.
+
+**Not authorised:** any change to the readout, the scorer, the prompts, the concept
+set, the pairing, or the test. Those stay exactly as filed.
+
+## Protocol
+
+| element | value |
+|---|---|
+| vectors | as Addendum 2: L2-normalised; random control rescaled to norm 1 |
+| strengths | 2048, 4096, 8192, 16384, 32768 (spanning alpha_unnorm 0.41 to 6.6) |
+| conditions | real first; then random at alpha* and the next step up |
+| everything else | unchanged from Addendum 2 |
+
+The strengths are chosen to bracket the entire range over which the unnormalised runs
+showed the effect appear (alpha_unnorm 2) and saturate (alpha_unnorm 6), so the grid
+cannot fall short a second time.
+
+## Criteria, fixed now
+
+**Onset.** As Addendum 2: the smallest alpha at which mean introspective P(YES) with
+real vectors exceeds 0.10. Call it alpha*.
+
+- If alpha* is found, run the random arm at alpha* and one step above, and apply
+  Addendum 2's A1/A2/A3 criteria unchanged. That is the primary test and it remains
+  unrun.
+- If no alpha up to 32,768 reaches 0.10 — which would contradict the scale arithmetic,
+  since alpha_unit 32,768 is alpha_unnorm 6.6 and that strength demonstrably works —
+  then the discrepancy is in the injection path under `--normalise`, not in the model.
+  Debug the code; do not report a null.
+
+**Secondary, and now the more consequential question.** Record the median
+residual-stream norm at the read position, which version 2026-09-07a writes to a
+`.config.json` sidecar rather than printing. Then:
+
+- If their alpha=4 on a unit vector is a perturbation of order 1e-4 of that norm, the
+  literal unit-norm reading of their protocol is untenable and we say so: the likely
+  convention is scaling relative to activation scale, under which our unnormalised
+  runs are the closer match to their protocol.
+- If it is of order 1e-1 or larger, the literal reading stands and their effect is
+  produced by a much smaller perturbation than ours.
+
+**Committed in advance.** Whichever of those two the norm implies is reported, and
+section 4.1 of the paper is written to match it rather than to preserve the current
+draft's concession. No further extension of the grid without a further addendum.
