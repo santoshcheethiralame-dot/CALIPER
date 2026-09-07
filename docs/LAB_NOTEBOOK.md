@@ -1584,6 +1584,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C44) | **THE ALL-ZERO GUARD FIRED IN PRODUCTION AND SAVED THE RUN.** A second Gemma session re-ran the *old* notebook cells; the forced arm again computed seven alphas of 0 from the unfilled `R = 0.0`, and `2026-09-07f` refused to start instead of writing 420 useless rows. C39's fix is validated by the exact failure it was built for | notebook C44 |
+| 2026-09-07 (C44) | **The read-position fix is confirmed in production.** The log prints `read position check: 'table' at token(s) [7] of 13; decoded ' table' (template tail is '
+')` — the vector is measured at the word, not the newline. Gemma's concept-position residual norm reproduces exactly: median **36,244.97**, min 31,072.4, max 46,779.8 | notebook C44 |
+| 2026-09-07 | **The remaining failure mode is a stale notebook, not the script.** Two Gemma sessions have now been lost to cells that predate the current sheet. **Delete every cell before pasting the new ones** — the corrected sheet has no placeholder and no steer cell, so nothing carried over from the old one is safe to keep | A-12b |
 | 2026-09-07 (C43) | **THE FAILURE CLASS IS REPAIRABLE, AND THE REPAIR NEEDS NO GROUND TRUTH.** Held-out R2 picks the good draw at correlation **+0.953** with **median regret 0.0000**. Five seeds selected by test_r2 take the worst failures from **0.5175 to 0.9669**. Five seeds saturates; three does not | notebook C43 |
 | 2026-09-07 (C43) | **The lottery account is confirmed**: n1503 spans **0.0660 to 0.9829** on nothing but the seed, while passing units hold to four decimals. This is the mechanism behind the disagreement flag - that flag is the two-draw special case of selecting on held-out R2 | notebook C43 |
 | 2026-09-07 | **Confirmatory n=100 run PRE-REGISTERED before running** (`preregistration-s1-multiseed.md`), with the disclosure that its protocol was sized on a favourable six-unit pilot. Scoring a headline against a protocol chosen after seeing a good subset is the C40 failure mode, found earlier in this same session | prereg |

@@ -13,6 +13,16 @@
 the **concept** position is **36,244.97** (the template-tail figure was 58,932). The
 alpha=0 baselines also reproduced C20 exactly: introspective 3.42e-05, neutral 0.188.
 
+## FIRST: delete every cell in the notebook
+
+Two sessions have now been lost to cells left over from an older version of this sheet.
+The previous run re-executed a steer cell with placeholder alphas (68 minutes for
+nothing) and then an old forced cell whose `R = 0.0` was never filled — the script's
+guard caught that one and refused to start, which is why no bad data was produced.
+
+**There is no steer cell in this sheet and no value to paste anywhere.** If your notebook
+contains either, it is the old sheet. Clear it out before continuing.
+
 ## Setup
 
 Gemma 3 27B under **Models**, `caliper-s3` at **`2026-09-07f`** under **Datasets**,
