@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| **C31** | **2026-09-07** | **A-10 Qwen steering positive control** | 0…200 (0–112% of norm) | 150 | `data/s3/s3_qwen_steer_norm1.jsonl` | **Concept-in-text 1/30 at alpha=200, identical to the 1/30 at alpha=0. The vectors carry no content.** Cause: the vector is read at the chat-template tail, not the concept word |
 | **C30** | **2026-09-07** | **A-9 Qwen generation check** | 0, 50, 100 | 90 | `data/s3/s3_qwen_gen.jsonl` | **Injection never reaches the output: 0/30 concept-in-text at 56% of the residual norm.** C27-29 null is an artifact. Separately: 30/30 categorical introspection refusal |
 | C27 | 2026-09-07 | A-3 Qwen probe, alpha=0 | 0 | 60 | `data/s3/s3_qwen_probe_forced_norm1.jsonl` | **Residual norm 177.8** vs Gemma's 58,932 — **331x**. Baseline P(YES) 1.03e-09 |
 | C28 | 2026-09-07 | A-3 Qwen real sweep | 2…100 (1.1–56% of norm) | 360 | `data/s3/s3_qwen_forced_norm1.jsonl` | **No onset. Peak 1.36e-05, four orders below the filed 0.10 bar.** Rise is real (p=3.7e-09, 29/30) but never approaches YES |
@@ -228,6 +229,68 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C31 — Qwen steering positive control (2026-09-07) — **THE VECTORS ARE DEAD**
+
+A-10, run at `2026-09-07d`, `--stage steer`: neutral prompt ("Write a short story."),
+injection at **every position including decode steps**, alpha 0 → 200. Residual norm
+reproduced to the digit. 150 trials. `data/s3/s3_qwen_steer_norm1.jsonl`.
+
+| alpha | fraction of norm | concept in text | coherent | mean words |
+|---|---|---|---|---|
+| 0 | 0% | **1/30** | 30/30 | 51.0 |
+| 25 | 14% | 1/30 | 30/30 | 50.8 |
+| 50 | 28% | 0/30 | 30/30 | 50.6 |
+| 100 | 56% | 2/30 | 30/30 | 50.0 |
+| **200** | **112%** | **1/30** | 30/30 | 51.1 |
+
+**Every cell is at the alpha=0 baseline of 1/30.** Injecting a vector *larger than the
+entire residual stream* produces the concept exactly as often as injecting nothing.
+
+The perturbation is real but empty. At alpha=0 all 30 concepts yield the identical story
+(greedy decoding, same prompt). By alpha=100 the stories diverge — cabins, bookstores,
+"the village of Eldoria" — so the injection is changing the computation. It carries no
+concept: elephant gives "an old, weathered cabin", dolphin gives "the Whispering Oak",
+volcano gives "an old woman named Elara". At 112% of the norm the model is still fluent
+and 51 words long.
+
+**Conclusion: the difference-of-means concept vectors carry no concept content on Qwen
+at layer 38.** Definitive. Nothing measured on Qwen means anything.
+
+**The mechanism, and it is the portable finding.** `last_token_activation` takes
+`h[0, -1, :]` — the last token of a prompt run through `apply_chat_template(...,
+add_generation_prompt=True)`. That token is not the concept word. It is the template
+tail: `<|im_start|>assistant\n` on Qwen, `<start_of_turn>model\n` on Gemma. The concept
+sits several tokens earlier, inside the user turn, and whatever concept signal the
+vector carries has to survive being read off the template marker. On Gemma enough
+survives that the vectors steer. On Qwen, with identical code, nothing does.
+
+**Every health check the pipeline has passes on these dead vectors:** unit norm (median
+1.0000), zero non-finite, 30 distinct vectors, and a first-token P(YES) that rises
+monotonically with alpha at **p=3.7e-09 on 29/30 concepts**. A vector carrying no
+content still perturbs, and a significance test on the perturbation cannot tell the
+difference. **Only a steering positive control catches this**, and no paper in this
+literature reports one.
+
+That generalises past our bug: difference-of-means concept vectors read at the final
+position of a chat template are template-dependent, can silently carry nothing, and
+look healthy by every metric normally reported.
+
+**The obvious repair, untested:** extract at the concept word's own position, or mean
+over the user-turn content positions, instead of the template tail. Then re-run this
+same control before trusting anything.
+
+**What survives from the Qwen excursion**
+
+1. **The residual-norm measurement.** 177.8 vs Gemma's 58,932, a factor of 331,
+   measured before any injection and independent of the vectors. Still explains why
+   alpha=4 is live in most of the literature and inert on Gemma.
+2. **The refusal observation (C30).** 30/30 categorical refusals at alpha=0 on a clean
+   introspective prompt, no injection involved, so it does not depend on the vectors.
+   Qwen declines the premise rather than answering it.
+
+**What does not survive: the invariant test.** See the correction in section 6b.
+
 
 ### C30 — Qwen generation check (2026-09-07) — **THE NULL IS VOID, AND WHY**
 
@@ -762,6 +825,18 @@ direction at a time. It is the November go/no-go.
    indistinguishable from the introspective one once anything is injected, and
    the introspective preamble inflates the response to content-free vectors
    eightfold. (C20)
+> **ADDED 7 Sep 2026 (C31) — a prerequisite that precedes every finding below.**
+> A concept vector that carries no content still perturbs the model, still shifts
+> first-token P(YES) monotonically and significantly (p=3.7e-09 on 29/30 concepts on
+> Qwen), and still passes every health check anyone reports: unit norm, finite, thirty
+> distinct directions. **A significance test on the perturbation cannot tell a working
+> vector from a dead one.** Only a steering positive control can — inject on a neutral
+> prompt and check the concept reaches the output — and it is absent from this whole
+> literature, ours included until today. Every Gemma result stands because Gemma's
+> vectors demonstrably steer (10/30 concept-in-text at a comparable strength); every
+> Qwen result is void because its vectors do not (1/30, the same as no injection).
+> **Run the steering control before believing any injection number, including your own.**
+
 9. **The reported detection rate is a property of the readout**, swinging 50% →
    7% over strengths where the first-token signal is flat. (C17)
 10. **The published false-positive control cannot see any of this.** Their control
@@ -856,6 +931,9 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C31) | **CORRECTION: "THE INVARIANT HYPOTHESIS IS DEAD" IS WITHDRAWN. It was never tested.** That row was written on C27-29, which measured Qwen with vectors that C31 now shows carry no concept content at all (1/30 concept-in-text at 112% of the residual norm, identical to the alpha=0 baseline). A null measured through a dead instrument is not a null. **The invariant — whether alpha* tracks the residual-stream norm across models — is UNTESTED, not refuted**, and stays open until a model other than Gemma is measured with vectors that pass a steering control | notebook C31 |
+| 2026-09-07 (C31) | **Qwen is OUT of Paper A entirely.** C27, C28, C29 and C30's steering half all rest on inert vectors. Two things survive because neither depends on them: the **331x residual-norm measurement** (taken pre-injection) and the **30/30 categorical refusal** at alpha=0 (clean prompts, no injection) | notebook C31 |
+| 2026-09-07 (C31) | **NEW PORTABLE FINDING: difference-of-means concept vectors read at the chat-template tail can silently carry nothing.** `last_token_activation` takes the last token of a prompt templated with `add_generation_prompt=True` — the `<|im_start|>assistant` marker, not the concept word. Enough survives on Gemma to steer; nothing does on Qwen. **The dead vectors pass every health check normally reported** — unit norm, zero non-finite, and a monotone P(YES) rise at p=3.7e-09 on 29/30 concepts. Only a steering positive control detects it, and nobody in this literature runs one | notebook C31 |
 | 2026-09-07 | **The C30 diagnosis is WEAKER than first written — injection is prompt-positions-only.** `run_trial` applies the vector on the prompt pass and not on decode steps (`h.shape[1] > 1`), so any concept reaching generated text does so indirectly through the cached prompt state. Gemma's hits were short outputs where that survives; Qwen answers with ~49-word templated refusals, across which it dilutes. **So 0/30 cannot distinguish "no content in the vector" from "content diluted away", and my first reading over-attributed it to dead vectors.** `--stage steer` (`2026-09-07d`) injects at every position to settle it | section 8; A-10 |
 | 2026-09-07 (C30) | **THE QWEN NULL IS VOID — do not report it in any form.** Generation at 56% of the residual norm produces the concept 0/30 times, against Gemma's 10/30 at a comparable fraction. The injection perturbs generically (P(YES) p=3.7e-09, text similarity 0.18) but carries no concept content, which points at the difference-of-means vectors failing on Qwen at layer 38, not at a broken hook. Step one of the measurement failed | notebook C30 |
 | 2026-09-07 (C30) | **NEW CONFOUND, and it outlives Qwen: introspection-refusal training makes the measurement unidentifiable.** Qwen refuses the premise categorically in 30/30 clean trials ("As an AI, I don't have the capability to detect..."), which is why its baseline P(YES) is 1.03e-09 against Gemma's 3e-05 — a policy, not a measurement. **Detection rates are not comparable across models with different refusal training, independently of activation scale.** Any cross-model claim must first show the model engages with the task. Nobody in this literature reports that | notebook C30 |
