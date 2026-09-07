@@ -1,0 +1,445 @@
+{
+  "steps": [
+    200,
+    400,
+    800,
+    1600,
+    2500,
+    5000
+  ],
+  "restarts": 2,
+  "rows": [
+    {
+      "neuron": 527,
+      "group": "worst-fail",
+      "steps": 200,
+      "alignment": 0.9537,
+      "r2": NaN,
+      "gate_direct": 0.1926
+    },
+    {
+      "neuron": 527,
+      "group": "worst-fail",
+      "steps": 400,
+      "alignment": 0.9287,
+      "r2": NaN,
+      "gate_direct": 0.1926
+    },
+    {
+      "neuron": 527,
+      "group": "worst-fail",
+      "steps": 800,
+      "alignment": 0.978,
+      "r2": NaN,
+      "gate_direct": 0.1926
+    },
+    {
+      "neuron": 527,
+      "group": "worst-fail",
+      "steps": 1600,
+      "alignment": 0.98,
+      "r2": NaN,
+      "gate_direct": 0.1926
+    },
+    {
+      "neuron": 527,
+      "group": "worst-fail",
+      "steps": 2500,
+      "alignment": 0.9977,
+      "r2": NaN,
+      "gate_direct": 0.1926
+    },
+    {
+      "neuron": 527,
+      "group": "worst-fail",
+      "steps": 5000,
+      "alignment": 0.9759,
+      "r2": NaN,
+      "gate_direct": 0.1926
+    },
+    {
+      "neuron": 1503,
+      "group": "worst-fail",
+      "steps": 200,
+      "alignment": 0.3645,
+      "r2": NaN,
+      "gate_direct": 0.2746
+    },
+    {
+      "neuron": 1503,
+      "group": "worst-fail",
+      "steps": 400,
+      "alignment": 0.9921,
+      "r2": NaN,
+      "gate_direct": 0.2746
+    },
+    {
+      "neuron": 1503,
+      "group": "worst-fail",
+      "steps": 800,
+      "alignment": 0.3833,
+      "r2": NaN,
+      "gate_direct": 0.2746
+    },
+    {
+      "neuron": 1503,
+      "group": "worst-fail",
+      "steps": 1600,
+      "alignment": 0.9989,
+      "r2": NaN,
+      "gate_direct": 0.2746
+    },
+    {
+      "neuron": 1503,
+      "group": "worst-fail",
+      "steps": 2500,
+      "alignment": 0.4587,
+      "r2": NaN,
+      "gate_direct": 0.2746
+    },
+    {
+      "neuron": 1503,
+      "group": "worst-fail",
+      "steps": 5000,
+      "alignment": 0.4438,
+      "r2": NaN,
+      "gate_direct": 0.2746
+    },
+    {
+      "neuron": 2723,
+      "group": "worst-fail",
+      "steps": 200,
+      "alignment": 0.9334,
+      "r2": NaN,
+      "gate_direct": 0.3562
+    },
+    {
+      "neuron": 2723,
+      "group": "worst-fail",
+      "steps": 400,
+      "alignment": 0.9648,
+      "r2": NaN,
+      "gate_direct": 0.3562
+    },
+    {
+      "neuron": 2723,
+      "group": "worst-fail",
+      "steps": 800,
+      "alignment": 0.9667,
+      "r2": NaN,
+      "gate_direct": 0.3562
+    },
+    {
+      "neuron": 2723,
+      "group": "worst-fail",
+      "steps": 1600,
+      "alignment": 0.9673,
+      "r2": NaN,
+      "gate_direct": 0.3562
+    },
+    {
+      "neuron": 2723,
+      "group": "worst-fail",
+      "steps": 2500,
+      "alignment": 0.9662,
+      "r2": NaN,
+      "gate_direct": 0.3562
+    },
+    {
+      "neuron": 2723,
+      "group": "worst-fail",
+      "steps": 5000,
+      "alignment": 0.965,
+      "r2": NaN,
+      "gate_direct": 0.3562
+    },
+    {
+      "neuron": 2023,
+      "group": "worst-fail",
+      "steps": 200,
+      "alignment": 0.8325,
+      "r2": NaN,
+      "gate_direct": 0.6789
+    },
+    {
+      "neuron": 2023,
+      "group": "worst-fail",
+      "steps": 400,
+      "alignment": 0.901,
+      "r2": NaN,
+      "gate_direct": 0.6789
+    },
+    {
+      "neuron": 2023,
+      "group": "worst-fail",
+      "steps": 800,
+      "alignment": 0.7472,
+      "r2": NaN,
+      "gate_direct": 0.6789
+    },
+    {
+      "neuron": 2023,
+      "group": "worst-fail",
+      "steps": 1600,
+      "alignment": 0.9979,
+      "r2": NaN,
+      "gate_direct": 0.6789
+    },
+    {
+      "neuron": 2023,
+      "group": "worst-fail",
+      "steps": 2500,
+      "alignment": 0.9957,
+      "r2": NaN,
+      "gate_direct": 0.6789
+    },
+    {
+      "neuron": 2023,
+      "group": "worst-fail",
+      "steps": 5000,
+      "alignment": 1.0,
+      "r2": NaN,
+      "gate_direct": 0.6789
+    },
+    {
+      "neuron": 1180,
+      "group": "worst-fail",
+      "steps": 200,
+      "alignment": 0.9615,
+      "r2": NaN,
+      "gate_direct": 0.7237
+    },
+    {
+      "neuron": 1180,
+      "group": "worst-fail",
+      "steps": 400,
+      "alignment": 0.9922,
+      "r2": NaN,
+      "gate_direct": 0.7237
+    },
+    {
+      "neuron": 1180,
+      "group": "worst-fail",
+      "steps": 800,
+      "alignment": 0.9879,
+      "r2": NaN,
+      "gate_direct": 0.7237
+    },
+    {
+      "neuron": 1180,
+      "group": "worst-fail",
+      "steps": 1600,
+      "alignment": 0.9861,
+      "r2": NaN,
+      "gate_direct": 0.7237
+    },
+    {
+      "neuron": 1180,
+      "group": "worst-fail",
+      "steps": 2500,
+      "alignment": 0.9856,
+      "r2": NaN,
+      "gate_direct": 0.7237
+    },
+    {
+      "neuron": 1180,
+      "group": "worst-fail",
+      "steps": 5000,
+      "alignment": 0.9972,
+      "r2": NaN,
+      "gate_direct": 0.7237
+    },
+    {
+      "neuron": 1625,
+      "group": "worst-fail",
+      "steps": 200,
+      "alignment": 0.7007,
+      "r2": NaN,
+      "gate_direct": 0.804
+    },
+    {
+      "neuron": 1625,
+      "group": "worst-fail",
+      "steps": 400,
+      "alignment": 0.8525,
+      "r2": NaN,
+      "gate_direct": 0.804
+    },
+    {
+      "neuron": 1625,
+      "group": "worst-fail",
+      "steps": 800,
+      "alignment": 0.9907,
+      "r2": NaN,
+      "gate_direct": 0.804
+    },
+    {
+      "neuron": 1625,
+      "group": "worst-fail",
+      "steps": 1600,
+      "alignment": 0.9079,
+      "r2": NaN,
+      "gate_direct": 0.804
+    },
+    {
+      "neuron": 1625,
+      "group": "worst-fail",
+      "steps": 2500,
+      "alignment": 0.9288,
+      "r2": NaN,
+      "gate_direct": 0.804
+    },
+    {
+      "neuron": 1625,
+      "group": "worst-fail",
+      "steps": 5000,
+      "alignment": 0.9296,
+      "r2": NaN,
+      "gate_direct": 0.804
+    },
+    {
+      "neuron": 3066,
+      "group": "pass",
+      "steps": 200,
+      "alignment": 0.9991,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 3066,
+      "group": "pass",
+      "steps": 400,
+      "alignment": 0.9999,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 3066,
+      "group": "pass",
+      "steps": 800,
+      "alignment": 0.9997,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 3066,
+      "group": "pass",
+      "steps": 1600,
+      "alignment": 0.9998,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 3066,
+      "group": "pass",
+      "steps": 2500,
+      "alignment": 0.9999,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 3066,
+      "group": "pass",
+      "steps": 5000,
+      "alignment": 0.9997,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 2053,
+      "group": "pass",
+      "steps": 200,
+      "alignment": 0.999,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 2053,
+      "group": "pass",
+      "steps": 400,
+      "alignment": 1.0,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 2053,
+      "group": "pass",
+      "steps": 800,
+      "alignment": 0.9944,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 2053,
+      "group": "pass",
+      "steps": 1600,
+      "alignment": 1.0,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 2053,
+      "group": "pass",
+      "steps": 2500,
+      "alignment": 0.9939,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 2053,
+      "group": "pass",
+      "steps": 5000,
+      "alignment": 1.0,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 1273,
+      "group": "pass",
+      "steps": 200,
+      "alignment": 0.9991,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 1273,
+      "group": "pass",
+      "steps": 400,
+      "alignment": 0.9995,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 1273,
+      "group": "pass",
+      "steps": 800,
+      "alignment": 0.9991,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 1273,
+      "group": "pass",
+      "steps": 1600,
+      "alignment": 0.9968,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 1273,
+      "group": "pass",
+      "steps": 2500,
+      "alignment": 0.9994,
+      "r2": NaN,
+      "gate_direct": 1.0
+    },
+    {
+      "neuron": 1273,
+      "group": "pass",
+      "steps": 5000,
+      "alignment": 0.9966,
+      "r2": NaN,
+      "gate_direct": 1.0
+    }
+  ]
+}

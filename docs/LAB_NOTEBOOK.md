@@ -236,6 +236,66 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C42 — Steps sweep: the over-optimisation hypothesis is REFUTED (2026-09-07)
+
+C41 proposed that more optimisation makes the direction worse, because the 64-wide
+nonlinearity can absorb the error and fit the response through a wrong V. This tested it
+directly: 6 worst-fail and 3 pass units, steps from 200 to 5000, **restarts fixed at 2**,
+full data. `results/s1_steps_sweep.json`.
+
+| steps | worst-fail median | min | pass median |
+|---|---|---|---|
+| 200 | 0.8830 | 0.3645 | 0.9991 |
+| 400 | 0.9467 | 0.8525 | 0.9999 |
+| 800 | 0.9724 | 0.3833 | 0.9991 |
+| 1600 | 0.9830 | 0.9079 | 0.9998 |
+| **2500** | **0.9759** | 0.4587 | 0.9994 |
+| 5000 | 0.9705 | 0.4438 | 0.9997 |
+
+**Refuted.** There is no decline with steps — the curve rises to 1600 and is flat
+thereafter. Decisively: **at the gate's own 2500 steps with 2 restarts the worst-fail
+median is 0.9759, against the gate's 0.5175 at 3 restarts.** Same estimator, same data,
+same step count. Steps are not the variable, and my C41 mechanism was wrong.
+
+**What the sweep did establish, and it is better than what it was looking for.** Spread
+within a unit across nominally equivalent step counts:
+
+| group | median spread | max spread |
+|---|---|---|
+| worst-fail | **0.1609** | **0.6344** |
+| pass | 0.0029 | 0.0061 |
+
+n1503 alone runs 0.3645 → 0.9989 → 0.3833 → 0.9989 → 0.4587 → 0.4438 across the sweep.
+Passes never move past the fourth decimal.
+
+**Every worst-fail unit reaches ≥0.93 at some step count**, including C13's worst
+(n527, gate 0.1926, reaching 0.9977) and n1503 (gate 0.2746, reaching 0.9989).
+
+So the failure class is not a set of unrecoverable units. **It is a set of units whose
+objective is rugged, where the recovered direction is close to a lottery across
+configurations, and a single fit draws once from it.** The passes sit in a smooth
+landscape where every configuration converges to the same place.
+
+That reframes the 23%: it is not a recovery ceiling, it is a variance property, and the
+gate reported one draw.
+
+**Still unexplained: why did the gate at 3 restarts do worse than 2?** More restarts
+should weakly help, since the fit keeps the best. It is the only named difference left
+and it is untested — one comparison, confounded with whatever else differs between the
+runs. **Do not assert that more restarts hurt.** C43 tests the lottery account directly
+with independent single-restart fits across ten seeds, and asks the question that decides
+whether any of this is repairable: **can held-out R² identify the good draw without
+ground truth?** If it can, "fit several, keep the best test_r2" is a working repair and
+the disagreement flag is explained. If it cannot, the objective cannot distinguish a
+recovered direction from a lost one, which is a much sharper negative about this
+estimator family.
+
+**Script defect, corrected in C43.** This run asked the `Fit` object for `r2`, which does
+not exist — it exposes `train_r2` and `test_r2` — so `getattr(f, "r2", nan)` logged nan
+for every row and the absorption signature was never actually measured. The refutation
+above rests on the alignment column, which is unaffected.
+
+
 ### C41 — Required-N without the C37 filters, plus the control C37 lacked (2026-09-07) — **C37'S ATTRIBUTION WAS WRONG**
 
 18 units, stratified by gate alignment into worst-fail (0.144-0.804), marginal-fail
@@ -1468,6 +1528,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C42) | **MY C41 OVER-OPTIMISATION HYPOTHESIS IS REFUTED.** At the gate's own 2500 steps with 2 restarts the worst failures median 0.9759 against the gate's 0.5175 at 3 restarts. Alignment does not decline with steps at all. Steps are not the variable | notebook C42 |
+| 2026-09-07 (C42) | **The real asymmetry is VARIANCE, and it reframes the 23%.** Across nominally equivalent step counts, failure units spread by a median 0.161 and up to 0.634 while passes spread by 0.003. **Every worst-fail unit reaches >=0.93 at some configuration**, including C13's worst at 0.1926 -> 0.9977. The failure class is not unrecoverable units; it is units with a rugged objective, and the gate reported one draw from a lottery | notebook C42 |
+| 2026-09-07 | **Do not assert that more restarts hurt.** It is the only named difference left between the gate and the cheap config, but it rests on one confounded comparison and is untested. C43 isolates it | notebook C42 |
 | 2026-09-07 (C41) | **CORRECTION TO C37: the recovery is the FIT CONFIG, not resampling.** Decomposed: gate→full (same data, cheaper config) is +0.370 on the worst failures; full→best-subsample is +0.011. C37 changed both at once and credited the wrong one. Ruled out the selection rule too — the gate's direct fit alone gives 0.5175 and its cascade 0.4316, against 0.9668 for the same direct fit at 2 restarts/800 steps | notebook C41 |
 | 2026-09-07 (C41) | **Five of six CATASTROPHIC failures recover under less optimisation, including C13's worst unit (0.1445 → 0.9665).** C37 could not see this: its filter excluded every catastrophic unit. If it holds, **the 23% silent-failure rate is substantially an artifact of over-optimisation** and Paper B's Study 1 chapter changes | notebook C41 |
 | 2026-09-07 | **Any re-run of the n=100 gate at the cheap config must be pre-registered BEFORE it runs.** It would be re-scoring a headline result after seeing a favourable subset, which is the C40 failure mode exactly. File the criterion first | notebook C41 |
