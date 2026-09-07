@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-07d"
+VERSION = "2026-09-07e"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -351,8 +351,46 @@ def encode(tok, model, text):
 
 
 @torch.no_grad()
-def last_token_activation(model, tok, layers, text, layer):
-    """Residual stream at `layer`, last token, for a chat-templated prompt."""
+def _word_positions(tok, ids, word):
+    """Token positions of `word` inside an already-templated id sequence.
+
+    Returns the LAST occurrence, because "Tell me about {word}" puts the word at the end
+    of the user turn and the template tail may repeat tokens. None if not found.
+
+    Subword tokenizers encode a word differently with and without a preceding space, so
+    both are tried. This is why the search is over ids rather than over decoded text.
+    """
+    ids = list(ids)
+    for variant in (" " + word, word):
+        try:
+            want = tok.encode(variant, add_special_tokens=False)
+        except TypeError:
+            want = tok.encode(variant)
+        if not want:
+            continue
+        for start in range(len(ids) - len(want), -1, -1):
+            if ids[start:start + len(want)] == want:
+                return list(range(start, start + len(want)))
+    return None
+
+
+def concept_activation(model, tok, layers, text, layer, word=None, mode="concept"):
+    """Residual stream at `layer` for a chat-templated prompt.
+
+    mode="concept" (default) averages over the token positions of `word` itself.
+    mode="template-tail" takes the last token of the templated sequence, which is what
+    every run up to C31 used.
+
+    C31 is why the default changed. The last token of a prompt built with
+    add_generation_prompt=True is not the concept - it is the template marker
+    (<|im_start|>assistant on Qwen, <start_of_turn>model on Gemma). Enough concept
+    signal survived there on Gemma to steer; on Qwen none did, and the resulting vectors
+    were inert while passing every health check: unit norm, finite, and a first-token
+    P(YES) rising at p=3.7e-09. Reading the word's own positions removes the dependence
+    on the template.
+
+    mode="template-tail" is kept so C15-C24 can be reproduced exactly.
+    """
     enc = encode(tok, model, text)
     grab = {}
     h = layers[layer].register_forward_hook(
@@ -362,7 +400,25 @@ def last_token_activation(model, tok, layers, text, layer):
         model(**enc)
     finally:
         h.remove()
-    return grab["h"][0, -1, :].float().cpu()
+    hs = grab["h"][0]                       # (seq, d_model)
+
+    if mode == "template-tail" or word is None:
+        return hs[-1, :].float().cpu()
+
+    pos = _word_positions(tok, enc["input_ids"][0].tolist(), word)
+    if pos is None:
+        # Never silently fall back: a mis-located word means the vector is measured
+        # somewhere arbitrary, which is exactly the C31 failure.
+        raise SystemExit(
+            f"could not locate '{word}' in the templated prompt. The tokenizer splits it "
+            f"differently than expected; fix _word_positions rather than falling back to "
+            f"the template tail, which is the C31 bug.")
+    return hs[pos, :].mean(0).float().cpu()
+
+
+def last_token_activation(model, tok, layers, text, layer):
+    """Back-compat shim: the pre-C31 template-tail reader."""
+    return concept_activation(model, tok, layers, text, layer, mode="template-tail")
 
 
 def probe_finite(model, tok, layers, layer):
@@ -377,19 +433,34 @@ def probe_finite(model, tok, layers, layer):
     return ok
 
 
-def build_vectors(model, tok, layers, layer, normalise):
-    print(f"building concept vectors at layer {layer} ...", flush=True)
-    acts = torch.stack([last_token_activation(model, tok, layers, f"Tell me about {n}", layer)
+def build_vectors(model, tok, layers, layer, normalise, vector_pos="concept"):
+    print(f"building concept vectors at layer {layer} (read position: {vector_pos}) ...",
+          flush=True)
+    acts = torch.stack([concept_activation(model, tok, layers, f"Tell me about {n}", layer,
+                                           word=n, mode=vector_pos)
                         for n in BASELINE_NOUNS])
     # The residual-stream norm at the read position is what makes alpha interpretable on
     # the unit-vector protocol: alpha=4 on a unit vector is a 4/||h|| perturbation.
     hn = acts.norm(dim=1)
-    print(f"  residual norm at last token: median {hn.median():.1f}, "
+    # One-time proof in the log that the read position is the word and not the template
+    # tail. C31 was invisible for six runs because nothing ever printed where it read.
+    if vector_pos == "concept":
+        probe_word = BASELINE_NOUNS[0]
+        _enc = encode(tok, model, f"Tell me about {probe_word}")
+        _ids = _enc["input_ids"][0].tolist()
+        _pos = _word_positions(tok, _ids, probe_word)
+        print(f"  read position check: '{probe_word}' at token(s) {_pos} of {len(_ids)}; "
+              f"decoded {tok.decode([_ids[i] for i in _pos])!r} "
+              f"(template tail is {tok.decode([_ids[-1]])!r})", flush=True)
+
+    where = "last token" if vector_pos == "template-tail" else "concept token(s)"
+    print(f"  residual norm at {where}: median {hn.median():.1f}, "
           f"min {hn.min():.1f}, max {hn.max():.1f}", flush=True)
     base = acts.mean(0)
     vecs = {}
     for c in CONCEPTS:
-        v = last_token_activation(model, tok, layers, f"Tell me about {c}", layer) - base
+        v = concept_activation(model, tok, layers, f"Tell me about {c}", layer,
+                               word=c, mode=vector_pos) - base
         # The paper does not state whether v is normalised before scaling by alpha. We
         # sweep it; alpha is only comparable to theirs under one of the two conventions.
         vecs[c] = (v / v.norm()) if normalise else v
@@ -406,6 +477,7 @@ def build_vectors(model, tok, layers, layer, normalise):
         "vector_norm_median": float(stacked.norm(dim=1).median()),
         "n_vectors": len(vecs),
         "non_finite_vectors": bad,
+        "vector_read_position": vector_pos,
     }
     if bad:
         raise SystemExit(
@@ -535,6 +607,12 @@ def main():
     ap.add_argument("--layer", type=int, default=-1,
                     help="-1 = 0.60 of depth, matching their L=37 of 62")
     ap.add_argument("--alphas", type=float, nargs="+", default=[0, 2, 4, 8])
+    ap.add_argument("--vector-pos", choices=["concept", "template-tail"],
+                    default="concept",
+                    help="where the concept vector is read. 'concept' averages the "
+                         "word's own token positions (default since C31). "
+                         "'template-tail' is the pre-C31 behaviour, kept only to "
+                         "reproduce runs C15-C24")
     ap.add_argument("--normalise", action="store_true",
                     help="L2-normalise concept vectors before scaling (protocol ambiguity)")
     ap.add_argument("--concepts", type=int, default=len(CONCEPTS))
@@ -619,7 +697,8 @@ def main():
         if not probe_finite(model, tok, layers, a.layer):
             raise SystemExit("activations non-finite even in fp32 - do not trust this model")
 
-    vecs, run_scalars = build_vectors(model, tok, layers, a.layer, a.normalise)
+    vecs, run_scalars = build_vectors(model, tok, layers, a.layer, a.normalise,
+                                      vector_pos=a.vector_pos)
 
     # Run-level provenance sidecar. Per-trial rows go to the JSONL; anything measured
     # once per run goes here, or it is lost with the session (C22, section 8).

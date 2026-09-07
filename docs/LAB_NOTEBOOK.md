@@ -931,6 +931,7 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 | **VECTOR EXTRACTION FIXED (`2026-09-07e`); `--vector-pos concept` is now the default.** The vector is read by averaging the concept word's own token positions, located by searching its token ids in the templated sequence (both space-prefixed and bare variants tried, last occurrence taken). `--vector-pos template-tail` reproduces C15-C24 exactly. **A word that cannot be located raises rather than falling back to the tail** — a silent fallback is the C31 bug. The sidecar now records `vector_read_position`, and the log prints where it read, because C31 survived six runs purely because nothing ever said | section 8; A-11 |
 | 2026-09-07 (C31) | **CORRECTION: "THE INVARIANT HYPOTHESIS IS DEAD" IS WITHDRAWN. It was never tested.** That row was written on C27-29, which measured Qwen with vectors that C31 now shows carry no concept content at all (1/30 concept-in-text at 112% of the residual norm, identical to the alpha=0 baseline). A null measured through a dead instrument is not a null. **The invariant — whether alpha* tracks the residual-stream norm across models — is UNTESTED, not refuted**, and stays open until a model other than Gemma is measured with vectors that pass a steering control | notebook C31 |
 | 2026-09-07 (C31) | **Qwen is OUT of Paper A entirely.** C27, C28, C29 and C30's steering half all rest on inert vectors. Two things survive because neither depends on them: the **331x residual-norm measurement** (taken pre-injection) and the **30/30 categorical refusal** at alpha=0 (clean prompts, no injection) | notebook C31 |
 | 2026-09-07 (C31) | **NEW PORTABLE FINDING: difference-of-means concept vectors read at the chat-template tail can silently carry nothing.** `last_token_activation` takes the last token of a prompt templated with `add_generation_prompt=True` — the `<|im_start|>assistant` marker, not the concept word. Enough survives on Gemma to steer; nothing does on Qwen. **The dead vectors pass every health check normally reported** — unit norm, zero non-finite, and a monotone P(YES) rise at p=3.7e-09 on 29/30 concepts. Only a steering positive control detects it, and nobody in this literature runs one | notebook C31 |
@@ -1603,6 +1604,28 @@ for the analysis is in the `.jsonl` itself. But the archived sidecar is now name
 
 **Fix before the next paired run:** suffix the sidecar the same way the `.jsonl` is
 suffixed, or pass a distinct `--out` per condition.
+
+### The vector was read at the template tail, and nothing said so (C31, 7 Sep)
+`last_token_activation` took `h[0, -1, :]` from a prompt built with
+`add_generation_prompt=True`. That last token is the template marker, not the concept.
+Demonstrated locally on GPT-2's tokenizer with a simulated template: the old code reads
+`'
+'` at position 9; the new code reads `' elephant'` at position 5.
+
+Two things made it survive six runs (C15-C24 on Gemma, C27-C31 on Qwen):
+
+1. **Nothing printed the read position.** The log said `building concept vectors at
+   layer 37` and never said where in the sequence.
+2. **Dead vectors pass every check that was printed** — unit norm, zero non-finite, 30
+   distinct directions, and a first-token P(YES) rising at p=3.7e-09 on 29/30 concepts.
+
+Fixed in `2026-09-07e`. Two rules now enforced in code: **a word that cannot be located
+raises instead of falling back** to the tail, and the run **prints the decoded read
+position** for a probe word so the log proves it. `--vector-pos template-tail` is kept
+so the pre-C31 runs remain reproducible.
+
+Gemma's results survive because its vectors demonstrably steer (10/30 concept-in-text),
+but they were built the same way and may improve on a refit.
 
 ### `dtype=` and `bnb_4bit_compute_dtype` are different knobs (C26, 7 Sep)
 The second Qwen attempt failed with the *same* CPU-dispatch error as C25 even though
