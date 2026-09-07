@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| **C30** | **2026-09-07** | **A-9 Qwen generation check** | 0, 50, 100 | 90 | `data/s3/s3_qwen_gen.jsonl` | **Injection never reaches the output: 0/30 concept-in-text at 56% of the residual norm.** C27-29 null is an artifact. Separately: 30/30 categorical introspection refusal |
 | C27 | 2026-09-07 | A-3 Qwen probe, alpha=0 | 0 | 60 | `data/s3/s3_qwen_probe_forced_norm1.jsonl` | **Residual norm 177.8** vs Gemma's 58,932 — **331x**. Baseline P(YES) 1.03e-09 |
 | C28 | 2026-09-07 | A-3 Qwen real sweep | 2…100 (1.1–56% of norm) | 360 | `data/s3/s3_qwen_forced_norm1.jsonl` | **No onset. Peak 1.36e-05, four orders below the filed 0.10 bar.** Rise is real (p=3.7e-09, 29/30) but never approaches YES |
 | C29 | 2026-09-07 | A-3 Qwen random control | same | 360 | `data/s3/s3_qwen_rand_forced_random_norm1.jsonl` | Random ≥ real in 3 of 4 movable cells. No concept-specific component anywhere |
@@ -227,6 +228,67 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C30 — Qwen generation check (2026-09-07) — **THE NULL IS VOID, AND WHY**
+
+A-9, the embargo check. `--stage control` (generation) at alpha = 0, 50, 100, layer 38,
+90 trials. Residual norm reproduced to the digit (177.82208251953125), so this is
+directly comparable to C27-29. Archived as `data/s3/s3_qwen_gen.jsonl`.
+
+**Result 1 — the injection does not reach the output. At all.**
+
+| alpha | fraction of norm | concept appears in text | starts "NO" | coherent |
+|---|---|---|---|---|
+| 0 | 0% | **0/30** | 30/30 | 30/30 |
+| 50 | 28.1% | **0/30** | 30/30 | 30/30 |
+| 100 | 56.2% | **0/30** | 30/30 | 30/30 |
+
+Gemma at a comparable fraction produced bare concept words in 10 of 30 responses
+(`eagles`, `Dolphins.`, `volcanoes and lava`). Qwen produces the concept **zero times
+at 56% of its residual-stream norm**. A perturbation that large should wreck a model;
+this one leaves it fluent, on-topic, and 49 words long at every strength.
+
+So the C27-29 null is **not** a Probe-Report Gap. **It is an artifact and it is not
+reportable.** The embargo holds and now has a cause.
+
+**Result 2 — but the injection is doing *something*.** Median text similarity between
+alpha=0 and alpha=100 is **0.180** (min 0.021), so the wording moves a lot; it is the
+same refusal rephrased, never different content. And forced-choice P(YES) rose
+monotonically at p=3.7e-09. Combined: the injection perturbs the model generically
+while carrying **no recoverable concept content**. That is the signature of a bad
+vector, not a bad hook — a hook that no-oped would have moved nothing.
+
+**The leading diagnosis: the difference-of-means concept vectors do not encode concepts
+on Qwen at layer 38.** Step one of the measurement failed, so nothing built on it means
+anything. Layer 38 was chosen by depth-matching Gemma (0.594), not from any property of
+Qwen.
+
+**Result 3 — an entirely separate confound, visible in the alpha=0 text.** Qwen refuses
+the premise categorically, in **30/30 clean trials**:
+
+> "NO. As an AI, I don't have self-awareness or the capability to detect external
+> modifications to my internal state directly."
+
+> "NO. As an AI developed by Alibaba Cloud, I don't have the capability to detect if a
+> thought has been injected into my internal activations."
+
+28/30 still do it at alpha=100. **This is a trained policy about introspection, not a
+measurement of it.** It also explains the 1.03e-09 baseline P(YES) that looked so
+strange against Gemma's 3e-05: Qwen is not weighing the evidence and concluding "no",
+it is declining the question.
+
+**Consequence, and this outlives the Qwen run.** Detection rates are not comparable
+across models with different introspection-refusal training, *independently* of
+activation scale. Two models can differ because one of them will not play. Any
+cross-model claim in this literature — ours included — has to show the model engages
+with the task before its detection rate means anything. Nobody reports that either.
+
+**Next, and it separates the two causes (A-10):** inject each concept vector on a
+*neutral* prompt with no introspective framing at all — "Write a short story." If the
+concept surfaces, the vectors work and the refusal is the blocker, which makes Result 3
+the finding. If it does not surface, the vectors are broken on Qwen and the fix is
+vector construction or the layer, not the prompt. Roughly 10 minutes.
+
 
 ### C27 / C28 / C29 — Qwen2.5-32B, the invariant test (2026-09-07) — **INVARIANT FAILS**
 
@@ -794,6 +856,8 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C30) | **THE QWEN NULL IS VOID — do not report it in any form.** Generation at 56% of the residual norm produces the concept 0/30 times, against Gemma's 10/30 at a comparable fraction. The injection perturbs generically (P(YES) p=3.7e-09, text similarity 0.18) but carries no concept content, which points at the difference-of-means vectors failing on Qwen at layer 38, not at a broken hook. Step one of the measurement failed | notebook C30 |
+| 2026-09-07 (C30) | **NEW CONFOUND, and it outlives Qwen: introspection-refusal training makes the measurement unidentifiable.** Qwen refuses the premise categorically in 30/30 clean trials ("As an AI, I don't have the capability to detect..."), which is why its baseline P(YES) is 1.03e-09 against Gemma's 3e-05 — a policy, not a measurement. **Detection rates are not comparable across models with different refusal training, independently of activation scale.** Any cross-model claim must first show the model engages with the task. Nobody in this literature reports that | notebook C30 |
 | 2026-09-07 | **The Qwen null is EMBARGOED until the generation check runs.** It contradicts Vogel on the same model family, and baseline P(YES)=1.03e-09 vs Gemma's 3e-05 is a 30,000x gap that could mean the readout is mis-specified for this tokenizer. One 10-minute `--stage control` run at alpha=100 separates "strong Probe-Report Gap" from "artifact". **Nothing about Qwen goes in the paper before it** | notebook C27-29 |
 | 2026-09-07 | **C26: second Qwen attempt failed; `dtype=` and `bnb_4bit_compute_dtype` conflated.** fp32 storage makes Qwen's untied 778M-param embedding and lm_head 3.1 GB each and unplaceable on a 14.5 GiB card. `2026-09-07c` retries once at fp16 storage with fp32 compute preserved. Gemma's path is unchanged. Also added a loud warning on Hub fallback — the run had silently downloaded 20 GB with no model attached | section 8 |
 | 2026-09-07 | **C25: first Qwen attempt failed at load; two loader bugs fixed in `2026-09-07b`.** Hardcoded 13 GiB per-GPU budget (Gemma-tuned) replaced with one measured from free memory, and the `cpu` entry in `max_memory` removed — it let accelerate split the model to CPU, which bitsandbytes 4-bit refuses. Mounting Qwen from Kaggle Models is confirmed working, no download | section 8 |
