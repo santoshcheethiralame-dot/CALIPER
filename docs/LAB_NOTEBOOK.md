@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| **C32** | **2026-09-07** | **A-11 steer control, vectors refit at the concept** | 0…200 | 150 | `data/s3/s3_qwen_refit_steer_norm1.jsonl` | **FIXED: 1/30 → 7/30 → 14/30 monotone, against C31's flat 1/30.** Residual norm at the concept token is **261.5**, not the tail's 177.8 |
 | **C31** | **2026-09-07** | **A-10 Qwen steering positive control** | 0…200 (0–112% of norm) | 150 | `data/s3/s3_qwen_steer_norm1.jsonl` | **Concept-in-text 1/30 at alpha=200, identical to the 1/30 at alpha=0. The vectors carry no content.** Cause: the vector is read at the chat-template tail, not the concept word |
 | **C30** | **2026-09-07** | **A-9 Qwen generation check** | 0, 50, 100 | 90 | `data/s3/s3_qwen_gen.jsonl` | **Injection never reaches the output: 0/30 concept-in-text at 56% of the residual norm.** C27-29 null is an artifact. Separately: 30/30 categorical introspection refusal |
 | C27 | 2026-09-07 | A-3 Qwen probe, alpha=0 | 0 | 60 | `data/s3/s3_qwen_probe_forced_norm1.jsonl` | **Residual norm 177.8** vs Gemma's 58,932 — **331x**. Baseline P(YES) 1.03e-09 |
@@ -229,6 +230,57 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C32 — Qwen steer control, vectors refit at the concept position (2026-09-07) — **FIXED**
+
+A-11, `2026-09-07e`, `vector_read_position: concept`. Identical to C31 in every other
+respect — same alphas, same prompt, same span, same model, same layer — so the two
+isolate the read position and nothing else. 150 trials.
+`data/s3/s3_qwen_refit_steer_norm1.jsonl`.
+
+| alpha | fraction of norm | **C32 concept in text** | C31 (template tail) |
+|---|---|---|---|
+| 0 | 0% | 1/30 | 1/30 |
+| 25 | 10% | 1/30 | 1/30 |
+| 50 | 19% | 2/30 | 0/30 |
+| 100 | 38% | **7/30** | 2/30 |
+| 200 | 76% | **14/30** | 1/30 |
+
+A monotone dose-response where C31 was flat at the 1/30 baseline. **The vectors work.**
+
+The text is unambiguous at alpha=200: elephant gives *"in the dense forests of the Congo,
+there lived an elephant named Mala"*, spider *"a tiny spider named Arna"*, dolphin
+*"a curious dolphin named Echo"* in *"a crystal-clear sea"*, volcano *"a dormant volcano
+named Mount Kila"*. At alpha=100 dolphin already gives *"a young dolphin named Echo"*.
+
+**14/30 undercounts the real steering rate,** because `identified` requires the literal
+word. Uncounted hits in the same rows: eagle produces *"a majestic bird named Aeron,
+with wingspan spanning over five..."*, volcano produces *"Mount Elysia"*, desert
+produces *"where the sun scorifies the sands"*. A semantic scorer would put this well
+above 14/30, and that gap should be stated wherever the number is quoted.
+
+**alpha=200 is past the usable window.** Degraded tokens appear — "untternal",
+"exolation", "scorifies" — so 76% of the residual norm is damaging the model. The clean
+operating point here is alpha=100, 38% of the norm.
+
+**The residual norm changed, and this propagates.** Measured at the concept token it is
+**261.5**; at the template tail it was 177.8. Every "fraction of the residual norm"
+figure in the Qwen tables was computed against the wrong denominator. Gemma's 58,932 was
+also a tail measurement, so **the 331x ratio needs recomputing at the concept position
+before it is quoted again** — it is a like-for-like comparison as it stands, but it is
+not the number the paper should report.
+
+**What this unblocks and what it breaks**
+
+- **Qwen is back in scope.** C27-C30 can be re-run properly, and the invariant test —
+  whether alpha* tracks the residual norm across models — is live again rather than
+  untestable.
+- **Paper A's Gemma results were built the same broken way.** C15-C24, including the
+  A1 headline at alpha=8192/16384, all used template-tail vectors. They steered (10/30
+  concept-in-text) so they are not void the way Qwen's were, but they were measured with
+  a degraded instrument. **The onset, the real-vs-random comparison, and the
+  content-free share can all move on a refit.** See the decision in section 6b.
+
 
 ### C31 — Qwen steering positive control (2026-09-07) — **THE VECTORS ARE DEAD**
 
@@ -836,6 +888,11 @@ direction at a time. It is the November go/no-go.
 > vectors demonstrably steer (10/30 concept-in-text at a comparable strength); every
 > Qwen result is void because its vectors do not (1/30, the same as no injection).
 > **Run the steering control before believing any injection number, including your own.**
+>
+> **Confirmed 7 Sep (C32).** Refitting the vectors at the concept position turned that
+> flat 1/30 into a monotone 1 → 7 → 14 of 30, with the read position the only thing
+> changed. The control both detected the fault and verified the repair, which is the
+> whole argument for running one.
 
 9. **The reported detection rate is a property of the readout**, swinging 50% →
    7% over strengths where the first-token signal is flat. (C17)
@@ -931,6 +988,9 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C32) | **THE FIX IS CONFIRMED AND PAPER A NOW NEEDS A GEMMA REFIT BEFORE IT SHIPS.** Refit vectors give a monotone 1→7→14 of 30 against C31's flat 1/30, isolating the read position as the only change. **C15-C24 — every Gemma run, including the A1 headline at alpha=8192/16384 — used template-tail vectors.** They are not void (Gemma's steered, 10/30) but they were measured with a degraded instrument, and the onset, the real-vs-random comparison and the content-free share can all move. **Re-run the Gemma forced-choice arms at `--vector-pos concept` before the preprint.** Roughly 2 GPU-hours | notebook C32 |
+| 2026-09-07 (C32) | **The 331x residual-norm ratio must be recomputed at the concept position before it is quoted again.** Qwen's norm is 261.5 at the concept token against 177.8 at the tail; Gemma's 58,932 was also a tail measurement. The ratio is like-for-like as it stands, but the tail is not the position the paper reads vectors from any more, so it is not the number to report | notebook C32 |
+| 2026-09-07 (C32) | **Qwen is back in scope and the invariant test is live again.** C27-C30 measured a dead instrument and can now be re-run properly. Whether alpha* tracks the residual norm across models is answerable again — the question that decides whether Paper A gets a calibration rule or stays three findings | notebook C32 |
 | 2026-09-07 | **VECTOR EXTRACTION FIXED (`2026-09-07e`); `--vector-pos concept` is now the default.** The vector is read by averaging the concept word's own token positions, located by searching its token ids in the templated sequence (both space-prefixed and bare variants tried, last occurrence taken). `--vector-pos template-tail` reproduces C15-C24 exactly. **A word that cannot be located raises rather than falling back to the tail** — a silent fallback is the C31 bug. The sidecar now records `vector_read_position`, and the log prints where it read, because C31 survived six runs purely because nothing ever said | section 8; A-11 |
 | 2026-09-07 (C31) | **CORRECTION: "THE INVARIANT HYPOTHESIS IS DEAD" IS WITHDRAWN. It was never tested.** That row was written on C27-29, which measured Qwen with vectors that C31 now shows carry no concept content at all (1/30 concept-in-text at 112% of the residual norm, identical to the alpha=0 baseline). A null measured through a dead instrument is not a null. **The invariant — whether alpha* tracks the residual-stream norm across models — is UNTESTED, not refuted**, and stays open until a model other than Gemma is measured with vectors that pass a steering control | notebook C31 |
 | 2026-09-07 (C31) | **Qwen is OUT of Paper A entirely.** C27, C28, C29 and C30's steering half all rest on inert vectors. Two things survive because neither depends on them: the **331x residual-norm measurement** (taken pre-injection) and the **30/30 categorical refusal** at alpha=0 (clean prompts, no injection) | notebook C31 |
