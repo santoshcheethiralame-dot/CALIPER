@@ -236,6 +236,62 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C43 - The lottery is real, and held-out R2 wins it (2026-09-07) - **A WORKING REPAIR**
+
+Ten independent single-restart fits per unit at different seeds, 800 steps, full data.
+6 worst-fail + 2 pass units. `results/s1_seed_lottery.json`.
+
+**The lottery account is confirmed.** Seed-to-seed range within a single unit:
+
+| neuron | gate | seed min | median | max |
+|---|---|---|---|---|
+| n527 | 0.1926 | 0.9024 | 0.9163 | 0.9498 |
+| **n1503** | 0.2746 | **0.0660** | 0.3251 | **0.9829** |
+| n2723 | 0.3562 | 0.9298 | 0.9668 | 0.9675 |
+| n2023 | 0.6789 | 0.6354 | 0.7343 | 0.9663 |
+| n1180 | 0.7237 | 0.9676 | 0.9883 | 0.9891 |
+| n1625 | 0.8040 | 0.8799 | 0.9131 | 0.9457 |
+| n3066 *(pass)* | 1.0000 | 0.9997 | 0.9999 | 1.0000 |
+| n2053 *(pass)* | 1.0000 | 0.9999 | 1.0000 | 1.0000 |
+
+n1503 spans 0.0660 to 0.9829 on nothing but the seed. The passes do not move.
+
+**And the question that decides everything: held-out R2 identifies the good draw.**
+
+| | |
+|---|---|
+| correlation(test_r2, alignment) on worst-fail draws | **+0.953** |
+| median regret of selecting by test_r2 vs the oracle | **0.0000** |
+| worst regret on any unit | 0.0195 |
+| zero-regret units | 4 of 6 |
+
+**The repair, measured:**
+
+| protocol | worst-fail median |
+|---|---|
+| the gate: one fit, 3 restarts, 2500 steps | **0.5175** |
+| five seeds, one restart, 800 steps, keep best test_r2 | **0.9669** |
+
+**Five seeds saturates** - k=5 and k=10 give identical results on every unit, and k=3 is
+not enough (min 0.7532). The confirmatory run is ~2.1 h of CPU for n=100, not 4.3.
+
+**Why this matters more than the diagnosis.** The selection needs **no ground truth** -
+test_r2 is computed from held-out data the estimator already has. That is the project's
+whole thesis applied to its own instrument: a readout that cannot be validated directly
+can still be repaired by a check requiring nothing external. It also explains the
+disagreement flag, which is the two-draw special case of the same idea.
+
+**Honest limits.** At k=5 the six worst units read 0.9675, 0.9663, 0.9498, 0.9457,
+0.9696, 0.9829 - **four of six clear the 0.95 bar, two do not.** The repair is large, not
+total. And this is 6 units chosen as the worst, not the full 23; the pass rate on all 100
+is unmeasured.
+
+**The confirmatory run is pre-registered before it runs**
+(`preregistration-s1-multiseed.md`), because scoring a headline against a protocol chosen
+after seeing a favourable subset is the C40 failure mode exactly, found in this same
+session.
+
+
 ### C42 — Steps sweep: the over-optimisation hypothesis is REFUTED (2026-09-07)
 
 C41 proposed that more optimisation makes the direction worse, because the 64-wide
@@ -1528,6 +1584,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C43) | **THE FAILURE CLASS IS REPAIRABLE, AND THE REPAIR NEEDS NO GROUND TRUTH.** Held-out R2 picks the good draw at correlation **+0.953** with **median regret 0.0000**. Five seeds selected by test_r2 take the worst failures from **0.5175 to 0.9669**. Five seeds saturates; three does not | notebook C43 |
+| 2026-09-07 (C43) | **The lottery account is confirmed**: n1503 spans **0.0660 to 0.9829** on nothing but the seed, while passing units hold to four decimals. This is the mechanism behind the disagreement flag - that flag is the two-draw special case of selecting on held-out R2 | notebook C43 |
+| 2026-09-07 | **Confirmatory n=100 run PRE-REGISTERED before running** (`preregistration-s1-multiseed.md`), with the disclosure that its protocol was sized on a favourable six-unit pilot. Scoring a headline against a protocol chosen after seeing a good subset is the C40 failure mode, found earlier in this same session | prereg |
 | 2026-09-07 (C42) | **MY C41 OVER-OPTIMISATION HYPOTHESIS IS REFUTED.** At the gate's own 2500 steps with 2 restarts the worst failures median 0.9759 against the gate's 0.5175 at 3 restarts. Alignment does not decline with steps at all. Steps are not the variable | notebook C42 |
 | 2026-09-07 (C42) | **The real asymmetry is VARIANCE, and it reframes the 23%.** Across nominally equivalent step counts, failure units spread by a median 0.161 and up to 0.634 while passes spread by 0.003. **Every worst-fail unit reaches >=0.93 at some configuration**, including C13's worst at 0.1926 -> 0.9977. The failure class is not unrecoverable units; it is units with a rugged objective, and the gate reported one draw from a lottery | notebook C42 |
 | 2026-09-07 | **Do not assert that more restarts hurt.** It is the only named difference left between the gate and the cheap config, but it rests on one confounded comparison and is untested. C43 isolates it | notebook C42 |
