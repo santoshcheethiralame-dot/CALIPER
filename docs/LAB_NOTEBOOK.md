@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| **C36** | **2026-09-07** | **S1-3 failure-class characterisation (local)** | — | 100 units | `results/s1_failure_class.json` | **Failures are sparse, heavy-tailed units**: active 6.8% vs 20.5%, kurtosis 87 vs 29. **z_mean predicts at AUC 0.877 with no fit at all** — a pre-fit screen |
 | **C35** | **2026-09-07** | **S1-1 flag ROC (local, no GPU)** | — | 100 units rescored | `results/s1_flag_roc.json` | **Held-out R² beats method disagreement: AUC 0.906 vs 0.802**, and discards 5 good units against 21 at the same 73% catch. The free flag is the better flag |
 | C33 | 2026-09-07 | A-13 Qwen forced, refit, real | 0…105 (0–40% of norm) | 420 | `data/s3/q_refit_forced_norm1.jsonl` | Curve climbs 1.0e-09 → **6.8e-02**, six orders. **Short of the 0.10 bar by one grid step** |
 | C34 | 2026-09-07 | A-13 Qwen forced, refit, random | same | 420 | `data/s3/q_refit_forced_random_norm1.jsonl` | **Real > random at 12/12 comparisons** — never true pre-refit. Significant only at the low end, where magnitudes are ~1e-09 |
@@ -234,6 +235,60 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C36 — S1-3, what the 23% failure class actually is (2026-09-07)
+
+`experiments/s1_failure_class.py`, local CPU. Neuron ids taken from the C13 gate output
+so the sample matches by construction. Activation statistics computed for all 100 units
+over the same 20k-token corpus, then scored against the gate's own pass rule.
+`results/s1_failure_class.json`.
+
+**Every activation statistic predicts failure**, scored under the correct gate rule
+(23 failures):
+
+| statistic | AUC | mean on failures | mean on passes | needs a fit? |
+|---|---|---|---|---|
+| held-out R² | **0.915** | — | — | yes |
+| **z_mean** | **0.877** | −1.20 | −0.65 | **no** |
+| response kurtosis | 0.863 | 87.4 | 28.9 | **no** |
+| w_norm | 0.857 | 3.96 | 3.27 | **no** |
+| frac_active | 0.825 | 6.8% | 20.5% | **no** |
+| method disagreement | 0.810 | — | — | **two** |
+
+**The failure class has a coherent identity: sparse, heavy-tailed units.** A unit the
+estimator fails on is active on 6.8% of positions against 20.5% for one it succeeds on,
+sits twice as far below GELU's zero (z_mean −1.20 vs −0.65), and has a response
+kurtosis three times higher (87 vs 29). That is one description, not four: a unit that
+fires rarely and, when it does, fires hard.
+
+**The practical result is a pre-fit screen.** z_mean needs no fit at all — it is a
+property of the unit and the corpus, one matmul. At AUC 0.877 it is close to held-out
+R²'s 0.915 while being available **before** committing 64 seconds to fitting:
+
+| catch | cost | effect |
+|---|---|---|
+| 12/23 (52%) | 5/77 good units (6%) | skip 17 fits of 100 |
+| 17/23 (74%) | 8/77 (10%) | skip 25 fits of 100 |
+| 19/23 (83%) | 15/77 (19%) | skip 34 fits of 100 |
+
+Combining z_mean with R² gives AUC 0.918 against R²'s 0.915 — no meaningful gain, and
+the two are only weakly correlated (r=+0.26), so they are not redundant so much as
+z_mean is simply weaker. **The honest recommendation is a two-stage rule: screen on
+z_mean before fitting, then flag on held-out R² after.**
+
+**C7's specific claim does not survive.** It reported failures sitting at z_mean −1.3 to
+−1.9, from 8 neurons. Across 100: only **6 of 23 failures** fall in that band, and
+**4 of 77 passes** do too. The median failure is −1.17, not −1.5. The *direction* is
+right and now well supported at AUC 0.877; the *band* was an artifact of a tiny sample.
+Do not quote it.
+
+**A tension with C14 worth chasing.** C14 put required-N at ~200 informative events for
+K=1. Failures here average **1,353** events and passes **4,097** — both far above 200,
+so raw event count is not the binding constraint on real units. C14 measured that on
+synthetic data with well-behaved responses; at kurtosis 87 the information per event is
+evidently much lower. **The required-N table may not transfer to real units, and that
+should be checked before it is published as guidance.**
+
+
 ### C35 — S1-1, is the disagreement flag a usable decision rule? (2026-09-07) — **IT IS DOMINATED**
 
 Re-analysis of `results/e01_gate.jsonl` (C13). No compute, no GPU.
@@ -278,11 +333,14 @@ silent failures.** But the specific instrument has to change, and the honest hea
 now "the fit's own held-out R² predicts its own silent failures at AUC 0.91", which is a
 simpler and more portable claim than one requiring two estimators.
 
-**Minor discrepancy to resolve.** The C13 summary records the split as 87% vs 55% pass
-either side of disagreement 0.05. Recomputed here it is **87% vs 58%** (69 units vs 31,
-and the 31 matches `frac_methods_disagree_gt_0.05 = 0.31` exactly). The unit counts
-agree, so the difference is in the pass criterion, not the split. Worth pinning before
-either number is published.
+**CORRECTION 7 Sep, same day: the discrepancy was mine, and the AUCs above are
+slightly wrong.** The gate's pass rule is `(align > 0.95) AND (k2_gain < 0.01)` — two
+clauses, not one. This analysis used alignment alone, giving 22 failures where the gate
+has **23**; unit n1937 aligns at 0.9545 but has k2_gain 0.0252 and fails on the second
+clause. Under the correct labels: **held-out R² AUC 0.915** (reported 0.906),
+**disagreement 0.810** (reported 0.802), k2_gain 0.396. The conclusion is unchanged —
+R² still dominates disagreement — and **C13's 87%/55% was right all along**; it
+reproduces exactly under the gate's own rule. Corrected figures are in C36.
 
 **Caveats.** n=100 from one model, one layer. Thresholds are chosen on the same data
 they are evaluated on, so the operating points are optimistic; a held-out set or
@@ -1112,6 +1170,10 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C36) | **The silent-failure flag becomes a TWO-STAGE rule, and the first stage needs no fit.** Failures are sparse, heavy-tailed units — active 6.8% of positions vs 20.5%, response kurtosis 87 vs 29, z_mean −1.20 vs −0.65. **z_mean predicts at AUC 0.877 before any fitting**, against held-out R²'s 0.915 after. Screen on z_mean (skip ~25 fits of 100 to catch 74% of failures), then flag on R². Combining them adds nothing (0.918) | notebook C36 |
+| 2026-09-07 (C36) | **C7's "failures sit at z_mean −1.3 to −1.9" is withdrawn as a band.** From 8 neurons; across 100 only 6/23 failures fall in it and 4/77 passes do too, median failure −1.17. The direction is right and now well supported; the band was a small-sample artifact. Do not quote it | notebook C36 |
+| 2026-09-07 (C36) | **C14's ~200-event required-N may not transfer to real units.** Failures average 1,353 informative events and passes 4,097 — both far above 200 — so raw event count is not what binds on real neurons. C14 measured it synthetically; at kurtosis 87 the information per event is far lower. **Check before publishing the required-N table as guidance** | notebook C36 |
+| 2026-09-07 | **CORRECTION to the C35 row below: its labels were wrong, its conclusion was not.** The gate's rule is `(align > 0.95) AND (k2_gain < 0.01)`; C35 used alignment alone, giving 22 failures instead of 23. Corrected AUCs: R² 0.915, disagreement 0.810. **C13's 87%/55% was correct all along** — the "discrepancy" I logged was my own mislabelling and is withdrawn | notebook C35; C36 |
 | 2026-09-07 (C35) | **PAPER B'S DELIVERABLE CHANGES INSTRUMENT: held-out R² replaces method disagreement as the ground-truth-free flag.** AUC 0.906 vs 0.802, and at 73% catch it discards 5 good units against disagreement's 21. **The better flag is also the free one** — R² is already computed by the fit, while disagreement needs both estimation routes and is the reason the dual protocol costs ~2x per neuron. The substantive claim survives intact; only the instrument changes, and the new headline is simpler: *a fit's own held-out R² predicts its own silent failures at AUC 0.91* | notebook C35 |
 | 2026-09-07 | **Thresholds in C35 are fitted and evaluated on the same 100 units, so the operating points are optimistic.** The AUCs are the robust part. **Cross-validate or hold out before any threshold is published**; quote AUC in the meantime | notebook C35 |
 | 2026-09-07 | **Discrepancy to resolve before either number is published:** C13's summary records the disagreement split as 87%/55%, recomputation gives 87%/58%. Unit counts agree exactly (69/31, matching the recorded 0.31), so the difference is in the pass criterion rather than the split | notebook C35 |
