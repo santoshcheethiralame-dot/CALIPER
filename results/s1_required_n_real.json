@@ -1,0 +1,522 @@
+{
+  "targets": [
+    50,
+    100,
+    200,
+    400,
+    800,
+    1600
+  ],
+  "fit": {
+    "k": 1,
+    "n_restarts": 2,
+    "steps": 800,
+    "seed": 0
+  },
+  "rows": [
+    {
+      "neuron": 808,
+      "passed": true,
+      "events": 50,
+      "n_rows": 196,
+      "alignment": 0.2166
+    },
+    {
+      "neuron": 808,
+      "passed": true,
+      "events": 100,
+      "n_rows": 392,
+      "alignment": 0.3939
+    },
+    {
+      "neuron": 808,
+      "passed": true,
+      "events": 200,
+      "n_rows": 783,
+      "alignment": 0.5404
+    },
+    {
+      "neuron": 808,
+      "passed": true,
+      "events": 400,
+      "n_rows": 1567,
+      "alignment": 0.9807
+    },
+    {
+      "neuron": 808,
+      "passed": true,
+      "events": 800,
+      "n_rows": 3134,
+      "alignment": 0.9914
+    },
+    {
+      "neuron": 808,
+      "passed": true,
+      "events": 1600,
+      "n_rows": 6267,
+      "alignment": 0.9936
+    },
+    {
+      "neuron": 66,
+      "passed": true,
+      "events": 50,
+      "n_rows": 148,
+      "alignment": 0.2967
+    },
+    {
+      "neuron": 66,
+      "passed": true,
+      "events": 100,
+      "n_rows": 296,
+      "alignment": 0.2759
+    },
+    {
+      "neuron": 66,
+      "passed": true,
+      "events": 200,
+      "n_rows": 593,
+      "alignment": 0.3892
+    },
+    {
+      "neuron": 66,
+      "passed": true,
+      "events": 400,
+      "n_rows": 1186,
+      "alignment": 0.5049
+    },
+    {
+      "neuron": 66,
+      "passed": true,
+      "events": 800,
+      "n_rows": 2371,
+      "alignment": 0.9905
+    },
+    {
+      "neuron": 66,
+      "passed": true,
+      "events": 1600,
+      "n_rows": 4743,
+      "alignment": 0.9953
+    },
+    {
+      "neuron": 2199,
+      "passed": true,
+      "events": 50,
+      "n_rows": 301,
+      "alignment": 0.0962
+    },
+    {
+      "neuron": 2199,
+      "passed": true,
+      "events": 100,
+      "n_rows": 601,
+      "alignment": 0.1496
+    },
+    {
+      "neuron": 2199,
+      "passed": true,
+      "events": 200,
+      "n_rows": 1202,
+      "alignment": 0.2239
+    },
+    {
+      "neuron": 2199,
+      "passed": true,
+      "events": 400,
+      "n_rows": 2405,
+      "alignment": 0.9938
+    },
+    {
+      "neuron": 2199,
+      "passed": true,
+      "events": 800,
+      "n_rows": 4809,
+      "alignment": 0.9973
+    },
+    {
+      "neuron": 2199,
+      "passed": true,
+      "events": 1600,
+      "n_rows": 9618,
+      "alignment": 0.9959
+    },
+    {
+      "neuron": 1598,
+      "passed": true,
+      "events": 50,
+      "n_rows": 469,
+      "alignment": 0.1583
+    },
+    {
+      "neuron": 1598,
+      "passed": true,
+      "events": 100,
+      "n_rows": 939,
+      "alignment": 0.0214
+    },
+    {
+      "neuron": 1598,
+      "passed": true,
+      "events": 200,
+      "n_rows": 1877,
+      "alignment": 0.2434
+    },
+    {
+      "neuron": 1598,
+      "passed": true,
+      "events": 400,
+      "n_rows": 3754,
+      "alignment": 0.9968
+    },
+    {
+      "neuron": 1598,
+      "passed": true,
+      "events": 800,
+      "n_rows": 7508,
+      "alignment": 0.9932
+    },
+    {
+      "neuron": 1598,
+      "passed": true,
+      "events": 1600,
+      "n_rows": 15016,
+      "alignment": 0.9944
+    },
+    {
+      "neuron": 2295,
+      "passed": true,
+      "events": 50,
+      "n_rows": 117,
+      "alignment": 0.2245
+    },
+    {
+      "neuron": 2295,
+      "passed": true,
+      "events": 100,
+      "n_rows": 233,
+      "alignment": 0.3
+    },
+    {
+      "neuron": 2295,
+      "passed": true,
+      "events": 200,
+      "n_rows": 467,
+      "alignment": 0.3004
+    },
+    {
+      "neuron": 2295,
+      "passed": true,
+      "events": 400,
+      "n_rows": 933,
+      "alignment": 0.7124
+    },
+    {
+      "neuron": 2295,
+      "passed": true,
+      "events": 800,
+      "n_rows": 1866,
+      "alignment": 0.9837
+    },
+    {
+      "neuron": 2295,
+      "passed": true,
+      "events": 1600,
+      "n_rows": 3733,
+      "alignment": 0.9991
+    },
+    {
+      "neuron": 2425,
+      "passed": true,
+      "events": 50,
+      "n_rows": 140,
+      "alignment": 0.2593
+    },
+    {
+      "neuron": 2425,
+      "passed": true,
+      "events": 100,
+      "n_rows": 280,
+      "alignment": 0.2406
+    },
+    {
+      "neuron": 2425,
+      "passed": true,
+      "events": 200,
+      "n_rows": 561,
+      "alignment": 0.5313
+    },
+    {
+      "neuron": 2425,
+      "passed": true,
+      "events": 400,
+      "n_rows": 1122,
+      "alignment": 0.9428
+    },
+    {
+      "neuron": 2425,
+      "passed": true,
+      "events": 800,
+      "n_rows": 2243,
+      "alignment": 0.9995
+    },
+    {
+      "neuron": 2425,
+      "passed": true,
+      "events": 1600,
+      "n_rows": 4486,
+      "alignment": 0.9997
+    },
+    {
+      "neuron": 268,
+      "passed": false,
+      "events": 50,
+      "n_rows": 532,
+      "alignment": 0.0916
+    },
+    {
+      "neuron": 268,
+      "passed": false,
+      "events": 100,
+      "n_rows": 1064,
+      "alignment": 0.0884
+    },
+    {
+      "neuron": 268,
+      "passed": false,
+      "events": 200,
+      "n_rows": 2129,
+      "alignment": 0.3383
+    },
+    {
+      "neuron": 268,
+      "passed": false,
+      "events": 400,
+      "n_rows": 4258,
+      "alignment": 0.885
+    },
+    {
+      "neuron": 268,
+      "passed": false,
+      "events": 800,
+      "n_rows": 8515,
+      "alignment": 0.9952
+    },
+    {
+      "neuron": 268,
+      "passed": false,
+      "events": 1600,
+      "n_rows": 17030,
+      "alignment": 0.9902
+    },
+    {
+      "neuron": 1954,
+      "passed": false,
+      "events": 50,
+      "n_rows": 412,
+      "alignment": 0.1074
+    },
+    {
+      "neuron": 1954,
+      "passed": false,
+      "events": 100,
+      "n_rows": 824,
+      "alignment": 0.0776
+    },
+    {
+      "neuron": 1954,
+      "passed": false,
+      "events": 200,
+      "n_rows": 1648,
+      "alignment": 0.4241
+    },
+    {
+      "neuron": 1954,
+      "passed": false,
+      "events": 400,
+      "n_rows": 3296,
+      "alignment": 0.7573
+    },
+    {
+      "neuron": 1954,
+      "passed": false,
+      "events": 800,
+      "n_rows": 6593,
+      "alignment": 0.9541
+    },
+    {
+      "neuron": 1954,
+      "passed": false,
+      "events": 1600,
+      "n_rows": 13185,
+      "alignment": 0.9779
+    },
+    {
+      "neuron": 374,
+      "passed": false,
+      "events": 50,
+      "n_rows": 438,
+      "alignment": 0.2137
+    },
+    {
+      "neuron": 374,
+      "passed": false,
+      "events": 100,
+      "n_rows": 876,
+      "alignment": 0.1268
+    },
+    {
+      "neuron": 374,
+      "passed": false,
+      "events": 200,
+      "n_rows": 1752,
+      "alignment": 0.2806
+    },
+    {
+      "neuron": 374,
+      "passed": false,
+      "events": 400,
+      "n_rows": 3504,
+      "alignment": 0.9485
+    },
+    {
+      "neuron": 374,
+      "passed": false,
+      "events": 800,
+      "n_rows": 7008,
+      "alignment": 0.9898
+    },
+    {
+      "neuron": 374,
+      "passed": false,
+      "events": 1600,
+      "n_rows": 14017,
+      "alignment": 0.9866
+    },
+    {
+      "neuron": 1745,
+      "passed": false,
+      "events": 50,
+      "n_rows": 338,
+      "alignment": 0.0191
+    },
+    {
+      "neuron": 1745,
+      "passed": false,
+      "events": 100,
+      "n_rows": 675,
+      "alignment": 0.0027
+    },
+    {
+      "neuron": 1745,
+      "passed": false,
+      "events": 200,
+      "n_rows": 1351,
+      "alignment": 0.278
+    },
+    {
+      "neuron": 1745,
+      "passed": false,
+      "events": 400,
+      "n_rows": 2702,
+      "alignment": 0.8419
+    },
+    {
+      "neuron": 1745,
+      "passed": false,
+      "events": 800,
+      "n_rows": 5404,
+      "alignment": 0.9989
+    },
+    {
+      "neuron": 1745,
+      "passed": false,
+      "events": 1600,
+      "n_rows": 10807,
+      "alignment": 0.927
+    },
+    {
+      "neuron": 830,
+      "passed": false,
+      "events": 50,
+      "n_rows": 573,
+      "alignment": 0.033
+    },
+    {
+      "neuron": 830,
+      "passed": false,
+      "events": 100,
+      "n_rows": 1145,
+      "alignment": 0.1479
+    },
+    {
+      "neuron": 830,
+      "passed": false,
+      "events": 200,
+      "n_rows": 2291,
+      "alignment": 0.7341
+    },
+    {
+      "neuron": 830,
+      "passed": false,
+      "events": 400,
+      "n_rows": 4582,
+      "alignment": 0.8002
+    },
+    {
+      "neuron": 830,
+      "passed": false,
+      "events": 800,
+      "n_rows": 9164,
+      "alignment": 0.8665
+    },
+    {
+      "neuron": 830,
+      "passed": false,
+      "events": 1600,
+      "n_rows": 18328,
+      "alignment": 0.8645
+    },
+    {
+      "neuron": 1937,
+      "passed": false,
+      "events": 50,
+      "n_rows": 371,
+      "alignment": 0.2449
+    },
+    {
+      "neuron": 1937,
+      "passed": false,
+      "events": 100,
+      "n_rows": 743,
+      "alignment": 0.1877
+    },
+    {
+      "neuron": 1937,
+      "passed": false,
+      "events": 200,
+      "n_rows": 1485,
+      "alignment": 0.3984
+    },
+    {
+      "neuron": 1937,
+      "passed": false,
+      "events": 400,
+      "n_rows": 2971,
+      "alignment": 0.9692
+    },
+    {
+      "neuron": 1937,
+      "passed": false,
+      "events": 800,
+      "n_rows": 5941,
+      "alignment": 0.9773
+    },
+    {
+      "neuron": 1937,
+      "passed": false,
+      "events": 1600,
+      "n_rows": 11883,
+      "alignment": 0.9986
+    }
+  ]
+}

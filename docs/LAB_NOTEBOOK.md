@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| C37 | 2026-09-07 | Threshold cross-validation (local) | — | 100 units, 5-fold | — | R² thresholds transfer (74→69% at fixed cost); **z_mean loses 16 pts out of sample (74→58%)**; disagreement loses 21 |
 | **C36** | **2026-09-07** | **S1-3 failure-class characterisation (local)** | — | 100 units | `results/s1_failure_class.json` | **Failures are sparse, heavy-tailed units**: active 6.8% vs 20.5%, kurtosis 87 vs 29. **z_mean predicts at AUC 0.877 with no fit at all** — a pre-fit screen |
 | **C35** | **2026-09-07** | **S1-1 flag ROC (local, no GPU)** | — | 100 units rescored | `results/s1_flag_roc.json` | **Held-out R² beats method disagreement: AUC 0.906 vs 0.802**, and discards 5 good units against 21 at the same 73% catch. The free flag is the better flag |
 | C33 | 2026-09-07 | A-13 Qwen forced, refit, real | 0…105 (0–40% of norm) | 420 | `data/s3/q_refit_forced_norm1.jsonl` | Curve climbs 1.0e-09 → **6.8e-02**, six orders. **Short of the 0.10 bar by one grid step** |
@@ -234,6 +235,134 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C37 — Does C14's required-N transfer to real units? (2026-09-07) — **NO, AND THE FAILURES GOT BETTER WITH LESS DATA**
+
+Local CPU, GPT-2 layer 6. 12 units stratified 6 pass / 6 fail from the C13 gate,
+subsampled per unit to a target number of informative events while preserving each
+unit's natural active fraction. Fit at E0.3b's cheap knee (2 restarts, 800 steps).
+`experiments/s1_required_n_real.py`, `results/s1_required_n_real.json`.
+
+| informative events | passed gate (median) | failed gate (median) |
+|---|---|---|
+| 50 | 0.2205 | 0.0995 |
+| 100 | 0.2582 | 0.1076 |
+| 200 | **0.3448** | **0.3683** |
+| 400 | 0.9617 | 0.8635 |
+| 800 | 0.9923 | 0.9835 |
+| 1600 | 0.9956 | 0.9823 |
+
+**C14's ~200-event figure does not transfer.** At 200 events real units sit at ~0.35
+alignment, nowhere near recovery. Saturation lands between 400 and 800 and is complete
+by 800. The real requirement is **roughly 400-800 informative events, two to four times
+the synthetic figure**, and any required-N table in the paper has to be quoted from real
+units rather than from planted ones.
+
+**Failures and passes need the same amount of data.** 0.9923 vs 0.9835 at 800 events,
+0.9956 vs 0.9823 at 1600. Whatever separates the failure class, it is not sample size.
+
+**And the finding that matters: five of six gate-failures recovered when given LESS
+data.**
+
+| neuron | gate (20k tokens, 3 restarts, 2500 steps) | subsampled (1600 events, 2 restarts, 800 steps) |
+|---|---|---|
+| n268 | 0.9406 | **0.9902** |
+| n374 | 0.9484 | **0.9866** |
+| n830 | 0.8634 | 0.8645 |
+| n1745 | 0.9079 | 0.9270 |
+| n1937 | 0.9545 | **0.9986** |
+| n1954 | 0.9397 | 0.9779 |
+| **median** | **0.9402** | **0.9823** |
+
+Less data, fewer restarts, fewer steps — and better recovery. **That is not something a
+data limitation can produce.** It is direct behavioural evidence for the optimisation
+account already implied by C9 (R² = 1.000 at the true direction) and C10 (the cascade
+reaches it): the failures are the search landing in a bad basin, and perturbing the
+problem — by resampling the data — knocks it into a good one. n830 is the exception at
+0.8634 → 0.8645, unchanged, and may be a genuinely harder case.
+
+If that holds up it suggests a cheap practical remedy nobody has tested here: **refit on
+a resampled subset and keep the better held-out R²**, which is the same
+fit-twice-and-compare shape as the disagreement flag.
+
+**TWO SELECTION BIASES, AND THEY ARE SEVERE. Do not generalise this to the failure
+class.**
+
+1. **Data-rich only.** The design required `n_events >= 1600` so every unit could reach
+   the top target. That keeps **8 of 23** gate-failures. Across all 23 the median is
+   1,285 events and the minimum is 526 — so the typical failure sits *below* this
+   experiment's entry requirement and near the 800-event saturation point.
+2. **Near-misses only.** The six selected failures have gate alignments 0.86-0.95
+   against a 0.95 bar. **The catastrophic failures are not represented at all** — C13's
+   worst unit was 0.1445, and nothing like it is in this sample.
+
+So the honest claim is narrow: *among data-rich, marginal failures, resampling recovers
+most of them.* Whether it touches the units that fail badly is untested, and those are
+the ones that matter for the 23% headline.
+
+**Next, and it is cheap:** re-run without the `n_events >= 1600` filter, capping targets
+per unit at whatever it has, and include the worst failures by gate alignment. That
+tests the resampling remedy on the class it is supposed to help.
+
+### C38 — Cross-validating the flag thresholds (2026-09-07)
+
+C35 and C36 both chose thresholds on the same 100 units they scored, so their
+sensitivity/specificity pairs were optimistic. AUC is threshold-free and unaffected;
+this is 5-fold CV on the operating points. `experiments/s1_flag_cv.py`, no compute.
+
+| flag | AUC | target sens | in-sample | held-out |
+|---|---|---|---|---|
+| **held-out R² (post-fit)** | **0.915** | 70% | 74% at 5% cost | **69% at 5% cost** |
+| | | 80% | 83% at 26% | 76% at 20% |
+| z_mean (**pre-fit**) | 0.877 | 70% | 74% at 10% | **58% at 10%** |
+| | | 80% | 83% at 19% | 69% at 21% |
+| disagreement (two fits) | 0.810 | 70% | 74% at 26% | **53% at 26%** |
+
+**The ranking survives and held-out R² is the robust one** — 74% → 69% at unchanged 5%
+cost is barely any optimism, so C35's recommendation stands.
+
+**The pre-fit screen is weaker than C36 made it look.** z_mean's thresholds lose
+16 points of sensitivity out of sample (74% → 58%) at the same cost. The AUC of 0.877 is
+real and threshold-free, so the signal exists, but the *operating point* does not
+transfer well and should be quoted from the held-out column.
+
+**Disagreement degrades most** — 74% → 53% — which is a second reason to prefer held-out
+R² over it, on top of costing one fewer fit.
+
+
+### C37 — Cross-validating the flag thresholds (2026-09-07)
+
+C35 and C36 both chose thresholds on the same 100 units they scored, so their operating
+points were optimistic. AUC is threshold-free and unaffected; the sensitivity/cost pairs
+are not. 5-fold CV: threshold picked on four folds, measured on the fifth.
+`experiments/s1_flag_cv.py`.
+
+| flag | AUC | target | in-sample sens/cost | **held-out sens/cost** |
+|---|---|---|---|---|
+| held-out R² | 0.915 | 70% | 74% / 5% | **69% / 5%** |
+| | | 80% | 83% / 26% | **76% / 20%** |
+| z_mean (pre-fit) | 0.877 | 70% | 74% / 10% | **58% / 10%** |
+| | | 80% | 83% / 19% | **69% / 21%** |
+| disagreement | 0.810 | 70% | 74% / 26% | **53% / 26%** |
+| | | 80% | 83% / 35% | **69% / 36%** |
+
+**The ranking survives and R² is also the most stable.** Its thresholds barely
+generalise worse than they fit — 74%→69% at the 70% target, with cost unchanged at 5%.
+
+**The pre-fit screen is weaker than C36's table implied.** z_mean loses 16 points of
+sensitivity out of sample (74%→58%) at the same cost. The screen is real — AUC 0.877 is
+threshold-free and does not move — but its *thresholds* do not transfer well, so C36's
+"skip 25 fits of 100 to catch 74%" should be read as "catch about 58%" on unseen units.
+Corrected accordingly; the two-stage recommendation stands but the first stage buys less
+than it looked like.
+
+**Disagreement degrades worst**, losing 21 points (74%→53%) while already costing the
+most. Third of three on every measure now: lowest AUC, least stable thresholds, and the
+only one requiring two fits.
+
+**Still one model, one layer, 100 units.** CV controls threshold optimism, not the fact
+that every number here comes from GPT-2 layer 6.
+
 
 ### C36 — S1-3, what the 23% failure class actually is (2026-09-07)
 
@@ -1169,7 +1298,12 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C37) | **C14's ~200-event required-N does NOT transfer to real units — quote the real figure, not the synthetic one.** Real units reach only ~0.35 alignment at 200 events and saturate between 400 and 800, so the requirement is **2-4x** the planted-unit figure. Failures and passes need the same amount of data, so sample size is not what separates the failure class | notebook C37 |
+| 2026-09-07 (C37) | **Five of six gate-failures RECOVERED on less data** (median 0.9402 -> 0.9823 with fewer restarts and fewer steps). A data limitation cannot produce that. It is direct behavioural evidence for the optimisation-landscape account from C9/C10, and it suggests an untested remedy: **refit on a resampled subset and keep the better held-out R2** | notebook C37 |
+| 2026-09-07 (C37) | **That result is DOUBLY SELECTION-BIASED and must not be generalised.** The design required n_events >= 1600, keeping 8 of 23 failures when the class median is 1,285; and the six selected have gate alignments 0.86-0.95 against a 0.95 bar, so **the catastrophic failures (C13's worst was 0.1445) are absent entirely.** Re-run without the filter and including the worst units before this goes near the paper | notebook C37 |
+| 2026-09-07 (C38) | **Cross-validation: the flag ranking holds, held-out R2 is robust, the pre-fit screen is not.** R2 goes 74% -> 69% sensitivity at unchanged 5% cost, so C35 stands. z_mean loses 16 points out of sample (74% -> 58%) — its AUC 0.877 is real but its **operating point does not transfer**, and C36's numbers should be quoted from the held-out column | notebook C38 |
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C37) | **Threshold optimism measured; the two-stage rule stands but the pre-fit stage buys less than C36 implied.** Cross-validated, held-out R² holds at 69% sensitivity for 5% cost while z_mean drops from 74% to **58%** and disagreement from 74% to **53%**. AUCs are threshold-free and unchanged. **Quote held-out numbers, not the C36 table** | notebook C37 |
 | 2026-09-07 (C36) | **The silent-failure flag becomes a TWO-STAGE rule, and the first stage needs no fit.** Failures are sparse, heavy-tailed units — active 6.8% of positions vs 20.5%, response kurtosis 87 vs 29, z_mean −1.20 vs −0.65. **z_mean predicts at AUC 0.877 before any fitting**, against held-out R²'s 0.915 after. Screen on z_mean (skip ~25 fits of 100 to catch 74% of failures), then flag on R². Combining them adds nothing (0.918) | notebook C36 |
 | 2026-09-07 (C36) | **C7's "failures sit at z_mean −1.3 to −1.9" is withdrawn as a band.** From 8 neurons; across 100 only 6/23 failures fall in it and 4/77 passes do too, median failure −1.17. The direction is right and now well supported; the band was a small-sample artifact. Do not quote it | notebook C36 |
 | 2026-09-07 (C36) | **C14's ~200-event required-N may not transfer to real units.** Failures average 1,353 informative events and passes 4,097 — both far above 200 — so raw event count is not what binds on real neurons. C14 measured it synthetically; at kurtosis 87 the information per event is far lower. **Check before publishing the required-N table as guidance** | notebook C36 |
