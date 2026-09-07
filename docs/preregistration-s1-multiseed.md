@@ -65,3 +65,25 @@ C13 was scored against and failed at 77/100 [0.679, 0.842].
   appears in the results section, not only here.
 - If the primary passes, the claim is "selection by held-out R2 repairs the instrument on
   this model, layer and unit sample", not "the estimator works".
+
+## Clarification, filed 7 September 2026 before any data exists
+
+The protocol above specifies five k=1 fits per unit but does not say how `k2_gain` is
+obtained, and the pass criterion needs it. Closing that now rather than after seeing
+output.
+
+**The k=2 arm is fit the same way as the k=1 arm** - five seeds, one restart, 800 steps -
+and `k2_gain` is computed as
+
+    k2_gain = (best k=2 test_r2) - (selected k=1 test_r2)
+
+against the same unit's selected k=1 fit. This is symmetric between the arms and keeps
+the criterion's shape identical to C13, which used
+`d2.test_r2 - max(d1.test_r2, cascade.test_r2)`.
+
+The alternative - reusing C13's stored `k2_gain` - was rejected because our k=1 test_r2
+is expected to be higher, which would make the stored gain systematically too large and
+bias the pass rate downward. Neither direction is chosen to help the hypothesis: this one
+is chosen because both arms then see the same budget.
+
+Cost consequence: ten fits per unit rather than five.
