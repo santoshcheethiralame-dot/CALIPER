@@ -106,3 +106,37 @@ detect".
 
 `q_refit_forced_norm1.jsonl`, `q_refit_forced_random_norm1.jsonl`, and the
 `q_refit*.config.json` sidecars.
+
+
+---
+
+# A-13b — the extension (~20 min)
+
+**Run after C33/C34.** The curve reached 6.78e-02 at 40% of the norm against a 0.10
+onset bar, climbing six orders of magnitude across the sweep and steepest at the
+right-hand edge. That is a short grid, not a null.
+
+Two more strengths, and **no further**: C32's steer control showed alpha=200 (76% of the
+norm) producing degraded tokens while alpha=100 (38%) was coherent at 30/30, so past
+~60% the risk is measuring a damaged model rather than a detecting one.
+
+| fraction | alpha |
+|---|---|
+| 50% | 131 |
+| 60% | 157 |
+
+```python
+import sys, glob
+sys.argv = ["run", "--model", "qwen", "--compute-dtype", "fp32", "--stage", "forced",
+            "--normalise", "--control", "none", "--alphas", "131", "157",
+            "--out", "/kaggle/working/q_refit.jsonl"]
+hits = glob.glob("/kaggle/input/**/*.py", recursive=True)
+exec(open(hits[0]).read())
+```
+
+Then the same with `"--control", "random"`. Both append to the existing files, so the
+full curve ends up in one place.
+
+**If 60% still does not cross 0.10**, stop there and report it: detection does not
+appear on Qwen at any strength the model survives. That is a real result and it pairs
+with the C30 refusal finding rather than contradicting it.

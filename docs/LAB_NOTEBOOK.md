@@ -166,6 +166,8 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| C33 | 2026-09-07 | A-13 Qwen forced, refit, real | 0…105 (0–40% of norm) | 420 | `data/s3/q_refit_forced_norm1.jsonl` | Curve climbs 1.0e-09 → **6.8e-02**, six orders. **Short of the 0.10 bar by one grid step** |
+| C34 | 2026-09-07 | A-13 Qwen forced, refit, random | same | 420 | `data/s3/q_refit_forced_random_norm1.jsonl` | **Real > random at 12/12 comparisons** — never true pre-refit. Significant only at the low end, where magnitudes are ~1e-09 |
 | **C32** | **2026-09-07** | **A-11 steer control, vectors refit at the concept** | 0…200 | 150 | `data/s3/s3_qwen_refit_steer_norm1.jsonl` | **FIXED: 1/30 → 7/30 → 14/30 monotone, against C31's flat 1/30.** Residual norm at the concept token is **261.5**, not the tail's 177.8 |
 | **C31** | **2026-09-07** | **A-10 Qwen steering positive control** | 0…200 (0–112% of norm) | 150 | `data/s3/s3_qwen_steer_norm1.jsonl` | **Concept-in-text 1/30 at alpha=200, identical to the 1/30 at alpha=0. The vectors carry no content.** Cause: the vector is read at the chat-template tail, not the concept word |
 | **C30** | **2026-09-07** | **A-9 Qwen generation check** | 0, 50, 100 | 90 | `data/s3/s3_qwen_gen.jsonl` | **Injection never reaches the output: 0/30 concept-in-text at 56% of the residual norm.** C27-29 null is an artifact. Separately: 30/30 categorical introspection refusal |
@@ -230,6 +232,67 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C33 / C34 — Qwen forced choice, vectors refit at the concept (2026-09-07) — **INCONCLUSIVE, GRID FELL SHORT**
+
+A-13, `2026-09-07e`, `vector_read_position: concept`, residual norm 261.5, layer 38.
+Real (420 rows) and norm-matched random (420 rows), alpha at 0/1/2/5/10/20/40% of the
+residual norm. `data/s3/q_refit_forced*.jsonl`.
+
+**Note on order: A-12 has not run.** Gemma's reference onset is still a template-tail
+measurement, so the invariant test cannot be scored yet. This entry is the Qwen half
+only.
+
+| alpha | % of norm | real intro | random intro | real neutral | random neutral |
+|---|---|---|---|---|---|
+| 0 | 0% | 1.03e-09 | 1.03e-09 | 1.35e-07 | 1.35e-07 |
+| 3 | 1% | 1.12e-09 | 1.01e-09 | 1.51e-07 | 1.35e-07 |
+| 5 | 2% | 1.19e-09 | 1.02e-09 | 1.66e-07 | 1.37e-07 |
+| 13 | 5% | 1.66e-09 | 1.20e-09 | 2.51e-07 | 1.71e-07 |
+| 26 | 10% | 3.58e-09 | 2.38e-09 | 6.73e-07 | 4.06e-07 |
+| 52 | 20% | 6.31e-08 | 3.36e-08 | 4.58e-05 | 7.54e-06 |
+| **105** | **40%** | **6.78e-02** | 7.86e-03 | 8.44e-02 | 1.81e-02 |
+
+**The vectors work now, and it shows.** Real exceeds random at **every one of the twelve
+comparisons**, which C27-C29 never did. The injection moves the readout at every
+strength (p=1.0e-04 at 1% of the norm, p=1.9e-09 at 40%, rising on 30/30 concepts at
+the top).
+
+**But the filed onset criterion fails again — and this time it is a short grid, not a
+null.** Peak is 6.78e-02 against the 0.10 bar. The curve is climbing six orders of
+magnitude across the sweep and is steepest at its right-hand edge: 6.3e-08 at 20% of
+the norm to 6.8e-02 at 40%. One more step almost certainly crosses 0.10.
+
+This is the C21/C22 failure repeating: **a null from an unswept parameter is not a
+result.** The stop clause in Addendum 2 was written for a flat curve, and this one is
+not flat. Extend before concluding.
+
+**Recommended extension: 50% and 60% of the norm — alpha 131 and 157 — and no further.**
+C32's steer control showed alpha=200 (76%) producing degraded tokens ("untternal",
+"exolation"), while alpha=100 (38%) was fully coherent at 30/30. So the usable window
+closes somewhere between 40% and 76%, and pushing past ~60% risks measuring a damaged
+model rather than a detecting one.
+
+**A caveat that must travel with the real-vs-random result.** The comparison is
+significant only at the *low* end — p=4.6e-04, 4.0e-03, 2.3e-02 at 1%, 2%, 5% — and not
+at 10%, 20% or 40% (p=0.15, 0.86, 0.57). But at the low end the absolute values are
+1.1e-09 against 1.0e-09. That is a reliable difference between two numbers that both
+mean "the model says NO with overwhelming confidence". **Statistical significance here
+is not practical significance,** and the paired test is detecting a consistent
+one-part-in-ten shift on a one-in-a-billion probability. Do not quote these p-values
+without the magnitudes beside them.
+
+Note also that this is the **opposite** pattern to Gemma, where real-vs-random was
+significant in the middle of the range and not at the extremes. Whether that survives
+Gemma's refit is unknown.
+
+**The refusal confound is untouched.** Baseline introspective P(YES) is still 1.03e-09,
+neutral 1.35e-07. Fixing the vectors did nothing to the trained policy C30 found in
+30/30 clean trials, and it should not have. If detection stays low at 50-60% while the
+steer control shows the vectors plainly working, **that gap is the finding** — the
+injection reaches the computation and the model will not report it — not "Qwen does not
+detect".
+
 
 ### C32 — Qwen steer control, vectors refit at the concept position (2026-09-07) — **FIXED**
 
@@ -988,6 +1051,8 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C33/C34) | **The refit changed Qwen from a dead null to a live curve, but the grid stopped one step short.** Real beats random at 12/12 comparisons, never true pre-refit, and P(YES) climbs six orders to 6.8e-02 against a 0.10 bar. **Extend to 50% and 60% of the norm (alpha 131, 157) and no further** — C32 showed 76% degrading the model. The Addendum 2 stop clause was written for a flat curve and does not apply to a steep one | notebook C33/C34 |
+| 2026-09-07 | **Significance and magnitude have come apart on Qwen, and must be reported together.** Real-vs-random is significant only at 1-5% of the norm (p=4.6e-04 … 2.3e-02) where the values are 1.1e-09 against 1.0e-09 — both meaning "the model says NO with overwhelming confidence". Never quote these p-values without the magnitudes beside them | notebook C33/C34 |
 | 2026-09-07 | **Run sheets written for both refits, and the order is load-bearing.** A-12 (Gemma, `kaggle/NEXT_SESSION_GEMMA_REFIT.md`) first, A-13 (Qwen forced-choice, `kaggle/NEXT_SESSION_QWEN_REFIT_FORCED.md`) second. Both sweep **the same fractions of each model's own concept-position residual norm** (1, 2, 5, 10, 20, 40%), which is what makes the invariant test a like-for-like comparison. Comparing Qwen's new onset against Gemma's old template-tail onset would compare two different instruments | A-12; A-13 |
 | 2026-09-07 (C32) | **THE FIX IS CONFIRMED AND PAPER A NOW NEEDS A GEMMA REFIT BEFORE IT SHIPS.** Refit vectors give a monotone 1→7→14 of 30 against C31's flat 1/30, isolating the read position as the only change. **C15-C24 — every Gemma run, including the A1 headline at alpha=8192/16384 — used template-tail vectors.** They are not void (Gemma's steered, 10/30) but they were measured with a degraded instrument, and the onset, the real-vs-random comparison and the content-free share can all move. **Re-run the Gemma forced-choice arms at `--vector-pos concept` before the preprint.** Roughly 2 GPU-hours | notebook C32 |
 | 2026-09-07 (C32) | **The 331x residual-norm ratio must be recomputed at the concept position before it is quoted again.** Qwen's norm is 261.5 at the concept token against 177.8 at the tail; Gemma's 58,932 was also a tail measurement. The ratio is like-for-like as it stands, but the tail is not the position the paper reads vectors from any more, so it is not the number to report | notebook C32 |
