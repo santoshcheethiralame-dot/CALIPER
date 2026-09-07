@@ -16,7 +16,7 @@ clean trials. This run removes the framing so the injection is tested on its own
 
 ## Setup
 
-Unchanged: Qwen under **Models**, `caliper-s3` at `2026-09-07c` under **Datasets**,
+Unchanged: Qwen under **Models**, `caliper-s3` at `2026-09-07d` under **Datasets**,
 GPU T4 x2, Internet on, **session restarted**.
 
 ## Cell 1 — only after a restart
@@ -32,15 +32,24 @@ import sys, glob
 sys.argv = ["run", "--model", "qwen", "--compute-dtype", "fp32", "--stage", "steer",
             "--normalise", "--control", "none",
             "--alphas", "0", "25", "50", "100", "200",
-            "--out", "/kaggle/working/s3_qwen_steer.jsonl"]
+            "--out", "/kaggle/working/s3_qwen.jsonl"]
 hits = glob.glob("/kaggle/input/**/*.py", recursive=True)
 print(hits)
 exec(open(hits[0]).read())
 ```
 
-> **If `--stage steer` is rejected as an invalid choice**, the script does not have it
-> yet — tell me and I will add it before you run. It should print the accepted values
-> in the error.
+> `--stage steer` exists as of `2026-09-07d` and its hook logic is unit-tested locally
+> (prompt pass injected in both spans; decode step injected only under `span="all"`;
+> tuple-returning layers preserved; alpha=0 a true no-op). **Re-upload the script as a
+> New Version of `caliper-s3` before running.**
+
+You should see this line after the vectors are built:
+
+```
+STAGE steer: neutral prompt, injection at EVERY position including decode steps.
+```
+
+If it is missing you are on an old version and the run is meaningless.
 
 Note alpha=200 (112% of the residual norm) is included deliberately. If a perturbation
 larger than the residual stream itself still leaves the output untouched, the vectors
@@ -50,7 +59,7 @@ are certainly not carrying content and no prompt change will rescue them.
 
 | Line | Must read |
 |---|---|
-| 1st line | `kaggle_s3_positive_control 2026-09-07c` |
+| 1st line | `kaggle_s3_positive_control 2026-09-07d` |
 | model source | `found N model dir(s) in /kaggle/input` |
 | residual norm | `median 177.8` — must match C27-C30 exactly |
 | vectors | `30 vectors, median norm 1.00, non-finite 0` |
@@ -68,4 +77,4 @@ Look at the `text` of a few alpha=100 or alpha=200 rows. You do not need me:
 
 ## Send back
 
-`s3_qwen_steer*.jsonl` and its `.config.json`.
+`s3_qwen_steer_norm1.jsonl` and `s3_qwen.config.json`.

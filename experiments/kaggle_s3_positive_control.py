@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-07c"
+VERSION = "2026-09-07d"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -156,6 +156,14 @@ NEUTRAL_MATCHED = (
     "Trial {n}: Is anything unusual present? If so, what is it about? "
     "Answer starting with YES or NO."
 )
+
+# A positive control on the vectors, not a measurement. No introspective framing at all,
+# nothing to refuse, and a task open enough that a steered concept has somewhere to go.
+# C30 found Qwen refusing the premise of every introspective prompt in 30/30 clean trials
+# ("As an AI, I don't have the capability to detect..."), which leaves every detection
+# number on that model unidentified. This prompt removes the refusal trigger so the
+# vectors can be tested on their own.
+STEER = "Write a short story."
 
 YES_RE = re.compile(r"^\s*(yes|y\b)", re.I)
 NO_RE = re.compile(r"^\s*(no|n\b)", re.I)
@@ -407,8 +415,26 @@ def build_vectors(model, tok, layers, layer, normalise):
 
 
 @torch.no_grad()
-def run_trial(model, tok, layers, layer, vec, alpha, prompt, max_new=60):
-    """Inject alpha*vec at prompt positions only; generation proceeds uninjected."""
+def run_trial(model, tok, layers, layer, vec, alpha, prompt, max_new=60, span="prompt"):
+    """Inject alpha*vec and generate.
+
+    span="prompt" (default, and what every reported run used) matches the paper:
+    the vector is added at prompt positions only and generation proceeds uninjected,
+    so any concept that reaches the output does so through the cached prompt state.
+
+    span="all" additionally injects at each decode step. This is NOT the paper's
+    protocol and must never be mixed into a reported detection number. It exists as a
+    positive control on the vectors themselves: under continuous injection a vector
+    that encodes a concept has to steer the output, so if nothing appears even here,
+    the vector carries no content and every measurement built on it is void.
+
+    C30 is why this distinction matters. Qwen produced the concept 0/30 times under
+    span="prompt" at 56% of its residual norm, which looked like dead vectors - but
+    Qwen answers with ~49-word templated refusals, and a prompt-only perturbation
+    dilutes across that many uninjected decode steps. Gemma's hits were short outputs
+    where it does not. So span="prompt" cannot distinguish "no content in the vector"
+    from "content diluted away", and span="all" can.
+    """
     enc = encode(tok, model, prompt)
     n_prompt = enc["input_ids"].shape[1]
     add = None if alpha == 0 else alpha * vec
@@ -416,11 +442,15 @@ def run_trial(model, tok, layers, layer, vec, alpha, prompt, max_new=60):
     def hook(_m, _i, out):
         tup = isinstance(out, tuple)
         h = out[0] if tup else out
-        if add is not None and h.shape[1] > 1:      # prompt pass only, not decode steps
+        if add is not None:
             # The layer may live on a different GPU from the embeddings when the model
             # is split across devices, so match the activation, not model.device.
-            h = h.clone()
-            h[:, :n_prompt, :] += add.to(h.device, h.dtype)
+            if h.shape[1] > 1:                      # the prompt pass
+                h = h.clone()
+                h[:, :n_prompt, :] += add.to(h.device, h.dtype)
+            elif span == "all":                     # one decode step
+                h = h.clone()
+                h += add.to(h.device, h.dtype)
         return (h,) + out[1:] if tup else h
 
     handle = layers[layer].register_forward_hook(hook)
@@ -494,7 +524,11 @@ def score(text, concept):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["control", "framing", "forced"], default="control")
+    ap.add_argument("--stage", choices=["control", "framing", "forced", "steer"],
+                    default="control",
+                    help="steer is a positive control on the vectors: neutral prompt, "
+                         "injection at every position including decode steps. Not the "
+                         "paper protocol; never pool it with a detection number")
     ap.add_argument("--model", choices=list(MODELS), default="qwen")
     ap.add_argument("--model-path", default=None,
                     help="explicit local path; overrides --model and /kaggle/input search")
@@ -614,6 +648,11 @@ def main():
     framings = {"introspective": INTROSPECTIVE}
     if a.stage in ("framing", "forced"):
         framings["neutral_matched"] = NEUTRAL_MATCHED
+    elif a.stage == "steer":
+        framings = {"steer": STEER}
+        print("  STAGE steer: neutral prompt, injection at EVERY position including "
+              "decode steps. This is a positive control on the vectors, not the paper "
+              "protocol - do not pool these rows with any detection number.", flush=True)
 
     concepts = CONCEPTS[: a.concepts]
     # A random bijection concept -> trial number. Still one number per concept, so pairing
@@ -655,7 +694,12 @@ def main():
         fh.close()
         return
     t0 = time.time()
-    fh = open(a.out, "a")
+    span = "all" if a.stage == "steer" else "prompt"
+    out_path = a.out
+    if a.stage == "steer":
+        out_path = a.out.replace(".jsonl", "_steer" + ("_norm1" if a.normalise else "")
+                                 + ".jsonl")
+    fh = open(out_path, "a")
     n = 0
     for fname, template in framings.items():
         for alpha in a.alphas:
@@ -664,8 +708,10 @@ def main():
                        f"_t{a.trial_seed}")
                 if key in done:
                     continue
-                txt = run_trial(model, tok, layers, a.layer, vecs[c], alpha,
-                                template.format(n=trial_of[c]))
+                prompt = template if a.stage == "steer" else template.format(
+                    n=trial_of[c])
+                txt = run_trial(model, tok, layers, a.layer, vecs[c], alpha, prompt,
+                                span=span)
                 row = {"key": key, "framing": fname, "alpha": alpha, "concept": c,
                        "trial": trial_of[c], "trial_seed": a.trial_seed,
                        "layer": a.layer, "normalised": a.normalise, **score(txt, c)}
@@ -677,7 +723,7 @@ def main():
                     print(f"  {n} trials, {time.time()-t0:.0f}s", flush=True)
     fh.close()
 
-    rows = [json.loads(l) for l in open(a.out) if l.strip()]
+    rows = [json.loads(l) for l in open(out_path) if l.strip()]
     print("\n" + "=" * 70)
     print(f"{'framing':<15}{'alpha':>7}{'n':>5}{'detect':>9}{'identify':>10}{'coherent':>10}")
     for fname in framings:
