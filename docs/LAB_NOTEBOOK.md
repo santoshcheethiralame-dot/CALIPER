@@ -236,6 +236,82 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C41 — Required-N without the C37 filters, plus the control C37 lacked (2026-09-07) — **C37'S ATTRIBUTION WAS WRONG**
+
+18 units, stratified by gate alignment into worst-fail (0.144-0.804), marginal-fail
+(0.932-0.955) and pass (1.000). No event filter; targets capped per unit. Adds a
+**full-data arm at the cheap config**, which C37 did not have.
+`results/s1_required_n_unbiased.json`.
+
+| target | worst-fail median (n) | marginal-fail (n) | pass (n) |
+|---|---|---|---|
+| 50 | 0.1072 (6) | 0.1298 (6) | 0.1920 (6) |
+| 200 | 0.2422 (6) | 0.2342 (6) | 0.4001 (6) |
+| 400 | 0.9358 (6) | 0.9054 (6) | 0.7827 (6) |
+| 800 | 0.9704 (3) | 0.9681 (6) | 0.9978 (6) |
+| **full** | **0.9668 (6)** | **0.9856 (6)** | **0.9998 (6)** |
+
+**C37's required-N conclusion survives**: real units need 400-800 informative events, not
+C14's synthetic ~200, and the three strata are indistinguishable in how much data they
+need.
+
+**C37's headline attribution does not survive.** The decomposition it could not do:
+
+| group | gate | full (cheap config) | best subsample | **gate→full** | full→best |
+|---|---|---|---|---|---|
+| worst-fail | 0.5970 | 0.9668 | 0.9775 | **+0.3698** | +0.0107 |
+| marginal-fail | 0.9441 | 0.9856 | 0.9946 | +0.0415 | +0.0090 |
+| pass | 1.0000 | 0.9998 | 0.9996 | −0.0001 | −0.0002 |
+
+**Resampling contributes almost nothing (+0.011). The fit configuration contributes
+everything (+0.370).** C37 changed both at once and credited the wrong one.
+
+**And it is not the estimator or the selection rule** — that was the obvious next
+suspect and it is ruled out:
+
+| worst-fail, median | value |
+|---|---|
+| gate, dual protocol (selected) | 0.5970 |
+| gate, direct fit alone | 0.5175 |
+| gate, cascade alone | 0.4316 |
+| **same direct fit, 2 restarts / 800 steps** | **0.9668** |
+
+Same estimator, same data, same units. **Only fewer restarts and fewer steps, and the
+worst failures go from 0.52 to 0.97.**
+
+Per unit, including the catastrophic ones C37 excluded by construction:
+
+| neuron | gate selected | gate direct | cheap config |
+|---|---|---|---|
+| n527 | **0.1445** | 0.1926 | **0.9665** |
+| n1503 | 0.3481 | 0.2746 | 0.3334 |
+| n2723 | 0.5151 | 0.3562 | 0.9671 |
+| n2023 | 0.6789 | 0.6789 | 0.9823 |
+| n1180 | 0.7237 | 0.7237 | 0.9878 |
+| n1625 | 0.8040 | 0.8040 | 0.8629 |
+
+**Five of six catastrophic failures recover under less optimisation**, including C13's
+worst unit at 0.1445 → 0.9665. n1503 does not (0.3481 → 0.3334) and looks genuinely hard.
+
+**The candidate mechanism is already in the record.** C9 measured R² = 1.000 at a
+*wrong* direction. The bottleneck's nonlinearity is a 64-wide MLP, flexible enough to fit
+the response through a wrong V given enough steps — so past some point the objective
+stops being informative about the direction because the nonlinearity absorbs the error.
+More optimisation then makes the fit better and the direction worse. **C42 tests this
+directly** with a steps sweep recording R² alongside alignment: overfitting would
+separate train from held-out R², absorption would raise both while alignment falls.
+
+**If it holds, the 23% silent-failure rate is substantially an artifact of
+over-optimisation, and Paper B's Study 1 chapter changes.** The obvious confirmation is
+cheap — re-run the full n=100 gate at the cheap config, about 8 minutes at 4.7 s/neuron —
+and it must be pre-registered before it runs, because it would be re-scoring a headline
+after seeing a favourable subset.
+
+**Caveats.** n drops at high targets now that the filter is gone (worst-fail has 1 unit
+at 1600), so those cells are weak. And the cheap config's own worst case is 0.3334, so it
+is not a universal repair.
+
+
 ### C40 — Audit of the S3 positive control itself (2026-09-07) — **THE REPRODUCTION FIGURE WAS WRONG**
 
 Prompted by a direct question: is the instrument right for everything so far? Two silent
@@ -1392,6 +1468,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C41) | **CORRECTION TO C37: the recovery is the FIT CONFIG, not resampling.** Decomposed: gate→full (same data, cheaper config) is +0.370 on the worst failures; full→best-subsample is +0.011. C37 changed both at once and credited the wrong one. Ruled out the selection rule too — the gate's direct fit alone gives 0.5175 and its cascade 0.4316, against 0.9668 for the same direct fit at 2 restarts/800 steps | notebook C41 |
+| 2026-09-07 (C41) | **Five of six CATASTROPHIC failures recover under less optimisation, including C13's worst unit (0.1445 → 0.9665).** C37 could not see this: its filter excluded every catastrophic unit. If it holds, **the 23% silent-failure rate is substantially an artifact of over-optimisation** and Paper B's Study 1 chapter changes | notebook C41 |
+| 2026-09-07 | **Any re-run of the n=100 gate at the cheap config must be pre-registered BEFORE it runs.** It would be re-scoring a headline result after seeing a favourable subset, which is the C40 failure mode exactly. File the criterion first | notebook C41 |
 | 2026-09-07 (C40) | **THE REPRODUCTION FIGURE IS CORRECTED: 6.7%, not 10.0%.** The pre-registered scorer gives 2/30 at alpha=6; the published 3/30 was a hand-read subset matching no filed rule, and it happened to be the value closest to the target 10.8% that the operating point was then chosen to match. **The safeguard existed and was not consulted.** Corrected in the results doc, the draft and the plan; the pre-registration is left untouched as a filed record | notebook C40 |
 | 2026-09-07 (C40) | **Section 2's readout table had two uncomputable numbers** (27% and 7% at alpha 6 and 8). Recomputed under both rules: 43/17/7/0 pre-registered, 50/23/33/10 permissive. The first-token column verified correct. **The readout finding survives and sharpens** — the two generated-text rules do not even agree on the shape of the curve | notebook C40 |
 | 2026-09-07 (C40) | **A detection rate is only interpretable beside the false-positive rate produced by the SAME rule.** The permissive rule that yields 33.3% at alpha=6 also yields 16.7% at alpha=0, destroying the control. Report both or neither | notebook C40 |
