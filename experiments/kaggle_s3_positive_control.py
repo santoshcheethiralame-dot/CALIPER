@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-07f"
+VERSION = "2026-09-08a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -630,7 +630,8 @@ def main():
                          "concept i was always Trial i+1, so concept identity and trial "
                          "number were perfectly confounded and the trial number is in the "
                          "prompt. Now a seeded shuffle; vary the seed across replications")
-    ap.add_argument("--control", choices=["none", "random", "shuffle"], default="none",
+    ap.add_argument("--control", choices=["none", "random", "shuffle", "span"],
+                    default="none",
                     help="replace concept vectors with a norm-matched random direction "
                          "('random') or a coordinate permutation of the real vector "
                          "('shuffle'). Both preserve magnitude and destroy content, so a "
@@ -737,9 +738,30 @@ def main():
     if a.control != "none":
         # Seeded, so the control is reproducible and comparable across runs.
         gen = torch.Generator().manual_seed(0)
+        # Snapshot the real directions before any are overwritten, so the span control
+        # is built from concept vectors and not from partially-replaced ones.
+        basis = torch.stack([t.clone() for t in vecs.values()])
         for c, v in vecs.items():
             if a.control == "random":
                 r = torch.randn(v.shape, generator=gen)
+                vecs[c] = r / r.norm() * v.norm()
+            elif a.control == "span":
+                # ON-MANIFOLD control (A-8). random and shuffle are both off-manifold:
+                # a Gaussian and a coordinate permutation each point somewhere the
+                # model's computation does not go. C45/C46 found those producing MORE
+                # detection response than real concept vectors, which the off-manifold
+                # account explains and the concept-content account does not - but
+                # nothing so far separates the two, because every control tested is
+                # off-manifold.
+                #
+                # This one is on-manifold by construction: a random unit-weighted
+                # combination of the 30 real concept directions. It lies in the span of
+                # directions the model demonstrably uses, carries no single concept, and
+                # is matched in norm. If it behaves like the real vectors, the signal
+                # tracks manifold membership; if it behaves like random, it tracks
+                # content.
+                w = torch.randn(len(basis), generator=gen)
+                r = (w[:, None] * basis).sum(0)
                 vecs[c] = r / r.norm() * v.norm()
             else:
                 vecs[c] = v[torch.randperm(v.numel(), generator=gen)]
