@@ -6,7 +6,7 @@ near 14% of *its own* norm, injection strength becomes reportable as a fraction 
 the residual norm and the paper gets a calibration rule instead of a list of
 findings. If it lands somewhere else, we report that it varies by model.
 
-Script version required: **2026-09-07b**. (`a` fails to load Qwen — see the note below.)
+Script version required: **2026-09-07c**. (`a` and `b` both fail to load Qwen.)
 
 > **Re-upload `kaggle_s3_positive_control.py` as a New Version of `caliper-s3` before
 > starting.** Version `2026-09-07a` loads Gemma fine but dies on Qwen with
@@ -66,8 +66,10 @@ exec(open(hits[0]).read())
 
 | Line | Must read | If not |
 |---|---|---|
-| 1st line | `kaggle_s3_positive_control 2026-09-07b` | dataset didn't refresh; remove and re-add the input |
+| 1st line | `kaggle_s3_positive_control 2026-09-07c` | dataset didn't refresh; remove and re-add the input |
+| model source | **`found N model dir(s) in /kaggle/input`** then `using: /kaggle/input/models/qwen-lm/...` |
 | device budget | `device budget: {0: '14.5GiB', 1: '14.5GiB'} (no cpu offload)` |
+| storage retry | `storage dtype float16 (compute stays float32)` — expected on Qwen, harmless |
 | layer stack | `model.layers (64 layers)` then `layer 38 of 64` | tell me the printed path; `find_layers` needs Qwen's tree added |
 | vectors | `30 vectors, median norm 1.00, non-finite 0` | `--normalise` didn't take, or fp16 overflowed |
 | **residual norm** | `residual norm at last token: median ...` | **write this number down; it drives cell 3** |
@@ -181,5 +183,6 @@ re-running the same cell continues rather than restarting.
 | `could not locate decoder layers` | Qwen's module path missing | send me the error; one-line fix |
 | OOM at load | stale GPU memory, or the model is not 4-bit | Restart session; confirm both cards read ~15.5/15.6 GB free |
 | download starts instead of mounting | Qwen attached from HF not Kaggle Models | stop it; go back to step 0 |
-| `Some modules are dispatched on the CPU or the disk` | running version `a` | re-upload the script; `b` fixes it |
+| `Some modules are dispatched on the CPU or the disk` | running `a` or `b` | re-upload the script; `c` fixes it |
+| `!! no model found in /kaggle/input` | Qwen input not attached | **stop the run.** Add it under Input -> Models, else it downloads 20 GB from the Hub |
 | `median norm nan` | fp16 overflow | `--compute-dtype fp32` missing |

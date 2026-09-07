@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| C26 | 2026-09-07 | A-3 Qwen retry, **FAILED AT LOAD** | — | — | Kaggle log only | Same CPU-dispatch error, different cause: fp32 **storage** made `embed_tokens`/`lm_head` 3.1 GB each and unplaceable. Also silently fell back to the Hub — input not attached. Both fixed in `2026-09-07c` |
 | C25 | 2026-09-07 | A-3 Qwen probe, **FAILED AT LOAD** | — | — | Kaggle log only | `ValueError: Some modules are dispatched on the CPU or the disk`. Loader bug, not setup — version stamp, mount, and both GPUs were all correct. Fixed in `2026-09-07b` |
 | **C23** | **2026-09-07** | **forced, unit-norm, real, extended grid** | 2048…32768 | 300 | `data/s3/s3_unit_ext_forced_norm1.jsonl` | Onset alpha*=**8192**. Signal switches on at ~14% of the residual norm |
 | **C24** | **2026-09-07** | **forced, unit-norm, random, same grid** | 2048…32768 | 300 | `data/s3/s3_unit_ext_forced_random_norm1.jsonl` | **OUTCOME A1: real > random**, p=0.036 at alpha*, **p=9.5e-4** at 16384. Residual norm measured at **58,932** |
@@ -702,6 +703,7 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 | **C26: second Qwen attempt failed; `dtype=` and `bnb_4bit_compute_dtype` conflated.** fp32 storage makes Qwen's untied 778M-param embedding and lm_head 3.1 GB each and unplaceable on a 14.5 GiB card. `2026-09-07c` retries once at fp16 storage with fp32 compute preserved. Gemma's path is unchanged. Also added a loud warning on Hub fallback — the run had silently downloaded 20 GB with no model attached | section 8 |
 | 2026-09-07 | **C25: first Qwen attempt failed at load; two loader bugs fixed in `2026-09-07b`.** Hardcoded 13 GiB per-GPU budget (Gemma-tuned) replaced with one measured from free memory, and the `cpu` entry in `max_memory` removed — it let accelerate split the model to CPU, which bitsandbytes 4-bit refuses. Mounting Qwen from Kaggle Models is confirmed working, no download | section 8 |
 | 2026-09-07 | **A-3 run sheet written as a two-stage probe-then-sweep** (`kaggle/NEXT_SESSION_QWEN.md`). Qwen's residual norm is unknown, so a blind log grid would waste the session; instead a cheap alpha=0 probe measures the norm, writes it to the sidecar **before** any trials, and the sweep cells read that number and build the grid at the same *fractions of the norm* that bracketed Gemma's onset (1%-56%). The probe's alpha=0 rows double as the chat-template sanity gate. Weights must be mounted from Kaggle Models — a HuggingFace pull of Qwen2.5-32B is ~65 GB in bf16 and would exhaust the container | `kaggle/NEXT_SESSION_QWEN.md` |
 | 2026-09-07 (C23/C24) | **PAPER A'S HEADLINE CHANGES — outcome A1, not A2.** Under the published normalised protocol real beats norm-matched random at p=9.5e-4 (22/30) at alpha=16384. The pure content-free story does not survive and the abstract must be rewritten. What replaces it is stronger and more honest: a concept-specific component exists, it needs a perturbation ~14% of the residual-stream norm, it sits on a large content-free alarm, it is not self-specific, and **the published alpha=4 is 0.0068% of that norm — 2,048x below our onset**. The A2 result at unnormalised strengths stands as measured and becomes a section, not the thesis | notebook C23/C24 |
@@ -1358,6 +1360,36 @@ for the analysis is in the `.jsonl` itself. But the archived sidecar is now name
 
 **Fix before the next paired run:** suffix the sidecar the same way the `.jsonl` is
 suffixed, or pass a distinct `--out` per condition.
+
+### `dtype=` and `bnb_4bit_compute_dtype` are different knobs (C26, 7 Sep)
+The second Qwen attempt failed with the *same* CPU-dispatch error as C25 even though
+the C25 fix was confirmed working (`device budget: {0: '14.5GiB', 1: '14.5GiB'} (no cpu
+offload)` printed correctly). The cause was separate:
+
+- `bnb_4bit_compute_dtype` sets the precision of the **dequantised matmul**. This is
+  what stops Gemma-3-27B overflowing and must stay fp32 there.
+- `dtype=` on `from_pretrained` sets the **storage precision of everything bitsandbytes
+  does not quantise** — embeddings, `lm_head`, layernorms.
+
+`load()` passed the same fp32 to both. On Gemma that was affordable. On Qwen2.5-32B it
+is fatal: vocab 152,064 x hidden 5,120, **untied**, so `embed_tokens` and `lm_head` are
+~778M parameters each — **3.1 GB per module in fp32, as a single indivisible block**
+that accelerate must place entirely on one card already holding half the quantised
+body. It spills to CPU, and bitsandbytes 4-bit refuses any model split that way.
+
+Fixed in `2026-09-07c`: storage defaults to compute (so the Gemma path is unchanged
+byte for byte), and a `ValueError` mentioning "dispatched on the CPU" triggers one
+automatic retry at fp16 storage with compute precision untouched. Halving those two
+modules saves ~3.1 GB and costs no matmul precision.
+
+**The general trap:** a single `dtype` argument that looks like one decision is two.
+
+### The Hub fallback is silent, and cost a session (C26, 7 Sep)
+The same run never printed `found N model dir(s) in /kaggle/input`. The Qwen input was
+not attached, so `model_id` fell through to the Hub name and it spent ~4.4 minutes
+downloading ~20 GB before dying for the unrelated reason above. `2026-09-07c` prints a
+two-line `!!` warning at the fallback. **Check for `found N model dir(s)` in the first
+40 lines of any run** — its absence means the mount is missing.
 
 ### A `cpu` entry in `max_memory` silently breaks 4-bit loading (C25, 7 Sep)
 The first Qwen attempt died at load with:

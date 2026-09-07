@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-07b"
+VERSION = "2026-09-07c"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -230,7 +230,25 @@ def preflight(model_id):
         raise
 
 
-def load(model_id, compute_dtype=torch.float16):
+def load(model_id, compute_dtype=torch.float16, storage_dtype=None):
+    """Load in 4-bit. compute_dtype and storage_dtype are different knobs.
+
+    bnb_4bit_compute_dtype sets the precision of the dequantised matmul - this is what
+    stops Gemma-3-27B overflowing, and it must stay fp32 there. `dtype=` sets the
+    storage precision of everything bitsandbytes does NOT quantise: embeddings, lm_head,
+    layernorms. Passing fp32 to both, which is what this did until C26, doubles the
+    footprint of exactly the modules that cannot be split across devices.
+
+    On Qwen2.5-32B that is fatal: vocab 152,064 x hidden 5,120, untied, so embed_tokens
+    and lm_head are ~778M parameters each. In fp32 that is 3.1 GB per module as a single
+    indivisible block, and accelerate cannot place them on a 14.5 GiB card already
+    holding half the quantised body. It then spills to CPU, and bitsandbytes 4-bit
+    refuses any model split that way.
+
+    So storage defaults to compute (preserving the Gemma path byte for byte), and the
+    caller - or the automatic retry below - can drop storage to fp16 to halve those
+    modules while keeping fp32 matmul precision.
+    """
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
     hf_token = None if os.path.isdir(model_id) else preflight(model_id)
@@ -276,12 +294,31 @@ def load(model_id, compute_dtype=torch.float16):
         free, _ = torch.cuda.mem_get_info(i)
         budget[i] = f"{max(free / 1e9 - reserve_gb, 1.0):.1f}GiB"
     print(f"  device budget: {budget} (no cpu offload)", flush=True)
+    store = storage_dtype or compute_dtype
+    if store is not compute_dtype:
+        print(f"  storage dtype {str(store).split('.')[-1]} "
+              f"(compute stays {str(compute_dtype).split('.')[-1]})", flush=True)
     kw = dict(quantization_config=quant, device_map="auto", attn_implementation="eager",
               token=hf_token, max_memory=budget)
+
+    def _build(dt):
+        try:
+            return AutoModelForCausalLM.from_pretrained(model_id, dtype=dt, **kw)
+        except TypeError:   # transformers < 4.56 only knows torch_dtype
+            return AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=dt, **kw)
+
     try:
-        model = AutoModelForCausalLM.from_pretrained(model_id, dtype=compute_dtype, **kw)
-    except TypeError:   # transformers < 4.56 only knows torch_dtype
-        model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=compute_dtype, **kw)
+        model = _build(store)
+    except ValueError as e:
+        # The unquantised modules did not fit. Halving them is nearly always enough and
+        # costs no matmul precision, so retry once rather than making the user re-run.
+        if "dispatched on the CPU" not in str(e) or store is torch.float16:
+            raise
+        print("  unquantised modules do not fit at fp32 storage; retrying at fp16 "
+              "storage (compute precision unchanged)", flush=True)
+        gc.collect()
+        torch.cuda.empty_cache()
+        model = _build(torch.float16)
     model.eval()
     for i in range(torch.cuda.device_count()):
         used = torch.cuda.memory_allocated(i) / 1e9
@@ -516,7 +553,18 @@ def main():
 
     # A model added through Kaggle's Inputs panel wins: it needs no token, and Kaggle's
     # licence acceptance covers gated weights that HuggingFace would refuse.
-    model_id = a.model_path or find_kaggle_input(a.model) or MODELS[a.model]
+    model_id = a.model_path or find_kaggle_input(a.model)
+    if model_id is None:
+        # C26: a session ran without the model attached, fell through to the Hub, and
+        # spent four minutes downloading before failing for an unrelated reason. Say so
+        # loudly - the Inputs panel is easy to forget after a session restart, and the
+        # Kaggle mount is both faster and the only route that needs no token.
+        model_id = MODELS[a.model]
+        print(f"  !! no model found in /kaggle/input - falling back to the Hub "
+              f"({model_id}).", flush=True)
+        print(f"  !! this downloads ~20 GB and needs a token for gated weights. If you "
+              f"meant to use the Kaggle mount, stop now and add it under "
+              f"Input -> Models.", flush=True)
     first = torch.float32 if a.compute_dtype == "fp32" else torch.float16
     model, tok = load(model_id, first)
     layers = find_layers(model)
