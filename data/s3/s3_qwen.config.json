@@ -1,0 +1,43 @@
+{
+  "version": "2026-09-07c",
+  "argv": [
+    "--model",
+    "qwen",
+    "--compute-dtype",
+    "fp32",
+    "--stage",
+    "forced",
+    "--normalise",
+    "--control",
+    "none",
+    "--alphas",
+    "2",
+    "6",
+    "12",
+    "25",
+    "50",
+    "100",
+    "--out",
+    "/kaggle/working/s3_qwen.jsonl"
+  ],
+  "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/32b-instruct/1",
+  "layer": 38,
+  "n_layers": 64,
+  "normalise": true,
+  "control": "none",
+  "alphas": [
+    2.0,
+    6.0,
+    12.0,
+    25.0,
+    50.0,
+    100.0
+  ],
+  "trial_seed": 0,
+  "residual_norm_at_read_median": 177.82208251953125,
+  "residual_norm_at_read_min": 174.12283325195312,
+  "residual_norm_at_read_max": 180.5028533935547,
+  "vector_norm_median": 1.0,
+  "n_vectors": 30,
+  "non_finite_vectors": 0
+}

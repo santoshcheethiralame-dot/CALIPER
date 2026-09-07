@@ -166,6 +166,9 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| C27 | 2026-09-07 | A-3 Qwen probe, alpha=0 | 0 | 60 | `data/s3/s3_qwen_probe_forced_norm1.jsonl` | **Residual norm 177.8** vs Gemma's 58,932 — **331x**. Baseline P(YES) 1.03e-09 |
+| C28 | 2026-09-07 | A-3 Qwen real sweep | 2…100 (1.1–56% of norm) | 360 | `data/s3/s3_qwen_forced_norm1.jsonl` | **No onset. Peak 1.36e-05, four orders below the filed 0.10 bar.** Rise is real (p=3.7e-09, 29/30) but never approaches YES |
+| C29 | 2026-09-07 | A-3 Qwen random control | same | 360 | `data/s3/s3_qwen_rand_forced_random_norm1.jsonl` | Random ≥ real in 3 of 4 movable cells. No concept-specific component anywhere |
 | C26 | 2026-09-07 | A-3 Qwen retry, **FAILED AT LOAD** | — | — | Kaggle log only | Same CPU-dispatch error, different cause: fp32 **storage** made `embed_tokens`/`lm_head` 3.1 GB each and unplaceable. Also silently fell back to the Hub — input not attached. Both fixed in `2026-09-07c` |
 | C25 | 2026-09-07 | A-3 Qwen probe, **FAILED AT LOAD** | — | — | Kaggle log only | `ValueError: Some modules are dispatched on the CPU or the disk`. Loader bug, not setup — version stamp, mount, and both GPUs were all correct. Fixed in `2026-09-07b` |
 | **C23** | **2026-09-07** | **forced, unit-norm, real, extended grid** | 2048…32768 | 300 | `data/s3/s3_unit_ext_forced_norm1.jsonl` | Onset alpha*=**8192**. Signal switches on at ~14% of the residual norm |
@@ -224,6 +227,93 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C27 / C28 / C29 — Qwen2.5-32B, the invariant test (2026-09-07) — **INVARIANT FAILS**
+
+A-3, run at `2026-09-07c` after C25/C26. Probe (alpha=0, 60 rows), real sweep (360),
+norm-matched random (360). Qwen2.5-32B-Instruct, 4-bit NF4, fp32 compute / fp16
+storage, layer **38 of 64** (0.594 depth, matched to Gemma's 37/62). Archived to
+`data/s3/s3_qwen*`.
+
+**The measurement the run was for.**
+
+| | residual norm at read position |
+|---|---|
+| Gemma-3-27B L37 | **58,932** |
+| Qwen2.5-32B L38 | **177.8** |
+| ratio | **331x** |
+
+Gemma's activations are anomalous, not typical. This alone explains why the published
+alpha=4 is a live perturbation in most of the literature (2.2% of Qwen's norm) and
+inert on Gemma (0.0068%). The apparent disagreement between papers about what alpha
+"means" dissolves once the norm is reported.
+
+**Alphas were auto-scaled to Gemma's fractions**: 2, 6, 12, 25, 50, 100 = 1.1%, 3.4%,
+6.7%, **14.1%**, 28.1%, 56.2% of Qwen's norm. This covers Gemma's entire active range,
+onset to saturation.
+
+**Result — nothing, across four orders of magnitude.**
+
+| fraction of own norm | Gemma P(YES) | Qwen P(YES) |
+|---|---|---|
+| 3.5% | 0.0003 | 1.05e-09 |
+| 7.0% | 0.0312 | 1.14e-09 |
+| **13.9%** | **0.3639** | **1.82e-09** |
+| 27.8% | 0.5232 | 1.55e-08 |
+| 55.6% | 0.4434 | 1.36e-05 |
+
+At the fraction where Gemma reads 0.36, Qwen reads 1.8e-09 — a factor of 2x10^8.
+
+**Filed stop clause fires.** Addendum 2: *"If no alpha in the sweep reaches 0.10,
+report that the unit-norm protocol does not produce detection at any tested strength on
+this model and quantisation, and stop."* Highest value reached: **1.36e-05**, four
+orders below the bar. No onset. Reported and stopped.
+
+**THE HYPOTHESIS IS DEAD. alpha\* does not track the residual-stream norm across
+models.** The calibration rule the run was designed to establish does not exist.
+
+**The pipeline is not broken, and this is the important control.** P(YES) rises
+monotonically with alpha and the rise is highly significant: p=9.5e-4 at alpha=25,
+p=1.7e-6 at 50, **p=3.7e-09 at 100, rising on 29/30 concepts**. The injection reaches
+the readout and moves it in the right direction. It simply never moves it anywhere near
+an affirmative answer.
+
+**Where anything moves, random matches or beats real** — the opposite of Gemma:
+
+| alpha | framing | real | random | p | |
+|---|---|---|---|---|---|
+| 50 | introspective | 1.55e-08 | 2.53e-08 | 0.055 | random higher |
+| 50 | neutral | 1.55e-05 | 5.76e-06 | 0.015 | real higher |
+| 100 | introspective | 1.36e-05 | 2.46e-03 | 0.035 | **random higher** |
+| 100 | neutral | 7.07e-03 | 9.67e-03 | 0.045 | random higher |
+
+At these magnitudes all four are "the model says NO with overwhelming confidence", so
+the directions are not worth interpreting beyond noting that no concept-specific
+component appears anywhere.
+
+**THE OPEN QUESTION, AND IT GATES EVERY CLAIM ABOVE.** Vogel reports detection working
+on this exact model family, so a flat null here contradicts published work and must not
+be written up before it is checked. Three candidates the run cannot separate:
+
+1. **The readout is mis-specified for Qwen.** The strongest hint: baseline P(YES) is
+   **1.03e-09** on Qwen against **3e-05** on Gemma — Qwen is ~30,000x more certain of
+   NO before anything is injected. A model that assigns 1e-09 to YES on a yes/no
+   question is odd. The YES/NO id sets are computed from Qwen's own tokenizer at
+   runtime, so they are not Gemma leftovers, but the chat template may make the first
+   generated token something that is neither.
+2. **Wrong layer.** 38/64 was chosen by depth-matching Gemma, not from anything about
+   Qwen. Detection may live elsewhere in this model.
+3. **Qwen genuinely does not do this at 4-bit.**
+
+**The decisive check, ~10 minutes:** run `--stage control` (generation) at alpha=100 and
+read the text. If the concept appears in the output while forced-choice still reads
+1e-05, the injection is functionally reaching the model and this is a real and strong
+Probe-Report Gap — content present, never reported. If the output is unchanged, the
+injection is not doing what we think and the null is an artifact.
+
+**Do not report the Qwen null in any form until that check has run.** A null from a
+readout nobody validated on this tokenizer is not a null.
+
 
 ### C23 / C24 — Extended unit-norm grid, real and random (2026-09-07) — **OUTCOME A1**
 
@@ -703,6 +793,8 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 | **The Qwen null is EMBARGOED until the generation check runs.** It contradicts Vogel on the same model family, and baseline P(YES)=1.03e-09 vs Gemma's 3e-05 is a 30,000x gap that could mean the readout is mis-specified for this tokenizer. One 10-minute `--stage control` run at alpha=100 separates "strong Probe-Report Gap" from "artifact". **Nothing about Qwen goes in the paper before it** | notebook C27-29 |
 | 2026-09-07 | **C26: second Qwen attempt failed; `dtype=` and `bnb_4bit_compute_dtype` conflated.** fp32 storage makes Qwen's untied 778M-param embedding and lm_head 3.1 GB each and unplaceable on a 14.5 GiB card. `2026-09-07c` retries once at fp16 storage with fp32 compute preserved. Gemma's path is unchanged. Also added a loud warning on Hub fallback — the run had silently downloaded 20 GB with no model attached | section 8 |
 | 2026-09-07 | **C25: first Qwen attempt failed at load; two loader bugs fixed in `2026-09-07b`.** Hardcoded 13 GiB per-GPU budget (Gemma-tuned) replaced with one measured from free memory, and the `cpu` entry in `max_memory` removed — it let accelerate split the model to CPU, which bitsandbytes 4-bit refuses. Mounting Qwen from Kaggle Models is confirmed working, no download | section 8 |
 | 2026-09-07 | **A-3 run sheet written as a two-stage probe-then-sweep** (`kaggle/NEXT_SESSION_QWEN.md`). Qwen's residual norm is unknown, so a blind log grid would waste the session; instead a cheap alpha=0 probe measures the norm, writes it to the sidecar **before** any trials, and the sweep cells read that number and build the grid at the same *fractions of the norm* that bracketed Gemma's onset (1%-56%). The probe's alpha=0 rows double as the chat-template sanity gate. Weights must be mounted from Kaggle Models — a HuggingFace pull of Qwen2.5-32B is ~65 GB in bf16 and would exhaust the container | `kaggle/NEXT_SESSION_QWEN.md` |
@@ -884,6 +976,14 @@ conclusion changes sign or loses significance.*
 > test whether its onset lands near 14% of that norm. If it does, "report alpha as a
 > fraction of the residual norm" goes from a methodological suggestion to a
 > calibrated rule, which is a materially stronger contribution.
+>
+> **ANSWERED 7 Sep 2026 — and the answer is no.** C27-29 ran it. Qwen's residual norm
+> is 177.8 against Gemma's 58,932, and at every matched fraction of its own norm Qwen
+> shows nothing: 1.8e-09 where Gemma reads 0.36. The invariant does not hold and the
+> calibration rule does not exist. What survives is the 331x measurement itself, which
+> explains why alpha=4 is meaningful in most of the literature and inert on Gemma.
+> **A-3 is now superseded by A-9 (the generation check), which decides whether the Qwen
+> null is reportable at all.**
 
 **Question.** Is this a finding about Gemma or a pattern?
 
