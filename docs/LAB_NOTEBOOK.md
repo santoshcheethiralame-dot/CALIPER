@@ -236,6 +236,61 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C40 — Audit of the S3 positive control itself (2026-09-07) — **THE REPRODUCTION FIGURE WAS WRONG**
+
+Prompted by a direct question: is the instrument right for everything so far? Two silent
+bugs in one day (C31 read position, C39 alpha grid) make the prior that more exist.
+
+**The mechanics audit came back clean.** `yes_no_ids` returns six distinct first tokens
+per answer with no YES/NO overlap; `forced_choice` reads `logits[0, -1]`, genuinely the
+first generated token; injection covers all prompt positions in the single forward pass;
+the random control is a Gaussian rescaled to matched norm and the shuffle a coordinate
+permutation, both norm-preserving; no concept is a substring of another, and the only
+`desert` hit is "deserts", a true positive. The `>=3 words` coherence rule flagged in C15
+discards **zero** affirmative answers in the real data — all 35 short responses begin
+with NO — so `detected == said_YES` at every alpha and that worry is closed.
+
+**The scoring, however, does not reconcile with what was published.** At alpha=6, n=30:
+
+| rule | detections | FPR at alpha=0 |
+|---|---|---|
+| **pre-registered scorer** (affirmative at the start, plus coherence) | **2/30 = 6.7%** | 0/30 |
+| "YES" anywhere in the response | 10/30 = 33.3% | **5/30 = 16.7%** |
+| what `docs/s3-results.md` claimed | 3/30 = 10.0% | 0/30 |
+
+**The 3/30 matches neither rule.** It is the hand-read subset in which concept-laden text
+precedes an affirmative answer — desert, fear, betrayal — identified by reading
+transcripts, not by any filed rule. The pre-registration says the scorer is final and no
+re-scoring follows results. **The number this study is entitled to report is 6.7%.**
+
+Worse, the reported value is the one closest to the published 10.8%, and alpha=6 was then
+chosen as the operating point *because* it matched — a choice C18 already criticised for
+selecting the operating point against the quantity being measured. **The safeguard
+against exactly this was in place and simply not consulted.**
+
+**A second error in the same document.** Section 2's generated-text column read 50 / 23 /
+27 / 7 percent at alpha 2/4/6/8. The first two reproduce under the permissive rule;
+**27% and 7% match no rule computable from the archived data.** Correct values are
+43/17/7/0 (pre-registered) and 50/23/33/10 (permissive). The first-token column was
+verified against `s3_forced_real_sweep.jsonl` and was correct to the digit.
+
+**The readout finding survives and sharpens.** First-token P(YES) stays between 0.417 and
+0.504 across alpha 2 to 8 while the generated-text rate runs 43% to 0% (pre-registered)
+or 50% to 10% (permissive). The two generated-text rules do not even agree on the shape.
+
+**What is untouched.** Everything in sections 3-7 of the results doc comes from
+`forced_choice`, which never calls the generation scorer: the A1 result, the content-free
+comparison, the framing comparison, the 139x norm ratio. **Detection with a correct
+identification remains 0 in 210 under every rule tried** — the one number in Study 3 that
+no scoring choice moves.
+
+**Corrected in:** `docs/s3-results.md` sections 1 and 2 plus its corrections log,
+`docs/paper-s3-draft.md` (banner and both reproduction sentences),
+`paper/PLAN.md`. **`docs/preregistration-s3-forced-choice.md` is deliberately left
+untouched** — it is a filed dated record and the whole value of one is that it is not
+edited after the fact.
+
+
 ### C39 — Gemma refit, first attempt (2026-09-07) — **VOID GRID, ONE NUMBER SALVAGED**
 
 A-12 at `2026-09-07e`. The forced-choice arms are unusable: `argv` records
@@ -1337,6 +1392,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C40) | **THE REPRODUCTION FIGURE IS CORRECTED: 6.7%, not 10.0%.** The pre-registered scorer gives 2/30 at alpha=6; the published 3/30 was a hand-read subset matching no filed rule, and it happened to be the value closest to the target 10.8% that the operating point was then chosen to match. **The safeguard existed and was not consulted.** Corrected in the results doc, the draft and the plan; the pre-registration is left untouched as a filed record | notebook C40 |
+| 2026-09-07 (C40) | **Section 2's readout table had two uncomputable numbers** (27% and 7% at alpha 6 and 8). Recomputed under both rules: 43/17/7/0 pre-registered, 50/23/33/10 permissive. The first-token column verified correct. **The readout finding survives and sharpens** — the two generated-text rules do not even agree on the shape of the curve | notebook C40 |
+| 2026-09-07 (C40) | **A detection rate is only interpretable beside the false-positive rate produced by the SAME rule.** The permissive rule that yields 33.3% at alpha=6 also yields 16.7% at alpha=0, destroying the control. Report both or neither | notebook C40 |
 | 2026-09-07 (C39) | **THE 331x RESIDUAL-NORM RATIO IS SUPERSEDED — publish 139x.** Measured at the concept position, where the vectors are actually read: Gemma 36,244.97, Qwen 261.53. The 331x figure was tail-vs-tail and both denominators were wrong. The conclusion is unchanged in kind — alpha=4 is live on most models and inert on Gemma — but the number is not | notebook C39 |
 | 2026-09-07 (C39) | **A run sheet must never require pasting a number between cells.** A-12's `R = 0.0` placeholder went unfilled, every alpha computed to zero, and a 45-minute session produced 420 rows at alpha=0. `--alpha-frac` now computes the grid inside the run from the norm it already measured, and an all-zero multi-alpha grid refuses to start. **Sheet's fault, not the operator's** | `2026-09-07f`; A-12b |
 | 2026-09-07 (C37) | **C14's ~200-event required-N does NOT transfer to real units — quote the real figure, not the synthetic one.** Real units reach only ~0.35 alignment at 200 events and saturate between 400 and 800, so the requirement is **2-4x** the planted-unit figure. Failures and passes need the same amount of data, so sample size is not what separates the failure class | notebook C37 |

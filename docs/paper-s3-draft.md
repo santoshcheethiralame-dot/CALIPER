@@ -11,6 +11,13 @@
 > contribution list are in `paper/PLAN.md` section 0; the LaTeX version in `paper/main.tex`
 > carries the corrected abstract and introduction. Do not circulate this file's framing.
 
+> **Reproduction figure corrected on 7 September 2026.** The 10.0% (3/30) quoted below is
+> not produced by the pre-registered scorer, which gives **6.7% (2/30)**, Wilson 95% CI
+> [1.8%, 21.3%]. A permissive "YES anywhere" rule gives 33.3% but also yields 5/30 false
+> positives at α=0. The 3/30 was a hand-read subset and is withdrawn. Full account in
+> `docs/s3-results.md` under "Corrections made along the way". **Every reproduction
+> sentence in this file is stale.**
+
 ---
 
 ## Abstract
@@ -22,8 +29,9 @@ model's report reflects the content of what was injected or only the fact of a
 perturbation. To separate the two, we compare real concept vectors against two vectors of
 the same magnitude that carry no concept: a Gaussian direction rescaled to the real norm,
 and the real vector with its coordinates shuffled. On Gemma3-27B-it, at the layer and
-prompt of the original work, we first reproduce the reported detection rate (10.0%
-against 10.8%, with zero false positives). We then measure the probability that the
+prompt of the original work, we recover a detection rate of 6.7% under our
+pre-registered scorer against a published 10.8%, with zero false positives; the interval
+includes their figure but we do not claim a quantitative replication. We then measure the probability that the
 model's first generated token is "yes", so that no output yet exists for it to read. At
 the pre-registered operating point, a content-free vector produces the whole effect (real
 0.417, random 0.305, p=0.33). At lower strengths a concept-specific component is present
@@ -139,10 +147,19 @@ stage and is reported in Section 3.3.
 
 ### 3.1 The effect reproduces
 
-Under the generated-text readout with the introspective prompt at α=6, 3 of 30 trials were
-scored as detections. That is 10.0%, Wilson 95% CI 3.5% to 25.6%, against the published
-10.8%. At α=0 the count was 0 of 30, matching the published 0% false-positive rate. The
-experiments that follow concern an effect that is present in our setup.
+Under the generated-text readout with the introspective prompt at α=6, **2 of 30** trials
+were scored as detections by the pre-registered scorer. That is 6.7%, Wilson 95% CI 1.8%
+to 21.3%, against the published 10.8%; the interval contains their value but the point
+estimate is below it and we do not claim a quantitative replication. At α=0 the count was
+0 of 30, matching the published 0% false-positive rate under the same rule.
+
+The rate is fragile to the scoring rule in a way worth stating here rather than in
+limitations. Counting "yes" anywhere in the response rather than at its start gives
+33.3% (10/30) at α=6 — but the same rule returns 5/30 at α=0, so it destroys the
+false-positive control that makes the detection number meaningful. Both trials the
+pre-registered scorer counts name the wrong concept. **Detection accompanied by a correct
+identification occurs 0 times in 210 trials across the whole sweep**, and that null is
+stable under every scoring rule we tried.
 
 ### 3.2 The reported rate is a property of the readout
 

@@ -38,7 +38,7 @@ current draft are wrong or overstated, and the paper's positioning changes as a 
    controls only against no injection.
 2. **"The original does not state its normalisation convention."** False. Macar et al.
    L2-normalise before scaling by α, following Lindsey. Ours are unnormalised (median norm
-   5,002). Our α is therefore **not** their α, and "10.0% vs 10.8%" is a rate matched by
+   5,002). Our α is therefore **not** their α, and "6.7% vs 10.8%" is a rate matched by
    sweeping, not a protocol match. Say so. Run the normalised protocol (§6, run 2).
 3. **"The framing control had not been run."** Overstated. Macar et al. have an
    "Unprompted" variant with no preamble, and found it worse. Ours keeps the preamble and
@@ -164,7 +164,7 @@ Word budgets sum to ~3,200 words of prose, which with four figures and four tabl
 | 1 | Introduction | 550 | the claim; what a no-injection control cannot separate (three readings); what the two critiques inferred and did not manipulate; what the defended paper controlled for; the two manipulations we add; contributions (5) | — |
 | 2 | Related work | 300 | the map in §0 as prose: Lindsey → Godet/Morris/Vogel → Hahami/Pearson-Vogel → L&M / Macar / Singh. One sentence each on what they measured and what they did not. Nisbett & Wilson for confabulation | — |
 | 3 | Method | 550 | model, hardware, fp16 overflow; vectors (unnormalised, and why that matters); injection; two prompts verbatim; two readouts; two controls; analysis; pre-registration | Table 1: the two prompts |
-| 4.1 | Reproduction | 120 | 10.0% [3.5, 25.6] vs 10.8%; 0/30 FPR; **now with the caveat that α is matched by rate, not protocol** | — |
+| 4.1 | Reproduction | 120 | **6.7% [1.8, 21.3]** vs 10.8%; 0/30 FPR; **α matched by rate not protocol, and the 10.0% previously quoted was not the pre-registered scorer's number (corrected 7 Sep)** | — |
 | 4.2 | Readout | 180 | 7%–50% vs flat | Fig. 2 (readout) |
 | 4.3 | First-token shift; failed prediction | 200 | 0.00003 → 0.417, p=9.3e-9; the betrayal quote; outcome A | — |
 | 4.4 | Content-free controls | 350 | primary A2 at α=6; sweep; 36/61/82%; controls agree; why α=6 was the wrong place | Fig. 1 (dose-response), Fig. 3 (paired), Table 2 (sweep) |

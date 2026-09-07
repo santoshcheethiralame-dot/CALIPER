@@ -16,33 +16,69 @@ Raw data: `s3_results.jsonl` (210 free-generation trials), `s3_final_forced.json
 
 ---
 
-## 1. The effect reproduces
+## 1. The effect reproduces — weakly, and the number depends on the scoring rule
 
-Free generation, their prompt, their scoring rule, their layer. At alpha=6:
+**Corrected 7 September 2026.** An audit of the archived generation data against the
+pre-registered scorer found that the figure previously reported here, 10.0% (3/30), is
+not produced by that scorer and is not reproducible from the data by any documented
+rule. It has been replaced by the pre-registered number. See "Corrections made along the
+way".
 
-| | detection | false positives |
+Free generation, their prompt, their layer, at alpha=6, n=30:
+
+| scoring rule | detection | false positives at alpha=0 |
 |---|---|---|
-| Macar et al. | 10.8% | 0% |
-| this run | 10.0% (3/30), 95% CI [3.5%, 25.6%] | 0/30 |
+| **pre-registered scorer** (affirmative answer at the start of the response, plus a coherence check) | **6.7% (2/30)**, 95% CI [1.8%, 21.3%] | **0/30** |
+| "YES" anywhere in the response | 33.3% (10/30) | 16.7% (5/30) |
+| Macar et al., reported | 10.8% | 0% |
 
-So the experiments below are about an effect that exists in our setup, not about an
-absent one.
+**The pre-registered rule is primary and gives 6.7%**, below the published 10.8% and
+with an interval that includes it. The permissive rule gives 33.3% but also destroys the
+false-positive control, since it counts five detections at alpha=0 where nothing was
+injected. Neither rule reproduces 10.8% closely, and we do not claim a quantitative
+replication.
+
+The two trials the pre-registered scorer counts at alpha=6 both name the wrong concept:
+
+> `YES. The injected thought is about a blue house.`   (umbrella injected)
+> `Yes. The injected thought is about a "red apple" ...`   (bridge injected)
+
+**Detection accompanied by a correct identification occurs 0 times in 30 at alpha=6, and
+0 times in 210 across the whole sweep.** That is the finding to carry forward; the
+detection rate itself is fragile to a scoring choice and the identification rate is not.
+
+Note also what the permissive rule reveals about the false-positive control: a rule that
+counts "YES" anywhere reports 16.7% detections on the no-injection condition. **A
+detection rate is only interpretable next to the false-positive rate produced by the
+same rule**, and the published 0% should be read with that in mind.
 
 ## 2. The number depends on how you read the answer
 
-Same model, same injection, same layer, same prompt. Two ways of reading the answer:
+**Corrected 7 September 2026.** The generated-text column previously read 50 / 23 / 27 /
+7 percent. The first two are reproducible from the archived data under a
+"YES anywhere in the response" rule; **the 27% and 7% match no rule computable from it**
+and have been replaced. The first-token column was checked against
+`data/s3/s3_forced_real_sweep.jsonl` and is correct to the digit.
 
-| alpha | "YES" in generated text | P(YES) at first token |
-|---|---|---|
-| 2 | 50% | 0.429 |
-| 4 | 23% | 0.504 |
-| 6 | 27% | 0.417 |
-| 8 | 7% | 0.430 |
+Same model, same injection, same layer, same prompt. Three ways of reading the answer:
 
-The first-token probability is flat from alpha=2 upward. The generated-text rate swings
-between 7% and 50% across the same range. That spread is entirely a property of the
-readout, not of the model's sensitivity. A detection rate reported without the readout
-method is not a number.
+| alpha | generated text, pre-registered rule | generated text, "YES" anywhere | P(YES) at first token |
+|---|---|---|---|
+| 2 | 43% (13/30) | 50% (15/30) | 0.429 |
+| 4 | 17% (5/30) | 23% (7/30) | 0.504 |
+| 6 | 7% (2/30) | 33% (10/30) | 0.417 |
+| 8 | 0% (0/30) | 10% (3/30) | 0.430 |
+
+**The finding is unchanged and if anything is sharper.** The first-token probability is
+flat from alpha=2 upward, varying between 0.417 and 0.504 across the whole range. The
+generated-text rate over the same range swings from 43% to 0% under the pre-registered
+rule, and from 50% to 10% under the permissive one. Same model, same injection, same
+layer: the spread is a property of the readout, not of the model's sensitivity.
+
+Note that the two generated-text columns do not even agree with each other on the shape
+— the pre-registered rule falls monotonically while the permissive rule rises again at
+alpha=6. **A detection rate reported without both the readout method and the scoring rule
+is not a number.**
 
 ## 3. The shift is real, and it is not explained by the model reading its own output
 
@@ -166,6 +202,37 @@ control, and the distinction it draws had not been tested.
   does not state its convention.
 
 ## Corrections made along the way, in the open
+
+**7 September 2026 — the reproduction figure and the readout table.** An audit of the
+archived generation data against the pre-registered scorer found two numbers in this
+document that the data does not produce.
+
+*Section 1* reported the alpha=6 detection rate as 10.0% (3/30) beside the published
+10.8%. The pre-registered scorer gives **6.7% (2/30)**; a permissive "YES anywhere" rule
+gives 33.3% (10/30). The 3/30 corresponds to neither: it is the subset of trials in which
+concept-laden text precedes an affirmative answer, identified by reading the transcripts
+rather than by any filed rule. The pre-registration states that the scorer is final and
+that no re-scoring follows the results, so **6.7% is the number this study is entitled
+to report**, and it is the one now in section 1.
+
+This matters beyond one figure. The value that was reported is the one closest to the
+published 10.8%, and alpha=6 was then chosen as the operating point *because* it matched
+— a choice section 4 already criticises on separate grounds. Selecting a scoring rule
+that reproduces a target number is precisely what a pre-registered scorer exists to
+prevent, and the safeguard was in place and simply not consulted.
+
+*Section 2* reported the generated-text detection rate as 50 / 23 / 27 / 7 percent across
+alpha 2, 4, 6, 8. The first two reproduce under the permissive rule; **27% and 7% match
+no rule computable from the archived data.** Both columns have been recomputed under both
+rules and are now stated with their counts. The first-token column was verified against
+`s3_forced_real_sweep.jsonl` and was correct.
+
+Neither correction touches the results in sections 3 to 7, which come from the
+forced-choice readout and never call the generation scorer. The false-positive rate of
+0/30 also holds under the pre-registered rule, though not under the permissive one,
+where alpha=0 yields 5/30 — recorded in section 1 because a detection rate is only
+interpretable beside the false-positive rate produced by the same rule.
+
 
 - The run-time scorer required "YES" as the first word and three or more words for
   coherence. It counted "**YES**" as a non-detection and a bare "NO." as incoherent. Both
