@@ -236,6 +236,81 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C47 - S1 multi-seed confirmatory run, n=100 (2026-09-08) - **NO IMPROVEMENT**
+
+The pre-registered confirmatory run (`preregistration-s1-multiseed.md`, filed 7 Sep with
+a same-day k=2 clarification). 100 units, 5 seeds each at k=1 and k=2, selection by
+held-out R2, no ground truth used in selection. ~4.5 h local CPU.
+`results/s1_multiseed.jsonl`.
+
+**PRIMARY - FAIL.**
+
+| | |
+|---|---|
+| multi-seed pass rate | **76/100**, Wilson 95% [0.668, 0.833] |
+| criterion | lower bound > 0.90 |
+| verdict | **FAIL** |
+| C13 single fit, same units | **77/100** |
+
+The repair does not improve the instrument. It is one unit *worse* than the single fit
+it was meant to replace.
+
+**Repairs 8, breaks 9.** McNemar exact on the 17 discordant units: **p = 1.000**. There
+is no detectable difference between the two protocols.
+
+| | |
+|---|---|
+| gate FAIL -> multiseed PASS | 8 |
+| gate PASS -> multiseed FAIL | **9** |
+
+**The paired change is positive but tiny and its tails are asymmetric.** Median +0.0020,
+95% CI [+0.0005, +0.0040], improved 65 and worsened 33 - so it usually helps a little
+and occasionally destroys a unit:
+
+| | median | worst case |
+|---|---|---|
+| gains | +0.0118 | +0.7804 |
+| losses | -0.0026 | **-0.9553** |
+
+n1394 goes 0.9971 -> 0.0418. Every damaged unit carries a large positive k2_gain
+(+0.017 to +0.701), the signature of the k=1 arm landing badly on a unit a single seeded
+fit happened to get right. **The lottery cuts both ways**, and C43 only ever saw the side
+where there was nowhere to go but up.
+
+**C43's six pilot units, rescored here:**
+
+| neuron | gate | multi-seed | passes? |
+|---|---|---|---|
+| n527 | 0.1445 | 0.9249 | no |
+| n1503 | 0.3481 | 0.9815 | **yes** |
+| n2723 | 0.5151 | 0.9671 | no |
+| n2023 | 0.6789 | 0.6639 | no |
+| n1180 | 0.7237 | 0.9883 | no |
+| n1625 | 0.8040 | 0.9387 | no |
+
+Five of six improve substantially and only one clears the bar, because `k2_gain` fails
+them even where alignment recovers. C43 reported alignment alone and did not apply the
+full pass criterion - that is why its pilot looked stronger than it was.
+
+**Per the filed decision rule this is outcome NO IMPROVEMENT, and the pre-registration
+says to report it as "the pilot was a six-unit artifact".** That is close to right, with
+one correction: the pilot was not wrong about alignment recovering, it was wrong about
+that being sufficient.
+
+**A confound in my own protocol, and it is the obvious follow-up.** The multi-seed arm
+ran **1 restart x 800 steps** against the gate's **3 restarts x 2500 steps**. So this
+compares five cheap draws to one expensive draw, not seed-selection at matched budget.
+It is a fair test of "is five cheap draws better than one expensive one" - answer: no -
+and **not** a fair test of "does selecting on held-out R2 help". Matching the budget is
+the next run and it is cheap.
+
+**What survives.** C41/C42's ruggedness result and C43's +0.953 correlation between
+test_r2 and true alignment both stand - they are about the objective landscape, not
+about this protocol. What does not survive is the claim that multi-seed selection
+repairs the instrument. The C13 headline is unchanged: **77% recovered, 23% fail
+silently.**
+
+
 ### C45 / C46 - Gemma forced choice, vectors refit at the concept (2026-09-07) - **OUTCOME A3**
 
 A-12b, `2026-09-07f`, `--alpha-frac`, `vector_read_position: concept`, layer 37,
@@ -1659,6 +1734,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (C47) | **THE MULTI-SEED REPAIR FAILS ITS PRE-REGISTERED CRITERION. 76/100 vs the gate's 77/100**, Wilson [0.668, 0.833] against a 0.90 bar. Repairs 8, breaks 9, McNemar p=1.000. **C43's "the failure class is repairable" is WITHDRAWN** - it was measured on six units chosen as the worst, scored on alignment alone rather than the full pass criterion | notebook C47 |
+| 2026-09-08 | **The lottery cuts both ways.** Median paired change is +0.0020 [+0.0005, +0.0040] but the tails are asymmetric: median gain +0.0118 against a worst-case loss of **-0.9553** (n1394, 0.9971 -> 0.0418). Every damaged unit shows a large positive k2_gain - the k=1 arm landing badly on a unit one seeded fit got right | notebook C47 |
+| 2026-09-08 | **My protocol had a confound and the follow-up is cheap.** The multi-seed arm ran 1 restart x 800 steps against the gate's 3 x 2500, so this tested five cheap draws against one expensive draw, not seed-selection at matched budget. Fair test of the former, not the latter. **Re-run at matched budget before retiring the idea** | notebook C47 |
+| 2026-09-08 | **C13's headline is unchanged and stands: 77% recovered, 23% fail silently.** C41/C42 ruggedness and C43's +0.953 test_r2-vs-alignment correlation survive - they describe the landscape, not this protocol | notebook C47 |
 | 2026-09-07 (C45/C46) | **PAPER A'S HEADLINE IS DEAD IN BOTH ITS PREVIOUS FORMS. Pre-registered outcome A3: norm-matched RANDOM vectors produce MORE detection response than real concept vectors**, at every measurable strength and in both framings (p=1.1e-05 to 3.6e-02). Under the neutral prompt a real concept pushes P(YES) **below** the no-injection baseline (0.1882 -> 0.1205, p=9.3e-03, down on 23/30) while random pushes it up (-> 0.3199). Onset moves 13.9% -> 40.0% of the residual norm | notebook C45/C46 |
 | 2026-09-07 | **THIS IS THE THIRD ANSWER TO ONE QUESTION AND THE FIRST TWO USED A BROKEN INSTRUMENT.** C18/C19 said A2, C23/C24 said A1, C45/C46 says A3. Only the third read vectors at the concept position, and only that instrument has passed a steering control (C32). **Any write-up must state that the answer changed twice and why** - burying it would be the single most damaging thing this project could do to its own credibility | notebook C45/C46 |
 | 2026-09-07 | **A3 is reported and NOT interpreted, per the filed decision rule.** The off-manifold account - the signal tracks how anomalous a perturbation is, and a real concept direction is one the computation already uses - is a hypothesis with no dedicated test. **A-8, the on-manifold control, moves from future work to the next experiment**; it is now the run that decides what Paper A actually claims | prereg addendum; A-8 |
