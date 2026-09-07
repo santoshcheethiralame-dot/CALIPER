@@ -236,6 +236,81 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C45 / C46 - Gemma forced choice, vectors refit at the concept (2026-09-07) - **OUTCOME A3**
+
+A-12b, `2026-09-07f`, `--alpha-frac`, `vector_read_position: concept`, layer 37,
+residual norm at the concept token **36,245**. Real and norm-matched random, 420 rows
+each, alphas at 0/1/2/5/10/20/40% of that norm. `data/s3/g2_forced*.jsonl`.
+
+**This is the first Gemma measurement made with an instrument that has passed a steering
+control.** C15-C24 were all read at the template tail.
+
+| alpha | %norm | real intro | rand intro | real neutral | rand neutral |
+|---|---|---|---|---|---|
+| 0 | 0% | 0.0000 | 0.0000 | 0.1882 | 0.1882 |
+| 362 | 1% | 0.0000 | 0.0000 | 0.1746 | 0.1909 |
+| 725 | 2% | 0.0000 | 0.0001 | 0.1622 | 0.1959 |
+| 1,812 | 5% | 0.0000 | 0.0003 | 0.1393 | 0.2150 |
+| 3,624 | 10% | 0.0001 | 0.0080 | 0.1205 | 0.2471 |
+| 7,249 | 20% | 0.0120 | 0.1131 | 0.1215 | 0.3199 |
+| 14,498 | 40% | 0.1600 | 0.1965 | 0.1238 | 0.1851 |
+
+**The filed onset moves from 13.9% to 40.0% of the residual norm.**
+
+**PRE-REGISTERED OUTCOME A3: random is significantly ABOVE real.** Not once, but at
+every strength where either is measurable, in both framings:
+
+| %norm | framing | real | random | p | real higher on |
+|---|---|---|---|---|---|
+| 5% | introspective | 0.0000 | 0.0003 | **1.1e-03** | 8/30 |
+| 10% | introspective | 0.0001 | 0.0080 | **1.1e-05** | 5/30 |
+| 20% | introspective | 0.0120 | 0.1131 | **3.2e-03** | 9/30 |
+| 5% | neutral | 0.1393 | 0.2150 | **1.8e-02** | 9/30 |
+| 10% | neutral | 0.1205 | 0.2471 | **2.3e-02** | 10/30 |
+| 20% | neutral | 0.1215 | 0.3199 | **3.6e-02** | 10/30 |
+
+**And the two conditions move in opposite directions from the no-injection baseline.**
+Under the neutral prompt, where the 0.1882 baseline has headroom:
+
+| %norm | real | p vs baseline | | random | p vs baseline |
+|---|---|---|---|---|---|
+| 1% | 0.1746 | **4.0e-03** DOWN on 24/30 | | 0.1909 | 0.56 |
+| 2% | 0.1622 | **5.0e-03** DOWN on 24/30 | | 0.1959 | 0.43 |
+| 5% | 0.1393 | **9.9e-03** DOWN on 24/30 | | 0.2150 | 0.25 |
+| 10% | 0.1205 | **9.3e-03** DOWN on 23/30 | | 0.2471 | **5.0e-02** up |
+| 20% | 0.1215 | 0.38 | | 0.3199 | **4.7e-02** up |
+
+Injecting a **real concept** makes the model *more* confident nothing unusual is
+present than injecting nothing at all. Injecting **matched noise** makes it less
+confident.
+
+**Per the filed decision rule, A3 is reported as an anomaly and NOT interpreted.** The
+obvious account - that the signal tracks how off-manifold a perturbation is, and a real
+concept direction is one the computation already uses - is a hypothesis with no
+dedicated test behind it. It is exactly what **A-8**, the on-manifold control, was
+written to decide, and that run has never been made. A-8 moves from "future work" to the
+next experiment.
+
+**Magnitudes, so the p-values are not read alone.** The introspective ratios (up to 82x
+at 10%) are computed on 0.0001 against 0.0080 - both meaning the model says NO with near
+certainty. **Only the neutral framing carries interpretable magnitudes**, and it is the
+one to quote: 0.12-0.14 real against 0.22-0.32 random, against a 0.188 baseline. At 40%
+neither framing shows a significant real-vs-random difference.
+
+**This is the third answer to the same question, and the first two were made with a
+broken instrument:**
+
+| run | vectors | verdict |
+|---|---|---|
+| C18/C19 | template tail, unnormalised | **A2** - real indistinguishable from random |
+| C23/C24 | template tail, normalised | **A1** - real above random |
+| **C45/C46** | **concept position, normalised** | **A3 - random above real** |
+
+C32 showed template-tail vectors carrying no recoverable content on Qwen; on Gemma they
+steered but were demonstrably degraded. Any write-up must state that the reported answer
+changed twice, why, and that only the third measurement used a validated instrument.
+
+
 ### C43 - The lottery is real, and held-out R2 wins it (2026-09-07) - **A WORKING REPAIR**
 
 Ten independent single-restart fits per unit at different seeds, 800 steps, full data.
@@ -1584,6 +1659,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C45/C46) | **PAPER A'S HEADLINE IS DEAD IN BOTH ITS PREVIOUS FORMS. Pre-registered outcome A3: norm-matched RANDOM vectors produce MORE detection response than real concept vectors**, at every measurable strength and in both framings (p=1.1e-05 to 3.6e-02). Under the neutral prompt a real concept pushes P(YES) **below** the no-injection baseline (0.1882 -> 0.1205, p=9.3e-03, down on 23/30) while random pushes it up (-> 0.3199). Onset moves 13.9% -> 40.0% of the residual norm | notebook C45/C46 |
+| 2026-09-07 | **THIS IS THE THIRD ANSWER TO ONE QUESTION AND THE FIRST TWO USED A BROKEN INSTRUMENT.** C18/C19 said A2, C23/C24 said A1, C45/C46 says A3. Only the third read vectors at the concept position, and only that instrument has passed a steering control (C32). **Any write-up must state that the answer changed twice and why** - burying it would be the single most damaging thing this project could do to its own credibility | notebook C45/C46 |
+| 2026-09-07 | **A3 is reported and NOT interpreted, per the filed decision rule.** The off-manifold account - the signal tracks how anomalous a perturbation is, and a real concept direction is one the computation already uses - is a hypothesis with no dedicated test. **A-8, the on-manifold control, moves from future work to the next experiment**; it is now the run that decides what Paper A actually claims | prereg addendum; A-8 |
+| 2026-09-07 | **Quote the neutral framing, not the introspective ratios.** The 82x introspective ratio at 10% is 0.0001 against 0.0080, both meaning near-certain NO. Only the neutral arm has interpretable magnitudes (0.12-0.14 real vs 0.22-0.32 random against a 0.188 baseline). Same rule as C33/C34 | notebook C45/C46 |
 | 2026-09-07 (C44) | **THE ALL-ZERO GUARD FIRED IN PRODUCTION AND SAVED THE RUN.** A second Gemma session re-ran the *old* notebook cells; the forced arm again computed seven alphas of 0 from the unfilled `R = 0.0`, and `2026-09-07f` refused to start instead of writing 420 useless rows. C39's fix is validated by the exact failure it was built for | notebook C44 |
 | 2026-09-07 (C44) | **The read-position fix is confirmed in production.** The log prints `read position check: 'table' at token(s) [7] of 13; decoded ' table' (template tail is '
 ')` — the vector is measured at the word, not the newline. Gemma's concept-position residual norm reproduces exactly: median **36,244.97**, min 31,072.4, max 46,779.8 | notebook C44 |
