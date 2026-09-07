@@ -236,6 +236,45 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C39 — Gemma refit, first attempt (2026-09-07) — **VOID GRID, ONE NUMBER SALVAGED**
+
+A-12 at `2026-09-07e`. The forced-choice arms are unusable: `argv` records
+`--alphas 0 0 0 0 0 0 0`, so both conditions ran seven identical alpha=0 cells, 420 rows
+each. The run sheet asked for the residual norm to be pasted into `R = 0.0` in cells 3
+and 4 and it never was, so every fraction multiplied to zero. **Sheet's fault, not the
+operator's** — a manual transcription step between two cells is a failure mode waiting
+to happen, and it cost a 45-minute session.
+
+**What is kept, and it is the number A-12 was partly for.**
+
+| | template tail | **concept position** |
+|---|---|---|
+| Gemma-3-27B L37 | 58,932 | **36,244.97** |
+| Qwen2.5-32B L38 | 177.8 | 261.53 |
+| **ratio** | **331x** | **138.6x** |
+
+So the headline ratio drops from 331x to **139x** once both are measured where the
+vectors are actually read. Still a large difference and it still explains why alpha=4 is
+live on most models and inert on Gemma, but **139x is the number to publish** and 331x
+must not be quoted again.
+
+**The alpha=0 baselines reproduced C20 exactly** — introspective 3.42e-05, neutral
+0.18824 — which confirms the pipeline is deterministic across the refit and that the
+refit did not disturb the no-injection condition.
+
+The steer arm in the same session ran at absolute alpha 0-0.4 against a norm of 36,245,
+i.e. at most 0.001% of it, and returned 0/30 at every level. That is the expected
+nothing, not a result.
+
+**Two fixes in `2026-09-07f`:**
+
+1. **`--alpha-frac`** takes fractions and computes the grid inside the run, where the
+   norm is already known. There is nothing to paste, so the failure mode is gone rather
+   than documented.
+2. **A grid of more than one alpha, all zero, now refuses to run.** Nothing complained
+   last time until the analysis, three hours later.
+
+
 ### C37 — Does C14's required-N transfer to real units? (2026-09-07) — **NO, AND THE FAILURES GOT BETTER WITH LESS DATA**
 
 Local CPU, GPT-2 layer 6. 12 units stratified 6 pass / 6 fail from the C13 gate,
@@ -1298,6 +1337,8 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-07 (C39) | **THE 331x RESIDUAL-NORM RATIO IS SUPERSEDED — publish 139x.** Measured at the concept position, where the vectors are actually read: Gemma 36,244.97, Qwen 261.53. The 331x figure was tail-vs-tail and both denominators were wrong. The conclusion is unchanged in kind — alpha=4 is live on most models and inert on Gemma — but the number is not | notebook C39 |
+| 2026-09-07 (C39) | **A run sheet must never require pasting a number between cells.** A-12's `R = 0.0` placeholder went unfilled, every alpha computed to zero, and a 45-minute session produced 420 rows at alpha=0. `--alpha-frac` now computes the grid inside the run from the norm it already measured, and an all-zero multi-alpha grid refuses to start. **Sheet's fault, not the operator's** | `2026-09-07f`; A-12b |
 | 2026-09-07 (C37) | **C14's ~200-event required-N does NOT transfer to real units — quote the real figure, not the synthetic one.** Real units reach only ~0.35 alignment at 200 events and saturate between 400 and 800, so the requirement is **2-4x** the planted-unit figure. Failures and passes need the same amount of data, so sample size is not what separates the failure class | notebook C37 |
 | 2026-09-07 (C37) | **Five of six gate-failures RECOVERED on less data** (median 0.9402 -> 0.9823 with fewer restarts and fewer steps). A data limitation cannot produce that. It is direct behavioural evidence for the optimisation-landscape account from C9/C10, and it suggests an untested remedy: **refit on a resampled subset and keep the better held-out R2** | notebook C37 |
 | 2026-09-07 (C37) | **That result is DOUBLY SELECTION-BIASED and must not be generalised.** The design required n_events >= 1600, keeping 8 of 23 failures when the class median is 1,285; and the six selected have gate alignments 0.86-0.95 against a 0.95 bar, so **the catastrophic failures (C13's worst was 0.1445) are absent entirely.** Re-run without the filter and including the worst units before this goes near the paper | notebook C37 |
@@ -2012,6 +2053,22 @@ so the pre-C31 runs remain reproducible.
 
 Gemma's results survive because its vectors demonstrably steer (10/30 concept-in-text),
 but they were built the same way and may improve on a refit.
+
+### Never make a run sheet carry a number between cells (C39, 7 Sep)
+A-12's cells 3 and 4 opened with `R = 0.0        # <-- paste the residual norm from
+cell 2`. It was not pasted. Every alpha computed to `0.0 * fraction = 0`, both forced
+conditions ran seven identical alpha=0 cells, and nothing objected until the analysis
+three hours later. The session was lost.
+
+The value being pasted was **already known inside the run** — it is measured in
+`build_vectors` and written to the sidecar. Asking a human to move it between two
+notebook cells added a failure mode for no benefit.
+
+Fixed twice over in `2026-09-07f`: `--alpha-frac` takes fractions and resolves them
+against the measured norm internally, and a multi-alpha grid that is entirely zero now
+raises before loading anything.
+
+**The general rule: if the program can compute it, the run sheet must not ask for it.**
 
 ### `dtype=` and `bnb_4bit_compute_dtype` are different knobs (C26, 7 Sep)
 The second Qwen attempt failed with the *same* CPU-dispatch error as C25 even though

@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-07e"
+VERSION = "2026-09-07f"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -607,6 +607,13 @@ def main():
     ap.add_argument("--layer", type=int, default=-1,
                     help="-1 = 0.60 of depth, matching their L=37 of 62")
     ap.add_argument("--alphas", type=float, nargs="+", default=[0, 2, 4, 8])
+    ap.add_argument("--alpha-frac", type=float, nargs="+", default=None,
+                    help="alphas as FRACTIONS of the measured residual-stream norm, "
+                         "computed inside the run. Use this instead of --alphas whenever "
+                         "the grid should be comparable across models. Added after a "
+                         "session was lost to an unfilled 'R = 0.0' placeholder in a run "
+                         "sheet: the norm is known here, so the caller should not have to "
+                         "paste it back in")
     ap.add_argument("--vector-pos", choices=["concept", "template-tail"],
                     default="concept",
                     help="where the concept vector is read. 'concept' averages the "
@@ -710,6 +717,22 @@ def main():
          "control": a.control, "alphas": a.alphas, "trial_seed": a.trial_seed,
          **run_scalars}, indent=2))
     print(f"  wrote {sidecar}", flush=True)
+
+    if a.alpha_frac is not None:
+        rn = run_scalars["residual_norm_at_read_median"]
+        a.alphas = [round(f * rn, 3) for f in a.alpha_frac]
+        print(f"  alpha grid from fractions {a.alpha_frac} of residual norm {rn:.1f}:",
+              flush=True)
+        print(f"    {a.alphas}", flush=True)
+
+    # A grid that is all zeros is never intentional. One session was spent running seven
+    # identical alpha=0 conditions because a run sheet's "R = 0.0" placeholder was never
+    # filled in, and nothing complained until the analysis.
+    if len(a.alphas) > 1 and all(x == 0 for x in a.alphas):
+        raise SystemExit(
+            f"refusing to run: {len(a.alphas)} alphas were requested and every one is 0. "
+            "If a run sheet told you to paste a residual norm into the cell, it was not "
+            "pasted. Use --alpha-frac to have the run compute the grid itself.")
 
     if a.control != "none":
         # Seeded, so the control is reproducible and comparable across runs.
