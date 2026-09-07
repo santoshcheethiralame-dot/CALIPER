@@ -166,6 +166,7 @@ made after the trial-randomisation fix. Fields: `alpha, concept, control,
 framing, layer, normalised, p_yes, trial, trial_seed`. Nothing is missing except
 the random arm.
 
+| **C35** | **2026-09-07** | **S1-1 flag ROC (local, no GPU)** | — | 100 units rescored | `results/s1_flag_roc.json` | **Held-out R² beats method disagreement: AUC 0.906 vs 0.802**, and discards 5 good units against 21 at the same 73% catch. The free flag is the better flag |
 | C33 | 2026-09-07 | A-13 Qwen forced, refit, real | 0…105 (0–40% of norm) | 420 | `data/s3/q_refit_forced_norm1.jsonl` | Curve climbs 1.0e-09 → **6.8e-02**, six orders. **Short of the 0.10 bar by one grid step** |
 | C34 | 2026-09-07 | A-13 Qwen forced, refit, random | same | 420 | `data/s3/q_refit_forced_random_norm1.jsonl` | **Real > random at 12/12 comparisons** — never true pre-refit. Significant only at the low end, where magnitudes are ~1e-09 |
 | **C32** | **2026-09-07** | **A-11 steer control, vectors refit at the concept** | 0…200 | 150 | `data/s3/s3_qwen_refit_steer_norm1.jsonl` | **FIXED: 1/30 → 7/30 → 14/30 monotone, against C31's flat 1/30.** Residual norm at the concept token is **261.5**, not the tail's 177.8 |
@@ -232,6 +233,62 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C35 — S1-1, is the disagreement flag a usable decision rule? (2026-09-07) — **IT IS DOMINATED**
+
+Re-analysis of `results/e01_gate.jsonl` (C13). No compute, no GPU.
+`experiments/s1_flag_roc.py`, output `results/s1_flag_roc.json`.
+
+100 units, 22 failures at the pre-registered bar (alignment < 0.95). Three
+ground-truth-free candidates scored by ROC:
+
+| predictor | AUC | mean on failures | mean on passes |
+|---|---|---|---|
+| **held-out R² of the k=1 fit** | **0.906** | −0.865 | −0.997 |
+| method disagreement | 0.802 | 0.180 | 0.066 |
+| k=2 gain | 0.367 | — | — |
+
+**The disagreement flag works, and it is beaten by something simpler and free.**
+
+Operating points, same units, same failures:
+
+| catch rate | R²: good units lost | disagreement: good units lost |
+|---|---|---|
+| 50% (11/22) | **2/78 (3%)** | 7/78 (9%) |
+| 73% (16/22) | **5/78 (6%)** | 21/78 (27%) |
+| 82% (18/22) | 21/78 (27%) | 28/78 (36%) |
+| 100% (22/22) | 36/78 (46%) | 50/78 (64%) |
+
+At 73% sensitivity the R² rule discards **5 good units where disagreement discards 21** —
+four times cheaper for the same catch. R² dominates at every sensitivity tested.
+
+Combining does not rescue it. `R² OR disagreement` catches everything but flags 62 of
+100 units (51% of the good ones). `R² AND disagreement` gives 77% catch for 27% loss,
+which R² alone beats at 82% for the same 27%.
+
+**Why this matters more than it looks.** Method disagreement requires running **both**
+estimation routes — it is the reason the dual protocol costs ~2x per neuron. Held-out R²
+is already computed by the fit that is running anyway. So the better flag is also the
+free one, and the second fit is not buying detection quality.
+
+**Consequence for Paper B.** The merged design names the disagreement flag as *the*
+through-line deliverable — "a thing practitioners can run on their own readouts where no
+truth exists". That claim survives in substance: **a ground-truth-free flag does predict
+silent failures.** But the specific instrument has to change, and the honest headline is
+now "the fit's own held-out R² predicts its own silent failures at AUC 0.91", which is a
+simpler and more portable claim than one requiring two estimators.
+
+**Minor discrepancy to resolve.** The C13 summary records the split as 87% vs 55% pass
+either side of disagreement 0.05. Recomputed here it is **87% vs 58%** (69 units vs 31,
+and the 31 matches `frac_methods_disagree_gt_0.05 = 0.31` exactly). The unit counts
+agree, so the difference is in the pass criterion, not the split. Worth pinning before
+either number is published.
+
+**Caveats.** n=100 from one model, one layer. Thresholds are chosen on the same data
+they are evaluated on, so the operating points are optimistic; a held-out set or
+cross-validation is needed before any of these numbers goes in a paper. The AUCs are the
+robust part, the specific thresholds are not.
+
 
 ### C33 / C34 — Qwen forced choice, vectors refit at the concept (2026-09-07) — **INCONCLUSIVE, GRID FELL SHORT**
 
@@ -902,8 +959,12 @@ direction at a time. It is the November go/no-go.
 1. **The unit-level instrument fails silently on ~23% of real neurons**, with
    restart agreement giving no warning, while a perfect solution exists and is
    reachable by fitting one extra dimension. (C4, C9, C10, C13)
-2. **A disagreement flag predicts the failures without ground truth** — 87% vs
-   55% success, p = 7.7e-4. This is the exportable deliverable. (C13)
+2. **A ground-truth-free flag predicts the silent failures — but it is held-out R²,
+   not method disagreement.** AUC 0.906 vs 0.802; at 73% catch, R² discards 5 good
+   units against disagreement's 21 (C35, 7 Sep). R² is free, already computed by the
+   fit; disagreement needs both estimation routes. The exportable deliverable stands,
+   with the instrument swapped. *(supersedes the original C13 reading of 87% vs 55%,
+   whose pass criterion also needs pinning — see 6b)*
 3. **Classical spike-triggered estimators fail almost completely** on LM
    activations — 1/30 vs 26/30 — because the residual stream is non-Gaussian and
    GELU is non-monotone over the occupied range, driving Bussgang's constant
@@ -1051,6 +1112,9 @@ open and block the wording of Paper A section 4.1.
 | Date | Decision | Where |
 |---|---|---|
 | 2026-09-07 (C27-29) | **THE INVARIANT HYPOTHESIS IS DEAD; NO CALIBRATION RULE.** At the same fraction of its own residual norm where Gemma reads P(YES)=0.36, Qwen reads 1.8e-09. alpha* does not track the residual norm across models, so "report alpha as a fraction of ||h||" does not make models comparable. **The 331x norm difference stands as a measurement and still explains the literature's alpha disagreement — but it is a warning, not a rule.** Paper A keeps three findings and does not get its single sentence | notebook C27-29 |
+| 2026-09-07 (C35) | **PAPER B'S DELIVERABLE CHANGES INSTRUMENT: held-out R² replaces method disagreement as the ground-truth-free flag.** AUC 0.906 vs 0.802, and at 73% catch it discards 5 good units against disagreement's 21. **The better flag is also the free one** — R² is already computed by the fit, while disagreement needs both estimation routes and is the reason the dual protocol costs ~2x per neuron. The substantive claim survives intact; only the instrument changes, and the new headline is simpler: *a fit's own held-out R² predicts its own silent failures at AUC 0.91* | notebook C35 |
+| 2026-09-07 | **Thresholds in C35 are fitted and evaluated on the same 100 units, so the operating points are optimistic.** The AUCs are the robust part. **Cross-validate or hold out before any threshold is published**; quote AUC in the meantime | notebook C35 |
+| 2026-09-07 | **Discrepancy to resolve before either number is published:** C13's summary records the disagreement split as 87%/55%, recomputation gives 87%/58%. Unit counts agree exactly (69/31, matching the recorded 0.31), so the difference is in the pass criterion rather than the split | notebook C35 |
 | 2026-09-07 (C33/C34) | **The refit changed Qwen from a dead null to a live curve, but the grid stopped one step short.** Real beats random at 12/12 comparisons, never true pre-refit, and P(YES) climbs six orders to 6.8e-02 against a 0.10 bar. **Extend to 50% and 60% of the norm (alpha 131, 157) and no further** — C32 showed 76% degrading the model. The Addendum 2 stop clause was written for a flat curve and does not apply to a steep one | notebook C33/C34 |
 | 2026-09-07 | **Significance and magnitude have come apart on Qwen, and must be reported together.** Real-vs-random is significant only at 1-5% of the norm (p=4.6e-04 … 2.3e-02) where the values are 1.1e-09 against 1.0e-09 — both meaning "the model says NO with overwhelming confidence". Never quote these p-values without the magnitudes beside them | notebook C33/C34 |
 | 2026-09-07 | **Run sheets written for both refits, and the order is load-bearing.** A-12 (Gemma, `kaggle/NEXT_SESSION_GEMMA_REFIT.md`) first, A-13 (Qwen forced-choice, `kaggle/NEXT_SESSION_QWEN_REFIT_FORCED.md`) second. Both sweep **the same fractions of each model's own concept-position residual norm** (1, 2, 5, 10, 20, 40%), which is what makes the invariant test a like-for-like comparison. Comparing Qwen's new onset against Gemma's old template-tail onset would compare two different instruments | A-12; A-13 |
