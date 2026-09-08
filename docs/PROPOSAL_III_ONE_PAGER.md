@@ -130,7 +130,13 @@ Steps 1 and 2 need no GPU and no money. Steps 3 and 4 are the capstone proper.
    short preprint. It belongs to a proposal that was not selected, so we do not want to
    spend capstone attention on it without your view.
 
-3. **How ambitious to be about venue.** The honest read is that this is a solid,
+3. **What counts as "published" for the capstone.** This is the question we most need
+   answered, and we would rather ask it plainly than guess. Does a preprint count? A
+   workshop paper? Must it be a peer-reviewed venue, and must it be *accepted* rather
+   than submitted, by the deadline? Our schedule changes completely depending on the
+   answer, and we are currently planning against a bar we have not read.
+
+4. **How ambitious to be about venue.** The honest read is that this is a solid,
    careful methods contribution rather than a spectacular result. That can do well at
    venues that reward rigour and useful tools over novelty. We would rather aim
    correctly than aim high and miss.
