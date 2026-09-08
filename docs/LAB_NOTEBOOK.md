@@ -2102,6 +2102,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 | **KAGGLE DROPPED, everything runs locally.** Removes the device confound outright rather than measuring it, so **B-0 is unnecessary, not skipped** - its script and sheet stay in the tree for the day a GPU is needed. Cost: the programme is serial on 10 threads, ~30h wall clock across the remaining runs | `run_queue.sh` |
+| 2026-09-08 | **B-9 BECOMES A PYTHIA SCALE LADDER rather than one big model.** Pythia publishes 70m/160m/410m/1b/1.4b trained on identical data in identical order, so running one protocol across rungs gives a **controlled scaling curve for the failure rate** - a finding, not just a rebuttal to "only small models". 410m is queued; **1.4b is not**, because it needs ~5.6GB in fp32 against 16GB total with 2.6GB free under load, and it gets its own run when the machine is idle | notebook §7.8 |
+| 2026-09-08 | **Serial queue, one run at a time, deliberately.** 10 threads are saturated by a single gate run, so concurrency halves each without finishing anything sooner, and doubles peak RAM against a 16GB ceiling that already binds the scale runs. Every run resumes via Checkpoint, so killing the queue and rerunning continues from the last completed unit | `run_queue.sh` |
 | 2026-09-08 | **KAGGLE IS AVAILABLE AND THE CODE ALREADY SUPPORTS IT** - `pick_device` resolves cuda, `fit_batch` takes a device, `Checkpoint` was written for the 12h session cap, and the corpus is cached prose so internet can stay off. What was NOT ready: the bundle was two files stale and **missing `batched.py` entirely**, which the gate cannot start without. Hand-copying went stale twice, so the build is now `kaggle/build_bundle.py`, which prints what changed | `kaggle/build_bundle.py` |
 | 2026-09-08 | **B-0 FILED: the device is treated as a confound until measured.** The study is about WHICH UNITS FAIL, and failing units sit near basin boundaries by construction - exactly where floating-point reduction order can flip the answer. A table reporting GPT-2 23% / Pythia 7% with one device each would carry a hardware term inside its headline. C31 is the precedent: measure the control, do not assume it | `NEXT_SESSION_B0_DEVICE.md` |
 | 2026-09-08 | **A B-0 FAIL would be a finding, not a wasted run** - estimator failure classification would be hardware-dependent, meaning a reproduction on different hardware may not reproduce which units failed. Both branches are pre-registered and both are reportable | `NEXT_SESSION_B0_DEVICE.md` |
@@ -3167,6 +3170,36 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### Rows-on-disk is not a liveness check, and pgrep lies on Git Bash (2026-09-08)
+
+Cost: two duplicate runs and about half an hour, inside ten minutes.
+
+A serial queue was launched while B-1 was already running. Its guard asked "does this
+run's output file already have 100 rows?" - it had zero, because the first batch of 32
+had not finished writing - so the queue started a **second identical B-1 against the same
+output file**. Rows-on-disk tells you what *finished*. It never tells you what is running.
+
+The obvious fix was worse. `pgrep -f "experiments/e01_gate.py"` matches nothing under Git
+Bash on Windows, which cannot see a Windows process command line, so it returned no match,
+the guard passed, and a **third** run started. A guard that fails silently is worse than
+no guard, because it is trusted.
+
+`kill` alone did not stop the duplicate either - it needed `kill -9`, and the parent shell
+had to go with it.
+
+**Rule.** Concurrency guards use a lockfile carrying the PID, with `kill -0` to tell a
+live owner from a stale file:
+
+```bash
+LOCK="results/.queue.lock"
+if [ -f "$LOCK" ] && kill -0 "$(cat "$LOCK")" 2>/dev/null; then exit 1; fi
+echo $$ > "$LOCK"; trap 'rm -f "$LOCK"' EXIT
+```
+
+And verify a guard by **running it in the state where it must refuse**, not by reading it.
+Both broken versions looked correct.
+
 
 ### A truncated pytest run reports dots, and they look like a pass (2026-09-08)
 
