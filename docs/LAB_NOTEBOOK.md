@@ -238,6 +238,66 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C53 - E0.1 gate on a second model family, Pythia-160m (2026-09-08) - **REPLICATES, AT A DIFFERENT RATE**
+
+The run outline v3 made the top priority, since Study 1 leads the paper and "one model
+family" is its obvious objection. Pre-registered at `docs/preregistration-e01-pythia.md`,
+filed before the run. Everything held to C13 except the model: layer 6 of 12, 8,000
+tokens, 2 restarts, 1600 steps, batch 32, same unit-draw procedure, same pass criterion.
+100 units, 86.0 s/neuron, 8,601 s. `results/e01_gate_pythia.jsonl`.
+
+**PRIMARY - FAIL, at a materially different rate.**
+
+| | GPT-2 (C13) | **Pythia-160m** |
+|---|---|---|
+| pass rate | 77/100 | **93/100** |
+| Wilson 95% | [0.6785, 0.8416] | **[0.8625, 0.9657]** |
+| verdict vs the 0.90 bar | FAIL | **FAIL** |
+
+**Both models fail the pre-registered criterion, so the phenomenon replicates across
+families.** But the intervals **do not overlap**, so the magnitude is genuinely
+model-dependent: 23% silent failure on GPT-2 against 7% on Pythia.
+
+**Per the filed rule this drops the "roughly a quarter" framing.** The claim becomes a
+range - the estimator fails silently on 7-23% of units depending on the model - and both
+rates are reported side by side. The GPT-2 figure is not retired.
+
+**The failures are equally invisible, and on Pythia they are worse when they happen.**
+
+| | GPT-2 | Pythia |
+|---|---|---|
+| median alignment, all units | 0.9933 | **0.9994** |
+| median alignment, failures only | 0.8885 | **0.7941** |
+| **minimum alignment** | 0.1445 | **0.0761** |
+
+Pythia looks *better* by any aggregate anyone would report - a median of 0.9994 would be
+called excellent - while containing a unit recovered at 0.0761. Fewer failures, more
+severe. That strengthens rather than weakens the aggregate-invisibility argument: the
+median gets *further* from the truth as the failure rate drops.
+
+**SECONDARY 1 - the flag transfers, and improves.** This is the paper's deliverable, so
+it was the endpoint most at risk:
+
+| detector | GPT-2 | Pythia |
+|---|---|---|
+| two-route disagreement | 0.810 | **0.975** |
+| held-out R2 | 0.915 | **0.995** |
+
+Both rise. The ground-truth-free check does not depend on the model family, and on the
+model where failures are rarer and more extreme it is close to perfect.
+
+**One honest caveat on that.** Part of the improvement is likely that Pythia's failures
+are more severe (median 0.794 against 0.889, minimum 0.076 against 0.145), and extreme
+failures are easier to separate. The AUC gain is therefore not purely a statement about
+the detector - it is partly a statement about what it was asked to detect. **Do not
+report 0.995 as "the flag is better on Pythia" without that sentence.**
+
+**What this buys the paper.** The lead result survives its most obvious objection. The
+phenomenon is not a GPT-2 artifact, the aggregate-invisibility argument holds on both,
+and the deliverable works on both. What has to change is the headline number - a range,
+not a quarter.
+
+
 ### C50 / C51 / C52 - A-14, the validated-steering window (2026-09-08) - **OUTCOME B2**
 
 The run Addendum 4 was filed for, before it ran. Gemma-3-27B, layer 37, refit vectors,
@@ -1981,6 +2041,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (C53) | **STUDY 1 REPLICATES ON A SECOND FAMILY: Pythia-160m 93/100, Wilson [0.863, 0.966], FAIL against the same 0.90 bar.** Both models fail, so the silent-failure phenomenon is not a GPT-2 artifact - **but the intervals do not overlap**, so the rate is model-dependent. **Per the filed rule, "roughly a quarter" is dropped for a range: 7-23% depending on the model**, both reported side by side | notebook C53 |
+| 2026-09-08 (C53) | **THE FLAG TRANSFERS AND IMPROVES - the deliverable survives its biggest risk.** Disagreement AUC 0.810 to 0.975, held-out R2 0.915 to 0.995. **Caveat that must travel with it:** Pythia's failures are more severe (median 0.794 vs 0.889, min 0.076 vs 0.145) and extreme failures are easier to separate, so part of the gain is about what the detector was asked to detect | notebook C53 |
+| 2026-09-08 (C53) | **Aggregate invisibility gets STRONGER as the failure rate drops.** Pythia's median alignment is 0.9994 - excellent by any reported aggregate - while containing a unit recovered at 0.0761. Fewer failures, more severe, and the median moves further from the truth | notebook C53 |
+| 2026-09-08 (P1) | **STUDY 2 P1 IS VOID, NOT FAILED - and the fault is my design.** Recovery of a planted random direction sits BELOW the null at every strength (medians 0.0064/0.0086/0.0078 vs nulls 0.0128/0.0117/0.0100), above null on only 8/24 rows, max 0.0264 against a 0.30 bar, and flat across a 4x strength range. **But a random direction has no natural representation, so the text it produces carries no consistent signal to re-read** - the pipeline was asked for something that cannot happen. The pre-registration permits reporting this as a finding; it should not be. Corrected P1 plants a real concept vector that C48 showed steers, filed as a new run | notebook C53; prereg s2-p1 |
 | 2026-09-08 (C50-52) | **A-14 RETURNS B2: THE A3 EFFECT DOES NOT SURVIVE THE VALIDATED WINDOW.** Filed primary - real vs random, neutral, pooled 30-60% - gives p=0.119, real lower on 72/120. Only 30% is significant, and it sits at the edge of the unvalidated region. **The below-baseline suppression is also gone** (p=0.24-0.95, down on 12-16 of 30, i.e. chance). Both halves of C45/C46 are confined to strengths where C48 measured steering at chance | notebook C50-52 |
 | 2026-09-08 | **The A3 effect INVERTS with strength.** Real climbs 0.1009 to 0.2445 (neutral) while random stays flat; they converge near 40-50% and by 60% real is at or above random. So it is a low-strength phenomenon, not a property of concept vectors | notebook C50-52 |
 | 2026-09-08 | **Study 3 has no stable empirical claim at any strength on this model.** Per Addendum 4's filed B2 clause, Paper A's centre of gravity is the readout-dependence and framing results. Outline v3 already demoted Study 3 to a five-knob methods chapter - **this run confirms that was correct rather than defensive.** None of the five knobs depended on A3 | Addendum 4; outline v3 |
