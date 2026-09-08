@@ -31,6 +31,11 @@ ap.add_argument("--restarts", type=int, default=2)
 ap.add_argument("--layer", type=int, default=6)
 ap.add_argument("--batch", type=int, default=32)        # speedup saturates by 32
 ap.add_argument("--device", default="auto")
+ap.add_argument("--model", default="gpt2",
+                help="HF id. gpt2 is C13; EleutherAI/pythia-160m is the "
+                     "second-family replication, prereg docs/preregistration-e01-pythia.md")
+ap.add_argument("--d-mlp", type=int, default=3072,
+                help="units to draw from; 3072 for both gpt2 and pythia-160m")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -38,9 +43,9 @@ t0 = time.time()
 device = pick_device(a.device)
 ck = Checkpoint(a.out)
 
-model, tok = load_model("gpt2")
+model, tok = load_model(a.model)
 rng = np.random.default_rng(0)
-neurons = rng.choice(3072, size=a.neurons, replace=False)
+neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
 p = collect(model, tok, sample_corpus(n_docs=300, seed=0), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=0)
 print(f"  stimulus {p.stimulus.shape}  ({time.time()-t0:.0f}s)", flush=True)

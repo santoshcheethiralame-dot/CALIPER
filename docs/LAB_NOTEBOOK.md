@@ -65,9 +65,11 @@ Two papers are committed. The third exists only if E1.4 clears in sem 6.
   `block.mlp.c_fc`. Corpus cached in `results/corpus_cache/` (Gutenberg 11, 84, 1342).
 - `datasets` **hard-crashes the process** on this machine — `sample_corpus()`
   defaults to the cached Gutenberg files for that reason. Do not "fix" it back.
-- Measured throughput: **63.7 s per neuron** at the gate config (20k tokens,
-  d=768, 3 restarts, 2500 steps, k=1 + k=2, single-threaded). The dual
-  direct+cascade protocol roughly doubles it.
+- Measured throughput: **63.7 s per neuron** at the gate config. **Corrected
+  8 Sep 2026:** that config is **8,000 tokens, 1600 steps, 2 restarts, batch 32**
+  (`results/e01_gate.log`: `stimulus (8000, 768)`), i.e. the script defaults - not
+  the 20k/2500/3 previously written here. That figure belongs to the separate
+  throughput measurement in `plan.md` section 1 and was conflated with the gate.
 
 ### 2.2 Kaggle (GPU) — Study 3 and everything at ≥7B
 
@@ -235,6 +237,76 @@ artifact risk.
 ## 4. Runs in detail
 
 *(Newest first. Append; never rewrite.)*
+
+### C50 / C51 / C52 - A-14, the validated-steering window (2026-09-08) - **OUTCOME B2**
+
+The run Addendum 4 was filed for, before it ran. Gemma-3-27B, layer 37, refit vectors,
+`--alpha-frac 0 0.30 0.40 0.50 0.60` of the 36,245 concept-token norm. Real, random and
+span, 300 rows each. `data/s3/gw_forced*.jsonl`.
+
+**Neutral framing** (the arm with interpretable magnitudes):
+
+| alpha | %norm | real | random | span |
+|---|---|---|---|---|
+| 0 | 0% | 0.1882 | 0.1882 | 0.1882 |
+| 10,873 | 30% | **0.1009** | 0.2575 | 0.2085 |
+| 14,498 | 40% | 0.1238 | 0.1851 | 0.2166 |
+| 18,122 | 50% | 0.1688 | 0.1557 | 0.3039 |
+| 21,747 | 60% | 0.2445 | 0.2624 | 0.2815 |
+
+**FILED PRIMARY - real vs random, neutral, pooled across 30-60%, paired within
+strength:** real 0.1595 against random 0.2152, Wilcoxon W=3034, **p = 0.119**, real
+lower on 72 of 120 pairs.
+
+**OUTCOME B2: no significant difference.** The suppression does not survive into the
+window where the vectors demonstrably steer.
+
+**What the filed rule says to do, quoted from Addendum 4:** *"The C45/C46 headline is
+then reported as confined to strengths at which the vectors do not measurably steer,
+which is a substantial weakening, and Paper A's central claim becomes the
+readout-dependence and the framing results rather than A3."* That is now the position.
+
+**Per-strength, pre-specified as secondary.** Only the bottom of the window survives, and
+it is the strength closest to the unvalidated region:
+
+| %norm | neutral p | introspective p |
+|---|---|---|
+| 30% | **0.045** | **0.002** |
+| 40% | 0.289 | 0.339 |
+| 50% | 0.903 | 0.670 |
+| 60% | 0.792 | 0.685 |
+
+**And the direction reverses.** Real climbs with strength (0.1009 to 0.2445 neutral,
+0.0648 to 0.3009 introspective) while random stays roughly flat. They converge around
+40-50% and by 60% real is at or above random. The A3 effect is a **low-strength
+phenomenon that inverts**, not a property of concept vectors.
+
+**The below-baseline suppression is also gone.** At 1-10% of the norm (C45/C46) a real
+vector pushed neutral P(YES) below the no-injection baseline at p=0.004-0.009, down on
+23-24 of 30 concepts. Here:
+
+| %norm | real | vs baseline 0.1882 | down on |
+|---|---|---|---|
+| 30% | 0.1009 | p=0.516 | 16/30 |
+| 40% | 0.1238 | p=0.685 | 15/30 |
+| 50% | 0.1688 | p=0.952 | 15/30 |
+| 60% | 0.2445 | p=0.237 | 12/30 |
+
+Chance. Both halves of the C45/C46 result are confined to strengths at which C48 showed
+semantic steering running at 2/30 and 5/30 against a 3/30 baseline.
+
+**Secondary 1 - C49 holds.** Span is indistinguishable from random at every strength
+here too (p = 0.44, 0.47, 0.13, 0.79), so the off-manifold account stays refuted. That
+finding does not depend on the window.
+
+**What this settles.** Study 3 has no stable empirical claim about what detection is, at
+any strength, on this model. Three reversals, and the third confined to a range where the
+instrument is not working. **Outline v3 already put Study 3 last as a five-knob
+methods chapter; this run confirms that was the right call rather than a defensive one.**
+
+The five knobs are untouched by this: readout method, scoring rule, extraction position,
+strength normalisation, prompt framing. None of them depended on A3 being true.
+
 
 ### Literature scout 2, 8 September 2026 - **PERSONA VALIDATION IS OPEN; AGENT DRIFT IS NOT**
 
@@ -1909,6 +1981,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (C50-52) | **A-14 RETURNS B2: THE A3 EFFECT DOES NOT SURVIVE THE VALIDATED WINDOW.** Filed primary - real vs random, neutral, pooled 30-60% - gives p=0.119, real lower on 72/120. Only 30% is significant, and it sits at the edge of the unvalidated region. **The below-baseline suppression is also gone** (p=0.24-0.95, down on 12-16 of 30, i.e. chance). Both halves of C45/C46 are confined to strengths where C48 measured steering at chance | notebook C50-52 |
+| 2026-09-08 | **The A3 effect INVERTS with strength.** Real climbs 0.1009 to 0.2445 (neutral) while random stays flat; they converge near 40-50% and by 60% real is at or above random. So it is a low-strength phenomenon, not a property of concept vectors | notebook C50-52 |
+| 2026-09-08 | **Study 3 has no stable empirical claim at any strength on this model.** Per Addendum 4's filed B2 clause, Paper A's centre of gravity is the readout-dependence and framing results. Outline v3 already demoted Study 3 to a five-knob methods chapter - **this run confirms that was correct rather than defensive.** None of the five knobs depended on A3 | Addendum 4; outline v3 |
+| 2026-09-08 | **C49 survives the window: span is indistinguishable from random at every strength (p=0.13-0.79).** The off-manifold account stays refuted, and that finding does not depend on the strength range | notebook C50-52 |
 | 2026-09-08 (scout 2) | **STUDY 2 REPLACES STUDY 3 AS CHAPTER TWO.** Persona vectors are validated only by steering effect and finetuning correlation (r=0.76-0.97, 2507.21509), and auditing tools are already built on them (2607.13162, 2605.13329). **Nobody plants a known direction and measures recovery.** Venkatesh & Kurapath 2602.06801 shows orthogonal perturbations steer near-equivalently, so steering-based validation is demonstrably invalid - our motivation, in someone else's citable paper | notebook scout 2 |
 | 2026-09-08 | **Study 2 is UNBLOCKED.** The K>=2 degeneracy (C14) blocks only P4, the multitrait matrix. P1 (recovery at the plant layer) and P2 (recovery vs depth) need only K=1. The November go/no-go can be answered by two Kaggle sessions rather than by generalising the cascade | notebook scout 2 |
 | 2026-09-08 | **Agent persona drift REJECTED as a direction.** ContextEcho, SPASM, agent-drift quantification, geometric identity frameworks, FinPersona-Bench and a CHI 2026 paper all landed in 2026, all behavioural. Cheap to produce, several groups producing them, no advantage for us. AGI framings: no measurable gap on free-tier compute | notebook scout 2 |
