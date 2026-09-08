@@ -236,6 +236,55 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### Literature scout 2, 8 September 2026 - **PERSONA VALIDATION IS OPEN; AGENT DRIFT IS NOT**
+
+Second scouting pass, on agent personas and AGI-adjacent framings, asked before
+committing chapter two.
+
+**Agent persona drift is crowded and behavioural.** ContextEcho (2605.24279, drift in
+long agentic-coding sessions), SPASM (2604.09212, multi-turn identity failures),
+Quantifying Agent Drift (2601.04170), Measuring What Persists (2606.21843, geometric
+framework for agent identity), FinPersona-Bench (2606.31522), plus a CHI 2026 temporal
+stability paper. All measure drift from outputs. Benchmarks in this space are cheap to
+produce and several groups are producing them; we would be the fifth entrant with no
+advantage. **Not a direction.**
+
+**AGI framings: nothing actionable.** No measurable gap that a capstone on free-tier
+compute can close.
+
+**The gap that is open, and it is Study 2.** Persona vectors are validated two ways in
+the literature: by **steering effect**, and by **correlation with finetuning-induced
+shifts** (r = 0.76-0.97, Anthropic 2507.21509). Auditing tools are already built on top -
+2607.13162 audits open-weight models with them, 2605.13329 traces them through
+pretraining. **Nobody plants a known direction and measures whether the extraction
+pipeline recovers it.**
+
+**Venkatesh & Kurapath (2602.06801) makes this sharper, and it is a gift rather than a
+scoop.** They show orthogonal perturbations achieve near-equivalent steering efficacy, so
+behavioural equivalence classes are large. That means **"it steers, therefore it is the
+right direction" is demonstrably invalid** - and it is the primary validation the
+persona-vector literature relies on. Our motivation section now exists as someone else's
+citable result.
+
+**Consequence for the plan.** Study 2's blocker was the K>=2 degeneracy (C14), but that
+blocks only **P4**, the multitrait-multimethod matrix. **P1 (recovery at the plant layer)
+and P2 (recovery versus depth) need only K=1**, which the estimator handles. The decisive
+experiments are unblocked.
+
+Stakes are also higher than in August: persona vectors are moving into production
+monitoring while their extraction has never been checked against truth.
+
+**Ordering.** Study 1 still leads - free ground truth, no competitors. **Study 2 replaces
+Study 3 as chapter two**, and the through-line becomes: free ground truth at the unit
+level, planted ground truth at the trait level, the same instrument failing both ways,
+and steering-based validation unable to tell. Study 3 drops to a short section.
+
+**Caution recorded.** Study 2 needs a >=7B instruct model on Kaggle, and this week cost
+four sessions to loader and protocol bugs. P1 is a positive control: if it does not
+recover a planted direction at the plant layer, stop and fix rather than proceed. Budget
+two sessions and treat the first as likely lost.
+
+
 ### Literature scout, 8 September 2026 - **STUDY 3 IS CROWDED; STUDY 1 IS NOT**
 
 Not a run. A deliberate scouting pass before committing to the methods-paper pivot,
@@ -1860,6 +1909,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (scout 2) | **STUDY 2 REPLACES STUDY 3 AS CHAPTER TWO.** Persona vectors are validated only by steering effect and finetuning correlation (r=0.76-0.97, 2507.21509), and auditing tools are already built on them (2607.13162, 2605.13329). **Nobody plants a known direction and measures recovery.** Venkatesh & Kurapath 2602.06801 shows orthogonal perturbations steer near-equivalently, so steering-based validation is demonstrably invalid - our motivation, in someone else's citable paper | notebook scout 2 |
+| 2026-09-08 | **Study 2 is UNBLOCKED.** The K>=2 degeneracy (C14) blocks only P4, the multitrait matrix. P1 (recovery at the plant layer) and P2 (recovery vs depth) need only K=1. The November go/no-go can be answered by two Kaggle sessions rather than by generalising the cascade | notebook scout 2 |
+| 2026-09-08 | **Agent persona drift REJECTED as a direction.** ContextEcho, SPASM, agent-drift quantification, geometric identity frameworks, FinPersona-Bench and a CHI 2026 paper all landed in 2026, all behavioural. Cheap to produce, several groups producing them, no advantage for us. AGI framings: no measurable gap on free-tier compute | notebook scout 2 |
 | 2026-09-08 (scout) | **PAPER ORDER FLIPS: STUDY 1 LEADS, STUDY 3 BECOMES A CHAPTER.** A literature scan found Study 3's space contested - binary detection already shown artifactual by arXiv 2512.12411 (r=0.999 control) and content-agnostic by Lederman & Mahowald, steering vectors already shown non-identifiable by Venkatesh & Kurapath, and a COLM 2026 reality-check paper published. **Our A2 result was never ours.** A targeted search for weight-column-as-ground-truth calibration of a direction estimator returned nothing - **Study 1 is uncrowded and its ground truth is free rather than planted** | notebook scout |
 | 2026-09-08 | **The extraction-position finding is weaker than it looked.** Token position for concept extraction is already documented as mattering enormously (arXiv 2602.00333), and 2512.12411 avoids the bug entirely by averaging over all prompt tokens. What may survive is the narrow form - a vector passing every reported health check while carrying nothing - not "position matters" | notebook scout |
 | 2026-09-08 | **Adopt averaging over prompt tokens as the extraction default**, following 2512.12411. It is more robust than either the template tail (C31, dead vectors) or the concept-token read (C48, weak steering on Gemma). Not yet run | notebook scout |
