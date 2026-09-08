@@ -1,0 +1,91 @@
+{
+  "version": "2026-09-08d",
+  "argv": [
+    "--model",
+    "gemma",
+    "--compute-dtype",
+    "fp32",
+    "--stage",
+    "forced",
+    "--normalise",
+    "--alphas",
+    "0",
+    "--concepts",
+    "30",
+    "--out",
+    "/kaggle/working/gram.jsonl"
+  ],
+  "model_id": "/kaggle/input/models/google/gemma-3/transformers/gemma-3-27b-it/1",
+  "layer": 37,
+  "n_layers": 62,
+  "normalise": true,
+  "control": "none",
+  "alphas": [
+    0.0
+  ],
+  "trial_seed": 0,
+  "residual_norm_at_read_median": 36244.96875,
+  "residual_norm_at_read_min": 31072.3828125,
+  "residual_norm_at_read_max": 46779.83984375,
+  "vector_norm_median": 1.0,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "concept",
+  "gram_offdiag_median_abs": 0.42161282896995544,
+  "gram_offdiag_mean": 0.3242776393890381,
+  "gram_offdiag_max": 0.8520057201385498,
+  "gram_offdiag_min": -0.344851016998291,
+  "gram_offdiag_p90_abs": 0.7327380180358887,
+  "gram_top_pairs": [
+    [
+      0.852,
+      24,
+      26
+    ],
+    [
+      0.8434,
+      24,
+      27
+    ],
+    [
+      0.8432,
+      8,
+      24
+    ],
+    [
+      0.8416,
+      22,
+      26
+    ],
+    [
+      0.8382,
+      22,
+      24
+    ],
+    [
+      0.8363,
+      22,
+      27
+    ],
+    [
+      0.8313,
+      0,
+      3
+    ],
+    [
+      0.828,
+      4,
+      24
+    ],
+    [
+      0.8273,
+      4,
+      8
+    ],
+    [
+      0.8174,
+      4,
+      10
+    ]
+  ]
+}

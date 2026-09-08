@@ -36,6 +36,7 @@ import time
 import sys
 from pathlib import Path
 
+import numpy as np
 import torch
 
 
@@ -89,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-08d"
+VERSION = "2026-09-08f"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -330,6 +331,10 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
     base_mean = {L: torch.stack(v).mean(0) for L, v in base_acts.items() if v}
 
     out = open(a.out.replace(".jsonl", "_plant.jsonl"), "a")
+    # C57 could not be finished because only the COSINES were kept, not the extracted
+    # difference vectors. Projecting the shared concept-space component out of the
+    # difference and re-scoring needs the vectors themselves. Saved from 2026-09-08f.
+    diff_vecs = []
     print()
     print("=" * 74)
     print(f"{'alpha':>9}{'%norm':>6}{'lyr':>5}{'plant':>10}"
@@ -362,6 +367,9 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
                     rec = abs(float(d @ v))
                     null = abs(float(d @ nulls[pi]))
                     null_b = abs(float(d @ nulls_b[pi]))
+                    diff_vecs.append({"alpha_frac": frac, "plant": pi,
+                                      "plant_name": cname, "extract_layer": L,
+                                      "diff": diff.float().cpu().numpy()})
                 row = {"alpha": alpha, "alpha_frac": frac, "plant_layer": a.layer,
                        "extract_layer": L, "plant": pi, "plant_name": cname,
                        "null_name": null_names[pi], "n_prompts": len(prompts),
@@ -380,6 +388,14 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
                       f"{null_b:>8.4f}", flush=True)
     print("=" * 74)
     out.close()
+    if diff_vecs:
+        dpath = Path(str(a.out).replace(".jsonl", "") + ".diffs.npz")
+        np.savez_compressed(
+            dpath,
+            diffs=np.stack([d["diff"] for d in diff_vecs]),
+            meta=np.array([json.dumps({k: v for k, v in d.items() if k != "diff"})
+                           for d in diff_vecs], dtype=object))
+        print(f"  wrote {dpath}  ({len(diff_vecs)} extracted differences)", flush=True)
 
 
 def find_layers(model):
@@ -981,6 +997,21 @@ def main():
          "control": a.control, "alphas": a.alphas, "trial_seed": a.trial_seed,
          **run_scalars}, indent=2))
     print(f"  wrote {sidecar}", flush=True)
+
+    # Save the vectors themselves. Every run until now rebuilt them and threw them away,
+    # so any analysis needing them - projecting out the shared concept-space component,
+    # re-scoring a null, checking collinearity a different way - required a fresh GPU
+    # session. C57 could not be finished for exactly this reason. Same class of mistake
+    # as not logging the generated text in P1 (C54).
+    vpath = Path(str(a.out).replace(".jsonl", "") + ".vectors.npz")
+    np.savez_compressed(
+        vpath,
+        names=np.array(list(vecs), dtype=object),
+        vectors=torch.stack([vecs[c] for c in vecs]).float().cpu().numpy(),
+        layer=a.layer, normalise=bool(a.normalise), vector_pos=a.vector_pos,
+    )
+    print(f"  wrote {vpath}  ({len(vecs)} x {next(iter(vecs.values())).shape[0]})",
+          flush=True)
 
     if a.alpha_frac is not None:
         rn = run_scalars["residual_norm_at_read_median"]
