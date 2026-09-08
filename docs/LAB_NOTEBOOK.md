@@ -2981,6 +2981,24 @@ practitioner needs that number; an AUC does not give it to them.
 
 ## 8. Gotchas solved (so we never lose the time again)
 
+### A truncated pytest run reports dots, and they look like a pass (2026-09-08)
+
+The suite takes about 16 minutes — `test_estimator.py` and `test_batched.py` fit real
+models. It does not fit a foreground call, and a backgrounded `timeout 900 pytest
+tests -q` came back with nine dots and a zero exit. Nine dots is not nine passes: the
+suite collects **14**, pytest never reached its summary line, and the dots were
+progress output frozen at the wall.
+
+I quoted "9 passed" and pushed on it. The change was in fact fine — 11 passed in the
+two patched files, 3 in `test_runtime.py`, 14/14 — but that was established after the
+push, not before.
+
+**Rule.** A pytest result is the summary line (`N passed in Ms`), never the dots. If
+there is no summary line, the run did not finish. Run the suite as two calls —
+`test_estimator.py test_batched.py` (~16 min, background) and `test_runtime.py`
+(~25 s) — and read both summaries.
+
+
 ### Two runs sharing one `--out` overwrite each other's config sidecar
 C23 and C24 both used `--out /kaggle/working/s3_unit_ext.jsonl`. The `.jsonl`
 outputs are correctly distinguished by the `_norm1` / `_random_norm1` suffixes the
