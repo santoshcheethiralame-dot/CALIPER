@@ -238,6 +238,67 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C54 / C55 - Study 2 P1 and P2, planted random directions (2026-09-08) - **VOID**
+
+Archived to `data/s2/`. P1: 24 rows, 8 random unit plants x 3 strengths, extraction at
+the plant layer. P2: 40 rows, same plants at 40% of norm, extraction at layers 37, 39,
+43, 47, 55. Both ran to completion at `2026-09-08b`.
+
+**P1 - recovery sits below the null at every strength.**
+
+| %norm | median recovery | median null | rec > null |
+|---|---|---|---|
+| 10% | 0.0064 | 0.0128 | 3/8 |
+| 20% | 0.0086 | 0.0117 | 2/8 |
+| 40% | 0.0078 | 0.0100 | 3/8 |
+
+Above null on **8 of 24** rows, worse than a coin flip. Max recovery anywhere 0.0264
+against a pre-registered bar of 0.30 - **11x below**. Flat across a 4x strength range,
+which rules out the obvious "too weak" explanation.
+
+**P2 - flat at the null at every depth, and no rise anywhere.**
+
+| layer | offset | median recovery | median null | rec > null |
+|---|---|---|---|---|
+| 37 | +0 | 0.0079 | 0.0100 | 3/8 |
+| 39 | +2 | 0.0085 | 0.0102 | 3/8 |
+| 43 | +6 | 0.0080 | 0.0111 | 3/8 |
+| 47 | +10 | 0.0065 | 0.0108 | 3/8 |
+| 55 | +18 | 0.0073 | 0.0067 | 4/8 |
+
+16 of 40 above null - exactly chance. Max recovery at any depth 0.0198. P2 ran only
+because the notebook was headless and executes every cell; it was expected to be
+uninterpretable and it is. Its one use was as a free negative control, and it serves
+that: there is no signal at the plant layer, and none appears anywhere downstream.
+
+**VERDICT: VOID, NOT FAILED. The fault is the design, and it is mine.**
+
+The pre-registration permits reporting this as a finding - "a deployed extraction
+pipeline cannot recover a planted cause" - and it should not be reported that way.
+
+The plant is a **random unit direction**. The persona pipeline works because a *trait*
+direction makes the model produce trait-consistent text, and difference-of-means over
+that text recovers the direction. A random direction has no natural representation in
+the model, so the text it produces carries no consistent signal to re-read. **The
+pipeline was asked for something that cannot happen.**
+
+My filing justified random as removing a confound: *"a concept vector would confound
+whether the pipeline recovers what was planted with whether the model has a natural
+representation of the trait."* That reasoning removed the confound by removing the
+mechanism the pipeline depends on. The total absence of signal - below null at every
+strength and every depth, not merely weak - is what a mis-specified test looks like
+rather than a failing instrument.
+
+This is the same category as C27-C30 on Qwen: a null measured through an instrument that
+could not have produced a signal.
+
+**The corrected run**, filed separately before it goes: plant a **real concept vector**
+that C48 showed demonstrably steers Gemma at 40% of norm (10/30 semantic against a 3/30
+baseline), and score recovery against a different concept's vector as the null. That
+confounds slightly - the model does have a representation of the concept - but it tests
+something achievable, which this did not.
+
+
 ### C53 - E0.1 gate on a second model family, Pythia-160m (2026-09-08) - **REPLICATES, AT A DIFFERENT RATE**
 
 The run outline v3 made the top priority, since Study 1 leads the paper and "one model
@@ -2041,6 +2102,7 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (C55) | **P2 confirms P1 is void rather than weak: flat at the null at every depth (37, 39, 43, 47, 55), 16/40 above null which is exactly chance, no rise anywhere, max 0.0198.** Total absence of signal at the plant layer AND downstream is the signature of a mis-specified test, not a failing instrument | notebook C54/C55 |
 | 2026-09-08 (C53) | **STUDY 1 REPLICATES ON A SECOND FAMILY: Pythia-160m 93/100, Wilson [0.863, 0.966], FAIL against the same 0.90 bar.** Both models fail, so the silent-failure phenomenon is not a GPT-2 artifact - **but the intervals do not overlap**, so the rate is model-dependent. **Per the filed rule, "roughly a quarter" is dropped for a range: 7-23% depending on the model**, both reported side by side | notebook C53 |
 | 2026-09-08 (C53) | **THE FLAG TRANSFERS AND IMPROVES - the deliverable survives its biggest risk.** Disagreement AUC 0.810 to 0.975, held-out R2 0.915 to 0.995. **Caveat that must travel with it:** Pythia's failures are more severe (median 0.794 vs 0.889, min 0.076 vs 0.145) and extreme failures are easier to separate, so part of the gain is about what the detector was asked to detect | notebook C53 |
 | 2026-09-08 (C53) | **Aggregate invisibility gets STRONGER as the failure rate drops.** Pythia's median alignment is 0.9994 - excellent by any reported aggregate - while containing a unit recovered at 0.0761. Fewer failures, more severe, and the median moves further from the truth | notebook C53 |
