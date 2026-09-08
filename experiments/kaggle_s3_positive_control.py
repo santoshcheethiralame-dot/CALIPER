@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-08b"
+VERSION = "2026-09-08c"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -165,6 +165,40 @@ NEUTRAL_MATCHED = (
 # vectors can be tested on their own.
 STEER = "Write a short story."
 
+# Concept-specific associates. C48 showed the literal-word scorer undercuts steering
+# badly - it reported 0/30 where a semantic scorer found 10/30 on text that plainly
+# carried the concept. The manipulation check in P1b uses both.
+ASSOCIATES = {
+    "elephant": ["peanut", "trunk", "tusk", "herd", "ivory", "pachyderm"],
+    "spider": ["silk", "web", "weav", "arachn", "spin"],
+    "eagle": ["talon", "wing", "soar", "nest", "beak", "feather", "raptor"],
+    "dolphin": ["sonar", "click", "fin", "pod", "echo", "ocean", "sea", "swim"],
+    "volcano": ["lava", "magma", "erupt", "ash", "crater", "volcan"],
+    "desert": ["sand", "dune", "arid", "oasis", "camel", "scorch"],
+    "library": ["book", "shelf", "catalog", "librar", "read"],
+    "harbor": ["seal", "dock", "boat", "ship", "pier", "quay", "harbour", "tide"],
+    "violin": ["string", "bow", "fiddle", "music", "note"],
+    "umbrella": ["rain", "canopy", "shelter", "spoke"],
+    "telescope": ["star", "lens", "observ", "sky", "astro"],
+    "candle": ["wax", "flame", "wick", "flicker"],
+    "bread": ["dough", "crust", "bake", "loaf", "yeast", "flour"],
+    "mountain": ["peak", "summit", "slope", "ridge", "climb", "alpine"],
+    "river": ["flow", "current", "bank", "stream", "water"],
+    "clock": ["tick", "hour", "hand", "time", "chime"],
+    "mirror": ["reflect", "glass", "image"],
+    "bridge": ["span", "arch", "cross", "river"],
+    "garden": ["bloom", "flower", "soil", "grow", "plant", "seed"],
+    "engine": ["piston", "motor", "fuel", "gear", "machine"],
+}
+
+
+def steered(text, concept):
+    """Did the plant reach the text? Literal word or a concept-specific associate."""
+    t = (text or "").lower()
+    if concept.lower() in t:
+        return True
+    return any(k in t for k in ASSOCIATES.get(concept, []))
+
 YES_RE = re.compile(r"^\s*(yes|y\b)", re.I)
 NO_RE = re.compile(r"^\s*(no|n\b)", re.I)
 
@@ -233,15 +267,39 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
     # architectures is a layernorm weight and on others is not d_model at all.
     d_model = next(iter(vecs.values())).shape[0]
     gen = torch.Generator().manual_seed(a.plant_seed)
-    plants = []
+
+    if a.plant_source == "concept":
+        # C54/C55: random plants are void. A random direction has no natural
+        # representation, so the text it produces carries no consistent signal for
+        # difference-of-means to recover, and the pipeline was asked for something that
+        # cannot happen. Real concept vectors are the easy case, which makes this a
+        # necessary-condition test rather than a validation.
+        names = list(vecs)[: a.n_plants]
+        plants = [vecs[c] for c in names]
+        # Primary null: a DIFFERENT concept's vector. Conservative, because concept
+        # vectors share structure, so this null is harder to beat than a random one.
+        null_names = [list(vecs)[(list(vecs).index(c) + 7) % len(vecs)] for c in names]
+        nulls = [vecs[c] for c in null_names]
+        print(f"  {len(plants)} planted CONCEPT vectors: {names}", flush=True)
+        print(f"  null A (different concept):            {null_names}", flush=True)
+    else:
+        names = [f"random{i}" for i in range(a.n_plants)]
+        null_names = [f"randnull{i}" for i in range(a.n_plants)]
+        plants, nulls = [], []
+        for _ in range(a.n_plants):
+            v = torch.randn(d_model, generator=gen)
+            plants.append(v / v.norm())
+        for _ in range(a.n_plants):
+            v = torch.randn(d_model, generator=gen)
+            nulls.append(v / v.norm())
+        print(f"  {a.n_plants} planted RANDOM directions, seed {a.plant_seed} "
+              f"(C54/C55 recorded this as void - concept plants are the corrected run)",
+              flush=True)
+    # Null B, always reported alongside: an independent random unit direction.
+    nulls_b = []
     for _ in range(a.n_plants):
         v = torch.randn(d_model, generator=gen)
-        plants.append(v / v.norm())
-    nulls = []
-    for _ in range(a.n_plants):
-        v = torch.randn(d_model, generator=gen)
-        nulls.append(v / v.norm())
-    print(f"  {a.n_plants} planted directions, unit norm, seed {a.plant_seed}", flush=True)
+        nulls_b.append(v / v.norm())
 
     extract_layers = sorted({a.layer} | set(a.extract_layers or []))
     print(f"  extracting at layers {extract_layers} (plant layer {a.layer})", flush=True)
@@ -264,6 +322,7 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
         txt = run_trial(model, tok, layers, a.layer, plants[0], 0.0, pr,
                         max_new=a.plant_tokens, span="all")
         base_txt.append(txt)
+        _ = txt
         for L in extract_layers:
             act = response_activation(model, tok, layers, L, pr, txt)
             if act is not None:
@@ -273,15 +332,20 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
     out = open(a.out.replace(".jsonl", "_plant.jsonl"), "a")
     print()
     print("=" * 74)
-    print(f"{'alpha':>9}{'%norm':>7}{'layer':>7}{'plant':>7}"
-          f"{'|cos(diff, v)|':>16}{'|cos(diff, null)|':>19}")
+    print(f"{'alpha':>9}{'%norm':>6}{'lyr':>5}{'plant':>10}"
+          f"{'steered':>9}{'recovery':>10}{'nullA':>8}{'nullB':>8}")
     for frac in fracs:
         alpha = frac * rn
         for pi, v in enumerate(plants):
             inj_acts = {L: [] for L in extract_layers}
+            texts, n_steer = [], 0
+            cname = names[pi]
             for pr in prompts:
                 txt = run_trial(model, tok, layers, a.layer, v, alpha, pr,
                                 max_new=a.plant_tokens, span="all")
+                texts.append(txt)
+                if a.plant_source == "concept" and steered(txt, cname):
+                    n_steer += 1
                 for L in extract_layers:
                     act = response_activation(model, tok, layers, L, pr, txt)
                     if act is not None:
@@ -297,15 +361,23 @@ def run_plant(model, tok, layers, a, run_scalars, vecs):
                     d = diff / nrm
                     rec = abs(float(d @ v))
                     null = abs(float(d @ nulls[pi]))
+                    null_b = abs(float(d @ nulls_b[pi]))
                 row = {"alpha": alpha, "alpha_frac": frac, "plant_layer": a.layer,
-                       "extract_layer": L, "plant": pi, "n_prompts": len(prompts),
-                       "recovery": round(rec, 6), "null": round(null, 6),
-                       "diff_norm": round(float(nrm), 4)}
+                       "extract_layer": L, "plant": pi, "plant_name": cname,
+                       "null_name": null_names[pi], "n_prompts": len(prompts),
+                       "recovery": round(rec, 6), "null_a": round(null, 6),
+                       "null_b": round(null_b, 6),
+                       "n_steered": n_steer, "steer_rate": round(n_steer / len(prompts), 4),
+                       "diff_norm": round(float(nrm), 4),
+                       # C54/C55: without the text there was no way to tell a failed
+                       # extraction from a plant that never reached the output.
+                       "texts": [t[:200] for t in texts] if L == a.layer else None}
                 out.write(json.dumps(row) + "\n")
                 out.flush()
                 os.fsync(out.fileno())
-                print(f"{alpha:>9.0f}{frac:>7.0%}{L:>7}{pi:>7}"
-                      f"{rec:>16.4f}{null:>19.4f}", flush=True)
+                print(f"{alpha:>9.0f}{frac:>6.0%}{L:>5}{cname:>10}"
+                      f"{n_steer:>4}/{len(prompts):<4}{rec:>10.4f}{null:>8.4f}"
+                      f"{null_b:>8.4f}", flush=True)
     print("=" * 74)
     out.close()
 
@@ -760,6 +832,11 @@ def main():
     ap.add_argument("--n-prompts", type=int, default=16,
                     help="elicitation prompts per condition for --stage plant")
     ap.add_argument("--plant-seed", type=int, default=0)
+    ap.add_argument("--plant-source", choices=["concept", "random"], default="concept",
+                    help="what to plant. 'concept' is P1b, the corrected run: real "
+                         "concept vectors, which the model already represents. 'random' "
+                         "is the original P1, recorded VOID in C54/C55 because a random "
+                         "direction produces no consistent signal to re-read")
     ap.add_argument("--plant-tokens", type=int, default=40,
                     help="max_new_tokens for planted-direction generations")
     ap.add_argument("--extract-layers", type=int, nargs="*", default=None,
