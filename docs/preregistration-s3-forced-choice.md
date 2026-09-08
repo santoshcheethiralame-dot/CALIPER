@@ -256,3 +256,79 @@ residual-stream norm at the read position, which version 2026-09-07a writes to a
 **Committed in advance.** Whichever of those two the norm implies is reported, and
 section 4.1 of the paper is written to match it rather than to preserve the current
 draft's concession. No further extension of the grid without a further addendum.
+
+
+---
+
+# Addendum 4 - the validated-steering window
+
+**Filed 8 September 2026, before the run.**
+
+## Why this exists
+
+C45/C46 found real below random significantly at 5%, 10% and 20% of the residual norm,
+and **not** at 40% (neutral p=0.16, introspective p=0.58).
+
+C48 then measured where the vectors actually steer. Semantic steering against a 3/30
+baseline: **2/30 at 10%, 5/30 at 20%, 10/30 at 40%, 12/30 at 76%**.
+
+So the significant cells sit where steering is at or barely above chance, and the one
+cell where steering is properly demonstrated is null. That tension is the reason for this
+run and it was not anticipated when Addendum 3 was written.
+
+Two readings, and the existing data cannot separate them:
+
+- **A.** The effect is real and the 40% cell is underpowered at n=30.
+- **B.** The effect is an artifact of strengths too weak to do anything, and it correctly
+  disappears once the perturbation is large enough to matter.
+
+## Protocol (frozen)
+
+| element | value |
+|---|---|
+| model / layer | Gemma-3-27B-it, 4-bit NF4, fp32 compute, layer 37 |
+| vectors | `--vector-pos concept` (default since 2026-09-07e), L2-normalised |
+| strengths | `--alpha-frac 0 0.30 0.40 0.50 0.60` of the 36,245 concept-token norm |
+| conditions | real (`none`), `random`, `span` |
+| framings | introspective and neutral_matched |
+| readout | first-token P(YES) |
+| test | Wilcoxon signed-rank, paired by concept, two-sided, 0.05 |
+
+The window is 30-60%. The floor is set by C48's steering evidence; the ceiling because
+coherence was already 27/30 at 40% and 14/30 at 76%, and a degraded model's logits are
+not worth reading. **60% is the last strength reported regardless of what is seen.**
+
+## Criteria, fixed now
+
+**Primary.** Real versus random, neutral framing, **pooled across 30-60%** (the four
+non-zero strengths, paired by concept within strength).
+
+- **B1 - real significantly below random.** The suppression survives into the validated
+  window. The C45/C46 result stands and the 40% null was power. This is then the
+  headline and the 5-20% cells become supporting evidence rather than the claim.
+- **B2 - no significant difference.** The effect does not survive where the instrument is
+  demonstrably working. **The C45/C46 headline is then reported as confined to strengths
+  at which the vectors do not measurably steer, which is a substantial weakening**, and
+  Paper A's central claim becomes the readout-dependence and the framing results rather
+  than A3.
+- **B3 - real significantly above random.** Report as an anomaly. Do not interpret.
+
+**Secondary.**
+
+1. `span` versus `random` in this window, testing whether C49's refutation of the
+   off-manifold account holds where steering is validated.
+2. Real versus the alpha=0 baseline under the neutral prompt, testing whether the
+   below-baseline suppression seen at 1-10% persists.
+3. Per-strength tests, reported alongside the pooled primary and labelled secondary.
+
+## Committed in advance
+
+- The pooled neutral comparison is primary. Introspective is reported but not used for
+  the verdict: its values in this range run 0.01-0.20 and the low end all means
+  near-certain NO.
+- Whichever of B1/B2/B3 lands is reported as the headline, and **B2 is reported as
+  prominently as B1**. A result that weakens our own prior claim gets the same billing.
+- No strengths added after seeing output. If the effect appears only at an untested
+  strength, that is future work and is labelled as such.
+- C48's steering numbers are quoted next to any claim from this run, so nobody reads a
+  detection figure without knowing whether the vectors were doing anything there.
