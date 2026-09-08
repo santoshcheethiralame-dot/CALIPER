@@ -2102,6 +2102,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 | **KAGGLE IS AVAILABLE AND THE CODE ALREADY SUPPORTS IT** - `pick_device` resolves cuda, `fit_batch` takes a device, `Checkpoint` was written for the 12h session cap, and the corpus is cached prose so internet can stay off. What was NOT ready: the bundle was two files stale and **missing `batched.py` entirely**, which the gate cannot start without. Hand-copying went stale twice, so the build is now `kaggle/build_bundle.py`, which prints what changed | `kaggle/build_bundle.py` |
+| 2026-09-08 | **B-0 FILED: the device is treated as a confound until measured.** The study is about WHICH UNITS FAIL, and failing units sit near basin boundaries by construction - exactly where floating-point reduction order can flip the answer. A table reporting GPT-2 23% / Pythia 7% with one device each would carry a hardware term inside its headline. C31 is the precedent: measure the control, do not assume it | `NEXT_SESSION_B0_DEVICE.md` |
+| 2026-09-08 | **A B-0 FAIL would be a finding, not a wasted run** - estimator failure classification would be hardware-dependent, meaning a reproduction on different hardware may not reproduce which units failed. Both branches are pre-registered and both are reportable | `NEXT_SESSION_B0_DEVICE.md` |
+| 2026-09-08 | **Kaggle CPU sessions are the confound-free fallback.** They draw no GPU quota and are device-consistent with B-1/B-2 running locally. Honest arithmetic: Kaggle gives 4 cores against this machine's 10, so ~11h where local takes 4.4h - only just inside a 12h session, and Checkpoint resumes rather than restarts. Parallelism across sessions is the win, not per-run speed | notebook §7.8 Tier 2b |
 | 2026-09-08 | **DELONG FILED AS THE PRIMARY TEST, before B-1 produced a row.** The parent B-1 filing said "significantly below held-out R2" without naming a test - an open door, since several tests give several answers and the choice could be made after seeing numbers. Both signals are scored on the SAME units so the ROC curves are correlated; independent intervals would be the wrong comparison. Implemented in-repo, 8 unit tests, no new dependency | `preregistration-b1-addendum-1.md` §1 |
 | 2026-09-08 | **B-1 MAY BE UNDERPOWERED, and that is filed in advance rather than discovered.** Published power figures: dAUC=0.10 needs 36-142 cases, dAUC=0.02 needs 909-3,709. A synthetic check during implementation put the SE of a dAUC at 0.07-0.11 for uncorrelated signals at n=100/25 failures. **Rule fixed now: if \|dAUC\| < 0.10 the result is reported as UNDERPOWERED, not as a null - "no significant difference" is forbidden - and triggers one extension to n=300** | `preregistration-b1-addendum-1.md` §3 |
 | 2026-09-08 | **Multiplicity fixed: exactly ONE primary comparison** (restart agreement vs held-out R2 on GPT-2), uncorrected because it is a single pre-specified test. Every other signal and everything on Pythia is secondary and BH-corrected across the family, reported with raw and adjusted p | `preregistration-b1-addendum-1.md` §2 |
@@ -2563,6 +2567,34 @@ one, and the paper says so either way.**
 **At most one extension.** If n=300 still cannot resolve it, the honest conclusion is that
 the two signals are close enough that the choice is about cost — and cost already favours
 held-out R2, which is free, over restart agreement, which is 5x the compute.
+
+---
+
+#### Tier 2b — B-0, the device-equivalence check. Gates every Kaggle GPU run.
+
+**Question.** Does fitting on CUDA give the same answer as fitting on CPU?
+
+**Why it is not pedantic.** The study is about *which units fail*. A failing unit is one
+where the optimiser landed in the wrong basin, so failing units sit near basin boundaries
+by construction - exactly the population where floating-point reduction order can flip the
+outcome. CPU and GPU do not agree bitwise. A table reporting "GPT-2 23%, Pythia 7%" with
+one device each has a hardware term inside its headline number.
+
+**Criterion, filed before the run.** PASS = no unit changes pass/fail side AND
+max |d alignment| < 0.01 -> B-series may mix devices. FAIL = any flip, or the tolerance
+exceeded -> every compared set shares one device and the device is reported beside every
+number.
+
+**A FAIL is a finding, not a wasted run:** estimator failure classification would be
+hardware-dependent, which means anyone reproducing an interpretability result on different
+hardware may not reproduce *which* units failed. That is squarely what this bench is for.
+
+**Cost** ~40 min, 24 units, both devices, GPU session. Sheet:
+`kaggle/NEXT_SESSION_B0_DEVICE.md`. Script: `experiments/kaggle_device_equivalence.py`.
+
+**It also returns the measured speedup**, so the rest of the programme is scheduled
+against a number rather than a hope. Below ~3x, GPU is not worth the confound risk even
+on a PASS.
 
 ---
 
