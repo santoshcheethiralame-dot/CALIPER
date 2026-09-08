@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-08a"
+VERSION = "2026-09-08b"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -167,6 +167,147 @@ STEER = "Write a short story."
 
 YES_RE = re.compile(r"^\s*(yes|y\b)", re.I)
 NO_RE = re.compile(r"^\s*(no|n\b)", re.I)
+
+
+# Neutral elicitation prompts for the planted-direction study (P1/P2). Deliberately
+# bland and varied: difference-of-means needs the two conditions to differ ONLY by the
+# plant, so the prompts must not themselves push toward any trait.
+PLANT_PROMPTS = [
+    "Write a short story.",
+    "Describe a place you find interesting.",
+    "Explain how something ordinary works.",
+    "Tell me about a decision someone might face.",
+    "Write a few sentences about a conversation.",
+    "Describe what happens in a typical morning.",
+    "Write about an object and its history.",
+    "Explain something to a curious listener.",
+    "Describe a journey from start to finish.",
+    "Write about a change that took time.",
+    "Tell a story about two people meeting.",
+    "Describe how a problem got solved.",
+    "Write about something that was built.",
+    "Explain a process in plain language.",
+    "Describe an ordinary afternoon.",
+    "Write about something that was learned.",
+]
+
+
+@torch.no_grad()
+def response_activation(model, tok, layers, layer, prompt, response):
+    """Mean activation over the RESPONSE tokens, re-read with NO injection.
+
+    This is how persona vectors are actually extracted: you generate text under a
+    condition, then read activations off that text. It is deliberately the harder test
+    for P1 - the planted direction only shows up here if it changed the text enough to
+    be recoverable when the text is re-read clean. An extractor that passes only when
+    the injection is still switched on has not been tested at all.
+    """
+    full = encode(tok, model, prompt)
+    n_prompt = full["input_ids"].shape[1]
+    resp_ids = tok(response, add_special_tokens=False, return_tensors="pt")["input_ids"]
+    if resp_ids.shape[1] == 0:
+        return None
+    ids = torch.cat([full["input_ids"], resp_ids.to(full["input_ids"].device)], dim=1)
+    grab = {}
+    h = layers[layer].register_forward_hook(
+        lambda m, i, o: grab.__setitem__("h", (o[0] if isinstance(o, tuple) else o).detach()))
+    try:
+        model(input_ids=ids)
+    finally:
+        h.remove()
+    return grab["h"][0, n_prompt:, :].float().mean(0).cpu()
+
+
+def run_plant(model, tok, layers, a, run_scalars, vecs):
+    """P1/P2 - plant a known direction, then ask the extraction pipeline to find it.
+
+    P1 is a positive control on a linear read of a linear plant. If a planted direction
+    cannot be recovered AT the plant layer, nothing downstream in Study 2 means anything
+    and the run stops rather than proceeding to P2.
+
+    The null is the discriminant: the same extracted difference scored against a
+    DIFFERENT random direction. Recovery that is not clearly above that null is not
+    recovery, it is the extractor picking up the fact that something changed.
+    """
+    # d_model from a real concept vector rather than a layer parameter, which on some
+    # architectures is a layernorm weight and on others is not d_model at all.
+    d_model = next(iter(vecs.values())).shape[0]
+    gen = torch.Generator().manual_seed(a.plant_seed)
+    plants = []
+    for _ in range(a.n_plants):
+        v = torch.randn(d_model, generator=gen)
+        plants.append(v / v.norm())
+    nulls = []
+    for _ in range(a.n_plants):
+        v = torch.randn(d_model, generator=gen)
+        nulls.append(v / v.norm())
+    print(f"  {a.n_plants} planted directions, unit norm, seed {a.plant_seed}", flush=True)
+
+    extract_layers = sorted({a.layer} | set(a.extract_layers or []))
+    print(f"  extracting at layers {extract_layers} (plant layer {a.layer})", flush=True)
+
+    prompts = PLANT_PROMPTS[: a.n_prompts]
+    rn = run_scalars.get("residual_norm_at_read_median", 1.0)
+    # --alpha-frac is the intended route, but accept --alphas too rather than crashing
+    # on a.alpha_frac being None.
+    fracs = a.alpha_frac if a.alpha_frac is not None else [x / rn for x in a.alphas]
+    fracs = [f for f in fracs if f > 0]
+    if not fracs:
+        raise SystemExit("--stage plant needs at least one non-zero strength; pass "
+                         "--alpha-frac 0.10 0.20 0.40 (fractions of the residual norm)")
+
+    # Baseline generations are shared across every planted direction - generate once.
+    print(f"  baseline: {len(prompts)} generations ...", flush=True)
+    base_acts = {L: [] for L in extract_layers}
+    base_txt = []
+    for pr in prompts:
+        txt = run_trial(model, tok, layers, a.layer, plants[0], 0.0, pr,
+                        max_new=a.plant_tokens, span="all")
+        base_txt.append(txt)
+        for L in extract_layers:
+            act = response_activation(model, tok, layers, L, pr, txt)
+            if act is not None:
+                base_acts[L].append(act)
+    base_mean = {L: torch.stack(v).mean(0) for L, v in base_acts.items() if v}
+
+    out = open(a.out.replace(".jsonl", "_plant.jsonl"), "a")
+    print()
+    print("=" * 74)
+    print(f"{'alpha':>9}{'%norm':>7}{'layer':>7}{'plant':>7}"
+          f"{'|cos(diff, v)|':>16}{'|cos(diff, null)|':>19}")
+    for frac in fracs:
+        alpha = frac * rn
+        for pi, v in enumerate(plants):
+            inj_acts = {L: [] for L in extract_layers}
+            for pr in prompts:
+                txt = run_trial(model, tok, layers, a.layer, v, alpha, pr,
+                                max_new=a.plant_tokens, span="all")
+                for L in extract_layers:
+                    act = response_activation(model, tok, layers, L, pr, txt)
+                    if act is not None:
+                        inj_acts[L].append(act)
+            for L in extract_layers:
+                if not inj_acts[L] or L not in base_mean:
+                    continue
+                diff = torch.stack(inj_acts[L]).mean(0) - base_mean[L]
+                nrm = diff.norm()
+                if nrm < 1e-9:
+                    rec = null = 0.0
+                else:
+                    d = diff / nrm
+                    rec = abs(float(d @ v))
+                    null = abs(float(d @ nulls[pi]))
+                row = {"alpha": alpha, "alpha_frac": frac, "plant_layer": a.layer,
+                       "extract_layer": L, "plant": pi, "n_prompts": len(prompts),
+                       "recovery": round(rec, 6), "null": round(null, 6),
+                       "diff_norm": round(float(nrm), 4)}
+                out.write(json.dumps(row) + "\n")
+                out.flush()
+                os.fsync(out.fileno())
+                print(f"{alpha:>9.0f}{frac:>7.0%}{L:>7}{pi:>7}"
+                      f"{rec:>16.4f}{null:>19.4f}", flush=True)
+    print("=" * 74)
+    out.close()
 
 
 def find_layers(model):
@@ -596,7 +737,7 @@ def score(text, concept):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["control", "framing", "forced", "steer"],
+    ap.add_argument("--stage", choices=["control", "framing", "forced", "steer", "plant"],
                     default="control",
                     help="steer is a positive control on the vectors: neutral prompt, "
                          "injection at every position including decode steps. Not the "
@@ -614,6 +755,16 @@ def main():
                          "session was lost to an unfilled 'R = 0.0' placeholder in a run "
                          "sheet: the norm is known here, so the caller should not have to "
                          "paste it back in")
+    ap.add_argument("--n-plants", type=int, default=8,
+                    help="planted random directions for --stage plant")
+    ap.add_argument("--n-prompts", type=int, default=16,
+                    help="elicitation prompts per condition for --stage plant")
+    ap.add_argument("--plant-seed", type=int, default=0)
+    ap.add_argument("--plant-tokens", type=int, default=40,
+                    help="max_new_tokens for planted-direction generations")
+    ap.add_argument("--extract-layers", type=int, nargs="*", default=None,
+                    help="extra layers to extract at (P2 depth curve); the plant layer "
+                         "is always included")
     ap.add_argument("--vector-pos", choices=["concept", "template-tail"],
                     default="concept",
                     help="where the concept vector is read. 'concept' averages the "
@@ -768,6 +919,10 @@ def main():
         norms = torch.stack(list(vecs.values())).norm(dim=1)
         print(f"  CONTROL {a.control}: vectors replaced, median norm "
               f"{norms.median():.2f} (unchanged by construction)", flush=True)
+
+    if a.stage == "plant":
+        run_plant(model, tok, layers, a, run_scalars, vecs)
+        return
 
     framings = {"introspective": INTROSPECTIVE}
     if a.stage in ("framing", "forced"):

@@ -5,3 +5,5 @@
 {"align_direct": 0.9945, "align_cascade": 0.9997, "align_selected": 0.9997, "best_available": 0.9997, "picked": "cascade", "r2_k1": 0.999358, "k2_gain": -0.0062, "disagreement": 0.0052, "_key": 268}
 {"align_direct": 0.5178, "align_cascade": 0.9982, "align_selected": 0.9982, "best_available": 0.9982, "picked": "cascade", "r2_k1": 0.973694, "k2_gain": -0.6199, "disagreement": 0.4804, "_key": 1598}
 {"align_direct": 0.9997, "align_cascade": 0.9999, "align_selected": 0.9997, "best_available": 0.9999, "picked": "direct", "r2_k1": 0.999951, "k2_gain": -0.0004, "disagreement": 0.0002, "_key": 100}
+{"align_direct": 0.1745, "align_cascade": 0.9995, "align_selected": 0.9995, "best_available": 0.9995, "picked": "cascade", "r2_k1": 0.99897, "k2_gain": -0.0166, "disagreement": 0.8251, "_key": 2295}
+{"align_direct": 0.9932, "align_cascade": 0.9997, "align_selected": 0.9932, "best_available": 0.9997, "picked": "direct", "r2_k1": 0.9946, "k2_gain": 0.0041, "disagreement": 0.0065, "_key": 2425}
