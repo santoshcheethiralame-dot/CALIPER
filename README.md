@@ -11,7 +11,33 @@ response characterisation, explicit null models, and calibration against known g
 This repository carries that discipline across.
 
 Specification: [`docs/specification.md`](docs/specification.md) · Plan of record:
-[`docs/plan.md`](docs/plan.md)
+[`docs/plan.md`](docs/plan.md) · Lab notebook:
+[`docs/LAB_NOTEBOOK.md`](docs/LAB_NOTEBOOK.md)
+
+---
+
+## Where this is now (September 2026)
+
+The work has narrowed to one artifact: **a calibration bench for the ground-truth-free
+reliability checks interpretability already relies on.**
+
+Restart agreement, held-out fit, method disagreement — these decide whether a result is
+trusted, and none of them has been scored against a known-correct answer, because doing
+that requires the ground truth whose absence is why the check exists. The weight column
+supplies it. That is the whole idea.
+
+| document | what it holds |
+|---|---|
+| [`docs/BENCH_SPEC.md`](docs/BENCH_SPEC.md) | what the bench is, the literature gap, the interfaces |
+| [`docs/PIVOTS.md`](docs/PIVOTS.md) | every change of direction since July, with cause and cost |
+| [`docs/PROPOSAL_III_ONE_PAGER.md`](docs/PROPOSAL_III_ONE_PAGER.md) | the plain-language version |
+| [`docs/PROPOSAL_III_STATUS.md`](docs/PROPOSAL_III_STATUS.md) | the same with the numbers |
+| [`docs/LAB_NOTEBOOK.md`](docs/LAB_NOTEBOOK.md) §7.8 | the run programme of record |
+
+**Scope, stated up front rather than discovered by a reader.** The ground truth holds for
+an MLP unit reading its own layer. It does not extend to residual-stream features, sparse
+autoencoder latents, or behavioural directions, and whether these calibrations transfer
+there is an assumption this work cannot test.
 
 ---
 
@@ -50,7 +76,16 @@ wrong on ~20% of its inputs. Nothing downstream would have revealed it.
 ### 1. Rank-1 subspace search fails on real units, silently
 
 On ~20% of GPT-2 layer-6 neurons the estimator converges to a **confidently wrong**
-direction. Restart agreement is 0.85–0.99 and gives no warning at all.
+direction, and the aggregate statistics do not show it.
+
+> **Restart agreement is under measurement and the earlier wording here was too strong.**
+> This section previously said restart agreement "gives no warning at all". An 8-unit
+> pilot is more nuanced: correctly-recovered units agree across restarts to within 0.0003,
+> while **two of four failing units also agree to within 0.05 while being wrong.** The
+> check appears to catch severe failures and miss subtle ones. A pre-registered 100-unit
+> measurement is running; see `docs/preregistration-b1-stability-calibration.md` and its
+> addendum. The claim will be replaced by the measurement, in whichever direction it
+> falls.
 
 It is not a local minimum, not the loss, and not a property of the neurons. E0.1g settled it:
 

@@ -2102,6 +2102,13 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 | **DELONG FILED AS THE PRIMARY TEST, before B-1 produced a row.** The parent B-1 filing said "significantly below held-out R2" without naming a test - an open door, since several tests give several answers and the choice could be made after seeing numbers. Both signals are scored on the SAME units so the ROC curves are correlated; independent intervals would be the wrong comparison. Implemented in-repo, 8 unit tests, no new dependency | `preregistration-b1-addendum-1.md` §1 |
+| 2026-09-08 | **B-1 MAY BE UNDERPOWERED, and that is filed in advance rather than discovered.** Published power figures: dAUC=0.10 needs 36-142 cases, dAUC=0.02 needs 909-3,709. A synthetic check during implementation put the SE of a dAUC at 0.07-0.11 for uncorrelated signals at n=100/25 failures. **Rule fixed now: if \|dAUC\| < 0.10 the result is reported as UNDERPOWERED, not as a null - "no significant difference" is forbidden - and triggers one extension to n=300** | `preregistration-b1-addendum-1.md` §3 |
+| 2026-09-08 | **Multiplicity fixed: exactly ONE primary comparison** (restart agreement vs held-out R2 on GPT-2), uncorrected because it is a single pre-specified test. Every other signal and everything on Pythia is secondary and BH-corrected across the family, reported with raw and adjusted p | `preregistration-b1-addendum-1.md` §2 |
+| 2026-09-08 | **A FREE ANALYSIS the parent filing missed: the restart-count curve.** B-1 stores 5 restarts; practitioners run 2-3. Stability can be recomputed at 2/3/4/5 from data already collected, at zero extra compute, giving the operating characteristic of the check AS ACTUALLY USED. If it only works at 5 restarts that is a different recommendation from working at 2. Subsampled by first-k in recorded order, not a favourable subset | `preregistration-b1-addendum-1.md` §4 |
+| 2026-09-08 | **SCOUT: 2602.13450 "Inference From Random Restarts" validates the premise and does not scoop it.** It says the restart heuristic "lacks a formal inferential foundation, despite its widespread use" - but it is Bayesian theory on an econometric solver, not empirical calibration against ground truth, and never measures whether restart agreement predicts correctness. **It also supplies a mechanism for our pilot:** uniqueness concentrates polynomially while basin size concentrates exponentially, so restart agreement measures BASIN SIZE, not correctness - and a large basin can be the wrong basin. That is "stable and wrong" with independent theory behind it | scout, 8 Sep |
+| 2026-09-08 | **RUN PROGRAMME OF RECORD written as §7.8, superseding the A-series.** Five tiers, ~30 CPU-hours on the critical path. Three runs (B-8 family, B-9 scale, B-10 required-N) exist only because a scout named a reviewer objection we had not planned for; B-9 answers the strongest one, "only 124M and 160M models" | notebook §7.8 |
+| 2026-09-08 | **README corrected: "restart agreement gives no warning at all" was too strong.** The n=8 pilot shows it separates the severe failures cleanly (passes agree to 0.0003) and misses subtle ones (2 of 4 failures agree to within 0.05 while wrong). Replaced with the pilot numbers and a pointer to the running measurement, in whichever direction it falls | README §What Phase 0 found |
 | 2026-09-08 | **LATENT INCONSISTENCY FOUND in our own reported numbers.** The notebook reports pass rates under E0.1's filed gate criterion (`align > 0.95 AND k2_gain < 0.01`: GPT-2 77/100, Pythia 93/100) and AUCs under an alignment-only label (`s1_flag_roc.py`, 0.906 / 0.995). Both are correct for their own question and neither says which it is. Caught by writing a fresh analysis that scored alignment only and returned 94/100 where the run said 93 - the same conflation C43 already cost us once | `b1_signal_calibration.py` |
 | 2026-09-08 | **THE BENCH SCORES "recovery", NOT the gate criterion, and the reason is circularity.** k2_gain is one of the candidate signals AND a term in the gate label, so under that label it predicts itself. The bench asks "did the estimator find the right direction" - alignment alone. The script takes `--gate` to reproduce E0.1's number and excludes k2_gain as a signal when it does | `b1_signal_calibration.py` |
 | 2026-09-08 | **VENUE: TMLR is the primary target, not a top-tier main track.** The grade depends on a real acceptance, so the objective is certainty rather than prestige. TMLR accepts on correctness and clarity and explicitly NOT on novelty or significance - rolling, no deadline, indexed. A careful methods paper with honest negatives and pre-registration is what it exists for. NeurIPS D&B second, workshops as backup. Main track is low odds at 124M/160M | `PIVOTS.md` P10 |
@@ -2491,6 +2498,139 @@ name it as future work in v1 and run it for the workshop version — adding a ne
 control after the pre-registration closed, and before the preprint, invites
 exactly the "you kept running controls until one worked" reading that the
 pre-registration exists to prevent.
+
+---
+
+### 7.8 The bench run programme (B-series) — the plan of record, Sep–Oct 2026
+
+Supersedes 7.1's A-series as the active queue. A-1 to A-8 belonged to Paper A under the
+introspection framing; that paper is now cut from the flagship (see 6b, 8 Sep). Everything
+below is CPU-only and free unless marked otherwise.
+
+**Design rule carried from 7.1, and it now has teeth.** Every run states its question, its
+criterion, its cost, and its failure branch. Three runs below exist *only* because a
+literature scout named a reviewer objection we had not planned for.
+
+**Critical path to a submittable paper:** B-1 → B-2 → B-3 → (B-6 if triggered) → B-8 → B-9
+→ draft. About 30 CPU-hours total, which is three or four overnight runs.
+
+---
+
+#### Tier 0 — in flight
+
+| run | model | config | cost | state |
+|---|---|---|---|---|
+| **B-1** | GPT-2 small | n=100, L6, 5 restarts | ~4.4 h | **RUNNING** |
+| **B-2** | Pythia-160m | n=100, L6, 5 restarts | ~4.4 h | **QUEUED** behind B-1, auto-starts at 100 rows |
+
+Criteria in `preregistration-b1-stability-calibration.md` + `preregistration-b1-addendum-1.md`.
+
+---
+
+#### Tier 1 — offline, zero compute, runs in seconds once Tier 0 lands
+
+**B-3 · The spec sheet.** `b1_signal_calibration.py`. Recovery rate with a Wilson
+interval; every signal's AUC, sensitivity at 10% false alarm, and good units discarded at
+70% catch; DeLong against the incumbent with BH correction on the secondary family.
+*Script written and tested (8 tests, `tests/test_delong.py`).*
+
+**B-4 · The restart-count curve.** AUC of restart agreement recomputed at 2, 3, 4, 5
+restarts by subsampling what B-1 already stored. **Free.** Practitioners commonly run two
+or three; if the check only works at five, that is a materially different recommendation
+and the paper must say which. Pre-specified as descriptive, not tested (addendum 1 §4).
+
+**B-5 · Signal combination.** Logistic on {held-out R2, disagreement, restart agreement},
+nested 5-fold CV, compared to R2 alone by cross-validated AUC.
+*Failure branch, and it is a good outcome:* if the combination does not beat R2 alone,
+that is the finding — the free signal is sufficient — and the practical recommendation gets
+simpler, not weaker.
+
+---
+
+#### Tier 2 — conditional, triggered by B-3
+
+**B-6 · Extend to n=300 on GPT-2.** **Triggered if and only if |dAUC| < 0.10** between
+restart agreement and held-out R2. Authorised in advance by addendum 1 so it cannot be a
+reaction to a disappointing p-value. ~13 h.
+
+*Why it is likely to fire.* A synthetic check during implementation put the standard error
+of a dAUC at roughly 0.07-0.11 for uncorrelated signals at n=100 with 25 failures. Our
+signals are computed from the same fits and so are correlated, which shrinks that
+substantially — but the published power figures are blunt: dAUC = 0.10 needs 36-142 cases,
+dAUC = 0.02 needs 909-3,709. **n=100 can resolve a large gap and cannot resolve a small
+one, and the paper says so either way.**
+
+**At most one extension.** If n=300 still cannot resolve it, the honest conclusion is that
+the two signals are close enough that the choice is about cost — and cost already favours
+held-out R2, which is free, over restart agreement, which is 5x the compute.
+
+---
+
+#### Tier 3 — reviewer-proofing. Each one answers a specific predictable objection.
+
+**B-7 · Layer sweep.** GPT-2 layers 2, 6, 10, n=50 each. ~6.6 h.
+*Objection answered:* "you looked at one layer."
+*Question:* is silent failure depth-dependent? This is not only defensive — Proposal III's
+tuning curves will be measured across layers, so the depth profile of the instrument's
+error is needed before that work starts.
+*Failure branch:* if the failure rate swings wildly with depth, the headline becomes a
+range over depth as well as over models, and the single-layer numbers must be relabelled.
+
+**B-8 · Third model family.** GPT-Neo-125m (different training corpus, same scale), n=100,
+L6. ~4.4 h.
+*Objection answered:* "two models is not a family effect."
+*Failure branch:* if the third family behaves unlike both, the claim narrows from "models"
+to "these models" and the paper says so.
+
+**B-9 · Scale.** Pythia-1.4b, n=50, layer 12 of 24. d_model 2048 against 768, so the fit is
+roughly 2.7x wider. CPU overnight, or Kaggle GPU if it drags.
+*Objection answered:* **"only 124M and 160M models."** This is the single strongest
+objection to the paper and the one most likely to decide a review.
+*Failure branch:* if it will not run on CPU in a night, it moves to Kaggle rather than
+being dropped. If the failure rate at 1.4B is near zero, that is itself a result — the
+problem shrinks with scale — and it must be reported as readily as the opposite.
+
+**B-10 · Required-N per signal.** Token sweep 2k/4k/8k/16k at n=50. ~8 h.
+*Objection answered:* "your operating point is arbitrary."
+*Question:* does each signal's AUC stabilise, and does the **ranking** of signals change
+with data? A signal that wins only at 8k tokens is a different recommendation from one that
+wins everywhere.
+
+---
+
+#### Tier 4 — what makes it a bench rather than a paper
+
+**B-11 · The adapter interface and the spec-sheet CLI.** A third party supplies an
+estimator behind a small interface; the bench returns the spec sheet. Without this it is a
+paper with tables. With it, it is a thing other people can run — which is the axis
+NeurIPS D&B and TMLR actually reward. No compute.
+
+---
+
+#### Tier 5 — the bridge to the rest of Proposal III (sem 6)
+
+**T-1 · Generalise the cascade to K>1.** **Blocking.** Joint estimation currently
+degenerates to K=1 at every sample size. The population layer cannot start until this is
+fixed, and it has been open since C14.
+
+**T-2 · Tuning curves** over a controlled stimulus battery, cut to two variables by the
+August audit — now sitting on an instrument whose error rate is known.
+
+**T-3 · Pairwise maximum entropy** on a population of units. The August research pass
+verified this has zero existing language-model applications; the near-miss builds Ising
+couplings *into* an architecture, which is the opposite direction.
+
+---
+
+#### Cut, and why
+
+- **Study 2 (planted personas)** — P1 void, P1b a negative that a published behavioural
+  paper (2602.06801) already reached. Real work; not flagship material.
+- **Study 3 (introspection readout)** — solid result, fast-crowding area.
+- **A-1 to A-8** — belonged to Paper A's framing.
+
+Both cut studies remain reportable as separate outputs. Including weak studies weakens a
+paper.
 
 ---
 

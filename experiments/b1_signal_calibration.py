@@ -68,6 +68,77 @@ def roc(scores, labels):
     return pts, auc
 
 
+def _midrank(x):
+    """Ranks with ties averaged - the midrank DeLong's covariance form requires."""
+    order = sorted(range(len(x)), key=lambda i: x[i])
+    r = [0.0] * len(x)
+    i = 0
+    while i < len(x):
+        j = i
+        while j + 1 < len(x) and x[order[j + 1]] == x[order[i]]:
+            j += 1
+        avg = (i + j) / 2.0 + 1.0
+        for k in range(i, j + 1):
+            r[order[k]] = avg
+        i = j + 1
+    return r
+
+
+def delong(scores_a, scores_b, labels):
+    """DeLong's test for two CORRELATED ROC curves scored on the same units.
+
+    Both signals are computed from the same fits on the same neurons, so the two ROC
+    curves are correlated and independent intervals would be the wrong comparison - they
+    ignore the covariance and can hide a real difference. Filed as the primary test in
+    docs/preregistration-b1-addendum-1.md before B-1 produced a row.
+
+    Returns (auc_a, auc_b, difference, standard error, z, two-sided p).
+    """
+    from math import erfc, sqrt
+    pos = [i for i, y in enumerate(labels) if y]
+    neg = [i for i, y in enumerate(labels) if not y]
+    m, n = len(pos), len(neg)
+    if m < 2 or n < 2:
+        return (float("nan"),) * 6
+
+    aucs, v01, v10 = [], [], []
+    for sc in (scores_a, scores_b):
+        X = [sc[i] for i in pos]      # positives = failures
+        Y = [sc[i] for i in neg]
+        tx, ty, txy = _midrank(X), _midrank(Y), _midrank(X + Y)
+        auc = (sum(txy[:m]) - m * (m + 1) / 2.0) / (m * n)
+        aucs.append(auc)
+        # structural components: v10 over positives, v01 over negatives
+        v10.append([(txy[i] - tx[i]) / n for i in range(m)])
+        v01.append([1.0 - (txy[m + j] - ty[j]) / m for j in range(n)])
+
+    def cov(u, v, k):
+        mu = sum(u) / k
+        mv = sum(v) / k
+        return sum((a - mu) * (b - mv) for a, b in zip(u, v)) / (k - 1)
+
+    s10 = [[cov(v10[i], v10[j], m) for j in (0, 1)] for i in (0, 1)]
+    s01 = [[cov(v01[i], v01[j], n) for j in (0, 1)] for i in (0, 1)]
+    var = (s10[0][0] + s10[1][1] - 2 * s10[0][1]) / m +           (s01[0][0] + s01[1][1] - 2 * s01[0][1]) / n
+    diff = aucs[0] - aucs[1]
+    se = sqrt(var) if var > 0 else 0.0
+    if se == 0:
+        return (aucs[0], aucs[1], diff, 0.0, float("nan"), float("nan"))
+    z = diff / se
+    return (aucs[0], aucs[1], diff, se, z, erfc(abs(z) / sqrt(2.0)))
+
+
+def benjamini_hochberg(pvals):
+    """BH-adjusted p-values, order preserved. Secondary comparisons only."""
+    idx = sorted(range(len(pvals)), key=lambda i: pvals[i])
+    out, prev = [0.0] * len(pvals), 1.0
+    for rank, i in enumerate(reversed(idx), start=1):
+        k = len(pvals) - rank + 1
+        prev = min(prev, pvals[i] * len(pvals) / k)
+        out[i] = min(prev, 1.0)
+    return out
+
+
 def wilson(k, n, z=1.96):
     if n == 0:
         return (0.0, 1.0)
