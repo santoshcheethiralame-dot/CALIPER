@@ -89,7 +89,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-08c"
+VERSION = "2026-09-08d"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -646,6 +646,34 @@ def probe_finite(model, tok, layers, layer):
     return ok
 
 
+def _gram_stats(stacked):
+    """Pairwise cosine similarity of the concept vectors.
+
+    The off-diagonal median is the floor any concept-specific claim has to clear: it is
+    how close two UNRELATED concepts already are, so a recovered direction that only
+    reaches it has recovered concept space and not a concept.
+    """
+    v = stacked / stacked.norm(dim=1, keepdim=True)
+    g = (v @ v.T).float()
+    n = g.shape[0]
+    off = g[~torch.eye(n, dtype=torch.bool)]
+    top = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            top.append((float(g[i, j]), i, j))
+    top.sort(key=lambda x: -abs(x[0]))
+    print(f"  concept-vector similarity: median |cos| {off.abs().median():.4f}, "
+          f"mean {off.mean():.4f}, max {off.max():.4f}, min {off.min():.4f}", flush=True)
+    return {
+        "gram_offdiag_median_abs": float(off.abs().median()),
+        "gram_offdiag_mean": float(off.mean()),
+        "gram_offdiag_max": float(off.max()),
+        "gram_offdiag_min": float(off.min()),
+        "gram_offdiag_p90_abs": float(off.abs().quantile(0.90)),
+        "gram_top_pairs": [[round(c, 4), i, j] for c, i, j in top[:10]],
+    }
+
+
 def build_vectors(model, tok, layers, layer, normalise, vector_pos="concept"):
     print(f"building concept vectors at layer {layer} (read position: {vector_pos}) ...",
           flush=True)
@@ -691,6 +719,13 @@ def build_vectors(model, tok, layers, layer, normalise, vector_pos="concept"):
         "n_vectors": len(vecs),
         "non_finite_vectors": bad,
         "vector_read_position": vector_pos,
+        # P1b (C56) could not be interpreted without this. Its primary null was "a
+        # different concept's vector", chosen as conservative, but nobody had measured
+        # whether concept vectors are mutually similar. If they share a large common
+        # component then that null is simply the typical inter-concept cosine, and
+        # recovery failing to beat it means "no concept-specific signal" rather than
+        # "the extractor is broken". Measured here so the null is never again a guess.
+        **_gram_stats(stacked),
     }
     if bad:
         raise SystemExit(
