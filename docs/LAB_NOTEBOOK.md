@@ -236,6 +236,82 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### C48 - Gemma refit vectors: do they steer? (2026-09-08) - **WEAKLY, AND THAT MATTERS**
+
+A-12c. The validation C45/C46 was missing: `--stage steer`, neutral prompt, injection at
+every position, refit vectors, alphas as fractions of the 36,245 concept-token norm.
+150 trials. `data/s3/gval_steer_norm1.jsonl`.
+
+| alpha | %norm | literal concept | **semantic** | coherent |
+|---|---|---|---|---|
+| 0 | 0% | 0/30 | 3/30 *(baseline)* | 30/30 |
+| 3,624 | 10% | 0/30 | 2/30 | 30/30 |
+| 7,249 | 20% | 0/30 | 5/30 | 30/30 |
+| 14,498 | 40% | 1/30 | **10/30** | 27/30 |
+| 27,546 | 76% | 5/30 | **12/30** | **14/30** |
+
+"Semantic" counts a concept-specific associate as well as the literal word - peanut and
+trunk for elephant, sonar and clicks for dolphin, lava and magma for volcano. The literal
+scorer badly undercounts: at 76% it reports 5/30 while the text plainly carries the
+concept in "Silk-silk-like-f-web", "harbor seals seals", "The clicks... like sonar",
+"dust and peanuts".
+
+**The vectors do carry content.** At 40% semantic steering is 10/30 against a 3/30
+baseline, and the text is unmistakable: spider gives "The Silk and the Silkling... his
+silkwebs and his silklings", eagle gives "feather feather feather", harbor gives "the
+city of seals".
+
+**But they are much weaker than Qwen's refit vectors** (C32: 7/30 literal at 38%, 14/30
+at 76%, coherent 30/30 throughout). Gemma needs 76% of its norm to reach 5/30 literal,
+and by then coherence has collapsed to 14/30 - word salad and raw entity fragments.
+
+**The caveat that attaches to C45/C46, and it is not small.** That run swept 0-40%, and
+its *significant* real-vs-random cells are at **5%, 10% and 20%** - where semantic
+steering is 2/30 and 5/30 against a 3/30 baseline, i.e. at or barely above chance. **The
+headline result sits in a range where the real vectors barely steer generation at all.**
+
+This is not disqualifying: the forced-choice readout is a first-token logit measure and
+is far more sensitive than "does the concept word appear in fifty tokens". A vector can
+shift logits measurably without surfacing in text. But it must be stated, and it means
+the instrument is well validated at 40% and only weakly validated where the claim lives.
+
+### C49 - A-8, the on-manifold control (2026-09-08) - **THE OFF-MANIFOLD ACCOUNT IS REFUTED**
+
+`--control span`: a random direction drawn **within the span of the 30 concept vectors**,
+rescaled to unit norm. On-manifold by construction, living in concept space, but not any
+single coherent concept. Same alphas, same prompts, 420 rows.
+`data/s3/g2_forced_span_norm1.jsonl`.
+
+The prediction under the off-manifold account C45/C46 raised: if the signal tracks how
+anomalous a perturbation is, span is on-manifold and should behave like **real** (low).
+
+**Neutral framing** - the arm with interpretable magnitudes:
+
+| %norm | real | **span** | random | real vs span | span vs random |
+|---|---|---|---|---|---|
+| 5% | 0.1393 | 0.2115 | 0.2150 | p=0.052 | p=0.48 |
+| 10% | 0.1205 | **0.2606** | 0.2471 | **p=0.033** | p=0.73 |
+| 20% | 0.1215 | **0.2416** | 0.3199 | **p=0.045** | p=0.38 |
+| 40% | 0.1238 | 0.2166 | 0.1851 | p=0.16 | p=0.46 |
+
+**Span behaves like random, not like real.** Indistinguishable from noise at every
+strength (p=0.38-0.76), and significantly different from the real concept vector at 10%
+and 20%.
+
+**So the signal is not tracking off-manifold-ness.** A direction inside concept space
+produces the same elevated response as Gaussian noise. What suppresses the response is
+something specific to a **single coherent concept direction** - a mixture of concept
+directions does not do it.
+
+That is a sharper claim than the manifold story it replaces, and it was the hypothesis
+A-8 was written to kill. It did.
+
+**Introspective framing shows span intermediate** (real below span at 1-10%, span below
+random at 5-20%), but every value there is between 0.0000 and 0.0193 - all meaning
+near-certain NO - so the ordering is not worth interpreting. Neutral is the arm to quote,
+per the standing rule from C33/C34.
+
+
 ### C47 - S1 multi-seed confirmatory run, n=100 (2026-09-08) - **NO IMPROVEMENT**
 
 The pre-registered confirmatory run (`preregistration-s1-multiseed.md`, filed 7 Sep with
@@ -1734,6 +1810,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (C49) | **THE OFF-MANIFOLD ACCOUNT IS REFUTED. A-8 delivered.** A random direction inside the concept span behaves like Gaussian noise (p=0.38-0.76), not like a real concept vector (differs at p=0.033, 0.045). The signal does not track anomalousness. **What suppresses it is specific to a single coherent concept direction; a mixture of concept directions does not.** Sharper than the story it replaces | notebook C49 |
+| 2026-09-08 (C48) | **Gemma's refit vectors DO steer, but weakly, and C45/C46's headline sits where they barely steer.** Semantic steering 10/30 at 40% of norm against a 3/30 baseline, but only 2/30 and 5/30 at the 10% and 20% cells where the A3 result is significant. Not disqualifying - forced-choice logits are far more sensitive than generation - **but the instrument is well validated at 40% and only weakly where the claim lives, and the write-up must say so** | notebook C48 |
+| 2026-09-08 | **Gemma's vectors are much weaker steerers than Qwen's** (C32: 7/30 literal at 38%, coherent 30/30; Gemma needs 76% for 5/30 and coherence collapses to 14/30 there). The literal-word scorer undercounts badly - silk/web, harbor seals, dust and peanuts all score zero. **Report semantic steering alongside literal wherever steering is quoted** | notebook C48 |
 | 2026-09-08 (C47) | **THE MULTI-SEED REPAIR FAILS ITS PRE-REGISTERED CRITERION. 76/100 vs the gate's 77/100**, Wilson [0.668, 0.833] against a 0.90 bar. Repairs 8, breaks 9, McNemar p=1.000. **C43's "the failure class is repairable" is WITHDRAWN** - it was measured on six units chosen as the worst, scored on alignment alone rather than the full pass criterion | notebook C47 |
 | 2026-09-08 | **The lottery cuts both ways.** Median paired change is +0.0020 [+0.0005, +0.0040] but the tails are asymmetric: median gain +0.0118 against a worst-case loss of **-0.9553** (n1394, 0.9971 -> 0.0418). Every damaged unit shows a large positive k2_gain - the k=1 arm landing badly on a unit one seeded fit got right | notebook C47 |
 | 2026-09-08 | **My protocol had a confound and the follow-up is cheap.** The multi-seed arm ran 1 restart x 800 steps against the gate's 3 x 2500, so this tested five cheap draws against one expensive draw, not seed-selection at matched budget. Fair test of the former, not the latter. **Re-run at matched budget before retiring the idea** | notebook C47 |
