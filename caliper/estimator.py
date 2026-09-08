@@ -23,7 +23,16 @@ class Fit:
     k: int
     train_r2: float
     test_r2: float
-    restarts: list = field(default_factory=list)  # test_r2 per restart
+    restarts: list = field(default_factory=list)      # subspace per restart
+    r2_restarts: list = field(default_factory=list)   # held-out R2 per restart
+
+    @property
+    def r2_spread(self):
+        """Max minus min held-out R2 across restarts. The cheap stability variant:
+        no subspace comparison, just the number the fit already reports."""
+        if len(self.r2_restarts) < 2:
+            return float("nan")
+        return float(max(self.r2_restarts) - min(self.r2_restarts))
 
     @property
     def stability(self):
@@ -144,7 +153,7 @@ def fit(
         if nrm > 0:
             init = beta / nrm
 
-    best, subspaces = None, []
+    best, subspaces, r2s = None, [], []
     for r in range(n_restarts):
         # Restart 0 gets the warm start; the rest stay random so that restart
         # agreement remains a meaningful diagnostic rather than a foregone one.
@@ -177,10 +186,12 @@ def fit(
             basis = _to_original_frame(model.basis().cpu().numpy(), scale_np, frame)
             tr = _r2(model(s_tr), a_tr)
         subspaces.append(basis)
+        r2s.append(float(best_te))
         if best is None or best_te > best.test_r2:
             best = Fit(subspace=basis, k=k, train_r2=float(tr), test_r2=float(best_te))
 
     best.restarts = subspaces
+    best.r2_restarts = r2s
     return best
 
 

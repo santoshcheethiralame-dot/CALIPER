@@ -2102,6 +2102,14 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 | **THE DELIVERABLE IS A CALIBRATION BENCH FOR RELIABILITY CHECKS, not a benchmark of methods.** Method benchmarking is crowded (ObserverBench, MIB, AxBench). The scout found the same hole from three sides: reliability signals validated against behaviour or reconstruction but **never against a known-correct direction**; ground truth for direction recovery that is always planted or compiled (FRR, Linear Representation Bench, InterpBench, Tracr); harnesses that rank methods but carry no ground-truth-free failure detector. Free exact ground truth on a real model closes all three | `docs/BENCH_SPEC.md` |
+| 2026-09-08 | **B-1 FILED (`preregistration-b1-stability-calibration.md`) and UNBLOCKED BY A TWO-LINE CHANGE.** `Fit.stability` — restart agreement, the field's default check — has been computed on every fit since the estimator was written and never written to a row. Patches landed and smoke-tested in `caliper/batched.py`, `caliper/estimator.py`, `experiments/e01_gate.py`. **The headline run needs ~4.4 h of local CPU and no new idea** | prereg b1 |
+| 2026-09-08 | **B-1's pilot is disclosed in the filing, and it moderates the claim I first made.** I had said restart agreement was near-useless on our failures. `s1_seed_lottery.json` (n=8, run for C43) says otherwise: passing units are stable to within 0.0003, and of four failures **two are stable to within 0.05 while being wrong**, two are plainly unstable. The defensible expectation is **catches the severe failures, misses the subtle ones** — moderate AUC, poor operating point at high specificity. Recorded before the run so it cannot be retrofitted | prereg b1 |
+| 2026-09-08 | **All three B-1 outcomes are pre-registered as results.** If stability matches held-out R2 the finding becomes cost-benefit (5 fits vs free); if it *beats* R2 the deliverable's recommendation changes and **Finding 2 is amended**. A bench whose headline only works in one direction is an advocacy exercise | prereg b1 |
+| 2026-09-08 | **B-1 will move the pass rate off 77/100 and that is NOT a finding.** 5 restarts is a better optimiser than 2. C13's gate stands at its own filed configuration; B-1 is not a re-run of the gate. Committed in advance so the temptation to quote a nicer pass rate never arises | prereg b1 |
+| 2026-09-08 | **P1b IS NOT SCOOPED — it is the ground-truth complement to a published behavioural result.** [Non-Identifiability of Steering Vectors (2602.06801)](https://arxiv.org/html/2602.06801v4) reaches P1b's conclusion on Llama-3.1-8B and Qwen2.5-3B using **behavioural evidence only**, and states explicitly that it does not plant known directions and attempt recovery. That is exactly what P1b did. Reframes P1b from our failed study into corroboration by a different route, and revives the `2026-09-08f` re-run — behind the CPU work, since it needs a GPU | notebook 7.8 |
+| 2026-09-08 | **The stated limit goes in the abstract, not the appendix.** Free ground truth holds for an MLP unit reading its own layer. It does not extend to residual-stream features, SAE latents, or persona directions, and the bench cannot test whether its calibrations transfer there. A reviewer will raise this; better that we raise it first | `docs/BENCH_SPEC.md` |
+| 2026-09-08 | **`Fit.restarts` was documented as holding `test_r2` per restart; it holds subspaces.** Stale comment since the estimator was written, corrected while adding `r2_restarts`. Nothing downstream was wrong — `stability` always did a subspace comparison — but the docstring would have misled the next reader into scoring the wrong thing | `caliper/estimator.py` |
 | 2026-09-08 | **P1b FILED AND BUILT (`preregistration-s2-p1b.md`, `2026-09-08c`).** Plants real concept vectors instead of random ones, null A is a *different concept's* vector (conservative - concept vectors share structure), null B a random direction reported alongside. **The manipulation check is the key addition and it gates the primary**: the run now logs every generation and reports the semantic steering rate, so a plant that never reached the text is distinguishable from an extraction that failed. That distinction is exactly what C54/C55 could not make | prereg s2-p1b |
 | 2026-09-08 | **P1b is a NECESSARY-CONDITION test, and the framing is committed in advance.** A concept direction is the easy case - the model already represents it - so a PASS does not establish that persona extraction recovers arbitrary traits. A FAIL with the manipulation check passed is the substantive negative. The filing also commits that a third void reconsiders the study rather than re-running on another guess | prereg s2-p1b |
 | 2026-09-08 (C55) | **P2 confirms P1 is void rather than weak: flat at the null at every depth (37, 39, 43, 47, 55), 16/40 above null which is exactly chance, no rise anywhere, max 0.0198.** Total absence of signal at the plant layer AND downstream is the signature of a mis-specified test, not a failing instrument | notebook C54/C55 |
@@ -2822,6 +2830,152 @@ Three things follow, none of them optional:
    September mentor meeting, since Paper A's authorship for a 4-person capstone is
    already on that agenda. Two papers, one author, overlapping controls, is a
    question that is much cheaper to answer now than at review.
+
+---
+
+### 7.8 The bench — B-1 to B-5, the calibration deliverable (Sep 2026, local CPU)
+
+**Filed 8 September 2026.** Spec: `docs/BENCH_SPEC.md`. Pre-registration for B-1/B-2:
+`docs/preregistration-b1-stability-calibration.md`.
+
+**What this line of work is.** Not a benchmark of direction-finding methods — that
+space is crowded (ObserverBench, MIB, AxBench). A **calibration bench for the
+ground-truth-free reliability checks** the field uses to decide whether to trust a
+result. The 8 September scout found the same hole from three sides: reliability
+signals validated against behaviour or reconstruction but never against a
+known-correct direction; ground truth for direction recovery that is always planted
+or compiled; harnesses that rank methods but carry no failure detector. Free exact
+ground truth on a real model closes it.
+
+**Why it costs almost nothing.** Every ingredient is already on disk. E0.5 is a
+four-method scoreboard against free ground truth (STA 0/30, decorrelated STA 1/30,
+STC 0/30, fitted bottleneck 26/30). Two substrates are wired and run (GPT-2 77/100,
+Pythia-160m 93/100). Three signals are already scored. The missing one is the
+important one and it was being computed and thrown away.
+
+---
+
+#### **B-1 · Restart-agreement calibration, GPT-2 — THE HEADLINE** ⚠ unblocked, not run
+
+**Question.** Restart agreement is the default reliability check in this literature.
+Does it predict whether the recovered direction is *correct*? Unanswerable without a
+known-correct direction; answerable here.
+
+**State — code change landed 8 Sep, run not started.** `Fit.stability` has existed
+at `caliper/estimator.py:29` since the estimator was written. `fit_batch` populated
+it on every fit. `e01_gate.py` never wrote it to the row. Three patches, all landed
+and smoke-tested:
+
+- `caliper/batched.py` — `per_restart_r2`, so held-out R2 per restart survives.
+- `caliper/estimator.py` — `Fit.r2_spread`; `fit()` now records `r2_restarts`; the
+  stale comment claiming `restarts` held test_r2 (it held subspaces) is corrected.
+- `experiments/e01_gate.py` — records `stability`, `r2_spread`, `n_restarts`.
+
+**Config.** `--restarts 5`, everything else the C13/C47 configuration: same 100
+units, layer 6, 8000 tokens, 1600 steps, bar `align > 0.95`.
+
+**Cost.** C13 ran 63.7 s/neuron at 2 restarts. The fit dominates, so 5 restarts is
+about 2.5x: **~4.4 h**, one overnight local CPU run, resumable via `Checkpoint`.
+
+**Endpoint.** AUC of `stability` against the AUC of held-out R2 (0.906) on the same
+100 units, with a bootstrap interval on the *difference*, not two bare numbers.
+
+**Pilot already on disk, disclosed in the filing.** `results/s1_seed_lottery.json`,
+8 units at 10 seeds, run for a different purpose (C43). Passing units are stable to
+within 0.0003; of four failing units, **two are stable to within 0.05 while being
+wrong** (n527 median align 0.9163 spread 0.0474; n1625 0.9131 / 0.0658), and two are
+plainly unstable (n1503 spread 0.9169; n2023 0.3309). Expectation recorded before
+the run: **moderate AUC, poor operating point at high specificity** — it catches the
+severe failures and misses the subtle ones. n=8 across two hand-picked groups is not
+a sample and licenses no claim.
+
+**Failure branches — all three are results, none is a failed run.**
+
+| outcome | reading | what ships |
+|---|---|---|
+| `stability` AUC < 0.70, significantly below R2 | The field's default check does not discriminate failures on this substrate | The headline. A widely used check calibrated for the first time and found wanting, with a free better alternative in hand |
+| `stability` AUC inside R2's interval | Equivalent detectors | Cost-benefit result: restart agreement costs 5 fits, held-out R2 costs zero. Reported without corrective framing |
+| `stability` AUC significantly above R2 | The incumbent recommendation is wrong | The bench recommends restart agreement, **and notebook Finding 2 is amended.** Say so plainly |
+
+**Anticipated confound, committed in advance.** 5 restarts is a better optimiser than
+2, so the pass rate will move off 77/100. **A changed pass rate is not a finding
+here** — C13's gate result stands at its own filed configuration, and B-1 is not a
+re-run of the gate.
+
+---
+
+#### **B-2 · The same on Pythia-160m** — transfer
+
+Same five signals, same criteria, C53's 100 units. ~4.4 h.
+
+**The caveat travels with it, unchanged from C53:** Pythia's failures are more severe
+(median 0.794 vs 0.889, min 0.076 vs 0.145) and extreme failures are easier to
+separate, so any gain is partly about what the detector was asked to detect. If
+`stability` improves on Pythia by the same margin R2 and disagreement did
+(0.906 -> 0.995, 0.802 -> 0.975), that is severity, not transfer, and the write-up
+says so.
+
+**Failure branch.** If the ranking of signals *flips* between families, the bench
+cannot recommend one signal and must report per-substrate spec sheets instead. That
+weakens the deliverable's headline and strengthens its honesty; it is reported, not
+worked around.
+
+---
+
+#### **B-3 · Does stability add anything on top of held-out R2?** — offline, free
+
+Logistic on the signal set, 5-fold CV, cross-validated AUC against R2 alone. C38
+already built the CV machinery for thresholds.
+
+**Why it is separate from B-1.** A signal that is *redundant* is a different finding
+from one that is *uninformative*, and only this run separates them. If stability
+adds nothing on top of R2 but is a fine detector alone, the recommendation is still
+"use R2, it is free" — but for a different reason, and the paper must not conflate
+them.
+
+**Failure branch.** With 22 failures in 100 units, a three-predictor logistic is at
+the edge of what the data supports. If CV intervals are too wide to separate the
+models, report that the run was underpowered and give the interval — do not report a
+point estimate as if it settled anything.
+
+---
+
+#### **B-4 · Required-N per signal** — offline, reuses `e03_required_n`
+
+At what N does each signal's AUC stabilise? The bench's spec sheet has a required-N
+row and it should be per-signal, not global. C41 established that the binding
+quantity is **events, not positions**, and that C37's original attribution was wrong;
+that correction carries into this run's design.
+
+---
+
+#### **B-5 · The spec-sheet generator** — one script, no new compute
+
+`experiments/bench_report.py`: reads the gate rows, emits the section 4.4 table for a
+(method, signal, substrate) triple. Recovery with Wilson CI, signal AUC with
+interval, TPR at fixed FPR, discarded-good at 73% catch, random-direction floor,
+required-N.
+
+**The operating-characteristic columns are the deliverable, not the AUC.** C35 is the
+precedent: held-out R2 and disagreement both had high AUC, and the reason to prefer
+R2 was that at 73% catch it discarded 5 good units against disagreement's 21. A
+practitioner needs that number; an AUC does not give it to them.
+
+---
+
+#### **Not in v1, and why**
+
+- **A third model family.** Only after B-1/B-2 land. Breadth before the calibration
+  is measured is breadth for its own sake.
+- **SAE latents as a substrate.** No free ground truth there — that is the whole
+  point of section 3's stated limit. Wanting it does not create it.
+- **P1b re-run at `2026-09-08f`.** Still worth doing, now for a better reason than
+  before: the 8 Sep scout found
+  [Non-Identifiability of Steering Vectors (2602.06801)](https://arxiv.org/html/2602.06801v4),
+  which reaches P1b's conclusion **on behavioural evidence only** and explicitly does
+  not plant a known direction and attempt recovery. P1b is the ground-truth
+  complement to a published behavioural result, not a scooped study. GPU, so it
+  queues behind the CPU work.
 
 ---
 

@@ -90,6 +90,7 @@ def fit_batch(stimulus, responses, k=1, n_restarts=3, steps=2500, lr=3e-3,
     best_r2 = np.full(n_neurons, -np.inf)
     best_basis = [None] * n_neurons
     per_restart = [[] for _ in range(n_neurons)]
+    per_restart_r2 = [[] for _ in range(n_neurons)]
 
     for r in range(n_restarts):
         model = _BatchedBottleneck(n_neurons, s.shape[1], k, width=width,
@@ -132,6 +133,7 @@ def fit_batch(stimulus, responses, k=1, n_restarts=3, steps=2500, lr=3e-3,
         for i in range(n_neurons):
             if run_basis[i] is not None:
                 per_restart[i].append(_to_original_frame(run_basis[i], scale_np))
+                per_restart_r2[i].append(float(run_r2[i]))
                 if run_r2[i] > best_r2[i]:
                     best_r2[i] = run_r2[i]
                     best_basis[i] = per_restart[i][-1]
@@ -141,5 +143,6 @@ def fit_batch(stimulus, responses, k=1, n_restarts=3, steps=2500, lr=3e-3,
         f = Fit(subspace=best_basis[i], k=k, train_r2=float("nan"),
                 test_r2=float(best_r2[i]))
         f.restarts = per_restart[i]
+        f.r2_restarts = per_restart_r2[i]
         out.append(f)
     return out

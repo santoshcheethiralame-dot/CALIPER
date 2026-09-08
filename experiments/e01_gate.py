@@ -27,7 +27,11 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--neurons", type=int, default=100)
 ap.add_argument("--tokens", type=int, default=8000)     # E0.3b operating point
 ap.add_argument("--steps", type=int, default=1600)
-ap.add_argument("--restarts", type=int, default=2)
+ap.add_argument("--restarts", type=int, default=2,
+                help="B-1 calibrates restart agreement and needs 5; 2 gives a "
+                     "single pairwise comparison, too thin to calibrate. C13 and "
+                     "C53 both ran at 2 and their pass rates are quoted at that "
+                     "configuration, not this one")
 ap.add_argument("--layer", type=int, default=6)
 ap.add_argument("--batch", type=int, default=32)        # speedup saturates by 32
 ap.add_argument("--device", default="auto")
@@ -78,6 +82,14 @@ for start in range(0, len(todo), a.batch):
             "r2_k1": round(float(max(d1[j].test_r2, c.test_r2)), 6),
             "k2_gain": round(float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
             "disagreement": round(abs(ad - ac), 4),
+            # B-1: the field's default reliability check. The fit has always
+            # computed it; nothing wrote it down. Only the direct route has a
+            # restart lottery to agree about - fit_cascade runs a grid search and
+            # one polish, so its stability is undefined by construction, and that
+            # asymmetry is itself part of why the cascade is the better route.
+            "stability": round(float(d1[j].stability), 4),
+            "r2_spread": round(float(d1[j].r2_spread), 6),
+            "n_restarts": a.restarts,
         })
     el = time.time() - t0
     print(f"  {len(ck.rows())}/{int(alive.sum())} neurons  {el:.0f}s "
