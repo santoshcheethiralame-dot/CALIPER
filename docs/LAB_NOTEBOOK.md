@@ -236,6 +236,56 @@ artifact risk.
 
 *(Newest first. Append; never rewrite.)*
 
+### Literature scout, 8 September 2026 - **STUDY 3 IS CROWDED; STUDY 1 IS NOT**
+
+Not a run. A deliberate scouting pass before committing to the methods-paper pivot,
+because the pivot was being chosen on internal evidence alone.
+
+**What is already published in Study 3's space**
+
+| paper | what it holds |
+|---|---|
+| Detecting the Disturbance, arXiv 2512.12411 | **Binary injection-detection is artifactual** - global logit shifts bias toward YES regardless of question content, control correlation r=0.999. Llama-3.1-8B, layers 0-30 |
+| Lederman & Mahowald, arXiv 2603.05414 | Emergent introspection is **content-agnostic**; models default to high-frequency guesses like "apple" |
+| Venkatesh & Kurapath, arXiv 2602.06801 | Steering vectors are **non-identifiable**; orthogonal perturbations achieve near-equivalent efficacy. Feb 2026, revised Apr |
+| Can LLMs Introspect? A Reality Check, arXiv 2605.26242 | **Published at COLM 2026** |
+| Attention-guided feature learning, arXiv 2602.00333 | Token position for extraction **already known to matter enormously**, including chat-template positions |
+
+**Consequences, stated plainly**
+
+1. **Our A2 result is scooped twice.** "Detection is content-free" is Lederman & Mahowald
+   and 2512.12411. It was never ours.
+2. **2512.12411 extracts by averaging over all prompt tokens.** They never hit our
+   template-tail bug because their method sidesteps it, and their control is cleaner than
+   ours: same injection, a factual question with a known NO answer, r=0.999. They did in
+   one control what took us C18-C49.
+3. **The extraction-position finding is not novel as "position matters."** That is known.
+   What may remain is the sharper form - a vector passing every reported health check
+   while carrying nothing - but it is a narrower claim than it looked yesterday.
+
+**What survives in Study 3**, each checked against 2512.12411 specifically:
+
+- readout comparison, first-token vs generated text (they use logits only and say so)
+- introspective vs neutral prompt framing (they do not vary framing at all)
+- scoring-rule sensitivity, 6.7% vs 33.3% with the FPR flipping 0% to 17%
+- cross-model norm incomparability, 138x between Gemma and Qwen at the concept position
+- norm-matched random and span controls - their control varies the *question*, not the *vector*
+
+**What nobody is doing.** A targeted search for prior work using an MLP neuron's weight
+column as free ground truth to score a direction-finding estimator returned neuroscience
+MID papers and LLM weight-space papers, and nothing joining them. **Study 1's territory
+is uncrowded**, its ground truth is free rather than planted, and we already hold: 77/100
+recovery with a pre-registered failure, failures that are confidently wrong (restart
+agreement 0.85-0.99), a ground-truth-free flag at AUC 0.915, characterised ruggedness, a
+measured seed lottery, and a repair that failed its own criterion and was reported.
+
+**A free lead from the paper that scooped us.** 2512.12411 finds *genuine* partial
+introspection in differential tasks - 88% localising which sentence was injected, 83%
+comparing injection strengths - but only at **early layers L0-L5**. We tested binary
+detection at layer 37 of 62. If Study 3 is ever to carry a positive result, that is the
+experiment. It would confirm their finding rather than establish ours.
+
+
 ### C48 - Gemma refit vectors: do they steer? (2026-09-08) - **WEAKLY, AND THAT MATTERS**
 
 A-12c. The validation C45/C46 was missing: `--stage steer`, neutral prompt, injection at
@@ -1810,6 +1860,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-08 (scout) | **PAPER ORDER FLIPS: STUDY 1 LEADS, STUDY 3 BECOMES A CHAPTER.** A literature scan found Study 3's space contested - binary detection already shown artifactual by arXiv 2512.12411 (r=0.999 control) and content-agnostic by Lederman & Mahowald, steering vectors already shown non-identifiable by Venkatesh & Kurapath, and a COLM 2026 reality-check paper published. **Our A2 result was never ours.** A targeted search for weight-column-as-ground-truth calibration of a direction estimator returned nothing - **Study 1 is uncrowded and its ground truth is free rather than planted** | notebook scout |
+| 2026-09-08 | **The extraction-position finding is weaker than it looked.** Token position for concept extraction is already documented as mattering enormously (arXiv 2602.00333), and 2512.12411 avoids the bug entirely by averaging over all prompt tokens. What may survive is the narrow form - a vector passing every reported health check while carrying nothing - not "position matters" | notebook scout |
+| 2026-09-08 | **Adopt averaging over prompt tokens as the extraction default**, following 2512.12411. It is more robust than either the template tail (C31, dead vectors) or the concept-token read (C48, weak steering on Gemma). Not yet run | notebook scout |
+| 2026-09-08 | **If Study 3 is ever to carry a positive result it must move to differential tasks at early layers.** 2512.12411 reports 88% sentence-localisation and 83% strength-comparison at L0-L5, against our binary detection at L37/62. That experiment would confirm their finding, not establish ours - so it is optional, and it is not the paper | notebook scout |
 | 2026-09-08 (C49) | **THE OFF-MANIFOLD ACCOUNT IS REFUTED. A-8 delivered.** A random direction inside the concept span behaves like Gaussian noise (p=0.38-0.76), not like a real concept vector (differs at p=0.033, 0.045). The signal does not track anomalousness. **What suppresses it is specific to a single coherent concept direction; a mixture of concept directions does not.** Sharper than the story it replaces | notebook C49 |
 | 2026-09-08 (C48) | **Gemma's refit vectors DO steer, but weakly, and C45/C46's headline sits where they barely steer.** Semantic steering 10/30 at 40% of norm against a 3/30 baseline, but only 2/30 and 5/30 at the 10% and 20% cells where the A3 result is significant. Not disqualifying - forced-choice logits are far more sensitive than generation - **but the instrument is well validated at 40% and only weakly where the claim lives, and the write-up must say so** | notebook C48 |
 | 2026-09-08 | **Gemma's vectors are much weaker steerers than Qwen's** (C32: 7/30 literal at 38%, coherent 30/30; Gemma needs 76% for 5/30 and coherence collapses to 14/30 there). The literal-word scorer undercounts badly - silk/web, harbor seals, dust and peanuts all score zero. **Report semantic steering alongside literal wherever steering is quoted** | notebook C48 |
