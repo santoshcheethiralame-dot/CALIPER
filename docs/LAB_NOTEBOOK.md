@@ -2148,6 +2148,8 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **B-11 SESSION 2 ALSO PRODUCED NOTHING** - Cell 1 succeeded, then every run failed with `ModuleNotFoundError: No module named 'caliper'`. `!python` is a subprocess: it inherits cwd but not `sys.path`, and Python adds the *script's* directory, never the bundle root. Fixed with `os.environ["PYTHONPATH"] = root` plus an in-cell subprocess import test. The local queue never had this bug because `run_queue.sh` starts with `export PYTHONPATH=.`; the sheet was written without carrying it across | notebook §8 |
+| 2026-09-09 | **Setup cells must prove what they assert.** Both failed ladder sessions had a Cell 1 that reported success on something it had not tested - first the mount path, then subprocess importability. Cell 1 now asserts the files exist AND runs a subprocess import under the exact condition the runs use. The shipped cell is rehearsed against a simulated mount at the same nesting depth before it ships | `NEXT_SESSION_LADDER.md` |
 | 2026-09-09 | **B-11 SESSION 1 PRODUCED NOTHING - a run-sheet bug, not a science result.** Cell 1 hard-coded `glob("/kaggle/input/*/")[0]`; the bundle mounted a level deeper (`/kaggle/input/datasets/santoshcheethirala/`), so every command failed on a missing path. The ladder loop still printed all four rung headers, so **the log looks like four runs happened**. Nothing is recorded as a ladder result and the run is re-queued unchanged | notebook §8 |
 | 2026-09-09 | **Run sheets are now validated before a session is spent on them** - `kaggle/check_sheets.py` parses every python cell in `kaggle/*.md` and reports magic cells as skipped rather than passed. 29 cells parse, 4 skipped, 0 broken. This is the second run-sheet failure in the project; the first cost four rounds and ~3h, and both were visible before the session started | `kaggle/check_sheets.py` |
 | 2026-09-09 | **B-11 FILED: the Pythia scale ladder goes to Kaggle, and it is the right run for a GPU session.** Pythia publishes 70m/160m/410m/1.4b **trained on identical data in identical order** - the only suite where scale varies with corpus and curriculum fixed. So this is not "we also tried a bigger model", it is silent-failure rate as a controlled function of scale | `preregistration-b11-pythia-ladder.md` |
@@ -3229,6 +3231,49 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### `!python` on Kaggle is a subprocess - it inherits cwd, not sys.path (2026-09-09)
+
+Second failed ladder session, same sheet, different cause. Cell 1 worked perfectly this
+time - it found the bundle, printed the tree, said `bundle OK` - and then every run died:
+
+```
+ModuleNotFoundError: No module named 'caliper'
+```
+
+`sys.path.insert(0, root)` changes the **notebook kernel's** path. `!python
+experiments/e01_gate.py` starts a **new process**, which inherits the working directory
+but not `sys.path`. Python then puts the *script's* directory (`experiments/`) on the
+path - never the bundle root - so the package is invisible. Cell 1 reporting success is
+what makes it expensive: the diagnostics all pass and the failure appears four cells
+later.
+
+The local queue never had this bug because `run_queue.sh` opens with
+`export PYTHONPATH=.`. The Kaggle sheet was written without carrying that across.
+
+**Rule.** In any notebook that launches work with `!python` or `subprocess`, set the
+environment, not just the path:
+
+```python
+os.environ["PYTHONPATH"] = root
+```
+
+and then **prove it in the same cell**, under the exact condition the runs use:
+
+```python
+p = subprocess.run([sys.executable, "-c", "import caliper, caliper.batched"],
+                   capture_output=True, text=True)
+assert p.returncode == 0, "a subprocess cannot import caliper: " + p.stderr
+```
+
+A setup cell that cannot fail is not a setup cell. Both ladder sessions died because Cell 1
+declared success on something it had not tested.
+
+**`check_sheets.py` earned itself immediately.** The first attempt at this fix shipped an
+f-string whose escape had been mangled into a real newline; the validator caught it before
+a third session was spent. The shipped cell is now also rehearsed end to end against a
+simulated mount at the same nesting depth, so what ships is what was tested.
+
 
 ### Never hard-code the Kaggle mount depth - locate the bundle by a marker file (2026-09-09)
 

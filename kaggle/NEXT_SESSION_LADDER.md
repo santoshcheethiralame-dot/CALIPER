@@ -54,10 +54,25 @@ root = os.path.dirname(os.path.dirname(hits[0]))
 sys.path.insert(0, root)
 os.chdir(root)
 
+# PYTHONPATH, not just sys.path. Every run below is launched with `!python ...`, which is a
+# SUBPROCESS - it inherits the working directory but not the kernel's sys.path. Python puts
+# the *script's* directory (experiments/) on the path, never the bundle root, so `import
+# caliper` fails with ModuleNotFoundError even though Cell 1 looks like it worked. This
+# line is what the local run_queue.sh does as `export PYTHONPATH=.`.
+os.environ["PYTHONPATH"] = root
+
 print("root:", root)
 print("contents:", sorted(os.listdir(root)))
 for need in ("caliper/estimator.py", "caliper/batched.py", "experiments/e01_gate.py"):
     assert os.path.exists(need), f"missing {need} - rebuild with build_bundle.py and re-upload"
+
+# Prove a subprocess can import the package, here, rather than discovering it four
+# tracebacks later. This is the exact condition every run below executes under.
+import subprocess
+p = subprocess.run([sys.executable, "-c", "import caliper, caliper.batched; print('subprocess import OK')"],
+                   capture_output=True, text=True)
+assert p.returncode == 0, "a subprocess cannot import caliper: " + p.stderr
+print(p.stdout.strip())
 print("bundle OK")
 ```
 
