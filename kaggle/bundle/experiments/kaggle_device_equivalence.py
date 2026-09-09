@@ -41,10 +41,14 @@ PASS_BAR = 0.95
 TOL = 0.01
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--neurons", type=int, default=24)
+ap.add_argument("--neurons", type=int, default=16)
 ap.add_argument("--tokens", type=int, default=8000)
 ap.add_argument("--steps", type=int, default=1600)
-ap.add_argument("--restarts", type=int, default=5)
+# 2, not 5, and deliberately: this run certifies the configuration the ladder and the
+# primary arms actually use (Addendum 1), and its CPU arm is the expensive half. At 5
+# restarts on Kaggle's 4-core CPU the CPU arm alone runs about 90 minutes while the GPU
+# sits idle - quota spent proving something about a config nothing else runs.
+ap.add_argument("--restarts", type=int, default=2)
 ap.add_argument("--layer", type=int, default=6)
 ap.add_argument("--model", default="gpt2")
 ap.add_argument("--d-mlp", type=int, default=3072)

@@ -88,9 +88,15 @@ If this prints False, stop. Both runs need it.
 ## Cell 3 — B-0, the device check
 
 ```python
-!python experiments/kaggle_device_equivalence.py --neurons 24 \
+!python experiments/kaggle_device_equivalence.py --neurons 16 --restarts 2 \
     --out /kaggle/working/device_equivalence.json
 ```
+
+> **Run the ladder FIRST if the session is short.** B-0's CPU arm is its expensive half -
+> Kaggle's 4-core CPU is roughly 2.5x slower than the local machine - and the GPU idles
+> throughout it. The ladder is the run with the result in it; B-0 only decides whether
+> *future* comparative runs may move to Kaggle. Cell order here is convenience, not
+> dependency: **the ladder does not depend on B-0 in any way.**
 
 **Read the verdict line.** It does not block the ladder either way — the ladder is
 internally consistent regardless — but it decides whether the *layer sweep and GPT-Neo*

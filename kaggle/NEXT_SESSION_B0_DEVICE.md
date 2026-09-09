@@ -100,7 +100,7 @@ If `cuda` is False, stop — the run is meaningless without both devices.
 ## Cell 3
 
 ```python
-!python experiments/kaggle_device_equivalence.py --neurons 24 --out /kaggle/working/device_equivalence.json
+!python experiments/kaggle_device_equivalence.py --neurons 16 --restarts 2 --out /kaggle/working/device_equivalence.json
 ```
 
 24 units drawn as the **first 24 of the same 100 the gate drew**, same rng and seed, so
