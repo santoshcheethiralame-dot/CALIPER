@@ -236,6 +236,62 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### B-0 extended to n=50 (2026-09-10) - **A BIGGER FINDING THAN THE DEVICE ONE: batch composition changes the answer**
+
+`data/b11/device_equivalence_n50.json`. Extended to settle whether 5-of-16 was a rate. It
+is not, and the attempt to measure it uncovered something better.
+
+**The headline number, first.** 4 of 50 units flip pass/fail between CPU and CUDA, Wilson
+[0.032, 0.188], max |d alignment| **0.9189** against a median of 0.000136. GPU speedup
+1.87x. Verdict FAIL, as at n=16.
+
+**Then the contradiction.** The B-0 draw is nested - `choice(3072, 100)[:n]` - so the 16
+units are a subset of the 50. Yet the flip sets barely overlap:
+
+| | flipped units |
+|---|---|
+| n=16 | 100, 268, 1034, **1759**, 2723 |
+| n=50 | 85, 1503, 1520, **1759** |
+
+One unit in common. The same unit's CUDA alignment moves with n: **1759 goes 0.9960 ->
+0.3137**, 1034 goes 0.7881 -> 0.9257, 2723 goes 0.9980 -> 0.8034.
+
+**Batch size alone changes the answer, on BOTH devices.** Same 16 units, same seeds, same
+device, only the number of *other* units in the batch differs:
+
+| device | median \|d\| | max \|d\| | units changing pass/fail side |
+|---|---|---|---|
+| CPU | 0.005158 | 0.299429 | **5 of 16** |
+| CUDA | 0.010560 | 0.682346 | 2 of 16 |
+
+**On CPU with fixed seeds this cannot be floating point. It is the initialisation.**
+`caliper/batched.py:30` draws `torch.randn(n, d, k, generator=g)` - one tensor of shape
+(n, d, k) from a single generator - so **neuron i's starting point depends on how many
+neurons are in the batch**. Different init, different basin, different answer. Deterministic
+and fully reproducible; nothing to do with hardware.
+
+**The claim this supports, and it is stronger than the device one:**
+
+> The direction an estimator recovers for a unit depends on which other units were fitted
+> alongside it. Batching for speed - which is standard practice - silently changes the
+> scientific result.
+
+**Three consequences.**
+
+1. **B-0's two runs are not comparable to each other** and the 5/16 vs 4/50 discrepancy is
+   explained, not mysterious. Within a single run, both devices share n and therefore share
+   the init, so **the device comparison inside one run stands**.
+2. **A caveat on our own data, disclosed.** `e01_gate.py` chunks by `--batch 32`, so a run
+   is internally consistent - but **B-1 resumed at 92/100**, and its final 8 units were
+   fitted in a batch of 8 rather than inside a batch of 32. Their init therefore differs
+   from a fresh run. B-1b and B-2b ran straight through and are unaffected.
+3. **This is arguably a defect worth fixing**, by seeding per neuron rather than drawing one
+   stacked tensor. **Not fixed now** - it would change every number already collected, for
+   the same reason `fit_cascade`'s device was left alone mid-ladder.
+
+---
+
+
 ### B-11 steps check - the scale effect is an OPTIMISER ARTEFACT (2026-09-10) - **SCALE CLAIM WITHDRAWN**
 
 Executes the branch pre-committed in `preregistration-b11-pythia-ladder.md` before the

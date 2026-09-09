@@ -1,0 +1,660 @@
+{
+  "verdict": "FAIL",
+  "n": 50,
+  "tolerance": 0.01,
+  "max_abs_d_alignment": 0.918945,
+  "median_abs_d_alignment": 0.00013649999999998386,
+  "max_abs_d_stability": 0.029078000000000048,
+  "n_flips": 4,
+  "flips": [
+    [
+      85,
+      0.99114,
+      0.924115
+    ],
+    [
+      1759,
+      0.993079,
+      0.31367
+    ],
+    [
+      1503,
+      0.989286,
+      0.372925
+    ],
+    [
+      1520,
+      0.986894,
+      0.067949
+    ]
+  ],
+  "speedup": 1.87,
+  "seconds": {
+    "cpu": 3798.6,
+    "cuda": 2033.6
+  },
+  "config": {
+    "neurons": 50,
+    "tokens": 8000,
+    "steps": 1600,
+    "restarts": 2,
+    "layer": 6,
+    "model": "gpt2",
+    "d_mlp": 3072,
+    "out": "/kaggle/working/device_equivalence_n50.json"
+  },
+  "results": {
+    "cpu": {
+      "rows": [
+        {
+          "neuron": 808,
+          "align_selected": 0.991293,
+          "stability": 0.965137,
+          "r2_k1": 0.999917
+        },
+        {
+          "neuron": 66,
+          "align_selected": 0.998103,
+          "stability": 0.997148,
+          "r2_k1": 0.999923
+        },
+        {
+          "neuron": 1034,
+          "align_selected": 0.694442,
+          "stability": 0.61176,
+          "r2_k1": 0.647514
+        },
+        {
+          "neuron": 2199,
+          "align_selected": 0.998371,
+          "stability": 0.92979,
+          "r2_k1": 0.999474
+        },
+        {
+          "neuron": 268,
+          "align_selected": 0.93166,
+          "stability": 0.959345,
+          "r2_k1": 0.998096
+        },
+        {
+          "neuron": 1598,
+          "align_selected": 0.993966,
+          "stability": 0.804994,
+          "r2_k1": 0.999402
+        },
+        {
+          "neuron": 100,
+          "align_selected": 0.951729,
+          "stability": 0.905796,
+          "r2_k1": 0.998948
+        },
+        {
+          "neuron": 2295,
+          "align_selected": 0.999973,
+          "stability": 0.998293,
+          "r2_k1": 0.99996
+        },
+        {
+          "neuron": 2425,
+          "align_selected": 0.999899,
+          "stability": 0.997779,
+          "r2_k1": 0.999974
+        },
+        {
+          "neuron": 1448,
+          "align_selected": 0.965265,
+          "stability": 0.994962,
+          "r2_k1": 0.99953
+        },
+        {
+          "neuron": 1199,
+          "align_selected": 0.994732,
+          "stability": 0.963853,
+          "r2_k1": 0.998511
+        },
+        {
+          "neuron": 2899,
+          "align_selected": 0.99966,
+          "stability": 0.989418,
+          "r2_k1": 0.99994
+        },
+        {
+          "neuron": 2723,
+          "align_selected": 0.39447,
+          "stability": 0.721227,
+          "r2_k1": 0.32756
+        },
+        {
+          "neuron": 1894,
+          "align_selected": 0.960253,
+          "stability": 0.784421,
+          "r2_k1": 0.999895
+        },
+        {
+          "neuron": 85,
+          "align_selected": 0.99114,
+          "stability": 0.035005,
+          "r2_k1": 0.993615
+        },
+        {
+          "neuron": 1759,
+          "align_selected": 0.993079,
+          "stability": 0.956272,
+          "r2_k1": 0.996471
+        },
+        {
+          "neuron": 1954,
+          "align_selected": 0.997646,
+          "stability": 0.940649,
+          "r2_k1": 0.997354
+        },
+        {
+          "neuron": 3066,
+          "align_selected": 0.999582,
+          "stability": 0.999934,
+          "r2_k1": 0.999979
+        },
+        {
+          "neuron": 1625,
+          "align_selected": 0.784881,
+          "stability": 0.669392,
+          "r2_k1": 0.922665
+        },
+        {
+          "neuron": 374,
+          "align_selected": 0.972314,
+          "stability": 0.883791,
+          "r2_k1": 0.999249
+        },
+        {
+          "neuron": 1628,
+          "align_selected": 0.980779,
+          "stability": 0.957838,
+          "r2_k1": 0.997302
+        },
+        {
+          "neuron": 2969,
+          "align_selected": 0.990438,
+          "stability": 0.858269,
+          "r2_k1": 0.99934
+        },
+        {
+          "neuron": 1621,
+          "align_selected": 0.996663,
+          "stability": 0.994379,
+          "r2_k1": 0.999955
+        },
+        {
+          "neuron": 2053,
+          "align_selected": 0.997799,
+          "stability": 0.928323,
+          "r2_k1": 0.999889
+        },
+        {
+          "neuron": 1745,
+          "align_selected": 0.785452,
+          "stability": 0.516222,
+          "r2_k1": 0.999011
+        },
+        {
+          "neuron": 2436,
+          "align_selected": 0.994937,
+          "stability": 0.773457,
+          "r2_k1": 0.999896
+        },
+        {
+          "neuron": 3054,
+          "align_selected": 0.998856,
+          "stability": 0.913456,
+          "r2_k1": 0.997352
+        },
+        {
+          "neuron": 777,
+          "align_selected": 0.999723,
+          "stability": 0.957214,
+          "r2_k1": 0.99886
+        },
+        {
+          "neuron": 1142,
+          "align_selected": 0.996099,
+          "stability": 0.939167,
+          "r2_k1": 0.998599
+        },
+        {
+          "neuron": 522,
+          "align_selected": 0.986393,
+          "stability": 0.977505,
+          "r2_k1": 0.998876
+        },
+        {
+          "neuron": 1503,
+          "align_selected": 0.989286,
+          "stability": 0.313275,
+          "r2_k1": 0.995331
+        },
+        {
+          "neuron": 1859,
+          "align_selected": 0.998279,
+          "stability": 0.996886,
+          "r2_k1": 0.999977
+        },
+        {
+          "neuron": 1149,
+          "align_selected": 0.950364,
+          "stability": 0.346152,
+          "r2_k1": 0.994667
+        },
+        {
+          "neuron": 696,
+          "align_selected": 0.812547,
+          "stability": 0.64898,
+          "r2_k1": 0.99624
+        },
+        {
+          "neuron": 241,
+          "align_selected": 0.968832,
+          "stability": 0.965961,
+          "r2_k1": 0.99848
+        },
+        {
+          "neuron": 2879,
+          "align_selected": 0.999672,
+          "stability": 0.999979,
+          "r2_k1": 0.999894
+        },
+        {
+          "neuron": 1287,
+          "align_selected": 0.996665,
+          "stability": 0.264987,
+          "r2_k1": 0.997345
+        },
+        {
+          "neuron": 1817,
+          "align_selected": 0.995176,
+          "stability": 0.546365,
+          "r2_k1": 0.996476
+        },
+        {
+          "neuron": 2571,
+          "align_selected": 0.994725,
+          "stability": 0.994501,
+          "r2_k1": 0.999896
+        },
+        {
+          "neuron": 2594,
+          "align_selected": 0.792633,
+          "stability": 0.699668,
+          "r2_k1": 0.979883
+        },
+        {
+          "neuron": 1674,
+          "align_selected": 0.998629,
+          "stability": 0.604386,
+          "r2_k1": 0.995451
+        },
+        {
+          "neuron": 2528,
+          "align_selected": 0.99464,
+          "stability": 0.885102,
+          "r2_k1": 0.999209
+        },
+        {
+          "neuron": 2557,
+          "align_selected": 0.993172,
+          "stability": 0.500634,
+          "r2_k1": 0.999581
+        },
+        {
+          "neuron": 1662,
+          "align_selected": 0.949897,
+          "stability": 0.816456,
+          "r2_k1": 0.998871
+        },
+        {
+          "neuron": 2077,
+          "align_selected": 0.997744,
+          "stability": 0.997669,
+          "r2_k1": 0.999974
+        },
+        {
+          "neuron": 1889,
+          "align_selected": 0.998002,
+          "stability": 0.902407,
+          "r2_k1": 0.999222
+        },
+        {
+          "neuron": 2190,
+          "align_selected": 0.995147,
+          "stability": 0.975679,
+          "r2_k1": 0.999963
+        },
+        {
+          "neuron": 1091,
+          "align_selected": 0.994243,
+          "stability": 0.935587,
+          "r2_k1": 0.999425
+        },
+        {
+          "neuron": 830,
+          "align_selected": 0.856971,
+          "stability": 0.681276,
+          "r2_k1": 0.968485
+        },
+        {
+          "neuron": 1520,
+          "align_selected": 0.986894,
+          "stability": 0.698714,
+          "r2_k1": 0.998147
+        }
+      ],
+      "seconds": 3798.6,
+      "seconds_per_neuron": 75.97
+    },
+    "cuda": {
+      "rows": [
+        {
+          "neuron": 808,
+          "align_selected": 0.991275,
+          "stability": 0.966273,
+          "r2_k1": 0.999917
+        },
+        {
+          "neuron": 66,
+          "align_selected": 0.997628,
+          "stability": 0.997126,
+          "r2_k1": 0.999934
+        },
+        {
+          "neuron": 1034,
+          "align_selected": 0.925713,
+          "stability": 0.613526,
+          "r2_k1": 0.990087
+        },
+        {
+          "neuron": 2199,
+          "align_selected": 0.997108,
+          "stability": 0.929799,
+          "r2_k1": 0.999609
+        },
+        {
+          "neuron": 268,
+          "align_selected": 0.930313,
+          "stability": 0.960249,
+          "r2_k1": 0.998065
+        },
+        {
+          "neuron": 1598,
+          "align_selected": 0.981741,
+          "stability": 0.804996,
+          "r2_k1": 0.999305
+        },
+        {
+          "neuron": 100,
+          "align_selected": 0.998946,
+          "stability": 0.905834,
+          "r2_k1": 0.999309
+        },
+        {
+          "neuron": 2295,
+          "align_selected": 0.999972,
+          "stability": 0.998271,
+          "r2_k1": 0.999963
+        },
+        {
+          "neuron": 2425,
+          "align_selected": 0.9999,
+          "stability": 0.997771,
+          "r2_k1": 0.999973
+        },
+        {
+          "neuron": 1448,
+          "align_selected": 0.965358,
+          "stability": 0.995166,
+          "r2_k1": 0.99952
+        },
+        {
+          "neuron": 1199,
+          "align_selected": 0.986523,
+          "stability": 0.963995,
+          "r2_k1": 0.998187
+        },
+        {
+          "neuron": 2899,
+          "align_selected": 0.994639,
+          "stability": 0.989417,
+          "r2_k1": 0.999794
+        },
+        {
+          "neuron": 2723,
+          "align_selected": 0.80342,
+          "stability": 0.721227,
+          "r2_k1": 0.55354
+        },
+        {
+          "neuron": 1894,
+          "align_selected": 0.998204,
+          "stability": 0.784471,
+          "r2_k1": 0.999839
+        },
+        {
+          "neuron": 85,
+          "align_selected": 0.924115,
+          "stability": 0.035204,
+          "r2_k1": 0.972751
+        },
+        {
+          "neuron": 1759,
+          "align_selected": 0.31367,
+          "stability": 0.956266,
+          "r2_k1": 0.765264
+        },
+        {
+          "neuron": 1954,
+          "align_selected": 0.997577,
+          "stability": 0.940562,
+          "r2_k1": 0.997289
+        },
+        {
+          "neuron": 3066,
+          "align_selected": 0.999583,
+          "stability": 0.999933,
+          "r2_k1": 0.999984
+        },
+        {
+          "neuron": 1625,
+          "align_selected": 0.933381,
+          "stability": 0.669398,
+          "r2_k1": 0.997211
+        },
+        {
+          "neuron": 374,
+          "align_selected": 0.957841,
+          "stability": 0.886079,
+          "r2_k1": 0.998582
+        },
+        {
+          "neuron": 1628,
+          "align_selected": 0.955912,
+          "stability": 0.957869,
+          "r2_k1": 0.999548
+        },
+        {
+          "neuron": 2969,
+          "align_selected": 0.990335,
+          "stability": 0.859508,
+          "r2_k1": 0.999276
+        },
+        {
+          "neuron": 1621,
+          "align_selected": 0.996663,
+          "stability": 0.994374,
+          "r2_k1": 0.999955
+        },
+        {
+          "neuron": 2053,
+          "align_selected": 0.997811,
+          "stability": 0.928498,
+          "r2_k1": 0.999866
+        },
+        {
+          "neuron": 1745,
+          "align_selected": 0.922324,
+          "stability": 0.516153,
+          "r2_k1": 0.998985
+        },
+        {
+          "neuron": 2436,
+          "align_selected": 0.994938,
+          "stability": 0.77274,
+          "r2_k1": 0.999896
+        },
+        {
+          "neuron": 3054,
+          "align_selected": 0.998856,
+          "stability": 0.913463,
+          "r2_k1": 0.997352
+        },
+        {
+          "neuron": 777,
+          "align_selected": 0.999733,
+          "stability": 0.956833,
+          "r2_k1": 0.998877
+        },
+        {
+          "neuron": 1142,
+          "align_selected": 0.996107,
+          "stability": 0.939188,
+          "r2_k1": 0.998599
+        },
+        {
+          "neuron": 522,
+          "align_selected": 0.986391,
+          "stability": 0.976953,
+          "r2_k1": 0.998784
+        },
+        {
+          "neuron": 1503,
+          "align_selected": 0.372925,
+          "stability": 0.313278,
+          "r2_k1": 0.301647
+        },
+        {
+          "neuron": 1859,
+          "align_selected": 0.998289,
+          "stability": 0.996889,
+          "r2_k1": 0.999979
+        },
+        {
+          "neuron": 1149,
+          "align_selected": 0.950222,
+          "stability": 0.346075,
+          "r2_k1": 0.994626
+        },
+        {
+          "neuron": 696,
+          "align_selected": 0.870973,
+          "stability": 0.678058,
+          "r2_k1": 0.934083
+        },
+        {
+          "neuron": 241,
+          "align_selected": 0.965826,
+          "stability": 0.963602,
+          "r2_k1": 0.998402
+        },
+        {
+          "neuron": 2879,
+          "align_selected": 0.999662,
+          "stability": 0.999977,
+          "r2_k1": 0.999892
+        },
+        {
+          "neuron": 1287,
+          "align_selected": 0.996534,
+          "stability": 0.267633,
+          "r2_k1": 0.997303
+        },
+        {
+          "neuron": 1817,
+          "align_selected": 0.958935,
+          "stability": 0.546386,
+          "r2_k1": 0.996564
+        },
+        {
+          "neuron": 2571,
+          "align_selected": 0.994731,
+          "stability": 0.994626,
+          "r2_k1": 0.999885
+        },
+        {
+          "neuron": 2594,
+          "align_selected": 0.918914,
+          "stability": 0.700604,
+          "r2_k1": 0.98867
+        },
+        {
+          "neuron": 1674,
+          "align_selected": 0.998512,
+          "stability": 0.604386,
+          "r2_k1": 0.997301
+        },
+        {
+          "neuron": 2528,
+          "align_selected": 0.994634,
+          "stability": 0.885069,
+          "r2_k1": 0.99921
+        },
+        {
+          "neuron": 2557,
+          "align_selected": 0.996846,
+          "stability": 0.499813,
+          "r2_k1": 0.999625
+        },
+        {
+          "neuron": 1662,
+          "align_selected": 0.949924,
+          "stability": 0.825656,
+          "r2_k1": 0.998907
+        },
+        {
+          "neuron": 2077,
+          "align_selected": 0.997751,
+          "stability": 0.997651,
+          "r2_k1": 0.999973
+        },
+        {
+          "neuron": 1889,
+          "align_selected": 0.998001,
+          "stability": 0.902807,
+          "r2_k1": 0.999188
+        },
+        {
+          "neuron": 2190,
+          "align_selected": 0.995191,
+          "stability": 0.975485,
+          "r2_k1": 0.99996
+        },
+        {
+          "neuron": 1091,
+          "align_selected": 0.994321,
+          "stability": 0.935812,
+          "r2_k1": 0.999399
+        },
+        {
+          "neuron": 830,
+          "align_selected": 0.899231,
+          "stability": 0.682867,
+          "r2_k1": 0.968143
+        },
+        {
+          "neuron": 1520,
+          "align_selected": 0.067949,
+          "stability": 0.698714,
+          "r2_k1": 0.266577
+        }
+      ],
+      "seconds": 2033.6,
+      "seconds_per_neuron": 40.67
+    }
+  }
+}
