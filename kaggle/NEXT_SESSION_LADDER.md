@@ -109,6 +109,12 @@ Each rung is depth-matched to 0.5 relative depth and runs at **2 restarts**, mat
 primary arm and the incumbent AUCs per Addendum 1.
 
 ```python
+# 50 UNITS PER RUNG, not 100 - see preregistration-b11-addendum-1-n50.md. fit_cascade is
+# 24x the work of fit_batch (151,040 unbatched steps per 32 units against 6,400 batched),
+# it runs one unit at a time, and e01_gate.py:72 calls it without device= so it stays on
+# CPU. The GPU accelerates about 4% of the job. At 100 units the four rungs need ~8.4 h
+# against a 12 h cap; at 50 they need ~4.6 h and all four land.
+#
 # ORDER MATTERS. Measured on a T4: 38.6 s/unit at d_model 512, and cost scales with
 # d_model, so the four rungs are about 8.4 h against a 12 h session cap. The LAST rung is
 # the one at risk of being cut off, so 1.4b goes third, not fourth:
@@ -125,7 +131,7 @@ for model, layer, d_mlp in RUNGS:
     tag = model.split("/")[-1].replace(".", "")
     print(f"\n{'=' * 70}\n  {model}  layer {layer}  d_mlp {d_mlp}\n{'=' * 70}", flush=True)
     !python experiments/e01_gate.py --model {model} --layer {layer} --d-mlp {d_mlp} \
-        --restarts 2 --neurons 100 --device cuda \
+        --restarts 2 --neurons 50 --device cuda \
         --out /kaggle/working/b11_{tag}.jsonl
 ```
 
