@@ -70,8 +70,20 @@ echo "=== B-series queue started $(date) ==="
 run "B-1  gpt2 L6"        100 results/b1_stability_gpt2.jsonl \
     --restarts 5 || exit 1
 
-run "B-2  pythia-160m L6" 100 results/b1_stability_pythia.jsonl \
-    --restarts 5 --model EleutherAI/pythia-160m --layer 6 --d-mlp 3072 || exit 1
+# B-1b, the PRIMARY arm - see preregistration-b1-addendum-1-power.md. 2 restarts, not 5,
+# for three reasons: the incumbent AUCs (R2 0.906, disagreement 0.802) were measured at 2,
+# so holding the optimiser fixed is the fair comparison; 2 restarts is what a practitioner
+# running two seeds actually holds; and C13's 22% failure rate at 2 restarts yields ~66
+# failures at n=300, inside the range the power work requires. The 5-restart n=100 arm
+# above is retained as the sensitivity arm, not the primary.
+#
+# The 300 units EXTEND the C13 draw - same rng, same seed - so the first 100 are the
+# existing set and no unit is reselected.
+run "B-1b gpt2 n=300 r=2" 300 results/b1b_primary_gpt2.jsonl     --restarts 2 --neurons 300 || exit 1
+
+run "B-2b pythia n=300 r=2" 300 results/b1b_primary_pythia.jsonl     --restarts 2 --neurons 300 --model EleutherAI/pythia-160m --layer 6 --d-mlp 3072 || exit 1
+
+run "B-2s pythia n=100 r=5" 100 results/b1_stability_pythia.jsonl     --restarts 5 --model EleutherAI/pythia-160m --layer 6 --d-mlp 3072 || exit 1
 
 # B-7, layer sweep. L6 is already covered by B-1, so only the two ends are new.
 run "B-7  gpt2 L2"         50 results/b7_layer02_gpt2.jsonl \
