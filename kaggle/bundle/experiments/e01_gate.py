@@ -89,6 +89,10 @@ for start in range(0, len(todo), a.batch):
             # asymmetry is itself part of why the cascade is the better route.
             "stability": round(float(d1[j].stability), 4),
             "r2_spread": round(float(d1[j].r2_spread), 6),
+            # Secondary 4 of the B-1 filing: does a cheap 2-restart stability
+            # estimate agree with the 5-restart one? Only answerable offline if
+            # the pairs survive the run, so keep them, not just their median.
+            "stability_pairs": d1[j].stability_pairs,
             "n_restarts": a.restarts,
         })
     el = time.time() - t0

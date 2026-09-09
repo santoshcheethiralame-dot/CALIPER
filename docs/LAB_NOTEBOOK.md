@@ -2102,6 +2102,8 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **B-11 SESSION 1 PRODUCED NOTHING - a run-sheet bug, not a science result.** Cell 1 hard-coded `glob("/kaggle/input/*/")[0]`; the bundle mounted a level deeper (`/kaggle/input/datasets/santoshcheethirala/`), so every command failed on a missing path. The ladder loop still printed all four rung headers, so **the log looks like four runs happened**. Nothing is recorded as a ladder result and the run is re-queued unchanged | notebook §8 |
+| 2026-09-09 | **Run sheets are now validated before a session is spent on them** - `kaggle/check_sheets.py` parses every python cell in `kaggle/*.md` and reports magic cells as skipped rather than passed. 29 cells parse, 4 skipped, 0 broken. This is the second run-sheet failure in the project; the first cost four rounds and ~3h, and both were visible before the session started | `kaggle/check_sheets.py` |
 | 2026-09-09 | **B-11 FILED: the Pythia scale ladder goes to Kaggle, and it is the right run for a GPU session.** Pythia publishes 70m/160m/410m/1.4b **trained on identical data in identical order** - the only suite where scale varies with corpus and curriculum fixed. So this is not "we also tried a bigger model", it is silent-failure rate as a controlled function of scale | `preregistration-b11-pythia-ladder.md` |
 | 2026-09-09 | **Why the ladder is not device-confounded: every rung runs on the same GPU**, so the scaling curve is internally consistent and its claim needs no reference to the local numbers. Absolute rates are NOT pooled with the local n=300 arms and the device is named beside every number. The layer sweep and GPT-Neo runs stay local because they ARE comparative - B-7 against layer 6, B-8 against GPT-2 | `NEXT_SESSION_LADDER.md` |
 | 2026-09-09 | **The 160m rung is a free device cross-check.** C53 ran the same protocol locally on CPU (93/100 at 2 restarts), so the GPU rung is directly comparable at n=100. Weaker than B-0's paired per-unit test and does not replace it, but a large discrepancy would be informative and is reported either way | `preregistration-b11-pythia-ladder.md` |
@@ -3181,6 +3183,47 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### Never hard-code the Kaggle mount depth - locate the bundle by a marker file (2026-09-09)
+
+Cost: one wasted session. Cheap only by luck - the whole notebook failed in 25 seconds
+instead of after an hour of fitting.
+
+The B-11 ladder session produced **nothing**. Cell 1 did:
+
+```python
+root = glob.glob("/kaggle/input/*/")[0]   # WRONG
+```
+
+and the log's ninth line said exactly why:
+
+```
+/kaggle/input/datasets/ ['santoshcheethirala']
+```
+
+The bundle mounted a level deeper than the sheet assumed, so `root` became
+`/kaggle/input/datasets/`, and every command after it failed with
+`can't open file '.../experiments/e01_gate.py': No such file or directory`. The ladder loop
+still printed all four rung headers, so the log *looks* like four runs happened. It is a
+run sheet that fails silently and looks successful.
+
+**Rule.** Find the bundle by a file that must exist inside it, assert loudly when it does
+not, and print what is actually mounted:
+
+```python
+hits = glob.glob("/kaggle/input/**/caliper/estimator.py", recursive=True)
+assert hits, "bundle not found - is the dataset attached?"
+root = os.path.dirname(os.path.dirname(hits[0]))
+```
+
+Then assert every file the run needs before starting, so a stale bundle fails in Cell 1
+rather than mid-run.
+
+**And check the sheets before spending a session on them.** `python kaggle/check_sheets.py`
+parses every ```python block in `kaggle/*.md` and reports cells using IPython magic as
+*skipped*, not passed. This is the second run-sheet failure in this project - the first cost
+four rounds and about three hours - and both were visible before the session started.
+
 
 ### A local overnight run is only as reliable as the machine's sleep settings (2026-09-09)
 

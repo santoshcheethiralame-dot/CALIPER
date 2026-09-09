@@ -35,6 +35,21 @@ class Fit:
         return float(max(self.r2_restarts) - min(self.r2_restarts))
 
     @property
+    def stability_pairs(self):
+        """Every pairwise restart alignment, in order.
+
+        `stability` is the median of these. The list is kept because a practitioner
+        running R restarts holds a stability estimate built from R, not from ours, and
+        the bench's secondary question is whether a cheap 2-restart estimate agrees with
+        an expensive 5-restart one. That is only answerable offline if the pairs survive
+        the run - the median alone throws the information away.
+        """
+        if len(self.restarts) < 2:
+            return []
+        return [round(abs(subspace_alignment(a, b)), 6)
+                for a, b in _pairs(self.restarts)]
+
+    @property
     def stability(self):
         """Median pairwise alignment across restarts; ~1 means converged."""
         if len(self.restarts) < 2:

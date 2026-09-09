@@ -49,11 +49,27 @@ uses GPT-2, and the corpus is the cached prose shipped in the bundle.
 ## Cell 1
 
 ```python
-import sys, glob, os
-root = glob.glob("/kaggle/input/*/")[0]
+# Locate the bundle by a marker file, not by guessing the mount depth. Kaggle mounts a
+# dataset at a path that depends on how it was created and attached - a previous session
+# died on every command because the sheet assumed /kaggle/input/<one-level>/ and the
+# bundle was actually a level deeper.
+import sys, os, glob
+
+print("what is actually mounted:")
+for p in sorted(glob.glob("/kaggle/input/**", recursive=True))[:40]:
+    print("   ", p)
+
+hits = glob.glob("/kaggle/input/**/caliper/estimator.py", recursive=True)
+assert hits, "caliper/estimator.py not found under /kaggle/input - is the dataset attached?"
+root = os.path.dirname(os.path.dirname(hits[0]))
 sys.path.insert(0, root)
 os.chdir(root)
-print(root, os.listdir(root))
+
+print("root:", root)
+print("contents:", sorted(os.listdir(root)))
+for need in ("caliper/estimator.py", "caliper/batched.py", "experiments/e01_gate.py"):
+    assert os.path.exists(need), f"missing {need} - rebuild with build_bundle.py and re-upload"
+print("bundle OK")
 ```
 
 ## Cell 2
