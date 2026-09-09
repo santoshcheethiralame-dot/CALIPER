@@ -109,11 +109,17 @@ Each rung is depth-matched to 0.5 relative depth and runs at **2 restarts**, mat
 primary arm and the incumbent AUCs per Addendum 1.
 
 ```python
+# ORDER MATTERS. Measured on a T4: 38.6 s/unit at d_model 512, and cost scales with
+# d_model, so the four rungs are about 8.4 h against a 12 h session cap. The LAST rung is
+# the one at risk of being cut off, so 1.4b goes third, not fourth:
+#   - 1.4b cannot run locally at all (5.6 GB fp32 against 2.6 GB free) and is the rung that
+#     answers "only small models". Losing it means losing it.
+#   - 410m fits locally at ~1.6 GB, so if the session dies before it, it is recoverable.
 RUNGS = [
     ("EleutherAI/pythia-70m",   3,  2048),
     ("EleutherAI/pythia-160m",  6,  3072),
-    ("EleutherAI/pythia-410m",  12, 4096),
     ("EleutherAI/pythia-1.4b",  12, 8192),
+    ("EleutherAI/pythia-410m",  12, 4096),
 ]
 for model, layer, d_mlp in RUNGS:
     tag = model.split("/")[-1].replace(".", "")
