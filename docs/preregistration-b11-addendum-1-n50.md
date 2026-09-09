@@ -60,8 +60,19 @@ here rather than discovered at review.
 
 ## Committed in advance
 
-- The 50 units are the **first 50 of the same draw**, same rng and seed. No reselection,
-  and a later extension to 100 is nested rather than parallel.
+- ~~The 50 units are the **first 50 of the same draw**, same rng and seed. No reselection,
+  and a later extension to 100 is nested rather than parallel.~~
+
+  **WITHDRAWN the same day, before any rung completed.** False for the same reason as the
+  B-1 filing: `choice(3072, size=50)` shares **1 unit of 50** with the first 50 of
+  `choice(3072, size=100)`. Changing `--neurons` changes the whole draw, so a later
+  extension to 100 is **parallel, not nested**.
+
+  **Operational consequence, and it is the serious half.** The 70m rung resumed a checkpoint
+  holding 30 rows written under `--neurons 100`, then began filling the *different* n=50
+  draw into the same file — its counter read `79/50`. **That file mixes two unit sets and is
+  not a valid rung.** Any rung whose checkpoint predates this amendment is **deleted and
+  re-run, never resumed.** Rungs started fresh at n=50 are unaffected.
 - The 70m rung restarts from zero. Its two abandoned attempts produced no recorded result
   and are not analysed.
 - **The device stays uniform across all four rungs.** If a rung cannot complete on the GPU

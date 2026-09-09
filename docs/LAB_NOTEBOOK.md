@@ -2148,6 +2148,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **TWO FILINGS CARRIED A FALSE NESTING CLAIM; both struck through in place.** `choice(3072, size=N)` is not a prefix relation in N - n=50 shares **1 unit of 50** with the first 50 of n=100, and n=100 shares **6 of 100** with n=300. B-1 and B-1b are **near-disjoint independent draws**, not nested arms | b1-addendum-1, b11-addendum-1 |
+| 2026-09-09 | **The endpoints survive; one write-up rule changes.** Each arm computes its own incumbents on its own units, so the within-arm DeLong comparisons are untouched. What changes: **C13's AUCs (0.906, 0.802) are context, never a comparator** | notebook section 8 |
+| 2026-09-09 | **The 70m ladder rung is CONTAMINATED - delete, do not resume.** Checkpoint keys on unit id, so re-running at `--neurons 50` against a file written at `--neurons 100` appended a second unit set; the progress line read `79/50`. A counter past its target is the tell | NEXT_SESSION_LADDER.md |
 | 2026-09-09 | **THE BOTTLENECK IS `fit_cascade`, AND IT IS STRUCTURAL: 24x the work of `fit_batch`, unbatched, on CPU.** Per batch of 32 units, `fit_batch` runs 6,400 steps batched across all 32; `fit_cascade` runs 720 grid probes plus 5x800 polish **per unit** = 151,040 steps one unit at a time. `e01_gate.py:72` omits `device=`, so it takes `fit()`'s cpu default. **The GPU accelerates about 4% of the job** - which is the whole explanation for the measured 1.1x | `experiments/e01_gate.py:72` |
 | 2026-09-09 | **B-11 AMENDED TO 50 UNITS PER RUNG.** At 100 the four rungs need ~8.4h against a 12h cap with the largest last; at 50 they need ~4.6h and all four land. Filed **before any rung completed** - no alignment, pass rate or AUC had been seen for any rung, so the amendment rests on timing alone. Committed with it: a null trend at n=50 is reported as **underpowered and inconclusive**, never as "scale-invariant" | `preregistration-b11-addendum-1-n50.md` |
 | 2026-09-09 | **`fit_cascade`'s device default is deliberately NOT fixed mid-ladder.** Passing `device=` would speed future runs and is worth doing, but changing numerics between rungs would put a **code version inside the scaling curve** - the exact class of confound this ladder was built to avoid. Fix it after the ladder, not during | `preregistration-b11-addendum-1-n50.md` |
@@ -3240,6 +3243,41 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### Changing --neurons changes the WHOLE draw, it does not extend it (2026-09-09)
+
+`np.random.default_rng(0).choice(3072, size=N, replace=False)` is not a prefix relation in
+N. Drawing without replacement at a different size gives a **different sequence**, not a
+longer one:
+
+| pair | shared units |
+|---|---|
+| first 50 of n=100, vs n=50 | **1 of 50** |
+| n=100, vs first 100 of n=300 | **6 of 100** |
+
+Two consequences, one cosmetic and one serious.
+
+**Cosmetic.** Two filings claimed the larger draw extends the smaller and that the arms are
+nested. Both were false and are struck through in place. The endpoints survive, because
+each arm computes its own incumbents on its own units - but C13's AUCs become **context,
+never a comparator**, since quoting them beside a different draw is a cross-sample
+comparison.
+
+**Serious.** `Checkpoint` keys on the unit id, so re-running with a different `--neurons`
+against an existing output file **appends a second, different unit set to it**. The Kaggle
+70m rung resumed 30 rows written under `--neurons 100`, began filling the n=50 draw into
+the same file, and its progress line read `79/50`. That file mixes two draws and is not a
+valid rung.
+
+**Rules.**
+1. `--neurons` is part of a run's identity, like the model and the layer. Changing it means
+   a **new output file**, never a resume.
+2. A progress counter reading past its target (`79/50`) is the tell: the checkpoint holds
+   rows the current draw never asked for.
+3. To make draws genuinely nested, permute the pool once and slice:
+   `rng.permutation(d_mlp)[:n]`. **Not changed mid-ladder**, for the same reason
+   `fit_cascade`'s device is not - it would put a code version inside the scaling curve.
+
 
 ### `!python` on Kaggle is a subprocess - it inherits cwd, not sys.path (2026-09-09)
 

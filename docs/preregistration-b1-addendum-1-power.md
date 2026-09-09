@@ -111,9 +111,33 @@ with Benjamini–Hochberg correction across the signals tested.
   correlated; independent intervals would overstate the evidence for a difference.
 - Benjamini–Hochberg across the signal set, since four to five signals are being compared
   on one dataset.
-- **The 300 units extend the C13 draw rather than replacing it** — same rng, same seed,
+- ~~**The 300 units extend the C13 draw rather than replacing it** — same rng, same seed,
   same layer. The first 100 are the existing set, so the original arm is nested inside
-  the new one and no unit is reselected.
+  the new one and no unit is reselected.~~
+
+  **WITHDRAWN 9 September 2026, mid-run. This claim is false and was never true.**
+  `np.random.default_rng(0).choice(3072, size=300)` is **not** a superset of
+  `choice(3072, size=100)` — drawing without replacement at a different size produces a
+  different sequence, not a longer one. Measured: the two sets share **6 units of 100**,
+  and the running B-1b file shares 3 units with B-1.
+
+  **The correct statement:** B-1 (n=100, 5 restarts) and B-1b (n=300, 2 restarts) are
+  **near-disjoint independent draws** from the same 3,072-unit population, at the same
+  layer, under the same seed but different sizes.
+
+  **Does this invalidate B-1b? No, and the reason matters.** The primary endpoint compares
+  `stability` against held-out R2 **within B-1b's own units**, so it is untouched. What is
+  affected is any statement that the arms are nested or that B-1b re-measures C13's units —
+  neither is true, and neither is load-bearing.
+
+  **What changes in the write-up:** the incumbent AUCs (R2 0.906, disagreement 0.802) come
+  from C13's units, so quoting them beside B-1b's numbers is a **cross-sample** comparison,
+  not a paired one. B-1b computes its own incumbents on its own units and those are what
+  the DeLong test uses. C13's figures are context, never a comparator.
+
+  Caught because a Kaggle rung resumed a checkpoint written under a different `--neurons`
+  value and its progress counter read `79/50`. **A file that mixes two draws is a
+  data-integrity failure; two arms drawn independently are not.**
 - Both arms are reported. The 5-restart arm is not dropped for being underpowered; it is
   reported as the sensitivity arm it now is, with its n and its restart count stated.
 - **This disclosure travels with the result.** Wherever the primary AUC comparison is
