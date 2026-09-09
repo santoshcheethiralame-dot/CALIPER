@@ -141,10 +141,22 @@ and each is resumable, because `Checkpoint` reads its own output file.
 ## Cell 5 — package before the session expires
 
 ```python
-import shutil, glob
-for f in glob.glob("/kaggle/working/*.jsonl") + glob.glob("/kaggle/working/*.json"):
-    print(f, sum(1 for _ in open(f)) if f.endswith("jsonl") else "")
-shutil.make_archive("/kaggle/working/ladder_results", "zip", "/kaggle/working")
+import shutil, glob, os
+
+rows = {f: sum(1 for _ in open(f)) for f in sorted(glob.glob("/kaggle/working/*.jsonl"))}
+for f, n in rows.items():
+    print(f"{os.path.basename(f):<28} {n:>4} rows" + ("   <- SHORT" if n < 50 else ""))
+
+# Refuse to package nothing. A previous session zipped an empty directory, and the
+# resulting archive looked like a successful download until it was opened.
+assert rows, "no .jsonl files in /kaggle/working - the ladder has not produced anything yet"
+assert all(n >= 50 for n in rows.values()), "a rung is short - check which, before packaging"
+
+# Write the archive OUTSIDE the directory being archived. Writing it into /kaggle/working
+# and then zipping /kaggle/working makes the archive contain itself.
+shutil.make_archive("/kaggle/ladder_results", "zip", "/kaggle/working")
+print("wrote /kaggle/ladder_results.zip",
+      os.path.getsize("/kaggle/ladder_results.zip"), "bytes")
 ```
 
 **Download the zip before the session ends.** Kaggle outputs are ephemeral and this project
