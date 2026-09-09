@@ -236,6 +236,109 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### B-1b - THE PRIMARY ENDPOINT RESOLVES (2026-09-09) - **RESTART AGREEMENT IS DOMINATED, p < 0.0001**
+
+Local CPU, GPT-2 L6, **n=300, 2 restarts**, 08:46-20:35, 141.7 s/unit.
+`results/b1b_primary_gpt2.jsonl`. Protocol: `preregistration-b1-stability-calibration.md`
++ Addendum 1.
+
+**52 failures of 300 (17%)** - inside the 36-142 the power work requires, so this is the
+first adequately powered arm in the series.
+
+| signal | AUC |
+|---|---|
+| **held-out R2** | **0.942** |
+| restart agreement (`stability`) | 0.778 |
+| two-route disagreement | 0.752 |
+| `r2_spread` | 0.704 |
+
+**Primary endpoint, DeLong on correlated ROC curves, same units:**
+`restart agreement - held-out R2 = -0.164, z = -5.22, p < 0.0001`.
+
+**This is the pre-registered outcome "stability AUC significantly below held-out R2".**
+The field's default reliability check is significantly worse than a number the fit already
+computes for free.
+
+**What a threshold costs, which is the practitioner-facing result:**
+
+| catch rate | held-out R2 discards | restart agreement discards |
+|---|---|---|
+| 50% | **0 of 248** | 40 of 248 (16%) |
+| 70% | 8 of 248 (3%) | 62 of 248 (25%) |
+| 80% | 24 of 248 (10%) | 90 of 248 (36%) |
+| 90% | 52 of 248 (21%) | 118 of 248 (48%) |
+
+At 50% catch, held-out R2 costs **nothing**; restart agreement costs 40 good units. The
+gap is not a rounding difference in AUC, it is the difference between a usable rule and an
+expensive one.
+
+**6 of 52 failing units look stable (>0.95)** - the stable-and-wrong class exists at 2
+restarts, where B-1's 5-restart arm found none of 9.
+
+**Finding 2 is confirmed and now properly powered.** The earlier readings (C13's 0.906
+vs 0.802, B-1's 0.913 vs 0.845) pointed the same way on too few failures; this one
+settles it.
+
+---
+
+### B-0 - THE DEVICE IS A CONFOUND (2026-09-09) - **FAIL, and it is a finding**
+
+Kaggle T4, 16 units, 2 restarts, same seeds on both devices.
+`data/b11/device_equivalence.json`.
+
+| | |
+|---|---|
+| units flipping pass/fail | **5 of 16 (31%)** |
+| max abs d alignment | **0.6615** (tolerance 0.01) |
+| median abs d alignment | 0.00068 |
+| GPU speedup | 1.29x |
+
+**The median unit agrees to four decimal places and the tail disagrees by 0.66.** That is
+the pre-registered prediction confirmed: failing units sit near basin boundaries by
+construction, and that is exactly where floating-point reduction order flips the answer.
+
+**Reportable claim: estimator failure classification is hardware-dependent.** Reproducing
+an interpretability result on different hardware may reproduce the aggregate and not
+reproduce *which units failed*.
+
+**Consequences, all already in force:** the ladder is internally GPU-consistent and stands
+on its own; the local arms are internally CPU-consistent; **the two are never pooled**, and
+the 160m-rung-vs-C53 cross-check is now expected to differ rather than agree.
+
+---
+
+### B-11 - PYTHIA SCALE LADDER (2026-09-09) - **RISES WITH SCALE; NOT REPORTABLE UNTIL THE STEPS CHECK RUNS**
+
+Kaggle T4, one device, n=50 per rung, 2 restarts, depth-matched to 0.5.
+
+| rung | d_model | pass | rate | Wilson 95% | median | min |
+|---|---|---|---|---|---|---|
+| 70m | 512 | 48/50 | 96% | [0.865, 0.989] | 0.9970 | 0.0982 |
+| 160m | 768 | 48/50 | 96% | [0.865, 0.989] | 0.9989 | 0.1563 |
+| 410m | 1024 | 48/50 | 96% | [0.865, 0.989] | 0.9994 | 0.9145 |
+| **1.4b** | 2048 | **31/50** | **62%** | **[0.482, 0.741]** | 0.9878 | 0.0256 |
+
+**The filing anticipated this exact outcome and forbids reporting it yet:**
+
+> if the failure rate rises with scale, do not report it yet. Wider models may simply be
+> harder to fit at a fixed 1600 steps. **Re-run the top rung at 3200 steps and report
+> both.** A rate that falls with more steps is an optimiser artefact, not a scale effect.
+
+**The artefact reading is currently the more likely one.** Three rungs sit at *exactly*
+48/50 across a 2x width range and then only the widest breaks. 1.4b is d_model 2048 - 4x
+the width of 70m - fitted with the same 1600 steps and the same width-64 bottleneck. That
+is what an under-optimised fit looks like, not obviously what a scale effect looks like.
+
+**Required next run: `--model EleutherAI/pythia-1.4b --layer 12 --d-mlp 8192 --neurons 50
+--steps 3200`, on GPU, reported beside the 1600-step result whichever way it comes out.**
+
+Also noted: 410m's min alignment is **0.9145** - it has no severe failures at all - while
+its neighbours have minima of 0.098 and 0.156. Aggregate invisibility is not monotone in
+scale.
+
+---
+
+
 ### B-1 - restart agreement calibrated, 5 restarts, n=100 (2026-09-09) - **SENSITIVITY ARM, UNDERPOWERED AS FILED**
 
 Ran 22:56 to 08:46 across a machine sleep at 02:54 that cost five hours and no rows.
@@ -2148,6 +2251,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **THE HEADLINE LANDS: restart agreement is significantly dominated by held-out R2.** B-1b, n=300, 52 failures (inside the required 36-142), AUC 0.778 vs 0.942, **DeLong z = -5.22, p < 0.0001**. At 50% catch, held-out R2 discards **0** good units and restart agreement discards 40. The field's default check is worse than a number the fit already computes for free | notebook B-1b |
+| 2026-09-09 | **B-0 FAILS: the device is a confound, and it is a reportable finding.** 5 of 16 units flip pass/fail between CPU and GPU on identical seeds; max abs d alignment **0.6615** against a median of 0.00068. The prediction is confirmed exactly - failing units sit near basin boundaries, which is where reduction order flips the answer. **Claim: estimator failure classification is hardware-dependent** | `data/b11/device_equivalence.json` |
+| 2026-09-09 | **B-11 rises with scale (4%, 4%, 4%, 38%) and is NOT REPORTABLE until the steps check runs.** The filing pre-committed this branch precisely because it is the exciting one. Three rungs at exactly 48/50 across a 2x width range, then only the widest breaks, at 4x the width of 70m on the same 1600 steps - that is what an under-optimised fit looks like. **Required: 1.4b re-run at 3200 steps** | `preregistration-b11-pythia-ladder.md` |
+| 2026-09-09 | **GPU speedup measured at 1.29x**, confirming the 1.1x estimate from the 70m rung. B-7 and B-8 stay local permanently; there is no case for moving comparative runs to Kaggle | B-0 |
 | 2026-09-09 | **TWO FILINGS CARRIED A FALSE NESTING CLAIM; both struck through in place.** `choice(3072, size=N)` is not a prefix relation in N - n=50 shares **1 unit of 50** with the first 50 of n=100, and n=100 shares **6 of 100** with n=300. B-1 and B-1b are **near-disjoint independent draws**, not nested arms | b1-addendum-1, b11-addendum-1 |
 | 2026-09-09 | **The endpoints survive; one write-up rule changes.** Each arm computes its own incumbents on its own units, so the within-arm DeLong comparisons are untouched. What changes: **C13's AUCs (0.906, 0.802) are context, never a comparator** | notebook section 8 |
 | 2026-09-09 | **The 70m ladder rung is CONTAMINATED - delete, do not resume.** Checkpoint keys on unit id, so re-running at `--neurons 50` against a file written at `--neurons 100` appended a second unit set; the progress line read `79/50`. A counter past its target is the tell | NEXT_SESSION_LADDER.md |
