@@ -80,7 +80,7 @@ abstract until its run lands.
 | claim | what would support it | run |
 |---|---|---|
 | The calibration transfers across model families | Same DeLong comparison on Pythia-160m at n=300 | **B-2b, running, ~09:00** |
-| The scale trend is real, or is an optimiser artefact | 1.4b at 3200 steps beside 1600, with the 410m control | **steps check, running** |
+| ~~The scale trend is real, or is an optimiser artefact~~ | **RESOLVED 10 Sep: artefact. Scale claim withdrawn.** 0 of 19 failing 1.4b units converged (R2 > 0.99); held-out R2 detects them at AUC 0.980/0.996. They are under-fitting, not silent failure | **done** |
 | Design choice contributes materially to the reported failure rate | Layer and family components | **B-7, B-8, queued** |
 | Failure classification is hardware-dependent | B-0: 5 of 16 units flip, max abs delta 0.6615 | **thin at n=16 — see below** |
 

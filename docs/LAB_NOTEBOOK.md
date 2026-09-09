@@ -236,6 +236,62 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### B-11 steps check - the scale effect is an OPTIMISER ARTEFACT (2026-09-10) - **SCALE CLAIM WITHDRAWN**
+
+Executes the branch pre-committed in `preregistration-b11-pythia-ladder.md` before the
+ladder ran. `data/b11/b11_pythia-{14b,410m}_s3200.jsonl`, Kaggle T4, paired on the same 50
+units per rung (the draw depends on `--neurons` and the seed, not on `--steps`).
+
+| rung | 1600 steps | 3200 steps | discordant | McNemar |
+|---|---|---|---|---|
+| **pythia-1.4b** | 31/50 (62%) | **36/50 (72%)** | **5 fail->pass, 0 pass->fail** | p = 0.0625 |
+| pythia-410m (control) | 48/50 (96%) | 48/50 (96%) | 1 each way | p = 1.0 |
+
+**The filing anticipated four outcomes and this is a fifth: partial attenuation.** 1.4b rose
+but nowhere near 96%. Taken alone that is ambiguous. **The free diagnostic settles it.**
+
+**Not one failing unit at 1.4b has converged.**
+
+| | failing units, median held-out R2 | passing units | failures with R2 > 0.99 |
+|---|---|---|---|
+| 1.4b @1600 | 0.899 | 0.997 | **0 of 19** |
+| 1.4b @3200 | 0.752 | 0.997 | **0 of 14** |
+| 410m @1600 | 0.907 | 0.99979 | 0 of 2 |
+
+**This is decisive, and it withdraws the scale claim.** A converged-but-wrong unit has high
+held-out R2 and a wrong direction - that is the silent failure this whole project is about,
+and GPT-2 has them at R2 ~ 0.9999. **1.4b has none.** Its failures are units the optimiser
+never fitted at all, and held-out R2 flags them loudly: **AUC 0.980 at 1600 steps and 0.996
+at 3200.**
+
+**So 1.4b's failures are not silent failures. They are under-fitting**, which is detectable,
+attributable and fixable - a different phenomenon that happens to land on the same side of
+the 0.95 bar.
+
+**What is reported.** Both budgets side by side, with 1.4b labelled under-optimised at both.
+**No scale claim is made in either direction.** The residual 24-point gap is not evidence of
+a scale effect, because 3200 steps has not converged either - the surviving failures have
+median R2 0.752, which *fell* from 0.899 as the five easiest were fixed.
+
+**What the project gains instead**, and it is worth more than the withdrawn claim:
+
+1. **A fixed step budget silently under-fits wider models, and reads as a scale effect.**
+   Anyone running one interpretability protocol across a model suite at a fixed budget will
+   see this and may report it as scale. That is a real methodological contribution.
+2. **Held-out R2 passes an independent test.** It was calibrated on GPT-2 against silent
+   failures; here it detects a completely different failure mode at AUC 0.996 without
+   retuning.
+3. The pre-registered sceptical check did exactly its job. **The exciting result did not
+   survive, and it was filed in advance that it would not be reported until it had been
+   attacked.**
+
+**Secondary endpoint mostly not evaluable.** Per-rung signal AUCs need failures, and the
+n=50 amendment leaves 70m/160m/410m with **2 failures each** - their AUCs (0.615 to 1.000)
+are noise. Only 1.4b has enough, and there held-out R2 dominates as everywhere else.
+
+---
+
+
 ### B-1b - THE PRIMARY ENDPOINT RESOLVES (2026-09-09) - **RESTART AGREEMENT IS DOMINATED, p < 0.0001**
 
 Local CPU, GPT-2 L6, **n=300, 2 restarts**, 08:46-20:35, 141.7 s/unit.
