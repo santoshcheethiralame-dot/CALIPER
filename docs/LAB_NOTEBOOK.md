@@ -2251,6 +2251,12 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **CITATION LEDGER CREATED, with a verification level on every row.** 60+ sources, marked FULL (main text read) / ABS (abstract or search summary only) / BIB (formalised). **Never cite a specific claim from an ABS row** - that is the rule the August audit exists to enforce, after it killed two novelty claims that abstracts had not revealed | `docs/CITATIONS.md` |
+| 2026-09-09 | **TIER 3 REFRAMED: B-7 and B-8 become variance components, not reviewer-proofing.** `2604.11581` shows naive CIs run **40-60% too narrow** by ignoring design-choice variance; `2607.19386` finds methodological variance exceeds architectural variance. Our Wilson intervals have that flaw. **We have five of six components already run** - device, restarts, scale, steps, and the two queued - so the paper can report a design-sensitivity-corrected interval | notebook section 7.8 |
+| 2026-09-09 | **VENUE CORRECTED: NeurIPS D&B is now the Evaluations & Datasets track**, whose scope explicitly includes *work that analyzes failure modes of existing benchmarks or evaluation practices* and welcomes negative results. That is a description of this paper. **NeurIPS 2026 closed (May 2026 deadline); NeurIPS 2027 E&D approx May 2027**, which lands on the 'science done by May 2027' constraint. TMLR stays the near-term target | scout 9 Sep |
+| 2026-09-09 | **ADOPT NIST AI 800-3 (Feb 2026), the official standard for benchmark statistical rigour.** Cheap - we already do Wilson intervals and pre-registration. Two things to add: the **benchmark accuracy vs generalized accuracy** distinction (300 units estimate a 3,072-unit population) and intervals over point scores throughout | scout 9 Sep |
+| 2026-09-09 | **B-0 must be positioned against the FP non-associativity literature, not claimed as novel against it.** `2408.05148` and `2511.00025` already establish that numbers vary across hardware. **Our claim is narrower and sharper: a qualitative classification flips** - which units count as failures - with median agreement 0.00068 against a tail of 0.66 | `docs/CITATIONS.md` section 6 |
+| 2026-09-09 | **GAP FOUND: we report AUC and operating points but no reliability diagram.** The failure-prediction literature (`2303.02970`, `2403.02886`) expects one - does a signal value of X correspond to failure probability Y? About 20 lines of offline analysis, and reviewers in this area look for it | `docs/CITATIONS.md` section 7 |
 | 2026-09-09 | **Kaggle run sheets now ship ONE self-contained cell.** The steps check was handed over as three cells assuming setup had already run; under Save-and-Run-All it had not, cwd was still `/kaggle/working`, and both runs died instantly. Setup in a separate cell is setup that gets skipped | `NEXT_SESSION_STEPS_CHECK.md` |
 | 2026-09-09 | **The packaging guard paid off on its first outing.** `assert rows` refused to archive an empty directory. The same situation two sessions earlier produced a 49-byte zip that looked like a successful download until opened - a silent failure turned into a loud one | notebook section 8 |
 | 2026-09-09 | **STEPS CHECK QUEUED, executing a branch pre-committed before the ladder ran.** 1.4b at 3200 steps (~4.3h), plus **410m at 3200 as a control** (~2.1h). The control is the addition: re-running only 1.4b cannot separate *more steps helps everything* from *more steps helps the wide model specifically*, and only the second supports the under-optimisation reading | `NEXT_SESSION_STEPS_CHECK.md` |
@@ -2755,6 +2761,41 @@ one, and the paper says so either way.**
 **At most one extension.** If n=300 still cannot resolve it, the honest conclusion is that
 the two signals are close enough that the choice is about cost — and cost already favours
 held-out R2, which is free, over restart agreement, which is 5x the compute.
+
+---
+
+#### Tier 3 REFRAMED - the variance decomposition. B-7 and B-8 are now load-bearing.
+
+**Filed 9 September 2026 after the scout.** `2604.11581` (Hidden Measurement Error) shows
+naive confidence intervals run **40-60% too narrow** because they count sampling noise and
+ignore *researcher design choices*. Our Wilson intervals have exactly that flaw: they count
+unit-sampling noise and ignore device, layer, family, scale, step budget and restart count.
+
+`2607.19386` (Building Fast, Evaluating Slow) independently finds **methodological variance
+exceeds architectural variance** across autointerp metrics. The two together say the same
+thing: the design choices are bigger than the thing being measured, and nobody budgets for
+them.
+
+**We can budget for them, because we have already run most of the components.**
+
+| component | run | status | measured |
+|---|---|---|---|
+| device | B-0 | **done** | **5/16 units flip pass/fail** |
+| restart count | B-1 vs B-1b | **done** | 77/100 at r=2 -> 91/100 at r=5 |
+| scale | B-11 ladder | **done** | 4 rungs, 96/96/96/62% |
+| step budget | steps check | running | 1600 vs 3200 on 1.4b + 410m control |
+| **model family** | **B-8** | queued | GPT-Neo-125m, same shape as GPT-2, different corpus |
+| **layer** | **B-7** | queued | L2 / L6 / L10 |
+
+**This changes what B-7 and B-8 are for.** They were reviewer-proofing - answers to
+objections nobody had raised. They are now **variance components in a total-error budget**,
+and the paper reports a design-sensitivity-corrected interval beside the naive Wilson one.
+
+**Nobody has asked what fraction of a reported interpretability number is design choice
+rather than signal.** We can answer it with runs that are five-sixths paid for.
+
+**Priority unchanged, reasoning changed:** B-7 and B-8 still run after the primary arms, but
+they are no longer optional and are not cut if time is short.
 
 ---
 
