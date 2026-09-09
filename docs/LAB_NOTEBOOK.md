@@ -236,6 +236,52 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### B-1 - restart agreement calibrated, 5 restarts, n=100 (2026-09-09) - **SENSITIVITY ARM, UNDERPOWERED AS FILED**
+
+Ran 22:56 to 08:46 across a machine sleep at 02:54 that cost five hours and no rows.
+`results/b1_stability_gpt2.jsonl`, GPT-2 small, layer 6, 8000 tokens, 1600 steps,
+**5 restarts**, the C13/C47 unit draw.
+
+| | value | C13 at 2 restarts |
+|---|---|---|
+| passing | **91/100**, Wilson [0.838, 0.952] | 77/100 |
+| median alignment | 0.9943 | 0.9933 |
+| **min alignment** | **0.8115** | **0.1445** |
+
+**Signal AUCs, all on the same 100 units:**
+
+| signal | AUC |
+|---|---|
+| held-out R2 | **0.913** |
+| restart agreement (`stability`) | 0.845 |
+| two-route disagreement | 0.760 |
+| `r2_spread` | 0.648 |
+
+**Read this arm as underpowered, because it is.** 9 failures. Addendum 1 was filed before
+the run finished, on exactly this basis: comparing 0.845 against 0.913 with 9 positives is
+not a comparison. The primary arm (2 restarts, n=300) decides.
+
+**Three things the arm does establish.**
+
+1. **More restarts is a better optimiser, and the filing already said this is not a
+   finding.** 77/100 to 91/100, and the severe failures disappear - min alignment 0.1445
+   becomes 0.8115. C13's aggregate-invisibility case (a median of 0.9933 hiding a unit at
+   0.1445) is much weaker here: 0.9943 hiding 0.8115.
+2. **At 5 restarts, restart agreement is NOT useless, and my earlier framing was wrong.**
+   0 of 9 failing units look stable at the 0.95 threshold. The "stable and wrong" cases in
+   the n=8 pilot came from a different configuration. The honest claim is narrower than the
+   one I started with: restart agreement trails held-out R2 here, on 9 failures, and
+   whether that gap is real is not yet known.
+3. **Held-out R2 leads in every arm measured so far** - 0.906 at C13, 0.913 here. The
+   incumbent recommendation survives this arm without being confirmed by it.
+
+**What this arm cannot answer, by construction.** Secondary 4 - does a cheap 2-restart
+stability estimate match the 5-restart one - needs the per-restart pairs, and B-1's rows
+predate `stability_pairs`. B-2 onward carry the column.
+
+---
+
+
 *(Newest first. Append; never rewrite.)*
 
 ### C54 / C55 - Study 2 P1 and P2, planted random directions (2026-09-08) - **VOID**
