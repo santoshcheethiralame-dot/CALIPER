@@ -27,9 +27,13 @@ needs ~5.6 GB in fp32 against 16 GB total with 2.6 GB free under load.
 
 ## Setup
 
-`caliper-bundle` at its **newest version** (rebuilt 8 Sep; earlier versions are missing
-`batched.py` and will not run). **GPU T4 x2. Internet ON** — Pythia is downloaded from the
-Hub and is not gated, so no token is needed.
+**Upload `kaggle/caliper-bundle.zip` as a NEW dataset named `caliper-bundle`** — it does
+not exist yet; the existing `caliper-s3` and `caliper-s1` are different packages. Steps are
+in `UPLOAD.md`.
+
+Then: **GPU T4 x2. Internet ON** — Pythia is pulled from the Hub and is not gated, so no
+token is needed. The *corpus* needs no internet: the bundle ships the cached Gutenberg
+texts and `sample_corpus` only reads them.
 
 ## Cell 1 — paths
 

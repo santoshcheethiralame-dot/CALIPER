@@ -7,3 +7,4 @@ __pycache__/
 results/corpus_cache/
 *.npz.tmp
 .venv/
+kaggle/caliper-bundle.zip

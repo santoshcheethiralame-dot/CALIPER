@@ -42,9 +42,9 @@ result on different hardware may not reproduce which units failed.
 
 ## Setup
 
-`caliper-bundle` dataset at its **newest version** (rebuilt 8 Sep — the previous version
-was missing `batched.py` and would not have run). **GPU T4 x2. Internet can stay off** —
-the corpus is cached prose, no Hub call.
+**`caliper-bundle` dataset** — upload `kaggle/caliper-bundle.zip` as a new dataset if you
+have not already (see `UPLOAD.md`). **GPU T4 x2. Internet can stay off** for this run: it
+uses GPT-2, and the corpus is the cached prose shipped in the bundle.
 
 ## Cell 1
 
