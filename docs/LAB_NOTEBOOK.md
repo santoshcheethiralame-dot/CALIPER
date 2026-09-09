@@ -2251,6 +2251,8 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **Kaggle run sheets now ship ONE self-contained cell.** The steps check was handed over as three cells assuming setup had already run; under Save-and-Run-All it had not, cwd was still `/kaggle/working`, and both runs died instantly. Setup in a separate cell is setup that gets skipped | `NEXT_SESSION_STEPS_CHECK.md` |
+| 2026-09-09 | **The packaging guard paid off on its first outing.** `assert rows` refused to archive an empty directory. The same situation two sessions earlier produced a 49-byte zip that looked like a successful download until opened - a silent failure turned into a loud one | notebook section 8 |
 | 2026-09-09 | **STEPS CHECK QUEUED, executing a branch pre-committed before the ladder ran.** 1.4b at 3200 steps (~4.3h), plus **410m at 3200 as a control** (~2.1h). The control is the addition: re-running only 1.4b cannot separate *more steps helps everything* from *more steps helps the wide model specifically*, and only the second supports the under-optimisation reading | `NEXT_SESSION_STEPS_CHECK.md` |
 | 2026-09-09 | **The steps comparison is PAIRED - McNemar, not two proportions.** The unit draw depends only on `--neurons` and the seed, not on `--steps`, so the 3200-step run scores the same 50 units. Note the contrast with `--neurons`, which changes the whole draw | `NEXT_SESSION_STEPS_CHECK.md` |
 | 2026-09-09 | **Readings fixed before the numbers exist, all four branches.** Including the one where the artefact reading wins: the scale claim is withdrawn, and the paper instead gains a methodological point - **a fixed step budget silently under-fits wider models and would have been read as a scale effect**. Both step budgets are reported side by side either way; the 1600-step table stays with its numbers intact | `NEXT_SESSION_STEPS_CHECK.md` |
@@ -3353,6 +3355,30 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### Setup in its own cell is setup that gets skipped (2026-09-09)
+
+Third Kaggle session lost to the same class of problem, and the cheapest one to prevent.
+
+The steps check was handed over as three cells - two runs and a packaging step - on the
+assumption that the bundle setup cell had already been run. In a fresh notebook under
+Save-and-Run-All there is no already-run kernel state to inherit, so the working directory
+was still `/kaggle/working` and both runs died instantly:
+
+```
+python3: can't open file '/kaggle/working/experiments/e01_gate.py'
+```
+
+**Rule.** A Kaggle run sheet ships **one self-contained cell**: locate the bundle, set
+`PYTHONPATH`, assert the GPU, then run. Never a run cell that depends on a setup cell
+above it, because the dependency is invisible and the failure is instant and total.
+
+**What did work, and is worth keeping.** The packaging cell's `assert rows, "nothing to
+package"` fired correctly and refused to build an archive from an empty directory. Two
+sessions earlier the same situation produced a 49-byte zip that looked like a successful
+download until it was opened. **The guard converted a silent failure into a loud one**, which
+is the entire reason it was added.
+
 
 ### Changing --neurons changes the WHOLE draw, it does not extend it (2026-09-09)
 

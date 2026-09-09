@@ -37,26 +37,56 @@ compare with **McNemar's exact test on the discordant units**, not a two-proport
 Note the contrast with `--neurons`, which *does* change the whole draw (notebook section 8).
 `--steps` is safe to vary; `--neurons` is not.
 
-## Cell A — required
+## One cell — setup and both runs together
+
+**Self-contained on purpose.** A previous attempt ran the two `!python` lines in a fresh
+notebook without the setup cell, so the working directory was still `/kaggle/working` and
+both died with `can't open file '/kaggle/working/experiments/e01_gate.py'`. Setup that lives
+in a separate cell is setup that gets skipped — under Save-and-Run-All there is no
+already-run kernel state to inherit.
 
 ```python
-!python experiments/e01_gate.py --model EleutherAI/pythia-1.4b --layer 12 --d-mlp 8192 \
-    --restarts 2 --neurons 50 --steps 3200 --device cuda \
-    --out /kaggle/working/b11_pythia-14b_s3200.jsonl
+import sys, os, glob, subprocess
+
+hits = glob.glob("/kaggle/input/**/caliper/estimator.py", recursive=True)
+assert hits, "bundle not found under /kaggle/input - is caliper-bundle attached?"
+root = os.path.dirname(os.path.dirname(hits[0]))
+sys.path.insert(0, root)
+os.chdir(root)
+os.environ["PYTHONPATH"] = root          # !python is a subprocess: it inherits cwd, not sys.path
+assert os.path.exists("experiments/e01_gate.py"), "bundle is incomplete"
+print("root:", root, "| bundle OK")
+
+import torch
+assert torch.cuda.is_available(), "no GPU - turn on the T4 accelerator"
+print("cuda:", torch.cuda.get_device_name(0))
+
+RUNS = [
+    # (label, model, layer, d_mlp, out) -- REQUIRED first, control second
+    ("1.4b @3200 (required)", "EleutherAI/pythia-1.4b",  12, 8192, "b11_pythia-14b_s3200"),
+    ("410m @3200 (control)",  "EleutherAI/pythia-410m",  12, 4096, "b11_pythia-410m_s3200"),
+]
+for label, model, layer, d_mlp, tag in RUNS:
+    print(f"\n{'=' * 70}\n  {label}  -  {model}\n{'=' * 70}", flush=True)
+    subprocess.run([sys.executable, "experiments/e01_gate.py",
+                    "--model", model, "--layer", str(layer), "--d-mlp", str(d_mlp),
+                    "--restarts", "2", "--neurons", "50", "--steps", "3200",
+                    "--device", "cuda",
+                    "--out", f"/kaggle/working/{tag}.jsonl"])
 ```
 
-~4.3 h. **Note the distinct output file.** `--steps` is part of a run's identity, so it
-gets its own file — never resume a 3200-step run into a 1600-step checkpoint.
+~4.3 h for the required run, ~2.1 h for the control. **Distinct output files:** `--steps`
+is part of a run's identity, so a 3200-step run never resumes into a 1600-step checkpoint.
 
-## Cell B — the control, and it is worth the extra time
+**Why the control earns its two hours.** The required run alone cannot separate:
 
-```python
-!python experiments/e01_gate.py --model EleutherAI/pythia-410m --layer 12 --d-mlp 4096 \
-    --restarts 2 --neurons 50 --steps 3200 --device cuda \
-    --out /kaggle/working/b11_pythia-410m_s3200.jsonl
-```
+- *more steps helps everything* — in which case a 1.4b improvement says nothing about width
+- *more steps helps the wide model specifically* — which is the under-optimisation claim
 
-~2.1 h. **Run Cell A first**; this one only if the session has room.
+410m is the right control: adjacent in scale, and the cleanest rung in the ladder (min
+alignment 0.9145, no severe failures at all). If 1.4b jumps toward 96% while 410m barely
+moves, the width-dependent optimisation deficit is established directly rather than
+inferred.
 
 **Why it earns its time.** Cell A alone cannot separate two explanations:
 
