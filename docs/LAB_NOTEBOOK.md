@@ -2102,6 +2102,12 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-09-09 | **B-11 FILED: the Pythia scale ladder goes to Kaggle, and it is the right run for a GPU session.** Pythia publishes 70m/160m/410m/1.4b **trained on identical data in identical order** - the only suite where scale varies with corpus and curriculum fixed. So this is not "we also tried a bigger model", it is silent-failure rate as a controlled function of scale | `preregistration-b11-pythia-ladder.md` |
+| 2026-09-09 | **Why the ladder is not device-confounded: every rung runs on the same GPU**, so the scaling curve is internally consistent and its claim needs no reference to the local numbers. Absolute rates are NOT pooled with the local n=300 arms and the device is named beside every number. The layer sweep and GPT-Neo runs stay local because they ARE comparative - B-7 against layer 6, B-8 against GPT-2 | `NEXT_SESSION_LADDER.md` |
+| 2026-09-09 | **The 160m rung is a free device cross-check.** C53 ran the same protocol locally on CPU (93/100 at 2 restarts), so the GPU rung is directly comparable at n=100. Weaker than B-0's paired per-unit test and does not replace it, but a large discrepancy would be informative and is reported either way | `preregistration-b11-pythia-ladder.md` |
+| 2026-09-09 | **Pre-committed trap: if the failure rate RISES with scale, do not report it yet.** Wider models may simply be harder to fit at a fixed 1600 steps. The check is to re-run the top rung at 3200 steps and report both - a rate that falls with more steps is an optimiser artefact, not a scale effect. Filed before the run so the sceptical check cannot be skipped if the exciting outcome appears | `preregistration-b11-pythia-ladder.md` |
+| 2026-09-09 | **B-9a dropped from the local queue.** 410m becomes a ladder rung instead; running it locally too would produce a number poolable with neither set | `run_queue.sh` |
+| 2026-09-09 | **QUEUE DIED OVERNIGHT AT 02:54 - the machine slept.** No traceback, parent shell gone: killed, not crashed. ~5 of 9 hours wasted, 0 rows lost because Checkpoint resumed B-1 at 92/100. The global CLAUDE.md already warned that the laptop is often closed and local scheduled work cannot be relied on; this is that cost, measured. Mitigation is `powercfg /change standby-timeout-ac 0`, which Santosh must run - a system setting is not mine to change | notebook §8 |
 | 2026-09-09 | **B-1 ADDENDUM 1 FILED: the design was underpowered, and the primary arm moves to `restarts=2, n=300`.** Disclosed in the filing: written after seeing 64 of 100 rows, with the interim AUCs reproduced. Nothing changes about the bar, units, signals, endpoint or decision rule - only sample size and a second arm. **The decisive reason is fairness, not power**: the incumbent AUCs (R2 0.906, disagreement 0.802) were measured at 2 restarts, so scoring a 5-restart stability against them compares signals under different optimisers | `preregistration-b1-addendum-1-power.md` |
 | 2026-09-09 | **CORRECTION: the failure-rate drop from 22% to ~9% is NOT a finding.** The original filing anticipated it in writing - "the pass rate is therefore expected to move, and a changed pass rate is not a finding here" - because 5 restarts is a better optimiser than 2. An earlier session note called it a real finding; that was wrong. The *power consequence* is real and is what Addendum 1 acts on | `preregistration-b1-addendum-1-power.md` |
 | 2026-09-09 | **DeLong's test, not overlapping intervals**, for every AUC comparison. Two AUCs on the same units are correlated because both come from the same fits, so independent intervals would overstate the evidence for a difference. Benjamini-Hochberg across the signal set. Power reference: 36-142 cases per group for Delta AUC 0.10 (Obuchowski-McClish / Hanley-McNeil), against ~10 expected failures at n=100 | `preregistration-b1-addendum-1-power.md` |
@@ -3175,6 +3181,28 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### A local overnight run is only as reliable as the machine's sleep settings (2026-09-09)
+
+Cost: about five hours of wall clock, zero data.
+
+The B-series queue was launched at 22:56 and died at 02:54 with B-1 at 92 of 100 units.
+**No traceback**, and the parent shell was gone too - the signature of the process being
+killed rather than crashing. The machine slept.
+
+`Checkpoint` did its job: restarting the queue printed `B-1 starting (92/100 done)` and the
+remaining 8 units cost 20 minutes instead of redoing four hours. **Nothing was lost except
+time**, and only because every run in this project is resumable by default.
+
+The global project index already carried the warning - "the laptop is often closed:
+anything scheduled that must run reliably is a CLOUD routine, not a local one." This is
+that warning arriving as a bill.
+
+**Rule.** Before starting an overnight local run, either disable sleep on AC
+(`powercfg /change standby-timeout-ac 0`, reversed with `... 30` afterwards) or accept that
+progress is checkpointed and the queue needs restarting in the morning. Check the queue log
+for an `exit` line: its absence means the shell died, not the run.
+
 
 ### Rows-on-disk is not a liveness check, and pgrep lies on Git Bash (2026-09-08)
 

@@ -99,7 +99,11 @@ run "B-8  gpt-neo-125m L6" 100 results/b8_gptneo125m.jsonl \
 
 # B-9a, the first rung of the Pythia scale ladder. 410m is d_model 1024 and ~1.6 GB in
 # fp32, which fits comfortably. 1.4b is 5.6 GB and is NOT queued here - see the notebook.
-run "B-9a pythia-410m L12" 50 results/b9_pythia410m.jsonl \
-    --restarts 5 --model EleutherAI/pythia-410m --layer 12 --d-mlp 4096 --neurons 50 || exit 1
+# B-9a (pythia-410m) MOVED TO KAGGLE as a rung of the B-11 scale ladder - see
+# preregistration-b11-pythia-ladder.md and NEXT_SESSION_LADDER.md. The ladder runs every
+# rung on one GPU, so it is internally device-consistent, and it carries pythia-1.4b which
+# cannot run here at all: ~5.6 GB in fp32 against 16 GB total with 2.6 GB free under load.
+# Running 410m locally too would only produce a number that cannot be pooled with either
+# set.
 
 echo "=== queue finished $(date) ==="
