@@ -54,12 +54,25 @@ run () {   # run <label> <expected-rows> <out.jsonl> <args...>
   python experiments/e01_gate.py "$@" --out "$out" >> "${out%.jsonl}.log" 2>&1
   local rc=$? have2; have2=$(wc -l < "$out" 2>/dev/null || echo 0)
   echo "[$(date +%H:%M)] $label exit $rc, $have2/$want rows"
-  # A non-zero exit with rows on disk is a survivable interruption, not a reason to
-  # abandon the queue - the next invocation resumes it. A run that produced nothing is
-  # a real failure and stops the queue so it gets looked at.
+  # A non-zero exit with rows on disk is a survivable interruption - the next invocation
+  # resumes it.
+  #
+  # Zero rows is ambiguous, and getting that wrong cost a night. A run at 5 restarts writes
+  # nothing until its first batch of 32 completes, which is over an hour, so a power loss
+  # at minute 74 looks identical to a script that died on import. The queue stopped on a
+  # dead battery and sat idle until someone looked.
+  #
+  # So: retry once. A genuine failure fails again immediately; an interruption gets to
+  # continue. Only two consecutive empty runs stop the chain.
   if [ "$have2" -eq 0 ]; then
-    echo "[$(date +%H:%M)] $label produced no rows - stopping the queue"
-    return 1
+    echo "[$(date +%H:%M)] $label produced no rows - retrying once before giving up"
+    python experiments/e01_gate.py "$@" --out "$out" >> "${out%.jsonl}.log" 2>&1
+    have2=$(wc -l < "$out" 2>/dev/null || echo 0)
+    echo "[$(date +%H:%M)] $label retry: $have2/$want rows"
+    if [ "$have2" -eq 0 ]; then
+      echo "[$(date +%H:%M)] $label produced no rows twice - stopping the queue"
+      return 1
+    fi
   fi
 }
 
