@@ -236,6 +236,58 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### B-2b - the primary endpoint on a second family (2026-09-10) - **ORDERING REPLICATES, SIGNIFICANCE DOES NOT**
+
+`results/b1b_primary_pythia.jsonl`. Pythia-160m, layer 6, n=300, 2 restarts, local CPU,
+same protocol as B-1b. Ran 20:35 to 07:21.
+
+| | GPT-2 small | Pythia-160m |
+|---|---|---|
+| passing | 248/300 = 83%, Wilson [0.780, 0.865] | **287/300 = 96%**, Wilson [0.927, 0.975] |
+| median / min alignment | 0.9942 / 0.0508 | 0.9990 / 0.1354 |
+| failures | 52 | **13** |
+
+**Signal AUCs - the rank order is identical on both families:**
+
+| signal | GPT-2 | Pythia |
+|---|---|---|
+| held-out R2 | **0.942** | **0.993** |
+| restart agreement | 0.778 | 0.899 |
+| disagreement | 0.752 | 0.854 |
+| r2_spread | 0.704 | 0.793 |
+
+**DeLong on the primary endpoint:**
+
+| | delta AUC | z | p |
+|---|---|---|---|
+| GPT-2 | -0.1638 | -5.221 | **1.78e-07, significant** |
+| Pythia | -0.0938 | -1.579 | **0.114, not significant** |
+
+**Read this as the filing requires, not as we would like.** Addendum 1 committed in advance:
+*"If n = 300 still yields fewer than 30 failures, the comparison is reported as underpowered
+and inconclusive rather than extended a second time on a third guess."* **Pythia has 13.**
+So the Pythia arm is **underpowered and inconclusive on significance**, and it is not
+re-run at a larger n to chase a p-value.
+
+**What does replicate, and it is not nothing.** All four signals rank in the same order on
+both families, with held-out R2 first and restart agreement second by a clear margin. That
+is a qualitative replication of the ordering; it is not a second significant test.
+
+**The supportable claim, stated exactly:** *on GPT-2, restart agreement is significantly
+dominated by held-out R2 (p < 1e-06); on Pythia the same ordering appears but the arm is
+underpowered at 13 failures.* Anything stronger overstates it.
+
+**Why Pythia is underpowered by construction, not by accident.** Its failure rate is 4%
+against GPT-2's 17%, so n=300 buys 13 failures where GPT-2 buys 52. Reaching ~40 failures
+would need n ~ 1000, roughly 36 hours locally. **The filing says do not**, and that is the
+right call - a second significant test would be nice, but chasing it after seeing p = 0.114
+is exactly the behaviour pre-registration exists to prevent.
+
+**Stable-and-wrong replicates in kind:** 6 of 52 on GPT-2, 1 of 13 on Pythia.
+
+---
+
+
 ### B-0 extended to n=50 (2026-09-10) - **A BIGGER FINDING THAN THE DEVICE ONE: batch composition changes the answer**
 
 `data/b11/device_equivalence_n50.json`. Extended to settle whether 5-of-16 was a rate. It

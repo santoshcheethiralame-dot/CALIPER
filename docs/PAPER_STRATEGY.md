@@ -79,10 +79,10 @@ abstract until its run lands.
 
 | claim | what would support it | run |
 |---|---|---|
-| The calibration transfers across model families | Same DeLong comparison on Pythia-160m at n=300 | **B-2b, running, ~09:00** |
+| ~~The calibration transfers across model families~~ | **PARTIAL, 10 Sep.** Rank order of all four signals is identical on both families (R2 > restart > disagreement > spread). But DeLong is significant only on GPT-2 (p=1.8e-07); Pythia gives p=0.114 with **13 failures**. Per Addendum 1's pre-commitment, the Pythia arm is reported **underpowered and inconclusive** and is NOT re-run at larger n | **done** |
 | ~~The scale trend is real, or is an optimiser artefact~~ | **RESOLVED 10 Sep: artefact. Scale claim withdrawn.** 0 of 19 failing 1.4b units converged (R2 > 0.99); held-out R2 detects them at AUC 0.980/0.996. They are under-fitting, not silent failure | **done** |
 | Design choice contributes materially to the reported failure rate | Layer and family components | **B-7, B-8, queued** |
-| Failure classification is hardware-dependent | B-0: 5 of 16 units flip, max abs delta 0.6615 | **thin at n=16 — see below** |
+| Failure classification depends on the **batch**, not only the device | **B-0 n=50, 10 Sep.** 4/50 flip CPU vs CUDA, Wilson [0.032, 0.188]. But the bigger result: holding units, seeds and device fixed and changing only batch size moves **5 of 16** across the bar on CPU and 2 on CUDA. Mechanism is `batched.py:30` - one `randn(n,d,k)` draw, so a unit's init depends on how many units share the batch | **supported, and stronger than the device claim** |
 
 ### Claims to weaken or cut
 
@@ -93,11 +93,16 @@ abstract until its run lands.
 | "This calibration transfers to SAE latents / persona vectors" | The substrate does not extend there. **Untestable by us**, and must be labelled an assumption |
 | "Interpretability results are unreliable" | Far broader than the evidence. We measured one estimator family on two small models |
 
-**The B-0 problem, stated plainly.** 5 of 16 units flipping is a striking number on a thin
-sample. Either extend B-0 to n=50 on the same hardware (cheap, ~1 h) or state it as a
-**demonstration of existence, not a rate estimate**. Existence is enough for the claim we
-want — that failure classification *can* be hardware-dependent — but the paper must not
-imply 31% is an estimate of anything.
+**B-0 resolved, and it changed the claim.** Extending to n=50 gave 4/50 rather than 5/16 —
+and since the draw is nested, that discrepancy was itself the finding. The two runs used
+different batch sizes, and **batch size alone moves units across the pass bar on CPU as well
+as GPU**. The mechanism is deterministic: `batched.py:30` draws one `randn(n, d, k)` from a
+single generator, so a unit's initialisation depends on how many units share its batch.
+
+**The claim to make is therefore about batching, not hardware:** *the direction an estimator
+recovers for a unit depends on which other units were fitted alongside it.* That is
+reproducible, mechanistically explained, and affects anyone who batches for speed — which is
+everyone. The device result stands as a secondary observation, valid within a fixed batch.
 
 ---
 
