@@ -3,8 +3,9 @@
 import time
 
 import numpy as np
+import torch
 
-from caliper.batched import fit_batch
+from caliper.batched import _BatchedBottleneck, fit_batch
 from caliper.estimator import fit, subspace_alignment
 
 
@@ -44,6 +45,49 @@ def test_batched_matches_single_neuron_path():
         single = fit(X, Y[:, i], k=1, n_restarts=2, steps=800, seed=2)
         agree = abs(subspace_alignment(batched[i].subspace, single.subspace))
         assert agree > 0.95, f"neuron {i}: batched vs single agreement {agree:.3f}"
+
+
+def test_stacked_init_depends_on_batch_size():
+    """The defect, pinned as a test so the fix cannot be quietly reverted.
+
+    B-0 measured five of sixteen units changing pass/fail side purely from batch size.
+    The cause is here: one stacked randn of shape (n, d, k) consumes the generator in
+    n*d*k steps, so unit i's slice of the stream moves whenever n moves. Same units,
+    same seed, same device, different answer.
+    """
+    big = _BatchedBottleneck(8, 128, 1, seed=0)
+    small = _BatchedBottleneck(3, 128, 1, seed=0)
+    assert not torch.equal(big.w1[:3], small.w1), (
+        "expected the stacked draw to differ between n=8 and n=3; if it does not, "
+        "B-0's batch-size result needs a different explanation"
+    )
+
+
+def test_per_neuron_seed_removes_the_batch_size_coupling():
+    """Unit i's initialisation must be a function of (seed, i) alone.
+
+    This is what makes a paired comparison across batch sizes legitimate: the same unit
+    starts in the same place whether it is fitted alone or alongside seven others, so
+    any remaining difference is arithmetic rather than a different basin.
+    """
+    d, k, width = 128, 1, 64
+    big = _BatchedBottleneck(8, d, k, width=width, seed=0, per_neuron_seed=True)
+    small = _BatchedBottleneck(3, d, k, width=width, seed=0, per_neuron_seed=True)
+    for name in ("v", "w1", "w2", "w3"):
+        full, part = getattr(big, name), getattr(small, name)
+        assert torch.equal(full[:3], part), f"{name} still depends on batch size"
+    # A different restart must still get a different start.
+    other = _BatchedBottleneck(3, d, k, width=width, seed=1000, per_neuron_seed=True)
+    assert not torch.equal(big.w1[:3], other.w1), "restart seed is being ignored"
+
+
+def test_per_neuron_seed_is_opt_in():
+    """Opt-in only. Turning it on by default would change every number already collected."""
+    legacy = _BatchedBottleneck(3, 128, 1, seed=0)
+    per_neuron = _BatchedBottleneck(3, 128, 1, seed=0, per_neuron_seed=True)
+    assert not torch.equal(legacy.v, per_neuron.v), (
+        "default and per-neuron init are identical; one of the two paths is not wired up"
+    )
 
 
 def test_batching_is_faster_per_neuron():

@@ -8,3 +8,7 @@ results/corpus_cache/
 *.npz.tmp
 .venv/
 kaggle/caliper-bundle.zip
+
+# queue lock and per-run PID claims: live process state, never content
+results/.queue.lock
+results/*.claim

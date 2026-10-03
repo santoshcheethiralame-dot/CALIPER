@@ -21,22 +21,49 @@ from torch import nn
 from .estimator import Fit, _to_original_frame
 
 
+def _per_neuron_stack(n, d, k, width, seed):
+    """Initial parameters drawn one unit at a time, so unit i's start is fixed by
+    (seed, i) and not by how many units happen to share the batch.
+
+    The stacked draw this replaces is the mechanism behind B-0's larger result:
+    ``torch.randn(n, d, k, generator=g)`` consumes the generator in n*d*k steps, so
+    unit i's slice moves whenever n moves. Same units, same seeds, same device, and
+    5 of 16 units changed pass/fail side purely from batch size. Seeding per unit
+    removes that coupling by construction.
+
+    (seed, i) -> seed * 1_000_003 + i is injective for any i below 1e6, so no two
+    units and no two restarts share a stream.
+    """
+    gens = [torch.Generator().manual_seed(seed * 1_000_003 + i) for i in range(n)]
+    v = torch.stack([torch.randn(d, k, generator=g) for g in gens]) / np.sqrt(d)
+    w1 = torch.stack([torch.randn(k, width, generator=g) for g in gens]) / np.sqrt(k)
+    w2 = torch.stack([torch.randn(width, width, generator=g) for g in gens]) / np.sqrt(width)
+    w3 = torch.stack([torch.randn(width, 1, generator=g) for g in gens]) / np.sqrt(width)
+    return v, w1, w2, w3
+
+
 class _BatchedBottleneck(nn.Module):
     """n independent rank-k bottleneck models, evaluated as batched matmuls."""
 
-    def __init__(self, n, d, k, width=64, seed=0, init=None):
+    def __init__(self, n, d, k, width=64, seed=0, init=None, per_neuron_seed=False):
         super().__init__()
-        g = torch.Generator().manual_seed(seed)
-        v = torch.randn(n, d, k, generator=g) / np.sqrt(d)
+        if per_neuron_seed:
+            v, w1, w2, w3 = _per_neuron_stack(n, d, k, width, seed)
+        else:
+            g = torch.Generator().manual_seed(seed)
+            v = torch.randn(n, d, k, generator=g) / np.sqrt(d)
+            w1 = torch.randn(n, k, width, generator=g) / np.sqrt(k)
+            w2 = torch.randn(n, width, width, generator=g) / np.sqrt(width)
+            w3 = torch.randn(n, width, 1, generator=g) / np.sqrt(width)
         if init is not None:
             v[:, :, 0] = torch.as_tensor(init, dtype=v.dtype)
         self.v = nn.Parameter(v)
         # Per-neuron MLP parameters, held as stacked tensors rather than n modules.
-        self.w1 = nn.Parameter(torch.randn(n, k, width, generator=g) / np.sqrt(k))
+        self.w1 = nn.Parameter(w1)
         self.b1 = nn.Parameter(torch.zeros(n, width))
-        self.w2 = nn.Parameter(torch.randn(n, width, width, generator=g) / np.sqrt(width))
+        self.w2 = nn.Parameter(w2)
         self.b2 = nn.Parameter(torch.zeros(n, width))
-        self.w3 = nn.Parameter(torch.randn(n, width, 1, generator=g) / np.sqrt(width))
+        self.w3 = nn.Parameter(w3)
         self.b3 = nn.Parameter(torch.zeros(n, 1))
 
     def basis(self):
@@ -54,7 +81,7 @@ class _BatchedBottleneck(nn.Module):
 
 def fit_batch(stimulus, responses, k=1, n_restarts=3, steps=2500, lr=3e-3,
               test_frac=0.2, width=64, seed=0, device="cpu", patience=200,
-              warm_start=True, verbose=False):
+              warm_start=True, verbose=False, per_neuron_seed=False):
     """Fit every column of ``responses`` against the shared ``stimulus``.
 
     Returns a list of ``Fit``, one per column, in the model's original coordinate frame.
@@ -95,7 +122,8 @@ def fit_batch(stimulus, responses, k=1, n_restarts=3, steps=2500, lr=3e-3,
     for r in range(n_restarts):
         model = _BatchedBottleneck(n_neurons, s.shape[1], k, width=width,
                                    seed=seed + 1000 * r,
-                                   init=init if (r == 0 and init is not None) else None
+                                   init=init if (r == 0 and init is not None) else None,
+                                   per_neuron_seed=per_neuron_seed
                                    ).to(device)
         opt = torch.optim.Adam(model.parameters(), lr=lr)
         run_r2 = np.full(n_neurons, -np.inf)
