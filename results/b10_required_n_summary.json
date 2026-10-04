@@ -1,0 +1,238 @@
+{
+  "out": "results/b10_required_n.jsonl",
+  "neurons": 50,
+  "restarts": 2,
+  "steps": 1600,
+  "model": "gpt2",
+  "layer": 6,
+  "by_tokens": {
+    "2000": {
+      "n_units": 50,
+      "n_failures": 42,
+      "pass_rate": 0.16,
+      "wilson_95": [
+        0.0834,
+        0.2851
+      ],
+      "auc": {
+        "held-out R2": {
+          "auc": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "n_failures": 42
+        },
+        "restart agreement": {
+          "auc": 0.9375,
+          "ci95": [
+            0.8601,
+            0.9881
+          ],
+          "n_failures": 42
+        },
+        "disagreement": {
+          "auc": 0.7113,
+          "ci95": [
+            0.4494,
+            0.9375
+          ],
+          "n_failures": 42
+        },
+        "restart R2 spread": {
+          "auc": 0.3929,
+          "ci95": [
+            0.1369,
+            0.6786
+          ],
+          "n_failures": 42
+        }
+      },
+      "ranking": [
+        "held-out R2",
+        "restart agreement",
+        "disagreement",
+        "restart R2 spread"
+      ],
+      "restart_minus_r2": {
+        "diff": -0.0625,
+        "se": 0.0334,
+        "z": -1.871,
+        "p": 0.0614,
+        "n_failures": 42,
+        "underpowered": false
+      }
+    },
+    "4000": {
+      "n_units": 50,
+      "n_failures": 22,
+      "pass_rate": 0.56,
+      "wilson_95": [
+        0.4231,
+        0.6884
+      ],
+      "auc": {
+        "held-out R2": {
+          "auc": 0.9854,
+          "ci95": [
+            0.9545,
+            1.0
+          ],
+          "n_failures": 22
+        },
+        "restart agreement": {
+          "auc": 0.8474,
+          "ci95": [
+            0.7273,
+            0.9481
+          ],
+          "n_failures": 22
+        },
+        "disagreement": {
+          "auc": 0.6786,
+          "ci95": [
+            0.5162,
+            0.8199
+          ],
+          "n_failures": 22
+        },
+        "restart R2 spread": {
+          "auc": 0.6526,
+          "ci95": [
+            0.4853,
+            0.7922
+          ],
+          "n_failures": 22
+        }
+      },
+      "ranking": [
+        "held-out R2",
+        "restart agreement",
+        "disagreement",
+        "restart R2 spread"
+      ],
+      "restart_minus_r2": {
+        "diff": -0.138,
+        "se": 0.0579,
+        "z": -2.381,
+        "p": 0.0173,
+        "n_failures": 22,
+        "underpowered": false
+      }
+    },
+    "8000": {
+      "n_units": 50,
+      "n_failures": 17,
+      "pass_rate": 0.66,
+      "wilson_95": [
+        0.5215,
+        0.7756
+      ],
+      "auc": {
+        "held-out R2": {
+          "auc": 0.9251,
+          "ci95": [
+            0.8324,
+            0.9893
+          ],
+          "n_failures": 17
+        },
+        "restart agreement": {
+          "auc": 0.7237,
+          "ci95": [
+            0.5829,
+            0.8556
+          ],
+          "n_failures": 17
+        },
+        "disagreement": {
+          "auc": 0.8422,
+          "ci95": [
+            0.7184,
+            0.943
+          ],
+          "n_failures": 17
+        },
+        "restart R2 spread": {
+          "auc": 0.6328,
+          "ci95": [
+            0.4724,
+            0.779
+          ],
+          "n_failures": 17
+        }
+      },
+      "ranking": [
+        "held-out R2",
+        "disagreement",
+        "restart agreement",
+        "restart R2 spread"
+      ],
+      "restart_minus_r2": {
+        "diff": -0.2014,
+        "se": 0.0614,
+        "z": -3.278,
+        "p": 0.00105,
+        "n_failures": 17,
+        "underpowered": true
+      }
+    },
+    "16000": {
+      "n_units": 50,
+      "n_failures": 10,
+      "pass_rate": 0.8,
+      "wilson_95": [
+        0.6696,
+        0.8876
+      ],
+      "auc": {
+        "held-out R2": {
+          "auc": 0.77,
+          "ci95": [
+            0.6175,
+            0.9
+          ],
+          "n_failures": 10
+        },
+        "restart agreement": {
+          "auc": 0.7175,
+          "ci95": [
+            0.56,
+            0.8675
+          ],
+          "n_failures": 10
+        },
+        "disagreement": {
+          "auc": 0.7925,
+          "ci95": [
+            0.65,
+            0.92
+          ],
+          "n_failures": 10
+        },
+        "restart R2 spread": {
+          "auc": 0.65,
+          "ci95": [
+            0.4675,
+            0.83
+          ],
+          "n_failures": 10
+        }
+      },
+      "ranking": [
+        "disagreement",
+        "held-out R2",
+        "restart agreement",
+        "restart R2 spread"
+      ],
+      "restart_minus_r2": {
+        "diff": -0.0525,
+        "se": 0.0849,
+        "z": -0.619,
+        "p": 0.536,
+        "n_failures": 10,
+        "underpowered": true
+      }
+    }
+  }
+}
