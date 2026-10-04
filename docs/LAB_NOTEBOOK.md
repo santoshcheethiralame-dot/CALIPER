@@ -2415,7 +2415,9 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
-| 2026-10-04 | **B-7'S THREE LEGS ARE PAIRED, AND CHECKING THAT OVERTURNED THE RESULT I HAD ALREADY PUSHED.** The unit draw depends only on the seed and `d_model`, both fixed across layers, so L2/L6/L10 ran the *same 50 units* — the failure sets are comparable within unit. They barely overlap: **0 units fail at all three layers**, 21 of 26 L2 failures pass at both L6 and L10 (median align 0.836 → 0.995), and 3 units pass at L2 and fail at L10. So the depth effect is not "shallow layers are noisier" and the aggregate 0.48/0.86/0.90 is an average over near-disjoint populations. **Failure is a property of the (unit, layer) pair.** An earlier write-up in this same session read the rates as "two regimes rather than a gradient" from the overlapping L6/L10 intervals; that was wrong, and it was wrong because the write-up did not check whether the legs were paired. Corrected in README, notebook and PAPER_STRATEGY, with the retraction kept visible | notebook §7.8 Tier 3, `experiments/analyse_b7_depth.py` |
+| 2026-10-04 | **B-12's FILED CRITERION WAS STRICTER THAN THE INSTRUMENT'S OWN REPEATABILITY, SO IT WAS AMENDED BEFORE THE RUN.** It demanded zero pass/fail flips across batch sizes, but B-7 L6 (r=5) against B-1b L6 (r=2) on the same 50 units gives 10 of 50 verdict flips (20%) from restart count alone - and batch size perturbs float32 reduction order, which is no smaller a perturbation. Under the filed criterion, ordinary restart noise would have been scored as "flips remain", firing the branch that claims silent failure depends on estimator implementation. B-12 now runs a fourth arm at the reference batch size with a different restart count and judges batch flips against control flips, reporting the external 20% alongside. `--control-restarts 0` restores the strict version. **A criterion stricter than the measurement noise is unfalsifiable, not strict** | `experiments/b12_batch_invariance.py`, `tests/test_b12_verdict.py` |
+| 2026-10-04 | **S1-2 GAINED A MULTIPLICATIVE ARM, AND ITS 0.80 CRITERION IS DELIBERATELY NOT EXTENDED TO IT.** The deflation result is coupling-dependent - response-only beats the projected method by 0.05 additive (0.995 vs 0.945) but 0.42 multiplicative (0.930 vs 0.506) - so additive-only would have characterised the effect only where it is smallest and omitted the case the paper's explanation rests on. The pre-registered 0.80 bar stays on the additive cells, because the 0.5213 joint baseline it is defined against comes from `e03_required_n.json`, which planted additive units; the archived baseline is written as `null` on multiplicative rows so it cannot be misread. The plant moved to `experiments/planted_units.py` so the gated structure can be tested, since the whole justification is a claim about that function | `experiments/planted_units.py`, `experiments/s1_2_deflation.py`, `tests/test_planted_units.py` |
+| 2026-10-04 | **B-7'S THREE LEGS ARE PAIRED, AND CHECKING THAT OVERTURNED THE RESULT I HAD ALREADY PUSHED.** The unit draw depends only on the seed and `d_model`, both fixed across layers, so L2/L6/L10 ran the *same 50 units* - the failure sets are comparable within unit. They barely overlap: **0 units fail at all three layers**, 21 of 26 L2 failures pass at both L6 and L10 (median align 0.836 -> 0.995), and 3 units pass at L2 and fail at L10. So the depth effect is not "shallow layers are noisier" and the aggregate 0.48/0.86/0.90 is an average over near-disjoint populations. **Failure is a property of the (unit, layer) pair.** An earlier write-up in this same session read the rates as "two regimes rather than a gradient" from the overlapping L6/L10 intervals; that was wrong, and it was wrong because the write-up did not check whether the legs were paired. Corrected in README, notebook and PAPER_STRATEGY, with the retraction kept visible | notebook §7.8 Tier 3, `experiments/analyse_b7_depth.py` |
 | 2026-10-04 | **PASS/FAIL IS NOT REPRODUCIBLE AT FIXED LAYER: 20% OF VERDICTS FLIP ON RESTART COUNT ALONE.** B-7 L6 at 5 restarts and B-1b L6 at 2 restarts share all 50 units and agree on 40 (3 units fail in both, 4 fail only at 5 restarts, 6 fail only at 2). This bounds how finely any single pass rate can be read, and it is why B-8's family contrast is argued as a 31-point gap rather than a marginal one. It also means a unit must not be described as permanently good or permanently broken | `experiments/analyse_b7_depth.py` |
 | 2026-10-04 | **THE KAGGLE BUNDLE HAD GONE STALE A THIRD TIME, AND NOTHING ABOUT IT LOOKS WRONG.** `kaggle/bundle/` ships copies of `caliper/`; it was missing `per_neuron_seed` and `fit_deflate`, so any Kaggle run would have executed a different estimator from the one the notebook reports as scored. Two of the three staleness events predate `kaggle/build_bundle.py`, whose own docstring records them. Rebuilt, and pinned with `tests/test_kaggle_bundle.py`, which hashes each shipped file against source and was verified to FAIL on injected one-line drift before being trusted | `tests/test_kaggle_bundle.py` |
 | 2026-09-09 | **PAPER STRATEGY FILED, built around a claim-evidence map.** Nine claims are supported today; four need runs that are running or queued. **Four tempting claims are explicitly ruled out**, including *restart agreement does not work* - it reaches AUC 0.778 and catches most failures, so the supportable claim is **dominated, not useless**. An earlier framing in this project said useless and that was wrong | `docs/PAPER_STRATEGY.md` |
@@ -3215,6 +3217,26 @@ against the joint fits in `e03_required_n.json` — the baseline already exists.
 **Pre-registered criterion, file before running:** *median subspace alignment at
 K=2 exceeds 0.80 at N=8000*, where joint estimation gives 0.5213.
 
+> **AMENDED 4 Oct 2026, before the run: a second coupling is added, and the criterion is
+> not.** The deflation finding is coupling-dependent — response-only beats the projected
+> method by 0.05 under additive coupling (0.995 vs 0.945) but by **0.42** under
+> multiplicative (0.930 vs 0.506) — so running additive alone would characterise the effect
+> only where it is smallest, and the paper's *explanation* for why projecting the stimulus
+> hurts rests on the multiplicative case. Both couplings now run.
+>
+> The pre-registered 0.80 criterion is **still judged on the additive cells only**, because
+> the 0.5213 joint baseline it is defined against comes from `e03_required_n.json`, which
+> planted additive units. Judging it on the multiplicative cells would compare against a
+> number from a different generative model. The multiplicative cells are reported for
+> mechanism, and the archived baseline is recorded as `null` on those rows rather than
+> quoted, so it cannot be misread.
+>
+> The stimulus-projection rationale that used to sit in this section — *"the projection is
+> not optional, because response-only leaves f(Xv₁) − Xv₁ for the next rank-1 search to
+> find"* — was **tested and refuted**, and is now corrected in the script docstring. The
+> arms `cascade`/`plain` are retained only because this flag is what the run varies;
+> `resp_only` is the arm the evidence supports.
+
 **Failure branches.**
 
 | What happens | Do this |
@@ -3275,6 +3297,27 @@ Wilson interval exceeds 0.90*, the same bar as C13.
 
 Not an experiment; the prerequisite for Phase A. Currently ~30% done, and the
 measured speedup is **4.5×, not the 20–40× estimated**, saturating by batch 32.
+
+> **B-12's criterion is AMENDED 4 Oct 2026, before the run, from "zero flips" to a
+> measured floor.** B-12 was filed with the criterion *"ZERO units change pass/fail side
+> between any two batch sizes."* That is not a bar this instrument can be held to.
+> Comparing B-7 layer 6 at 5 restarts against B-1b layer 6 at 2 restarts, on the same 50
+> units, **10 of 50 verdicts flip (20%) with nothing changed but the restart count.** Batch
+> size perturbs float32 reduction order, which is not a smaller perturbation than changing
+> restarts — so under the filed criterion, ordinary restart noise would have been reported
+> as "flips remain", which triggers the much larger claim that silent failure depends on how
+> the estimator was implemented.
+>
+> The fix is to measure the floor inside the run rather than import it from another
+> experiment: a fourth arm repeats the reference batch size at a different restart count, on
+> the same units in the same session. Batch-size flips are judged against control flips, and
+> the external 20% is reported beside it so the two can be compared instead of one being
+> trusted. `--control-restarts 0` restores the strict zero-flip criterion.
+>
+> **A criterion stricter than the instrument's own repeatability is not a strong criterion,
+> it is an unfalsifiable one** — it cannot distinguish a residual defect from the estimator
+> doing what it already does. Worth checking every filed criterion against a measured noise
+> floor before the run rather than after.
 
 **Required before Phase A:** a regression test asserting batched and unbatched
 fits agree to numerical precision on a fixed seed. If they do not agree exactly,
