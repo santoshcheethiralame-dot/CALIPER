@@ -2415,7 +2415,10 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
-| 2026-10-04 | **B-7 AND B-8 LANDED, AND BOTH FAILURE BRANCHES FIRED. Together they say silent failure is a MODEL-FAMILY effect, not just a model or depth effect.** B-7 (GPT-2 L2/L6/L10, 150/150 units): pass rate 0.48 → 0.86 → 0.90, so silent failure is strongly depth-dependent, but L6 and L10 intervals overlap so the defensible reading is TWO REGIMES not a gradient, and the L2→L6 jump (0.48→0.86) dwarfs L6→L10 (0.86→0.90). B-8 (GPT-Neo-125m L10, 100/100 units): pass rate 0.59 against GPT-2's 0.90 AT THE SAME LAYER, non-overlapping intervals - same scale, same depth, different corpus, 31 points. **The headline range must now be reported across model families; GPT-2 is the favourable case and every prior number in this notebook is layer-6 GPT-2.** B-8's planned L6 arm does not exist: GPT-Neo at L6 gives median alignment 0.0026 with 0/4 passing (chance) while GPT-2 L6 gives 0.9872 on the same harness, so the null is a model property and is reported rather than re-run somewhere friendlier | notebook §7.8 Tier 3 |
+| 2026-10-04 | **B-7'S THREE LEGS ARE PAIRED, AND CHECKING THAT OVERTURNED THE RESULT I HAD ALREADY PUSHED.** The unit draw depends only on the seed and `d_model`, both fixed across layers, so L2/L6/L10 ran the *same 50 units* — the failure sets are comparable within unit. They barely overlap: **0 units fail at all three layers**, 21 of 26 L2 failures pass at both L6 and L10 (median align 0.836 → 0.995), and 3 units pass at L2 and fail at L10. So the depth effect is not "shallow layers are noisier" and the aggregate 0.48/0.86/0.90 is an average over near-disjoint populations. **Failure is a property of the (unit, layer) pair.** An earlier write-up in this same session read the rates as "two regimes rather than a gradient" from the overlapping L6/L10 intervals; that was wrong, and it was wrong because the write-up did not check whether the legs were paired. Corrected in README, notebook and PAPER_STRATEGY, with the retraction kept visible | notebook §7.8 Tier 3, `experiments/analyse_b7_depth.py` |
+| 2026-10-04 | **PASS/FAIL IS NOT REPRODUCIBLE AT FIXED LAYER: 20% OF VERDICTS FLIP ON RESTART COUNT ALONE.** B-7 L6 at 5 restarts and B-1b L6 at 2 restarts share all 50 units and agree on 40 (3 units fail in both, 4 fail only at 5 restarts, 6 fail only at 2). This bounds how finely any single pass rate can be read, and it is why B-8's family contrast is argued as a 31-point gap rather than a marginal one. It also means a unit must not be described as permanently good or permanently broken | `experiments/analyse_b7_depth.py` |
+| 2026-10-04 | **THE KAGGLE BUNDLE HAD GONE STALE A THIRD TIME, AND NOTHING ABOUT IT LOOKS WRONG.** `kaggle/bundle/` ships copies of `caliper/`; it was missing `per_neuron_seed` and `fit_deflate`, so any Kaggle run would have executed a different estimator from the one the notebook reports as scored. Two of the three staleness events predate `kaggle/build_bundle.py`, whose own docstring records them. Rebuilt, and pinned with `tests/test_kaggle_bundle.py`, which hashes each shipped file against source and was verified to FAIL on injected one-line drift before being trusted | `tests/test_kaggle_bundle.py` |
+| 2026-09-09 | **PAPER STRATEGY FILED, built around a claim-evidence map.** Nine claims are supported today; four need runs that are running or queued. **Four tempting claims are explicitly ruled out**, including *restart agreement does not work* - it reaches AUC 0.778 and catches most failures, so the supportable claim is **dominated, not useless**. An earlier framing in this project said useless and that was wrong | `docs/PAPER_STRATEGY.md` |
 | 2026-10-04 | **DEFLATION'S STIMULUS PROJECTION FAILED ITS OWN CHECK, AND THE DEFAULT WAS WRONG.** `fit_deflate`'s stated rationale was that response-only deflation leaves f(X v1) − X v1 in the residual, so the next rank-1 search rediscovers v1 and the method degenerates to "a robust rank-1 fit run twice". Measured, response-only scores HIGHER under both couplings: additive 0.995 vs full 0.945, multiplicative 0.930 vs full 0.506. The rediscovery argument is a hypothesis that failed, the projection COSTS accuracy, and the docstring now says so. It is kept only because the flag is what S1-2 varies. Under multiplicative coupling the gap is large because y depends on the gated direction through the gate itself - removing the stimulus removes a factor the response needs | `caliper/estimator.py`, `tests/test_estimator.py` |
 | 2026-10-04 | **`kill -0` IS BLIND TO WINDOWS PIDS FROM MSYS, SO EVERY EARLIER QUEUE GUARD WAS INERT.** Measured: `kill -0` reports "not alive" for a running Windows python AND for an absurd PID, because MSYS keeps its own process table. Every prior version of the run-queue lock used `kill -0`, which means it never once detected a live queue - it only appeared to work when a stale lock happened to point at an MSYS PID. `tasklist` reads the real Windows process table and separates live from dead correctly. Liveness probes now use `tasklist` | `experiments/run_queue.sh` |
 | 2026-10-04 | **A QUEUE LOCK DOES NOT GUARD A RUN, AND THE GAP REPRODUCED THE BUG IT WAS WRITTEN TO PREVENT.** When Task Scheduler aborted the chain (0x8007042B) the bash chain died but its python child survived as an orphan, still appending to the output file. A queue started at that moment saw 31 rows against a target of 100, called the run incomplete, and launched a SECOND python against the same file - which is the original double-write incident, recreated by its own guard. Each run now also claims its own output file and records the launching PID, checked before the row count is trusted, because the row count is precisely the thing that cannot distinguish "not started" from "already running" | `experiments/run_queue.sh` |
@@ -3011,8 +3014,8 @@ error is needed before that work starts.
 range over depth as well as over models, and the single-layer numbers must be relabelled.
 
 > **RESULT — landed 4 Oct 2026, all three legs complete (150/150 units).** Silent failure
-> is **strongly depth-dependent**, and the trend runs opposite to the naive expectation
-> that shallow layers are the noisy ones.
+> is **strongly depth-dependent in aggregate**, and the paired structure shows the aggregate
+> is misleading about the mechanism.
 >
 > | layer | n | pass | pass rate | Wilson 95% | median align | min align | methods disagree >0.05 | s/unit |
 > |---|---|---|---|---|---|---|---|---|
@@ -3020,30 +3023,57 @@ range over depth as well as over models, and the single-layer numbers must be re
 > | L6 | 50 | 43 | 0.86 | 0.738–0.931 | 0.9935 | 0.2707 | 0.32 | 143.2 |
 > | L10 | 50 | 45 | 0.90 | 0.786–0.957 | 0.9943 | 0.8526 | 0.24 | 197.0 |
 >
-> **The failure branch fired, and it matters.** The pass rate nearly doubles from L2 to L6
-> and the L6→L10 intervals overlap heavily (0.738–0.931 vs 0.786–0.957), so the defensible
-> claim is **two regimes, not a gradient**: a shallow regime where silent failure is
-> common and a deep regime (L6 and L10 together) where it is not. Do not report a
-> monotone depth trend; the data does not resolve one.
+> **These three legs are PAIRED, and that is the whole point.** The unit draw depends only on
+> the seed and `d_model`, both fixed across layers, so all three legs ran the *same 50 units*
+> — verified, the unit keys are identical across the three files. The failure sets can
+> therefore be compared within unit, not only between samples.
 >
-> Two secondary readings matter more than the pass rate:
-> - **Method disagreement collapses with depth** (0.58 → 0.32 → 0.24). The four rank-1
->   routes agree with each other much more often in deep layers, which is what you would
->   expect if shallow-layer directions are genuinely harder to pin down rather than
->   merely harder to detect.
-> - **The worst single unit improves by an order of magnitude** (min align 0.479 → 0.271
->   → 0.853). Note L6's minimum (0.271) is *worse* than L2's (0.479), so the tails are not
->   cleanly ordered either. The median is nearly flat across L6/L10 (0.9935 vs 0.9943).
+> **They barely overlap. From `experiments/analyse_b7_depth.py`:**
+>
+> ```
+> L2 fail 26/50  ->  21 of those 26 PASS at both L6 and L10 (median align 0.836 -> 0.995)
+> fail at all three layers  : 0/50
+> pass at L2 but FAIL at L10: 3/50   (median align 0.998 at L2, 0.873 at L10)
+> pass everywhere            : 18/50
+> ```
+>
+> **So the depth effect is NOT "shallow layers are noisier."** No unit fails at every depth.
+> Depth does not repair a fixed set of broken units — it changes *which* units fail. The
+> 0.48 → 0.90 rise is real, but it is an average over near-disjoint failure sets, and the
+> reverse case exists: three units are cleanly recovered at L2 (0.998) and fail at L10 (0.873).
+>
+> **Correct statement: failure is a property of the (unit, layer) pair, not of either alone.**
+> Any sentence of the form "layer N has a failure rate of X" describes a population whose
+> membership shifts with N, so depth-stratified numbers must be quoted per layer with that
+> caveat rather than aggregated into a trend.
+>
+> **Pass/fail is also not perfectly reproducible at fixed layer.** B-7 L6 at 5 restarts and
+> B-1b L6 at 2 restarts share all 50 units and agree on **40 of 50 verdicts (80%)** — 3 units
+> fail in both, 4 fail only at 5 restarts, 6 fail only at 2. **20% of verdicts flip on restart
+> count alone.** That bounds how finely any single pass rate can be read, and is why the B-8
+> family contrast is argued as a 31-point gap rather than a small one.
+>
+> Secondary: method disagreement tracks the same instability (0.58 / 0.32 / 0.24). The four
+> rank-1 routes agree far more often in deep layers — consistent with shallow-layer
+> directions being genuinely less determined, but equally consistent with the L2 units being
+> a different population. It cannot separate those two readings, so neither is claimed.
 >
 > **Consequence for the headline.** Every prior number in this notebook — B-1, B-1b, B-2b,
-> and the whole Study-2 gate — is measured at **layer 6**. That is now demonstrably the
-> *easy* end of the deep regime, not a neutral default. The single-layer figures must be
-> relabelled as "layer 6" wherever they appear, and the L2 leg is the one that should be
-> quoted when the honest range over depth is wanted.
+> and the whole Study-2 gate — is measured at **layer 6**. B-8 shows layer-6 GPT-2 is the
+> favourable end of the family axis. The single-layer figures must be relabelled "layer 6"
+> wherever they appear.
 >
-> Cost note: the sweep ran 150 units in ~8.7 h wall against a ~6.6 h estimate. Deeper
-> layers cost more per unit (123.9 → 197.0 s/unit, +59%) because the collected activation
-> slice is wider. Estimate the deepest layer first in future sweeps.
+> Cost note: the sweep ran 150 units in ~8.7 h wall against a ~6.6 h estimate. Deeper layers
+> cost more per unit (123.9 → 197.0 s/unit, +59%). Estimate the deepest layer first in future
+> sweeps.
+>
+> **Correction, filed the same day.** An earlier write-up of this result read the pass rates
+> as "two regimes rather than a gradient", on the strength of the overlapping L6/L10
+> intervals. **The paired analysis refutes that.** The intervals overlap because the L6 and
+> L10 failure sets are nearly the same *size*, not because the layers behave alike — only 3
+> units fail at L6 while passing at L10. The deep regime is stable; the shallow regime is a
+> different population, not a noisier sample of the same one. The first reading was made
+> without checking whether the legs were paired, which is the actual lesson.
 
 **B-8 · Third model family.** GPT-Neo-125m (different training corpus, same scale), n=100,
 L6. ~4.4 h.
@@ -3071,15 +3101,24 @@ to "these models" and the paper says so.
 > passes at 0.59 while GPT-2 at the *same layer, same depth, same bar* passes at 0.90. The
 > intervals do not overlap (0.492–0.681 vs 0.786–0.957). **Silent failure is a model-family
 > effect, not just a model effect or a depth effect** — same scale, same depth, different
-> corpus, 31 points of pass rate. That is a stronger and stranger claim than "two models is
-> not a family effect": it says the family effect is the largest single term measured here,
-> larger than depth (0.48→0.90 across GPT-2) and larger than model identity within GPT-2.
+> corpus, 31 points of pass rate on a like-for-like comparison. That is a stronger and
+> stranger claim than "two models is not a family effect": it says the corpus is the axis
+> that matters most for a benchmark built on these models, and that "models" as a category
+> carries a 31-point spread inside a single layer.
+>
+> The family contrast is now the cleanest large effect in the notebook, precisely because it
+> holds layer fixed. **Do not rank it against the B-7 depth span.** The depth figure
+> (0.48 → 0.90, 42 points) is *not* a like-for-like contrast — B-7's legs run near-disjoint
+> failure sets, so that 42 is an aggregate over shifting populations, not a measured
+> difference between two comparable groups. Comparing 31 to 42 would be a category error.
 >
 > The honest consequence is that **the instrument's error rate is corpus-dependent, and
 > the paper's headline range must be reported across model families, not just models.**
 > GPT-2 is the favourable case. Any generalisation to "models" has to carry GPT-Neo's 0.59.
-> The high method disagreement (0.51, comparable to GPT-2 *L2*) is consistent with the
-> directions being genuinely less determined rather than merely less detectable.
+> Its high method disagreement (0.51) matches GPT-2 *L2*, but the B-7 paired analysis showed
+> disagreement tracks population difficulty without identifying the cause — a harder
+> population and a less-determined direction produce the same signature. Neither is claimed
+> here.
 >
 > Cost note: 48.4 s/unit at 2 restarts — roughly half the GPT-2 cost per unit despite
 > being a different tokenizer, so the ~4.4 h estimate was sound.
@@ -4079,6 +4118,27 @@ workaround to be cleaned up later — it is the protocol.
 Equal-count binned R² produced two phantom findings and one bad candidate
 selection. `fit_cascade` now shortlists on the binned screen and **decides with
 the real objective**. Standing rule: a screen is a screen.
+
+### A sweep over layers may be paired without anyone noticing, and it changes the answer
+B-7 swept L2/L6/L10 and the aggregate said "two regimes, not a gradient" — shallow layers
+just noisier. That reading was pushed before anyone asked whether the three legs ran the
+same units. They did: the draw depends only on the seed and `d_model`, both fixed across
+layers. Paired, the failure sets turn out to be near-disjoint — **0 of 50 units fail at all
+three**, 21 of 26 L2 failures pass at both deeper layers, and 3 fail in the reverse
+direction. The aggregate was averaging over populations that were not the same population.
+
+The tell was available in the data all along: identical unit keys across files, and an L2→L6
+jump large enough to look like a regime change. **Standing rule: before interpreting a
+multi-leg sweep, check whether the legs are paired (same ids, same draw) and compare the
+per-unit overlap, not just the rates.** Overlapping confidence intervals are not evidence
+that two groups are alike — here they overlap because the failure sets are the same
+*size*, and it was the wrong conclusion that hid the real finding.
+
+Second lesson, same run: the same comparison also answers what restart count does. Two runs
+at the same layer differing only in restarts agreed on 40/50 verdicts, so **20% of verdicts
+flip on restart count alone**. Nothing else in the notebook bounds the noise floor this
+cheaply, and it should be measured for every gate before its pass rate is quoted as a
+property of the units rather than of the draw.
 
 ### Orphaned background jobs skew every timing number
 Use `nohup`, not foreground `timeout`, and check for orphans before quoting any

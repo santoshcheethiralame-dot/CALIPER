@@ -80,16 +80,39 @@ measured to be the *favourable* case.
 | depth (GPT-2) | L2 / L6 / L10, 150/150 units | 0.48 / 0.86 / 0.90 |
 | model family (layer 10) | GPT-Neo-125m vs GPT-2, 100 units each | **0.59 vs 0.90** |
 
-The family term is the largest single effect measured here. GPT-Neo at layer 10 passes at
-0.59 against GPT-2's 0.90 **at the same layer, same depth, same bar, same scale** — only
-the training corpus differs, and the Wilson intervals do not overlap (0.492–0.681 vs
-0.786–0.957). Silent failure is corpus-dependent, and a single quoted failure rate that
-does not carry its model and layer is not a result.
+The family term is the cleanest large effect here, because it holds layer fixed. GPT-Neo at
+layer 10 passes at 0.59 against GPT-2's 0.90 **at the same layer, same depth, same bar,
+same scale** — only the training corpus differs, and the Wilson intervals do not overlap
+(0.492–0.681 vs 0.786–0.957). Silent failure is corpus-dependent, and a single quoted
+failure rate that does not carry its model and layer is not a result. (It is *not* rankable
+against the depth spread below, which is an aggregate over shifting populations.)
 
-Depth reads as **two regimes, not a gradient**: the L2→L6 jump is 42 points and the
-L6→L10 change is 4 points with overlapping intervals. The method-disagreement rate tracks
-the same shape, falling 0.58 → 0.32 → 0.24, which suggests shallow-layer directions are
-genuinely less determined rather than merely less detectable.
+**But the depth effect is not what the pass rates suggest.** B-7 ran the *same* 50 units at
+all three layers — the unit draw depends only on the seed and `d_model`, both fixed across
+layers — so the failure sets can be compared unit by unit. They barely overlap:
+
+```
+L2 fail 26/50  ->  21 of those 26 PASS at both L6 and L10 (0.836 -> 0.995)
+fail at all three layers:  0/50
+pass at L2 but fail at L10: 3/50   (the reverse also happens)
+```
+
+**No unit fails at every depth.** Depth does not fix a set of broken units; it changes
+*which* units fail. The rise from 0.48 to 0.90 is real but it is an average over
+near-disjoint failure sets, so "shallow layers are noisier" is not supported as a
+mechanism — some units are perfectly recoverable at L2 and unrecoverable at L10.
+
+Two further readings, both from `experiments/analyse_b7_depth.py`:
+
+- **Method disagreement tracks the same instability** (0.58 / 0.32 / 0.24 across depths).
+  The four rank-1 routes agree far more often in deep layers, which is consistent with
+  shallow-layer directions being genuinely less determined rather than merely less
+  detectable — but it is now equally consistent with the L2 units being a different set.
+- **Pass/fail is not perfectly reproducible even at fixed layer.** B-7 L6 at 5 restarts
+  and B-1b L6 at 2 restarts share all 50 units and agree on 40 of 50 verdicts (80%), with
+  3 units failing in both. So **20% of verdicts flip on restart count alone.** Any single
+  pass rate carries that much slack, which is why the family contrast above is stated as a
+  31-point gap rather than a small one.
 
 One null worth stating rather than burying: the planned GPT-Neo layer-6 arm does not
 exist. It gives median alignment **0.0026 with 0/4 units passing** — chance — on a harness
