@@ -81,7 +81,7 @@ abstract until its run lands.
 |---|---|---|
 | ~~The calibration transfers across model families~~ | **PARTIAL, 10 Sep.** Rank order of all four signals is identical on both families (R2 > restart > disagreement > spread). But DeLong is significant only on GPT-2 (p=1.8e-07); Pythia gives p=0.114 with **13 failures**. Per Addendum 1's pre-commitment, the Pythia arm is reported **underpowered and inconclusive** and is NOT re-run at larger n | **done** |
 | ~~The scale trend is real, or is an optimiser artefact~~ | **RESOLVED 10 Sep: artefact. Scale claim withdrawn.** 0 of 19 failing 1.4b units converged (R2 > 0.99); held-out R2 detects them at AUC 0.980/0.996. They are under-fitting, not silent failure | **done** |
-| Design choice contributes materially to the reported failure rate | Layer and family components | **B-7, B-8, queued** |
+| Design choice contributes materially to the reported failure rate | Layer and family components | **B-7, B-8 — LANDED 4 Oct. Supported, and the family term dominates.** B-7 (GPT-2 L2/L6/L10, 150/150): pass rate 0.48 / 0.86 / 0.90. B-8 (GPT-Neo-125m L10, 100/100): 0.59 at the **same layer** as GPT-2's 0.90, non-overlapping Wilson intervals. Family (31 pts) > depth (42 pts L2→L6, 4 pts L6→L10). **Two-regime depth reading, not a gradient** — L6 and L10 intervals overlap |
 | Failure classification depends on the **batch**, not only the device | **B-0 n=50, 10 Sep.** 4/50 flip CPU vs CUDA, Wilson [0.032, 0.188]. But the bigger result: holding units, seeds and device fixed and changing only batch size moves **5 of 16** across the bar on CPU and 2 on CUDA. Mechanism is `batched.py:30` - one `randn(n,d,k)` draw, so a unit's init depends on how many units share the batch | **supported, and stronger than the device claim** |
 
 ### Claims to weaken or cut
@@ -91,6 +91,8 @@ abstract until its run lands.
 | "Restart agreement does not work" | **False.** It reaches AUC 0.778 and catches most failures. The supportable claim is *dominated*, not *useless*. An early framing in this project said useless; that was wrong |
 | "The failure rate rises with model scale" | Pre-registration forbids it until the steps check runs, and the artefact reading currently looks more likely |
 | "This calibration transfers to SAE latents / persona vectors" | The substrate does not extend there. **Untestable by us**, and must be labelled an assumption |
+| "The reported failure rate is a property of the model" | **Now measured to be corpus-dependent.** B-8 puts GPT-Neo-125m at 0.59 against GPT-2's 0.90 at the same layer, same depth, same bar, same scale. Every headline number in the supported-claims table is layer-6 GPT-2, which B-7 shows is the *easy* end of the deep regime. State the range across families and depths wherever a single rate is quoted, and do not let "GPT-2" silently become "models" |
+| "Silent failure gets monotonically worse toward shallow layers" | B-7 shows two regimes, not a gradient: L2 0.48, L6 0.86, L10 0.90, with L6 and L10 intervals overlapping (0.738–0.931 vs 0.786–0.957). The tails are not cleanly ordered either — L6's worst unit (0.271) is worse than L2's (0.479). Report the regimes; a monotone trend claims resolution the data does not have |
 | "Interpretability results are unreliable" | Far broader than the evidence. We measured one estimator family on two small models |
 
 **B-0 resolved, and it changed the claim.** Extending to n=50 gave 4/50 rather than 5/16 —

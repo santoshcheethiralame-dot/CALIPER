@@ -16,7 +16,7 @@ Specification: [`docs/specification.md`](docs/specification.md) · Plan of recor
 
 ---
 
-## Where this is now (September 2026)
+## Where this is now (October 2026)
 
 The work has narrowed to one artifact: **a calibration bench for the ground-truth-free
 reliability checks interpretability already relies on.**
@@ -68,6 +68,37 @@ longer known.
 
 **Headline: the calibration phase did its job.** The first instrument we scored was silently
 wrong on ~20% of its inputs. Nothing downstream would have revealed it.
+
+### The failure rate is a property of the model and the layer, not just the instrument
+
+The variance decomposition landed 4 October 2026 and it changed what the headline is
+allowed to say. Every earlier number on this page is **GPT-2, layer 6**. That is now
+measured to be the *favourable* case.
+
+| axis | measurement | pass rate |
+|---|---|---|
+| depth (GPT-2) | L2 / L6 / L10, 150/150 units | 0.48 / 0.86 / 0.90 |
+| model family (layer 10) | GPT-Neo-125m vs GPT-2, 100 units each | **0.59 vs 0.90** |
+
+The family term is the largest single effect measured here. GPT-Neo at layer 10 passes at
+0.59 against GPT-2's 0.90 **at the same layer, same depth, same bar, same scale** — only
+the training corpus differs, and the Wilson intervals do not overlap (0.492–0.681 vs
+0.786–0.957). Silent failure is corpus-dependent, and a single quoted failure rate that
+does not carry its model and layer is not a result.
+
+Depth reads as **two regimes, not a gradient**: the L2→L6 jump is 42 points and the
+L6→L10 change is 4 points with overlapping intervals. The method-disagreement rate tracks
+the same shape, falling 0.58 → 0.32 → 0.24, which suggests shallow-layer directions are
+genuinely less determined rather than merely less detectable.
+
+One null worth stating rather than burying: the planned GPT-Neo layer-6 arm does not
+exist. It gives median alignment **0.0026 with 0/4 units passing** — chance — on a harness
+where GPT-2 layer 6 gives 0.9872 with 3/4. The hooks, the bar and the code were verified
+independently. A null where the same estimator recovers 0.99 on another model is a
+property of the model, so B-8 was run at layer 10, depth-matched, and the null is reported
+rather than replaced by a friendlier layer.
+
+Full numbers and the reasoning: [`docs/LAB_NOTEBOOK.md`](docs/LAB_NOTEBOOK.md) §7.8 Tier 3.
 
 ---
 

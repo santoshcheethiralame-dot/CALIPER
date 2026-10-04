@@ -2415,6 +2415,11 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-04 | **B-7 AND B-8 LANDED, AND BOTH FAILURE BRANCHES FIRED. Together they say silent failure is a MODEL-FAMILY effect, not just a model or depth effect.** B-7 (GPT-2 L2/L6/L10, 150/150 units): pass rate 0.48 → 0.86 → 0.90, so silent failure is strongly depth-dependent, but L6 and L10 intervals overlap so the defensible reading is TWO REGIMES not a gradient, and the L2→L6 jump (0.48→0.86) dwarfs L6→L10 (0.86→0.90). B-8 (GPT-Neo-125m L10, 100/100 units): pass rate 0.59 against GPT-2's 0.90 AT THE SAME LAYER, non-overlapping intervals - same scale, same depth, different corpus, 31 points. **The headline range must now be reported across model families; GPT-2 is the favourable case and every prior number in this notebook is layer-6 GPT-2.** B-8's planned L6 arm does not exist: GPT-Neo at L6 gives median alignment 0.0026 with 0/4 passing (chance) while GPT-2 L6 gives 0.9872 on the same harness, so the null is a model property and is reported rather than re-run somewhere friendlier | notebook §7.8 Tier 3 |
+| 2026-10-04 | **DEFLATION'S STIMULUS PROJECTION FAILED ITS OWN CHECK, AND THE DEFAULT WAS WRONG.** `fit_deflate`'s stated rationale was that response-only deflation leaves f(X v1) − X v1 in the residual, so the next rank-1 search rediscovers v1 and the method degenerates to "a robust rank-1 fit run twice". Measured, response-only scores HIGHER under both couplings: additive 0.995 vs full 0.945, multiplicative 0.930 vs full 0.506. The rediscovery argument is a hypothesis that failed, the projection COSTS accuracy, and the docstring now says so. It is kept only because the flag is what S1-2 varies. Under multiplicative coupling the gap is large because y depends on the gated direction through the gate itself - removing the stimulus removes a factor the response needs | `caliper/estimator.py`, `tests/test_estimator.py` |
+| 2026-10-04 | **`kill -0` IS BLIND TO WINDOWS PIDS FROM MSYS, SO EVERY EARLIER QUEUE GUARD WAS INERT.** Measured: `kill -0` reports "not alive" for a running Windows python AND for an absurd PID, because MSYS keeps its own process table. Every prior version of the run-queue lock used `kill -0`, which means it never once detected a live queue - it only appeared to work when a stale lock happened to point at an MSYS PID. `tasklist` reads the real Windows process table and separates live from dead correctly. Liveness probes now use `tasklist` | `experiments/run_queue.sh` |
+| 2026-10-04 | **A QUEUE LOCK DOES NOT GUARD A RUN, AND THE GAP REPRODUCED THE BUG IT WAS WRITTEN TO PREVENT.** When Task Scheduler aborted the chain (0x8007042B) the bash chain died but its python child survived as an orphan, still appending to the output file. A queue started at that moment saw 31 rows against a target of 100, called the run incomplete, and launched a SECOND python against the same file - which is the original double-write incident, recreated by its own guard. Each run now also claims its own output file and records the launching PID, checked before the row count is trusted, because the row count is precisely the thing that cannot distinguish "not started" from "already running" | `experiments/run_queue.sh` |
+| 2026-10-04 | **A ZERO-ROW RUN IS NOT A STUCK RUN, AND I READ ONE AS A HANG FOR AN HOUR.** B-7 L10 sat at 0/50 across several restarts while I kept killing and relaunching it. Two separate mistakes: my manual relaunches ran without `export PYTHONPATH=.`, so they died instantly on `ModuleNotFoundError: No module named 'caliper'` while the queue's own runs (which set it) were fine - three of them, concurrently, which is why the log interleaved; and a 50-neuron batch writes nothing until it finishes, which took 164 min. Before concluding a run is stuck, check the log for a traceback and check CPU, not just the row count. `exit 127` in the queue log means MY `Stop-Process`, not a crash | `experiments/run_queue.sh` |
 | 2026-09-09 | **PAPER STRATEGY FILED, built around a claim-evidence map.** Nine claims are supported today; four need runs that are running or queued. **Four tempting claims are explicitly ruled out**, including *restart agreement does not work* - it reaches AUC 0.778 and catches most failures, so the supportable claim is **dominated, not useless**. An earlier framing in this project said useless and that was wrong | `docs/PAPER_STRATEGY.md` |
 | 2026-09-09 | **B-0's 5-of-16 is a demonstration of EXISTENCE, not a rate.** 31% on n=16 is too thin to quote as an estimate. Either extend to n=50 (~1h) or state existence only - which is enough for the claim we want, that failure classification *can* be hardware-dependent | `docs/PAPER_STRATEGY.md` section 4 |
 | 2026-09-09 | **Three highest-severity rejection risks named with answers**: only small models (abstract, not appendix); only MLP units reading their own layer (unfixable, state it up front); and *where is the method* - which is precisely why TMLR and the E&D track are the targets and a methods main track is not | `docs/PAPER_STRATEGY.md` section 5 |
@@ -3005,11 +3010,79 @@ error is needed before that work starts.
 *Failure branch:* if the failure rate swings wildly with depth, the headline becomes a
 range over depth as well as over models, and the single-layer numbers must be relabelled.
 
+> **RESULT — landed 4 Oct 2026, all three legs complete (150/150 units).** Silent failure
+> is **strongly depth-dependent**, and the trend runs opposite to the naive expectation
+> that shallow layers are the noisy ones.
+>
+> | layer | n | pass | pass rate | Wilson 95% | median align | min align | methods disagree >0.05 | s/unit |
+> |---|---|---|---|---|---|---|---|---|
+> | L2 | 50 | 24 | 0.48 | 0.348–0.615 | 0.9541 | 0.4793 | 0.58 | 123.9 |
+> | L6 | 50 | 43 | 0.86 | 0.738–0.931 | 0.9935 | 0.2707 | 0.32 | 143.2 |
+> | L10 | 50 | 45 | 0.90 | 0.786–0.957 | 0.9943 | 0.8526 | 0.24 | 197.0 |
+>
+> **The failure branch fired, and it matters.** The pass rate nearly doubles from L2 to L6
+> and the L6→L10 intervals overlap heavily (0.738–0.931 vs 0.786–0.957), so the defensible
+> claim is **two regimes, not a gradient**: a shallow regime where silent failure is
+> common and a deep regime (L6 and L10 together) where it is not. Do not report a
+> monotone depth trend; the data does not resolve one.
+>
+> Two secondary readings matter more than the pass rate:
+> - **Method disagreement collapses with depth** (0.58 → 0.32 → 0.24). The four rank-1
+>   routes agree with each other much more often in deep layers, which is what you would
+>   expect if shallow-layer directions are genuinely harder to pin down rather than
+>   merely harder to detect.
+> - **The worst single unit improves by an order of magnitude** (min align 0.479 → 0.271
+>   → 0.853). Note L6's minimum (0.271) is *worse* than L2's (0.479), so the tails are not
+>   cleanly ordered either. The median is nearly flat across L6/L10 (0.9935 vs 0.9943).
+>
+> **Consequence for the headline.** Every prior number in this notebook — B-1, B-1b, B-2b,
+> and the whole Study-2 gate — is measured at **layer 6**. That is now demonstrably the
+> *easy* end of the deep regime, not a neutral default. The single-layer figures must be
+> relabelled as "layer 6" wherever they appear, and the L2 leg is the one that should be
+> quoted when the honest range over depth is wanted.
+>
+> Cost note: the sweep ran 150 units in ~8.7 h wall against a ~6.6 h estimate. Deeper
+> layers cost more per unit (123.9 → 197.0 s/unit, +59%) because the collected activation
+> slice is wider. Estimate the deepest layer first in future sweeps.
+
 **B-8 · Third model family.** GPT-Neo-125m (different training corpus, same scale), n=100,
 L6. ~4.4 h.
 *Objection answered:* "two models is not a family effect."
 *Failure branch:* if the third family behaves unlike both, the claim narrows from "models"
 to "these models" and the paper says so.
+
+> **RESULT — landed 4 Oct 2026 (100/100 units).** The run is at **layer 10, not layer 6**,
+> and that substitution is part of the finding rather than a convenience.
+>
+> **The planned L6 arm does not exist in the data.** A matched 4-unit smoke at L6 gave
+> median alignment **0.0026 with 0/4 passing** — chance. The same smoke on GPT-2 L6 gave
+> 0.9872 with 3/4 passing, so the harness, the bar, and the code were all fine; GPT-Neo
+> simply does not admit recoverable directions at L6 at this bar. Hook placement was
+> verified independently (the MLP input hook sits at exactly ln 2 layers up) and the
+> layer-6 correlation was 0.698, in line with the layers that do work. **A null at a layer
+> where the same estimator recovers 0.99 on GPT-2 is a property of the model, not a bug**,
+> and it is reported as such rather than quietly re-run at a layer that works.
+>
+> **Final arm, GPT-Neo-125m L10, depth-matched to the GPT-2 L10 leg:** n=100, 59 passing,
+> pass rate **0.59** (Wilson 0.492–0.681), median alignment **0.9586**, min 0.0344,
+> methods disagreeing >0.05 in **0.51** of units, 48.4 s/unit.
+>
+> **The failure branch fired too, and this is the load-bearing result.** GPT-Neo at L10
+> passes at 0.59 while GPT-2 at the *same layer, same depth, same bar* passes at 0.90. The
+> intervals do not overlap (0.492–0.681 vs 0.786–0.957). **Silent failure is a model-family
+> effect, not just a model effect or a depth effect** — same scale, same depth, different
+> corpus, 31 points of pass rate. That is a stronger and stranger claim than "two models is
+> not a family effect": it says the family effect is the largest single term measured here,
+> larger than depth (0.48→0.90 across GPT-2) and larger than model identity within GPT-2.
+>
+> The honest consequence is that **the instrument's error rate is corpus-dependent, and
+> the paper's headline range must be reported across model families, not just models.**
+> GPT-2 is the favourable case. Any generalisation to "models" has to carry GPT-Neo's 0.59.
+> The high method disagreement (0.51, comparable to GPT-2 *L2*) is consistent with the
+> directions being genuinely less determined rather than merely less detectable.
+>
+> Cost note: 48.4 s/unit at 2 restarts — roughly half the GPT-2 cost per unit despite
+> being a different tokenizer, so the ~4.4 h estimate was sound.
 
 **B-9 · Scale.** Pythia-1.4b, n=50, layer 12 of 24. d_model 2048 against 768, so the fit is
 roughly 2.7x wider. CPU overnight, or Kaggle GPU if it drags.
@@ -3732,6 +3805,9 @@ for an `exit` line: its absence means the shell died, not the run.
 
 ### Rows-on-disk is not a liveness check, and pgrep lies on Git Bash (2026-09-08)
 
+**Corrected 4 October 2026 — the rule below was wrong and I have since replaced it. Read
+this section as the story of how it was wrong, because the replacement is unintuitive.**
+
 Cost: two duplicate runs and about half an hour, inside ten minutes.
 
 A serial queue was launched while B-1 was already running. Its guard asked "does this
@@ -3747,8 +3823,7 @@ no guard, because it is trusted.
 `kill` alone did not stop the duplicate either - it needed `kill -9`, and the parent shell
 had to go with it.
 
-**Rule.** Concurrency guards use a lockfile carrying the PID, with `kill -0` to tell a
-live owner from a stale file:
+**The rule as first written, and now known to be inert:**
 
 ```bash
 LOCK="results/.queue.lock"
@@ -3756,8 +3831,64 @@ if [ -f "$LOCK" ] && kill -0 "$(cat "$LOCK")" 2>/dev/null; then exit 1; fi
 echo $$ > "$LOCK"; trap 'rm -f "$LOCK"' EXIT
 ```
 
+**`kill -0` does not work here either, and for a subtler reason than `pgrep`.** MSYS keeps
+its own process table and cannot see native Windows processes. Measured on this machine:
+
+| probe | live Windows PID 17876 | absurd PID 999999 |
+|---|---|---|
+| `kill -0` | "not alive" | "not alive" |
+| `tasklist` | found | missed |
+
+`kill -0` reports *not alive* for both, so it never once detected a live owner. It only
+appeared to work in testing when a stale lock happened to point at an MSYS PID — which is
+to say, it was right by accident. `tasklist` reads the real Windows process table and
+separates live from dead correctly:
+
+```bash
+alive () { tasklist //FI "PID eq $1" 2>/dev/null | grep -q "[0-9] $1 " }
+```
+
+**And the lock is not enough on its own, because a lock guards a QUEUE, not a RUN.** When
+Task Scheduler aborted the chain (0x8007042B, ERROR_PROCESS_ABORTED) the bash chain died
+but its python child survived as an orphan, still appending to the output file. A queue
+started at that moment saw 31 rows against a target of 100, called B-8 incomplete, and
+launched a **second python against the same file** — the original incident, recreated by
+the guard written to stop it. Each run now also claims its own output file and records the
+launching PID, and that claim is checked *before* the row count is consulted, because the
+row count is exactly the thing that cannot tell "not started" from "already running".
+
 And verify a guard by **running it in the state where it must refuse**, not by reading it.
-Both broken versions looked correct.
+Three broken versions of this guard looked correct. The claim-guard harness exercises four
+cases — live owner must refuse, dead owner must proceed, empty claim must proceed, absent
+claim must proceed — and the first version failed the live-owner case while passing the
+other three.
+
+### A run that writes nothing is not a hung run (2026-10-04)
+
+Cost: about an hour of killing and relaunching a healthy job.
+
+B-7's GPT-2 L10 leg sat at **0/50 rows** across several restarts and I read that as a hang.
+Two separate mistakes stacked:
+
+1. **My manual relaunches ran without `export PYTHONPATH=.`**, so they died instantly on
+   `ModuleNotFoundError: No module named 'caliper'`. The queue's own runs set it and were
+   fine — three of them at once, which is why the log showed interleaved model loads.
+2. **A batch writes nothing until it finishes.** 50 neurons at 8k tokens took 164 minutes
+   to produce the first row, which is entirely normal here.
+
+So "0 rows" was reported by processes that had already exited. Two diagnostics would have
+settled it in seconds instead of an hour:
+
+```bash
+grep -E "Traceback|ModuleNotFound" results/<run>.log   # did it even import?
+tasklist //FI "PID eq <pid>"                            # is it still consuming CPU?
+```
+
+**Rule.** A row count is not a liveness check *in either direction* — it cannot tell you a
+run is finished, and it cannot tell you a run is stuck. Check the log for a traceback and
+check the process for CPU, then check the row count last. And in the queue log, **`exit 127`
+means something killed the python from outside** (my `Stop-Process` did this repeatedly);
+it is not a crash signature and should not be read as one.
 
 
 ### A truncated pytest run reports dots, and they look like a pass (2026-09-08)

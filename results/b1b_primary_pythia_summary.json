@@ -1,0 +1,15 @@
+{
+  "n": 300,
+  "n_passing": 283,
+  "pass_rate": 0.9433,
+  "wilson_95_lower": 0.9111,
+  "wilson_95_upper": 0.9643,
+  "median_alignment": 0.999,
+  "min_alignment": 0.1354,
+  "median_k2_gain": -0.0049,
+  "median_regret": 0.0,
+  "max_regret": 0.0722,
+  "frac_methods_disagree_gt_0.05": 0.0867,
+  "seconds_per_neuron": 128.7,
+  "VERDICT": "PASS"
+}
