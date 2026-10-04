@@ -40,6 +40,20 @@ ap.add_argument("--model", default="gpt2",
                      "second-family replication, prereg docs/preregistration-e01-pythia.md")
 ap.add_argument("--d-mlp", type=int, default=3072,
                 help="units to draw from; 3072 for both gpt2 and pythia-160m")
+ap.add_argument("--neuron-pool", type=int, default=0,
+                help="draw this many units and keep the first --neurons. numpy's "
+                     "choice(replace=False) is NOT nested in size, so without a pool "
+                     "each --neurons value is a disjoint draw: a layer sweep would "
+                     "compare different units at every depth. --neuron-pool 300 makes "
+                     "any n<=300 a prefix of one ordering, which is exactly the n=300 "
+                     "draw B-1b used, so smaller runs nest inside the primary arm "
+                     "instead of beside it. Default 0 keeps the legacy draw so no "
+                     "completed run changes meaning.")
+ap.add_argument("--per-neuron-seed", action="store_true",
+                help="seed each unit's initialisation from its own index instead of "
+                     "one stacked draw, so a unit's result stops depending on how many "
+                     "units share its batch. Opt-in: it changes every number, so runs "
+                     "that must stay poolable with B-1/B-1b/B-2b leave it off.")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -49,7 +63,10 @@ ck = Checkpoint(a.out)
 
 model, tok = load_model(a.model)
 rng = np.random.default_rng(0)
-neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
+if a.neuron_pool:
+    neurons = rng.choice(a.d_mlp, size=a.neuron_pool, replace=False)[:a.neurons]
+else:
+    neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
 p = collect(model, tok, sample_corpus(n_docs=300, seed=0), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=0)
 print(f"  stimulus {p.stimulus.shape}  ({time.time()-t0:.0f}s)", flush=True)
@@ -63,9 +80,9 @@ for start in range(0, len(todo), a.batch):
     idx = todo[start:start + a.batch]
     Y = p.response[:, idx]
     d1 = fit_batch(p.stimulus, Y, k=1, n_restarts=a.restarts, steps=a.steps,
-                   seed=0, device=device)
+                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed)
     d2 = fit_batch(p.stimulus, Y, k=2, n_restarts=a.restarts, steps=a.steps,
-                   seed=0, device=device)
+                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed)
     for j, i in enumerate(idx):
         n = int(p.neurons[i])
         wu = p.weights[:, i] / np.linalg.norm(p.weights[:, i])
@@ -109,6 +126,11 @@ lo, hi = wilson(int(passed.sum()), len(rows))
 
 summary = {
     "n": len(rows), "n_passing": int(passed.sum()),
+    "out": a.out,
+    "model": a.model, "layer": a.layer, "neurons": a.neurons,
+    "n_restarts": a.restarts, "steps": a.steps, "batch": a.batch,
+    "tokens": a.tokens, "per_neuron_seed": bool(a.per_neuron_seed),
+    "neuron_pool": a.neuron_pool,
     "pass_rate": round(float(passed.mean()), 4),
     "wilson_95_lower": round(lo, 4), "wilson_95_upper": round(hi, 4),
     "median_alignment": round(float(np.median(sel)), 4),
@@ -120,7 +142,10 @@ summary = {
     "seconds_per_neuron": round((time.time() - t0) / max(len(rows), 1), 1),
     "VERDICT": "PASS" if lo > 0.90 else "FAIL",
 }
-json.dump(summary, open("results/e01_gate_summary.json", "w"), indent=2)
+# Keyed off --out: a fixed path meant every run in the queue overwrote the last
+# one's summary, so B-8 or a layer leg would silently replace B-2b's headline.
+summary_path = a.out.replace(".jsonl", "_summary.json")
+json.dump(summary, open(summary_path, "w"), indent=2)
 print("\n" + "=" * 66)
 for k, v in summary.items():
     print(f"  {k:.<44} {v}")

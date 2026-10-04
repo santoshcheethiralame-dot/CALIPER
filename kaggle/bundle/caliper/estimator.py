@@ -248,6 +248,77 @@ def _to_original_frame(basis, scale, frame=None):
     return q
 
 
+def _orthogonal_complement(V):
+    """Orthonormal basis of the complement of the columns of ``V`` (d, d - j)."""
+    Q, _ = np.linalg.qr(np.asarray(V, dtype=np.float64), mode="complete")
+    return Q[:, V.shape[1]:]
+
+
+def fit_deflate(stimulus, response, k=2, project_stimulus=True, method="cascade",
+                seed=0, **kw):
+    """Recover K directions one at a time, removing each before fitting the next.
+
+    Joint estimation of K >= 2 is this project's standing limitation: it measures 0.52
+    at K=2 and 0.36 at K=3, which is what recovering one direction perfectly and missing
+    the other K-1 would give. Whether the estimator or its parameterisation is at fault is
+    an open question, because `fit` optimises all K columns of V at once and nothing in
+    that objective asks one direction to win before the others.
+
+    `project_stimulus=True` additionally fits each step in the orthogonal complement of
+    what has already been recovered, so rediscovering a found direction is impossible
+    rather than merely unlikely.
+
+    THE STIMULUS PROJECTION IS THE CONTROL, NOT THE METHOD, and the original design had
+    this backwards. The argument for projecting the stimulus was that response deflation
+    alone leaves f(X v1) - X v1 in the residual, which is variance along v1, so the next
+    rank-1 search rediscovers v1 and the method degenerates into "a robust rank-1 fit run
+    twice, keeping the best". Measured, that prediction does not hold:
+
+        additive        full 0.945   response-only 0.995
+        multiplicative  full 0.506   response-only 0.930
+
+    Response-only scores HIGHER under both couplings, and under multiplicative coupling
+    the gap is large, because y depends on the gated direction through the gate itself -
+    removing it from the stimulus removes a factor the response needs. So the rediscovery
+    argument is a hypothesis that failed its own check, the projection costs accuracy, and
+    the default is kept only because the flag is what S1-2 varies. S1-2 reports both arms
+    per cell; the criterion is judged on the better one and the interpretation must say
+    which.
+
+    `method` picks the rank-1 route: ``cascade`` is the more robust fit and the default,
+    reported alongside ``plain`` because it costs a fraction as much and isolates how much
+    of any gain is the cascade rather than the deflation.
+    """
+    X = np.asarray(stimulus, dtype=np.float32)
+    y = np.asarray(response, dtype=np.float64)
+    route = fit_cascade if method == "cascade" else fit
+
+    found = np.zeros((X.shape[1], 0))
+    resid = y
+    for j in range(k):
+        # Work in a rotated frame so the fit cannot see an already-recovered direction.
+        # A direction u fitted inside the complement maps straight back as Q @ u, because
+        # X Q u = X u for any u orthogonal to the removed span.
+        if found.shape[1] == 0 or not project_stimulus:
+            Q, Z = None, X
+        else:
+            Q = _orthogonal_complement(found)
+            Z = X @ Q
+        one = route(Z, resid, k=1, seed=seed + 17 * j, **kw)
+        u = one.subspace[:, 0]
+        v = u if Q is None else Q @ u
+        found = np.concatenate([found, (v / np.linalg.norm(v))[:, None]], axis=1)
+        # Deflate the response against everything found so far, re-orthonormalised, so
+        # the subtraction is an exact projection rather than a sum of near-orthogonal fits.
+        basis, _ = np.linalg.qr(found)
+        resid = y - (X @ basis).sum(1)
+
+    q, _ = np.linalg.qr(found)
+    proj = X @ q
+    test_r2 = float(np.mean([_r2(proj[:, j], y) for j in range(k)]))
+    return Fit(subspace=q, k=k, train_r2=float("nan"), test_r2=test_r2)
+
+
 def subspace_alignment(a, b):
     """Mean cosine of principal angles between two subspaces; 1.0 means identical."""
     a = a / np.linalg.norm(a, axis=0, keepdims=True)

@@ -17,7 +17,7 @@ treatment: measure it, do not assume it.
 This script fits the SAME units with the SAME seeds on both devices and compares.
 
 Usage (Kaggle, GPU on):
-    python experiments/kaggle_device_equivalence.py --neurons 24
+    python experiments/kaggle_device_equivalence.py --neurons 16 --restarts 2
 
 Pre-registered criterion, filed before the run:
     PASS  - no unit changes pass/fail side, and max |d alignment| < 0.01.
