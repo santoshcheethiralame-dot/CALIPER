@@ -257,6 +257,18 @@ not the best possible venue.
 **Cut from the flagship:** Study 2 (P7) and Study 3 (P5). Both are real work; including
 weak studies weakens a paper.
 
+> **CORRECTED 4 October 2026 — half of this line never took effect.** Study 3 (P5) stays
+> cut. **Study 2 was reinstated as chapter two the same day**, by `paper/OUTLINE_v3.md`,
+> committed *after* this pivot log. Commit order settles it: `40f5576` (this file) sits at
+> history position 32, `6c4efb4` (OUTLINE_v3) at 44, and this log runs newest-first — so
+> OUTLINE_v3 is the later word. OUTLINE_v3 also supersedes OUTLINE_v2, which had put
+> Study 3 in chapter two.
+>
+> **Live paper structure is therefore: Study 1 leads, Study 2 is chapter two.** Read
+> `OUTLINE_v3.md`, not this line. This matters operationally, not just cosmetically: the
+> S1-2 gate is Study 2's go/no-go, so acting on the stale reading would have cancelled
+> the run the paper is waiting on.
+
 **Two limitations that go in the abstract, not the appendix.** Only 124M and 160M models
 so far. Ground truth holds only for a unit reading its own layer, and whether the
 calibration transfers is an assumption the work cannot test. Reviewers forgive a stated

@@ -111,6 +111,18 @@ rule (6.7% → 33.3%, FPR 0% → 17%), extraction position, strength normalisati
 across models), prompt framing (8× on content-free vectors).
 
 ### 8. Limitations
+> **UPDATED 4 October 2026.** The Study 1 sentence below was written before B-2b, B-7 and
+> B-8 landed and is no longer true. Current: Study 1 is **two model families** (GPT-2,
+> Pythia) at **n=300 each**, a **third family** (GPT-Neo-125m) at layer 10, and **three
+> depths** (2/6/10) on a 50-unit paired panel. It is still rank-1 throughout.
+>
+> The split matters and cannot be averaged away: **GPT-2 247/300 = 0.8233 fails the
+> pre-registered >=0.90 bar; Pythia 283/300 = 0.9433 passes it.** Two caveats now owed to
+> the limitations paragraph rather than the appendix: (a) the headline model is the one
+> that fails, so "replicated" must not be written as if both passed; (b) 20% of unit
+> verdicts flip between 2 and 5 restarts at fixed layer, so the headline rate carries a
+> restart-choice dependence that the n=300 runs do not shrink.
+
 Study 1 is one model family, layer 6, rank-1. Study 2 is one model, one plant layer.
 Study 3 is one model, 30 concepts, and its significant cells sit where steering is only
 weakly validated (C48). Extraction-position sensitivity is already documented (2602.00333).
@@ -123,9 +135,24 @@ three reversals and a failed repair.
 
 ## Priority queue
 
+> **RE-PRIORITISED 4 October 2026.** Two of the five items below are done and the
+> limitations section above is out of date. Status against committed artifacts:
+>
+> | item | status |
+> |---|---|
+> | **Study 1, second model** (Pythia / GPT-2 medium) | **DONE — B-2b, n=300, 283/300 = 0.9433, verdict PASS.** It was queued as "the obvious objection"; it is now answered |
+> | **Study 2 P1** | Open. Not started. No Kaggle session for it exists yet |
+> | **Study 2 P2** | Open. Not started. **Still the headline figure of chapter two, and chapter two still has no data** |
+> | A-14 window | Open. Settles a chapter-three claim only |
+> | Matched-budget seed re-run | Open, but now lower value — the deflation repair was resolved 4 Oct by measuring the protocols directly (response-only 0.995 vs additive 0.945) rather than by matching budgets |
+>
+> **What actually gates the paper is Study 2 P1/P2, and neither has been run.** The
+> Study 2 go/no-go (S1-2, deflation at K>1) is queued on CPU, but S1-2 is a *gate* on the
+> chapter, not a substitute for P1/P2 — do not read a green S1-2 as chapter two having data.
+
 | item | cost | why |
 |---|---|---|
-| **Study 1, second model** (Pythia / GPT-2 medium) | CPU, ~1 day | "One model" is the obvious objection and Study 1 is the paper |
+| ~~**Study 1, second model** (Pythia / GPT-2 medium)~~ | CPU, ~1 day | **Answered by B-2b: 0.9433 at n=300, PASS** |
 | **Study 2 P1** | 1 Kaggle session | Positive control. Gates the whole chapter |
 | **Study 2 P2** | 1 Kaggle session | The headline figure of chapter two |
 | A-14 window | 1 session, sheet written | Settles a chapter-three claim only |
