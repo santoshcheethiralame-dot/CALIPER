@@ -227,3 +227,18 @@ def test_rank_transform_does_not_break_a_heavy_tailed_response():
                 response_transform=transform)
         got = abs(subspace_alignment(f.subspace, w[:, None]))
         assert got > 0.95, f"{transform}: {got:.3f}"
+
+
+def test_sequence_order_keeps_sequences_whole():
+    """`sequence` shuffling must keep each sequence's rows contiguous and use each row once,
+    so the held-out prefix is made of whole unseen sequences; `token` must match the old
+    behaviour exactly, since every completed run used it."""
+    from caliper.activations import _order
+    n, block = 1270, 127
+    order = _order(n, block, np.random.default_rng(0), "sequence")
+    assert sorted(order) == list(range(n))
+    seq = order // block
+    runs = [k for i, k in enumerate(seq) if i == 0 or k != seq[i - 1]]
+    assert len(runs) == len(set(runs)) == n // block
+    legacy = np.random.default_rng(0).permutation(n)
+    assert np.array_equal(_order(n, block, np.random.default_rng(0), "token"), legacy)

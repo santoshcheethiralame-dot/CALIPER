@@ -6,6 +6,7 @@ batched, resumable. Pass rate reported as a Wilson interval, because a bare frac
 """
 import argparse, json, time
 import numpy as np
+from pathlib import Path
 from caliper.activations import collect, load_model, sample_corpus
 from caliper.batched import fit_batch
 from caliper.estimator import fit_cascade, subspace_alignment
@@ -60,6 +61,17 @@ ap.add_argument("--independent-units", action="store_true",
                      "would get alone. --per-neuron-seed alone fixes neither: it seeds by "
                      "position, and the default stopping rule is shared across the batch. "
                      "Opt-in for the same reason: it changes every number.")
+ap.add_argument("--no-save-directions", action="store_true",
+                help="skip writing the fitted directions. By default every unit's direct, "
+                     "cascade, k=2 and per-restart directions go to <out>_dirs/n<id>.npz, "
+                     "because alignments alone cannot be re-scored against a different "
+                     "target (the identifiable part of w, or a functional correlation) - "
+                     "the gap B-14's analysis had to log as a deviation. Saving changes no "
+                     "number.")
+ap.add_argument("--sequence-split", action="store_true",
+                help="shuffle whole sequences, not tokens, before fit_batch takes its first "
+                     "20%% as the held-out set, so held-out tokens never share a sequence "
+                     "with training tokens. Opt-in: it changes every held-out R2.")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -74,7 +86,11 @@ if a.neuron_pool:
 else:
     neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
 p = collect(model, tok, sample_corpus(n_docs=300, seed=0), layer=a.layer,
-            neurons=neurons, max_tokens=a.tokens, seed=0)
+            neurons=neurons, max_tokens=a.tokens, seed=0,
+            shuffle="sequence" if a.sequence_split else "token")
+dirs = None if a.no_save_directions else Path(a.out.replace(".jsonl", "_dirs"))
+if dirs is not None:
+    dirs.mkdir(parents=True, exist_ok=True)
 print(f"  stimulus {p.stimulus.shape}  ({time.time()-t0:.0f}s)", flush=True)
 
 alive = p.response.std(0) > 1e-4
@@ -99,6 +115,16 @@ for start in range(0, len(todo), a.batch):
         ac = abs(subspace_alignment(c.subspace, wu[:, None]))
         use_cascade = c.test_r2 > d1[j].test_r2
         sel = ac if use_cascade else ad
+        if dirs is not None:
+            # Written before the row, so a recorded row always has its directions.
+            np.savez_compressed(
+                dirs / f"n{n}.npz", w=p.weights[:, i].astype(np.float32),
+                direct=d1[j].subspace.astype(np.float32),
+                cascade=c.subspace.astype(np.float32),
+                k2=d2[j].subspace.astype(np.float32),
+                direct_restarts=np.stack([np.asarray(q, dtype=np.float32)
+                                          for q in d1[j].restarts]),
+                direct_r2_restarts=np.asarray(d1[j].r2_restarts, dtype=np.float32))
         ck.record(n, {
             "align_direct": round(ad, 4), "align_cascade": round(ac, 4),
             "align_selected": round(sel, 4), "best_available": round(max(ad, ac), 4),
@@ -138,6 +164,8 @@ summary = {
     "n_restarts": a.restarts, "steps": a.steps, "batch": a.batch,
     "tokens": a.tokens, "per_neuron_seed": bool(a.per_neuron_seed),
     "independent_units": bool(a.independent_units),
+    "sequence_split": bool(a.sequence_split),
+    "directions_dir": str(dirs) if dirs is not None else None,
     "neuron_pool": a.neuron_pool,
     "pass_rate": round(float(passed.mean()), 4),
     "wilson_95_lower": round(lo, 4), "wilson_95_upper": round(hi, 4),

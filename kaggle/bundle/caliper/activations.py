@@ -92,6 +92,7 @@ def collect(
     batch_size=8,
     skip_first=1,
     seed=0,
+    shuffle="token",
 ):
     """Stream text through the model, capturing stimulus/response pairs.
 
@@ -144,7 +145,7 @@ def collect(
     # One sample per sequence would be the strictest control for token
     # autocorrelation; we shuffle here and record that the effective sample size
     # is below the nominal count.
-    order = rng.permutation(len(stimulus))
+    order = _order(len(stimulus), seq_len - skip_first, rng, shuffle)
     return Probe(
         stimulus=stimulus[order],
         response=response[order],
@@ -152,6 +153,23 @@ def collect(
         neurons=neurons,
         layer=layer,
     )
+
+
+def _order(n, block, rng, mode):
+    """Row order for the stimulus/response pairs.
+
+    ``token`` permutes every row, so the first 20% that `fit_batch` holds out shares
+    sequences with the training rows, and neighbouring tokens in a sequence are close in
+    residual space. Held-out R2 is then mildly optimistic. ``sequence`` permutes whole
+    sequences and keeps each one's tokens together, so the held-out set is made of
+    sequences the fit never saw, apart from at most one sequence cut by the boundary.
+    """
+    if mode == "token":
+        return rng.permutation(n)
+    if mode != "sequence":
+        raise ValueError(f"unknown shuffle mode {mode!r}")
+    seq = np.arange(n) // block
+    return np.concatenate([np.flatnonzero(seq == k) for k in rng.permutation(seq.max() + 1)])
 
 
 def _run_batch(model, batch, captured, act_fn, neurons, stim_out, resp_out, skip_first):
