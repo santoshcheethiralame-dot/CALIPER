@@ -281,6 +281,32 @@ currently a guess. **Ask before planning further.**
 
 ---
 
+## P11 · APERTURE merges into CALIPER, and the plan becomes three papers on one claim
+**6 October 2026 · consolidation · net gain**
+
+**Was:** two projects by the same author with overlapping controls: APERTURE on
+self-report confounds (solo since August), CALIPER as the capstone bench. Publication
+collision was flagged in the notebook (§6) and left unresolved.
+
+**Became:** one programme. Its claim, from measurement science, is that agreement and
+precision checks are not trueness checks, tested at three levels.
+- **Paper 1:** the L1 bench (TMLR, late Nov 2026).
+- **Paper 2:** the L3 instrument audit (workshop, around Feb 2027). It absorbs APERTURE's
+  confound thesis, with APERTURE's F1 finished as S-3 and reported beside CALIPER's C20.
+- **Paper 3:** calibration of trust checks at L2 and L3 against exact truth (NeurIPS E&D,
+  around May 2027). APERTURE's PLANTED benchmark becomes its verbalizer arm (S-10).
+
+**Cause.** The overlap was the risk; merging removes it. APERTURE also supplies the one
+archived piece of its framing evidence: F1's reference cell reproduces R11, whose raw
+data is lost.
+
+**Cost.** APERTURE's standalone Preprint 1 is dropped. R7-R12 stay motivation only, since
+their data is gone.
+
+**Plan of record:** `docs/RUN_PLAN_L2_L3.md`.
+
+---
+
 ## What the pattern says
 
 Six of the ten entries were caused by **checking before committing** — a literature pass

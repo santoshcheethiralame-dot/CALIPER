@@ -2775,6 +2775,11 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-06 | **APERTURE MERGED INTO CALIPER; L2 AND L3 PLANNED IN FULL.** The two programmes merge at the paper level. APERTURE keeps its repo and is used as a library for L3, and its runs are registered here under the prefix A-. Plan of record: `docs/RUN_PLAN_L2_L3.md`.
+- **L2 runs:** T-0 harness; T-1 exact-estimand precision control; **T-2 exact readout bench (primary)**; T-3 whitened P1b rescore; T-4 trained-in directions (Gate B); T-5 and T-6 optional.
+- **L3 runs:** Part A, the instrument audit for Paper 2: S-0 apparatus merge, S-1 dead-vector precision/position ablation, S-2 small-model audit, S-3 finishing APERTURE F1 under its frozen prereg, S-4 reanalysis. Part B, exact-truth self-reports for Paper 3: S-5 to S-10 plus S-12 human grading.
+- **Gates:** A on 31 Dec, B in mid-March. All new science ends by March 2027.
+- **Publication collision with APERTURE F8 (§6):** resolved by the merge | `docs/RUN_PLAN_L2_L3.md`, `docs/PIVOTS.md` P11 |
 | 2026-10-05 | **B-14 ANALYSIS SCRIPT WRITTEN AND TESTED ON B-1b, BEFORE B-14 IS OPENED.** `experiments/analyse_b14.py` implements the prereg and Addendum 1. On B-1b it reproduces the primary exactly: restart 0.778, R2 0.942, diff -0.164, p = 1.8e-07, bootstrap 95% [-0.224, -0.106]. With alignments scrambled across units it is null (p = 0.67). The ground-truth signal scores AUC 1.0, and the label-shuffle permutation test gives p < 0.001. **Deviation from Addendum 1 items 1-2:** the identifiable-direction and functional labels need the fitted directions, and `e01_gate.py` archives only alignments. The script reports this instead of skipping it, and substitutes the per-unit 1/gamma cosine ceiling with a sensitivity rerun (B-1b: no unit limited, median ceiling 0.99976). Future runs should save directions. **Development findings on B-1b (already unblinded, so reportable):** (a) the nuisance baselines alone (active fraction, z_mean, kurtosis, GELU first-order coefficient) reach cross-validated AUC 0.844, rising to **0.907 with held-out R2** and to **0.841 with restart agreement**. Restart agreement adds nothing beyond unit difficulty, and held-out R2 does. (b) 40 of B-1b's 52 failures have held-out R2 <= 0.99 (under-fitted) and 12 are wrong-basin. Most of the old failure class is not stable-and-wrong, which makes B-14 the decisive run. Tests: `tests/test_analyse_b14.py` (3) | `experiments/analyse_b14.py` |
 | 2026-10-05 | **B-14 ADDENDUM 1 FILED BEFORE UNBLINDING; citation ledger consolidated; two construct-validity findings.** (1) The addendum adds secondary labels and analyses: the identifiable-direction label, functional correlation, threshold sweep, PR-AUC, nuisance baselines with incremental AUC, calibration, and permuted-label and cheating-signal controls. The script is developed on B-1b, then run once on B-14. (2) **LayerNorm-null direction:** s . (1/gamma) is constant, so w's component along 1/gamma is not identifiable. In GPT-2 small the median share of |w|^2 along it is about 5e-4. Units whose share limits cosine below 0.95: L2 4, L6 0, L10 1 (of 3072). B-1b is unaffected. B-7 L2 units 1825 (ceiling 0.917, scored 0.814) and 666 (ceiling 0.894, scored 0.872) were counted as failures; rescoring is pending. (3) **Held-out tokens share sequences with training tokens:** `collect` shuffles rows before `fit_batch` takes its first 20% as test. Sequence-level splitting is a P1 fix for future runs. (4) `docs/CITATIONS.md` grows from 56 to 459 citation rows, with a new MEM level (170 rows) and a verify-before-submission list. (5) Also noted: `activations.py` hard-codes GELU and `_mlp_in` returns `up_proj`, so a SwiGLU run needs the gate+up span and the right activation before B-16 | `docs/preregistration-b14-addendum-1.md`, `docs/CITATIONS.md` |
 | 2026-10-05 | **B-14 IS CHAINED BEHIND THE QUEUE BY A ONE-SHOT TASK.** Task Scheduler task `caliper-after-b12` (registered 08:50, started 08:51) runs `experiments/after_b12.sh`. The script waits until no process is running `run_queue`, `b12_batch_invariance` or `e01_gate`. If the control arm has 50 rows, it reruns `b12_batch_invariance.py` so the report carries the per-arm verdict. It then starts B-14 to `results/b14_primary_gpt2_indep.jsonl`, with progress in `results/after_b12.log`. Unlike the queue task, it is allowed to start and keep running on battery. B-14 is resumable, so an interruption costs only the unit in flight. Delete the task once B-14 is done: `schtasks /delete /tn caliper-after-b12 /f` | `experiments/after_b12.sh`, `experiments/after_b12.cmd` |
@@ -3251,6 +3256,29 @@ exactly the "you kept running controls until one worked" reading that the
 pre-registration exists to prevent.
 
 ---
+
+### 7.9 Levels 2 and 3, with APERTURE merged in: the plan of record from 6 Oct 2026
+
+The full plan lives in `docs/RUN_PLAN_L2_L3.md`, not here. That file holds the shared design
+for every level, the APERTURE inventory, each run's reference, dials, checks, criterion,
+failure branch and cost, the calendar, the gates and ownership. Runs get their own §3 rows
+and §4 entries here as they land, as for the B-series.
+
+| ID | Run | Paper | Compute | Gate / prereg |
+|---|---|---|---|---|
+| T-0 | Trait harness | 3 | CPU | gates T-2, T-4 |
+| T-1 | Exact-estimand precision control | 3 | CPU | prereg before run |
+| **T-2** | **Exact readout bench (primary L2)** | 3 | CPU | pilot -> prereg; **Gate A, 31 Dec** |
+| T-3 | Whitened P1b rescore | 3 | Kaggle ~2 h | optional |
+| T-4 | Trained-in trait directions | 3 | Kaggle 10-20 h | **Gate B, mid-March** |
+| S-0 | Apparatus merge + steering gate + impact-matched random | 2 | eng. | gates all S runs |
+| **S-1** | Dead-vector precision x position ablation | 2 | Kaggle 6-10 h | prereg before run |
+| **S-2** | Small-model instrument audit | 2 | Kaggle ~15 h | prereg before run |
+| **S-3** | A-F1, finish APERTURE confound hardening | 2 | Kaggle ~10 h | frozen prereg (mirror) |
+| S-4 | Study 3 reanalysis (TOST, exact CIs, dose-response) | 2 | CPU | offline |
+| S-5 to S-9 | Exact-truth self-report tasks | 3 | Kaggle ~13 h | prereg per task |
+| S-10 | PLANTED verbalizer calibration | 3 | Kaggle ~8 h | needs `readouts.py` |
+| S-12 | Human grading + kappa | 2, 3 | labour | gates judge-scored numbers |
 
 ### 7.8 The bench run programme (B-series) — the plan of record, Sep–Oct 2026
 
