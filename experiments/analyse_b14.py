@@ -33,6 +33,8 @@ from b1_signal_calibration import PASS, benjamini_hochberg, delong, roc, wilson 
 SIGNALS = {
     "held-out R2": lambda r: -r["r2_k1"],
     "restart agreement": lambda r: -r["stability"],
+    # Uses the true direction (|align_direct - align_cascade|), so it is not a check a
+    # practitioner could compute. Reported, labelled as such; see route_agreement.
     "disagreement": lambda r: r["disagreement"],
     "restart R2 spread": lambda r: r["r2_spread"],
 }
@@ -225,6 +227,12 @@ def main():
     adj = benjamini_hochberg([sec_p[k] for k in keys])
     rep["secondary_bh"] = {k: {"p": sec_p[k], "q": q} for k, q in zip(keys, adj)}
     rep["pr_auc_prevalence_baseline"] = n_fail / n
+    rep["disagreement_note"] = ("'disagreement' is |align_direct - align_cascade| and uses the "
+                                "true direction; it is not ground-truth-free")
+    if all("route_agreement" in r for r in R):
+        ra = np.array([-r["route_agreement"] for r in R])
+        rep["signals"]["route agreement (ground-truth-free)"] = {
+            "roc_auc": roc(list(ra), list(fail))[1], "pr_auc": avg_precision(ra, fail)}
 
     # ---- addendum 3: threshold sweep (descriptive)
     rep["threshold_sweep"] = {}

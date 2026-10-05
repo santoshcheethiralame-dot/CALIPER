@@ -131,7 +131,12 @@ for start in range(0, len(todo), a.batch):
             "picked": "cascade" if use_cascade else "direct",
             "r2_k1": round(float(max(d1[j].test_r2, c.test_r2)), 6),
             "k2_gain": round(float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
+            # NOT ground-truth-free: both terms are alignments to w. Kept so every
+            # earlier run stays comparable, but it must not be reported as a check a
+            # practitioner could compute. route_agreement is the ground-truth-free
+            # version: how far the two routes' own directions agree with each other.
             "disagreement": round(abs(ad - ac), 4),
+            "route_agreement": round(abs(subspace_alignment(d1[j].subspace, c.subspace)), 4),
             # B-1: the field's default reliability check. The fit has always
             # computed it; nothing wrote it down. Only the direct route has a
             # restart lottery to agree about - fit_cascade runs a grid search and
