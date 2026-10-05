@@ -219,24 +219,35 @@ total_flips = sum(c["n_flips"] for c in report["comparisons"].values())
 report["n_flips_total"] = total_flips
 
 floor = report.get("noise_floor", {}).get("n_flips")
+# Each small-batch arm is one comparison against the reference, exactly as the control is
+# one comparison against the reference, so each is judged against the floor on its own.
+# The first version tested the SUM over arms against a single comparison's floor, which
+# fires FAIL whenever two arms each sit at the floor. The sum is still reported.
+worst = max((c["n_flips"] for c in report["comparisons"].values()), default=0)
+report["n_flips_worst_arm"] = worst
+if control is not None:
+    for c in report["comparisons"].values():
+        c["within_floor"] = c["n_flips"] <= floor
 if control is None:
     report["VERDICT"] = (
         "PASS - zero flips, batch size no longer changes the answer"
         if total_flips == 0 else
         "FAIL - flips remain with per-neuron seeding on, so the residual is reduction "
         "order (no control arm run, so this is the strict zero-flip criterion)")
-elif total_flips <= floor:
+elif worst <= floor:
     report["VERDICT"] = (
-        f"PASS - {total_flips} batch-size flips, within the {floor}-flip noise floor "
-        f"measured by changing restart count alone on the same units")
+        f"PASS - every batch-size arm flips at most {worst} units, within the {floor}-flip "
+        f"noise floor measured by changing restart count alone on the same units")
 else:
     report["VERDICT"] = (
-        f"FAIL - {total_flips} batch-size flips exceed the {floor}-flip floor from "
-        f"restart changes alone, so the residual is reduction order in the batched GEMM")
+        f"FAIL - the worst batch-size arm flips {worst} units, beyond the {floor}-flip floor "
+        f"from restart changes alone. Before reading this as reduction order: arms run "
+        f"without --independent-units still share early stopping across the batch and seed "
+        f"by position, so batch size changes training length and initialisation too")
 
 print(f"\n  VERDICT: {report['VERDICT']}")
 suffix = f" vs noise floor {floor}" if floor is not None else ", strict zero-flip criterion"
-print(f"  (batch-size flips {total_flips}{suffix})")
+print(f"  (worst arm {worst}, all arms {total_flips}{suffix})")
 
 json.dump(report, open(a.out, "w"), indent=2)
 print(f"  wrote {a.out}")

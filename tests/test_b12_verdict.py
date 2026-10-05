@@ -119,3 +119,26 @@ def test_pass_bar_matches_the_gate(tmp_path):
     from b1_signal_calibration import PASS as GATE_PASS
 
     assert GATE_PASS == PASS
+
+
+def test_each_arm_is_judged_against_the_floor_on_its_own(tmp_path):
+    """Two small-batch arms that each flip exactly as often as the control are a PASS.
+
+    The first version summed flips over every arm and compared the sum with ONE control
+    comparison, so two arms sitting at the floor (1 + 1 = 2 > 1) read as FAIL. B-12 runs
+    two small-batch arms, so that is the case it would actually have hit.
+    """
+    arm(tmp_path, "b12_fix_b004.jsonl", all_pass())
+    arm(tmp_path, "b12_fix_b002.jsonl", with_fails(0))
+    arm(tmp_path, "b12_fix_b001.jsonl", with_fails(1))
+    arm(tmp_path, "b12_ctl_b004_r5.jsonl", with_fails(2))
+    out = tmp_path / "report.json"
+    cmd = [sys.executable, str(SCRIPT), "--neurons", str(UNITS), "--batches", "4", "2", "1",
+           "--control-restarts", "5", "--results-dir", str(tmp_path), "--out", str(out)]
+    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=300)
+    assert proc.returncode == 0, proc.stderr
+    rep = json.loads(out.read_text())
+    assert rep["n_flips_total"] == 2 and rep["noise_floor"]["n_flips"] == 1
+    assert rep["n_flips_worst_arm"] == 1
+    assert all(c["within_floor"] for c in rep["comparisons"].values())
+    assert rep["VERDICT"].startswith("PASS"), rep["VERDICT"]

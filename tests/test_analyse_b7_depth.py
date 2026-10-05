@@ -42,47 +42,46 @@ def analysis() -> dict[str, dict[int, dict]]:
     return {layer: load(path) for layer, path in LAYER_FILES.items()}
 
 
-def test_layer_legs_are_paired(analysis):
-    """The whole analysis rests on this. Same units at every layer, not just same n."""
+def test_layer_legs_share_indices_not_neurons(analysis):
+    """Same 50 indices at every layer - which is NOT the same 50 neurons.
+
+    Neuron i at layer 2 and neuron i at layer 6 have different weights and nothing in
+    common but a number. The 4 Oct write-up read the shared indices as a paired design;
+    that reading was withdrawn on 5 Oct. This test keeps the index fact pinned so nobody
+    rediscovers it as a pairing.
+    """
     keysets = [set(rows) for rows in analysis.values()]
     assert len(keysets) == 3
-    assert keysets[0] == keysets[1] == keysets[2], (
-        "B-7 legs are no longer paired - per-unit overlap is meaningless and the "
-        "depth reading falls back to an unpaired comparison"
-    )
+    assert keysets[0] == keysets[1] == keysets[2]
     assert len(keysets[0]) == 50
 
 
-def test_no_unit_fails_at_every_depth(analysis):
-    """The load-bearing finding: the failure sets are near-disjoint, not nested."""
-    def passed(row: dict) -> bool:
-        return row["align_selected"] > 0.95 and row["k2_gain"] < 0.01
-
-    always_fail = [
-        u for u in analysis["02"]
-        if not any(passed(analysis[layer][u]) for layer in analysis)
-    ]
-    assert always_fail == [], (
-        f"{len(always_fail)} units fail at all three layers - a shared hard core "
-        "contradicts the (unit, layer) reading and needs the write-up revisited"
-    )
+def _passed(row: dict) -> bool:
+    return row["align_selected"] > 0.95
 
 
-def test_depth_legs_have_no_faithful_subset_ordering(analysis):
-    """Depth is not monotone per unit. If this starts passing, the docstring's
-    DEPTH-BROKEN reading is stale."""
-    def passed(row: dict) -> bool:
-        return row["align_selected"] > 0.95 and row["k2_gain"] < 0.01
+def test_pattern_counts_match_independent_layers(analysis):
+    """The cross-layer pass/fail patterns are what three independent draws produce.
+
+    This is the check that withdrew the paired reading: "no unit fails at every depth"
+    and "depth changes which units fail" both follow from independence alone. If a
+    pattern ever lands far from its independence expectation, there IS shared structure
+    across index-matched units and that would need explaining.
+    """
+    from itertools import product
 
     units = sorted(analysis["02"])
-    broke = [u for u in units if passed(analysis["02"][u]) and not passed(analysis["10"][u])]
-    assert broke, (
-        "no unit regresses from L2 to L10 any more; the README claim that depth can break "
-        "a unit it handled at L2 would be stale"
-    )
+    rate = {l: sum(_passed(analysis[l][u]) for u in units) / len(units) for l in analysis}
+    for pat in product([False, True], repeat=3):
+        obs = sum(tuple(_passed(analysis[l][u]) for l in ("02", "06", "10")) == pat
+                  for u in units)
+        exp = len(units)
+        for l, v in zip(("02", "06", "10"), pat):
+            exp *= rate[l] if v else 1 - rate[l]
+        assert abs(obs - exp) <= 3, f"pattern {pat}: observed {obs}, expected {exp:.1f}"
 
 
-def test_analysis_script_runs_and_reports_paired_structure():
+def test_analysis_script_runs_and_reports_the_independence_null():
     if not all(p.exists() for p in LAYER_FILES.values()):
         pytest.skip("B-7 layer outputs not present")
     proc = subprocess.run(
@@ -90,6 +89,5 @@ def test_analysis_script_runs_and_reports_paired_structure():
     )
     assert proc.returncode == 0, proc.stderr
     out = proc.stdout
-    assert "shared core" in out
+    assert "expected if independent" in out
     assert "restart stability at fixed layer" in out
-    assert "fail at all three layers (shared core) : 0/" in out

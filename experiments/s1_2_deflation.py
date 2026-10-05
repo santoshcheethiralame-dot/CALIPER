@@ -188,14 +188,24 @@ for coupling in A.couplings:
                   and x.get("coupling", BASELINE_COUPLING) == coupling), None)
         if r:
             print(f"    {name:<10} {r['median']:.4f}   steps {r['step_medians']}")
-    best = max((x for x in rows if x["arm"] != "joint" and x["K"] == 2 and x["N"] == 8000
-                and x.get("coupling", BASELINE_COUPLING) == coupling),
-               key=lambda x: x["median"], default=None)
+    # The criterion is judged on the cascade arm, as filed in
+    # docs/preregistration-s1-2-deflation.md. The best-of-arms figure is printed
+    # beside it and is exploratory.
+    best = next((x for x in rows if x["arm"] == "cascade" and x["K"] == 2
+                 and x["N"] == 8000
+                 and x.get("coupling", BASELINE_COUPLING) == coupling), None)
+    any_best = max((x for x in rows if x["arm"] != "joint" and x["K"] == 2
+                    and x["N"] == 8000
+                    and x.get("coupling", BASELINE_COUPLING) == coupling),
+                   key=lambda x: x["median"], default=None)
+    if any_best:
+        print(f"  best deflation arm (exploratory): {any_best['arm']} at "
+              f"{any_best['median']:.4f}")
     joint = next((x for x in rows if x["arm"] == "joint" and x["K"] == 2 and x["N"] == 8000
                   and x.get("coupling", BASELINE_COUPLING) == coupling), None)
     if best and joint:
         b, j = best["median"], joint["median"]
-        print(f"\n  best deflation arm: {best['arm']} at {b:.4f} vs joint {j:.4f} "
+        print(f"\n  primary (cascade) arm: {b:.4f} vs joint {j:.4f} "
               f"({b-j:+.4f})")
         resp = next((x for x in rows if x["arm"] == "resp_only" and x["K"] == 2
                      and x["N"] == 8000 and x.get("coupling", BASELINE_COUPLING) == coupling),

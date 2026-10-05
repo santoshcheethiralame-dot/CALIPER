@@ -282,8 +282,8 @@ def fit_deflate(stimulus, response, k=2, project_stimulus=True, method="cascade"
     removing it from the stimulus removes a factor the response needs. So the rediscovery
     argument is a hypothesis that failed its own check, the projection costs accuracy, and
     the default is kept only because the flag is what S1-2 varies. S1-2 reports both arms
-    per cell; the criterion is judged on the better one and the interpretation must say
-    which.
+    per cell; the criterion is judged on the cascade arm, as filed in
+    docs/preregistration-s1-2-deflation.md, and the better arm is reported as exploratory.
 
     `method` picks the rank-1 route: ``cascade`` is the more robust fit and the default,
     reported alongside ``plain`` because it costs a fraction as much and isolates how much

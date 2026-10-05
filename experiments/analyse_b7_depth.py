@@ -1,5 +1,15 @@
 """Is the depth effect in B-7 about layers, or about specific units?
 
+CORRECTED 5 Oct 2026. The pairing this docstring describes does not exist: the legs share
+neuron INDICES, but neuron i at layer 2 and neuron i at layer 6 are different neurons, so
+nothing is paired. The pattern table now prints the count each pattern would have if the
+three layers were independent, and the observed counts sit on it (e.g. fail-pass-pass 20
+observed vs 19.4 expected under the alignment-only rule). The SHARED CORE / DEPTH-BROKEN
+question below therefore has no answer in this data. The restart-stability section at the
+end IS a valid pairing: same layer, same model, same neurons.
+
+Original text follows.
+
 B-7 swept GPT-2 layers 2, 6 and 10 over the SAME 50 units - a paired design, because the
 unit draw depends only on the seed and d_model, both of which are fixed across layers. The
 three pass rates (0.48 / 0.86 / 0.90) are therefore comparable within unit, not just
@@ -67,15 +77,19 @@ def depth_structure(data: dict[str, dict[int, dict]], units: list[int]) -> None:
     n = len(units)
     flags = {layer: {u: passed(data[layer][u]) for u in units} for layer in LAYERS}
 
-    print(f"\npaired units: {n} (identical draw across L2/L6/L10)\n")
-    print(f"{'pattern':<16}{'count':>6}   L2 L6 L10")
+    print(f"\nindex-matched units: {n} (same indices across L2/L6/L10 - different neurons)\n")
+    rate = {layer: sum(flags[layer].values()) / n for layer in LAYERS}
+    print(f"{'pattern':<16}{'count':>6}  {'expected if independent':>24}   L2 L6 L10")
     counts: dict[tuple[bool, bool, bool], int] = {}
     for u in units:
         pat = tuple(flags[layer][u] for layer in LAYERS)
         counts[pat] = counts.get(pat, 0) + 1
     for pat in sorted(counts, key=lambda p: -counts[p]):
         cells = " ".join("  P " if p else "  . " for p in pat)
-        print(f"{str(pat):<16}{counts[pat]:>6}   {cells}")
+        exp = n
+        for layer, p in zip(LAYERS, pat):
+            exp *= rate[layer] if p else 1 - rate[layer]
+        print(f"{str(pat):<16}{counts[pat]:>6}  {exp:>24.1f}   {cells}")
 
     always_fail = [u for u in units if not any(flags[layer][u] for layer in LAYERS)]
     l2_fail = [u for u in units if not flags["02"][u]]
