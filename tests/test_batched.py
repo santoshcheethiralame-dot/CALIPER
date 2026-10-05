@@ -105,3 +105,67 @@ def test_batching_is_faster_per_neuron():
     speedup = single_s / batched_s
     print(f"\n  batched {batched_s:.1f}s vs single {single_s:.1f}s -> {speedup:.1f}x")
     assert speedup > 1.5, f"only {speedup:.2f}x speedup"
+
+
+def test_position_seeding_is_not_unit_seeding():
+    """`per_neuron_seed` keys the stream on POSITION in the batch, not on the unit.
+
+    So the same neuron fitted in different batch layouts starts from different places
+    unless its id is passed. This is what left B-12's arms differing at most positions
+    even with seeding "fixed".
+    """
+    d, k = 128, 1
+    first = _BatchedBottleneck(4, d, k, seed=0, per_neuron_seed=True)   # unit 37 at pos 3
+    alone = _BatchedBottleneck(1, d, k, seed=0, per_neuron_seed=True)   # unit 37 at pos 0
+    assert not torch.equal(first.v[3], alone.v[0])
+    ids = [10, 20, 30, 37]
+    first = _BatchedBottleneck(4, d, k, seed=0, unit_ids=ids)
+    alone = _BatchedBottleneck(1, d, k, seed=0, unit_ids=[37])
+    for name in ("v", "w1", "w2", "w3"):
+        assert torch.equal(getattr(first, name)[3], getattr(alone, name)[0]), name
+
+
+def test_independent_units_fit_alone_equals_fit_in_batch():
+    """With unit-id seeding and per-unit stopping, a unit's fit must not depend on which
+    units share its batch, or in what order. This is the invariance B-12 tests at scale;
+    here it is pinned on a case small enough to run in the suite.
+    """
+    X, Y, _ = _setup(5, seed=4)
+    ids = np.array([101, 202, 303, 404, 505])
+    kw = dict(k=1, n_restarts=2, steps=600, seed=0, patience=100,
+              per_neuron_stop=True)
+    perm = np.array([3, 0, 4, 1, 2])
+    batch = fit_batch(X, Y[:, perm], unit_ids=ids[perm], **kw)
+    for j, i in enumerate(perm):
+        alone = fit_batch(X, Y[:, [i]], unit_ids=ids[[i]], **kw)[0]
+        agree = abs(subspace_alignment(alone.subspace, batch[j].subspace))
+        assert agree > 0.9999, f"unit {ids[i]}: alone vs batch agreement {agree:.6f}"
+        assert abs(alone.test_r2 - batch[j].test_r2) < 1e-4
+        assert len(alone.r2_restarts) == len(batch[j].r2_restarts)
+
+
+def test_shared_stopping_runs_a_unit_longer_than_alone(monkeypatch):
+    """The defect, pinned: under the default rule a batch keeps every unit training until
+    the LAST one stops improving. Counted in optimiser steps, so the test does not depend
+    on whether the extra steps happen to change the answer.
+    """
+    X, Y, _ = _setup(6, seed=5)
+    calls = {"n": 0}
+    real_step = torch.optim.Adam.step
+
+    def counted(self, *args, **kwargs):
+        calls["n"] += 1
+        return real_step(self, *args, **kwargs)
+
+    monkeypatch.setattr(torch.optim.Adam, "step", counted)
+    kw = dict(k=1, n_restarts=1, steps=3000, seed=0, patience=100)
+
+    def steps(cols, **extra):
+        calls["n"] = 0
+        fit_batch(X, Y[:, cols], **kw, **extra)
+        return calls["n"]
+
+    batched = steps(list(range(6)))
+    alone = [steps([i]) for i in range(6)]
+    assert batched >= max(alone)
+    assert min(alone) < batched, "no unit stopped earlier alone; the defect did not show"

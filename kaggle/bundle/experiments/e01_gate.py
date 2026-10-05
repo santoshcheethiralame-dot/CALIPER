@@ -54,6 +54,12 @@ ap.add_argument("--per-neuron-seed", action="store_true",
                      "one stacked draw, so a unit's result stops depending on how many "
                      "units share its batch. Opt-in: it changes every number, so runs "
                      "that must stay poolable with B-1/B-1b/B-2b leave it off.")
+ap.add_argument("--independent-units", action="store_true",
+                help="seed each unit from its neuron id (not its position in the batch) "
+                     "and give it its own early-stopping counter, so its fit is the one it "
+                     "would get alone. --per-neuron-seed alone fixes neither: it seeds by "
+                     "position, and the default stopping rule is shared across the batch. "
+                     "Opt-in for the same reason: it changes every number.")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -79,10 +85,11 @@ todo = [i for i in range(len(p.neurons)) if alive[i] and not ck.done(int(p.neuro
 for start in range(0, len(todo), a.batch):
     idx = todo[start:start + a.batch]
     Y = p.response[:, idx]
+    indep = dict(unit_ids=p.neurons[idx], per_neuron_stop=True) if a.independent_units else {}
     d1 = fit_batch(p.stimulus, Y, k=1, n_restarts=a.restarts, steps=a.steps,
-                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed)
+                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
     d2 = fit_batch(p.stimulus, Y, k=2, n_restarts=a.restarts, steps=a.steps,
-                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed)
+                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
     for j, i in enumerate(idx):
         n = int(p.neurons[i])
         wu = p.weights[:, i] / np.linalg.norm(p.weights[:, i])
@@ -130,6 +137,7 @@ summary = {
     "model": a.model, "layer": a.layer, "neurons": a.neurons,
     "n_restarts": a.restarts, "steps": a.steps, "batch": a.batch,
     "tokens": a.tokens, "per_neuron_seed": bool(a.per_neuron_seed),
+    "independent_units": bool(a.independent_units),
     "neuron_pool": a.neuron_pool,
     "pass_rate": round(float(passed.mean()), 4),
     "wilson_95_lower": round(lo, 4), "wilson_95_upper": round(hi, 4),
