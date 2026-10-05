@@ -782,6 +782,25 @@ Cautions carried from the pass. Lindsey and Macar both read concept vectors at t
 | [2607.04277](https://arxiv.org/pdf/2607.04277) | Self-Reference in LLMs: The Introspection Threshold (full title truncated in the note) | MEM | Title only |
 | [2602.00333](https://arxiv.org/abs/2602.00333) | Efficient and accurate steering via attention-guided feature learning (title truncated in the note) | MEM | A snippet credits a 2026 steering paper with 49.3% of concepts steerable when extraction is fixed at the template token `end_header_id` vs 78.2% with dynamic selection; this abstract says only "nearly doubling". Numbers and attribution unverified. Would support the template-tail dead-vector reading |
 
+## 23. Works reached through APERTURE's notes (added 6 Oct 2026)
+
+Cited in APERTURE's masterplan and lab notebook, and not elsewhere in this ledger. All are
+MEM: taken from APERTURE's text, not checked here. Pearson-Vogel (2602.20031), the Assistant
+Axis (2601.10387), 2511.08579, 2509.13316 and 2605.25052 already have rows.
+
+| id | title | level | why it matters |
+|---|---|---|---|
+| [2603.25112](https://arxiv.org/abs/2603.25112) | Signal-detection theory applied to LLM metacognition; title not recorded | MEM | Precedent for meta-d' / M-ratio in Part B. Adoption, not novelty |
+| [2606.23583](https://arxiv.org/abs/2606.23583) | Evaluation-awareness framing confound; title not recorded | MEM | The same surface-framing confound in a second literature (APERTURE A5.6). Supports Paper 2's framing section beyond introspection |
+| [2604.12373](https://arxiv.org/abs/2604.12373) | Matched-disagreement stratification; title not recorded | MEM | Stratification for the gamma estimator (APERTURE A5.5) |
+| [2310.06514](https://arxiv.org/abs/2310.06514) | AttributionLab | MEM | Ground-truth attribution benchmark; crowded-genre context for PLANTED (S-10) |
+| [2606.02378](https://arxiv.org/abs/2606.02378) | Introspection over training checkpoints; title not recorded | MEM | Why APERTURE dropped its developmental arm. Introspection reported emerging at the DPO stage |
+| [2509.05291](https://arxiv.org/abs/2509.05291) | Introspection over training; title not recorded | MEM | Same |
+| [2603.20276](https://arxiv.org/abs/2603.20276) | INTROSPECT-Bench (CMU, ICLR 2026 workshop) | MEM | Name collision that renamed APERTURE's benchmark to PLANTED. Nearest benchmark to S-10; position against it |
+| [2604.19809](https://arxiv.org/abs/2604.19809) | MIRROR, metacognitive Level 0-3 hierarchy | MEM | Name collision (APERTURE's old name); its level hierarchy overlaps a "levels" framing, so cite if the paper uses levels language |
+| [2606.04915](https://arxiv.org/abs/2606.04915) | Yu & Zhou (2026). Caliper: Probing Lexical Anchors versus Causal Structure in LLMs | ABS | **Name collision with this project.** Abstract checked 6 Oct. Do not name the released bench CALIPER |
+| — | Anthropic, Natural Language Autoencoders (NLA), transformer-circuits.pub 2026 | MEM | States it "cannot validate NLA measurements against ground truth"; found unverbalized evaluation awareness. The opening S-10 targets. Identifier not recorded |
+
 ---
 
 ## Maintenance rule

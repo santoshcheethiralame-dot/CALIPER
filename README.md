@@ -33,6 +33,12 @@ supplies it. That is the whole idea.
 | [`docs/PROPOSAL_III_ONE_PAGER.md`](docs/PROPOSAL_III_ONE_PAGER.md) | the plain-language version |
 | [`docs/PROPOSAL_III_STATUS.md`](docs/PROPOSAL_III_STATUS.md) | the same with the numbers |
 | [`docs/LAB_NOTEBOOK.md`](docs/LAB_NOTEBOOK.md) §7.8 | the run programme of record |
+| [`docs/RUN_PLAN_L2_L3.md`](docs/RUN_PLAN_L2_L3.md) | the trait-level and self-level runs, with APERTURE merged in |
+| [`docs/APERTURE_INHERITANCE.md`](docs/APERTURE_INHERITANCE.md) | what the merged APERTURE programme contributes, run by run |
+
+**APERTURE merged in (6 October 2026).** The sibling programme on self-report confounds
+(`../mirror`) now feeds the self level, and its runs are registered in the lab notebook as
+A-R1 to A-R12 and A-F1. Only APERTURE's archived F1 data is reported as measurement.
 
 **Scope, stated up front rather than discovered by a reader.** The ground truth holds for
 an MLP unit reading its own layer. It does not extend to residual-stream features, sparse

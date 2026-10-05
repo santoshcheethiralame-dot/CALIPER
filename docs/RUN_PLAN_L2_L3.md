@@ -271,6 +271,17 @@ warning, but a narrower one.
 - S-13 is a new optional run bridging L2 and L3: a dose-response sweep along the
   Assistant Axis.
 
+**Additions from APERTURE's lab notebook (6 Oct):**
+- S-0 adopts APERTURE's KL meter (next-token KL against the clean run) for two jobs:
+  - building impact-matched random vectors, by matching KL instead of norm;
+  - recording per-trial KL in every S run, so identification can be reported within
+    coherence bands (A-G1 found identification mostly at derailment).
+- S-2 also counts:
+  - off-list and unparseable answers per framing (A-R12, A-F1 c04);
+  - concept leakage into "NO" replies (A-R5's "caldera").
+- Every S config records library versions, because 8-bit greedy decoding drifted on 5 of
+  192 answers across versions (A-F1 vs A-R11).
+
 **S-3 · A-F1, finish APERTURE's confound hardening (Kaggle, about 10 GPU-hours, free tier).**
 The 13 remaining files run under the frozen prereg (`mirror/docs/prereg/2026-07-30-f1-confound-hardening.md`),
 scored once with `aperture/f1_score.py`. No interim scoring of the 11 files already in.

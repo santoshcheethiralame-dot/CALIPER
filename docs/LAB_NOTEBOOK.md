@@ -279,6 +279,55 @@ concept directions APERTURE already injects, which are documented to shift
 behaviour. That dependency is on tested code held locally, so it carries no
 artifact risk.
 
+> **Follow-up, 6 Oct 2026: APERTURE's full notebook re-read after the merge (PIVOTS P11).**
+> This table was written on 6 Sep from memory of APERTURE's state. Corrections and additions
+> follow; the rows above are left as they were.
+>
+> **Every APERTURE run, now prefixed A- for CALIPER's registry.** "Data" means raw data on
+> disk under `projects/mirror/runs/`, checked today.
+>
+> | ID | Date | Model, setup | Result as logged | Data |
+> |---|---|---|---|---|
+> | A-R1 | 07-13 | pythia-70m CPU, L3, alpha 0/4/8 | Pipeline smoke; KL exactly 0 at alpha 0 | **on disk** (`dev.jsonl`) |
+> | A-R2 | 07-13 | Gemma-2-2B-it, L13, alpha 0/4/8, 8 concepts | Every vector steers to its concept (incl. multilingual: fear -> miedo/peur); alpha 4/8 derails (KL 24-29) | lost |
+> | A-R3 / G1 | 07-13 | Gemma-2-2B, L13, alpha 0-3, 4 concepts | Coherent window alpha ~0.5-1 (KL 0.01-0.25). **Identification appears almost only once the model derails**: 2 of 24 cells show the concept in the coherent band (KL < 0.5); every other "exact" sits at KL >= 0.5, mostly > 5. Disclaimer ("As an AI...") in 8/8 responses at alpha <= 0.5, 0/16 at alpha >= 1 | **on disk** (`gemma_sweep.graded.jsonl`) |
+> | A-R4 | 07-13 | Gemma-2-2B, L13, detection prompt | 0/4 false alarms at alpha 0; coherent volcano/telescope injections answered NO; the only YES is joy (affect confound) | lost |
+> | A-R5 | 07-13 | Gemma-2-2B, L5-21, alpha 1/2 | Depth-robust NO. Early layers barely perturb (KL ~0). L21 volcano at KL 0.01 answers "NO ... caldera": the concept leaks into the reply that denies it | lost |
+> | A-R6 | 07-13 | Gemma-2-9B 8-bit, L21 | Same at 9B: NO on 5/6 coherent cells; joy affect confound again | lost |
+> | A-R7 | 07-14 | Gemma-2-2B 8-bit, inject L13, probe L20 | Probe-Report Gap 0.83: probe 1.00, shuffled control 0.00, report 0.17 (10-sample test set) | lost |
+> | A-R8 | 07-14 | same, patch L20 | Patching self +6.96 nats [5.34, 8.56], control +0.81 [-0.19, 1.80], paired +6.15 [4.50, 7.89] | lost |
+> | A-R9 | 07-15 | Gemma-2-2B, no injection, 16 passages | Injection-derived directions decode natural states 11/16 = 0.688 [0.438, 0.875] vs 0.062 chance, **only after mean-centring** (raw dot product: 14/16 predicted "dolphin", exactly chance) | lost |
+> | A-R10 | 07-15 | Gemma-2-2B, forced choice, 16 x 6 orders | Hit 0.302 vs 0.062 chance; gamma +1.988 [1.476, 2.478]; beta log-frequency negative (do not report) | lost |
+> | A-R11 | 07-15 | + neutral framing | Neutral hit 0.433, gamma +2.574 [2.163, 2.999] > introspective +1.988. Difference -0.586 [-1.148, -0.007] | lost; **reference cell reproduced by A-F1 c00** |
+> | A-R12 | 07-22 | + informative framing, pre-registered | gamma neutral +2.574 > introspective +1.988 > informative +1.645 [1.117, 2.152]; informative 15/96 unparseable. Primary P3 falsified; Pearson-Vogel not replicated at 2B | lost |
+> | **A-F1** | 08-18 to 08-23 | Gemma-2-2B 8-bit, 12 OFAT configs x 2 framings, frozen prereg | 11/24 files in, hash-verified. **P4 holds:** R11's gammas fall inside c00's CIs ([2.19, 3.07], [1.31, 2.25]). c04 introspective is 41.7% unparseable (20/40 "thought", 13 empty). Hit rates differ from R11 by 3 and 2 of 96 under greedy decoding (8-bit kernel drift across library versions) | **on disk** (`runs/F1/`); the remaining 13 files are S-3 |
+>
+> **Corrections to the table above.** R11 is no longer only "load-bearing and lost". F1's
+> reference cell reproduces it inside its CIs and is archived, so Paper 2 cites A-F1 c00 as
+> the measurement and R11 as its origin. The R7-R12 numbers in the table above were checked
+> against APERTURE's notebook today and match.
+>
+> **Interpretations that bear on CALIPER** (detail in `docs/APERTURE_INHERITANCE.md` §5).
+> 1. **The framing control now spans two scales and two readouts.** At 2B with forced-choice
+>    identification, neutral framing beats introspective (A-R11, A-F1 c00). At 27B with
+>    first-token detection, neutral and introspective are indistinguishable once anything is
+>    injected (C20). Neither scale shows a positive introspective-framing effect. This is
+>    Paper 2's framing result.
+> 2. **"Identification" is mostly what a derailing model emits** (A-G1), the same pattern as
+>    our generated-text readout swing (C17) and the concept window closing by 56% of the norm
+>    (C23/C24). Per-trial KL is the variable that separates the two, so S-2 records it and
+>    reports identification by KL band.
+> 3. **Prompt vocabulary leaks into the answer.** The informative framing lost 15/96 answers,
+>    and 20/40 of F1 c04's unparseable answers are the word "thought". A framing control must
+>    count off-list answers, not only hits.
+> 4. **The perturbation removes the disclaimer** (A-G1, 8/8 -> 0/16; Qwen in C30 refused
+>    30/30 at baseline). It is untested whether a content-free vector does the same. S-2 tests
+>    it.
+> 5. **Same seeds and greedy decoding, but a different library version: 5 of 192 answers
+>    changed** (A-F1 c00 vs A-R11). This is a fourth reproducibility source for Paper 1's error
+>    budget, beside restart count, batch and device.
+> 6. **Centring is not optional** (A-R9). It is the same failure as P1b's anisotropic bank.
+
 ---
 
 ## 4. Runs in detail
@@ -2685,6 +2734,15 @@ open and block the wording of Paper A section 4.1.
 
 ## 6. Open questions & confounds
 
+- **Does a content-free vector also remove the self-report disclaimer? (added 6 Oct, from
+  APERTURE A-G1)** In APERTURE's R3, "As an AI, I don't experience thoughts" appeared in 8/8
+  responses at alpha <= 0.5 and in 0/16 at alpha >= 1; Qwen refused 30/30 at baseline in
+  C30. If random vectors also remove it, a model's apparent willingness to introspect under
+  injection is part of the perturbation alarm. S-2 tests it.
+- **Is concept identification separable from derailment? (added 6 Oct)** APERTURE's G1 found
+  "exact" identification almost only at high KL. No CALIPER run records per-trial KL, so
+  CALIPER's identification numbers cannot yet be split by coherence. S-0 adds the KL meter.
+
 - **Coupled early stopping in `fit_batch` (added 5 Oct, standing, unfixed).** Patience is
   shared across the batch, so a unit's training length depends on its batch-mates. Every
   batched Study 1 run carries it. Fix: per-unit patience with an active mask, and freeze
@@ -2775,6 +2833,19 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-06 | **APERTURE's notebook re-read in full and folded into this one.**
+- **§3:** gains a follow-up with every APERTURE run as A-R1 to A-R12, plus A-F1, and which have data on disk (A-R1, A-R3, A-F1).
+- **Correction:** R11 is now carried by A-F1 c00.
+- **Six interpretations for CALIPER:**
+  - the framing control at two scales and two readouts (Paper 2);
+  - identification at derailment;
+  - prompt vocabulary leaking into answers;
+  - the disclaimer removed by perturbation;
+  - library-version drift as a fourth reproducibility source;
+  - centring.
+- **§6:** two new open questions.
+- **§8:** APERTURE's Kaggle gotchas.
+- **Elsewhere:** the run plan's S-0 gains the KL meter for impact matching and coherence bands; the citation ledger gains §23 for works cited only through APERTURE | §3 follow-up, `docs/APERTURE_INHERITANCE.md` §5, `docs/RUN_PLAN_L2_L3.md` |
 | 2026-10-06 | **APERTURE AUDITED FOR WHAT CALIPER CAN USE.**
 - **Evidence:** F1's archived reference cell is the replacement for R11, and its c04 flag shows the introspective prompt's vocabulary being emitted as the answer.
 - **Adopted:** APERTURE's vector recipe (whole-sentence means against same-category negatives) as a live arm; its stability/probe/steering gate as a health-check set to calibrate; residual centring; the gamma prior-null estimator for identification beyond default words; the affect-confound stratification; E13's Full-minus-Context-only control; seed twins and meta-d' for Part B.
@@ -4181,6 +4252,27 @@ practitioner needs that number; an AUC does not give it to them.
 ---
 
 ## 8. Gotchas solved (so we never lose the time again)
+
+### Kaggle gotchas inherited from APERTURE (recorded 6 Oct 2026)
+
+Solved once in APERTURE (`projects/mirror/docs/LAB_NOTEBOOK.md` §1 and §7). Recorded here
+because CALIPER's L3 runs now use the same apparatus.
+
+- **`%pip install` of a GitHub main.zip serves a cached old archive.** Use
+  `--no-cache-dir --force-reinstall --no-deps`, or the run silently uses last week's code.
+- **`git+https://` installs hang** on a credential prompt. Install from the
+  `/archive/refs/heads/main.zip` URL instead.
+- **TransformerLens rebuilds weights at full precision and doubles CPU RAM** on load. It caps at
+  about 6B on Kaggle (Gemma-2-9B fp16 dies after loading 100%, with no CUDA error). Above about
+  6B, use the HF backend with 8-bit bitsandbytes.
+- **For Gemma-2-2B under TransformerLens:** `from_pretrained_no_processing` with float16.
+  `from_pretrained` OOMs 30 GB of RAM; float32 OOMs the T4 on the 256k-vocab unembedding.
+- **A verdict line that tests one side of a CI** prints "includes 0" for an interval that
+  excludes 0 negatively (APERTURE R11, fixed). It is the same class as B-12's verdict
+  arithmetic: verdict logic needs tests in both directions.
+- **Greedy decoding is not reproducible across library versions under 8-bit quantisation.**
+  Same seeds changed 5 of 192 answers (A-F1 c00 vs A-R11). Record library versions in every
+  config, and score on statistics robust to a few flips.
 
 ### Setup in its own cell is setup that gets skipped (2026-09-09)
 

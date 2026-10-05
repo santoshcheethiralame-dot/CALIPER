@@ -124,3 +124,78 @@ that ties the two levels together.
    PES route is IEEE/Scopus proceedings, that panels include industry judges, and that a
    findings paper can read as "the project failed" to a systems-oriented rubric. Lead reviews
    with the bench as an artifact, and get the "published" definition from the mentor.
+
+---
+
+## 5. From APERTURE's lab notebook, run by run (added 6 Oct 2026)
+
+The registry is copied into CALIPER's notebook §3 as A-R1 to A-R12 and A-F1. What follows is
+what each result means for the merged programme.
+
+**A-R10, A-R11, A-R12 (forced-choice identification, Gemma-2-2B).**
+- **R10:** raw hit rate is 0.302 against 0.062 chance, and gamma is +1.99. That is exactly
+  what pure output steering predicts, because R8 showed the injection raises the concept's
+  output log-probability by about 7 nats.
+- **R11:** the neutral prompt does *better* (0.433, gamma +2.57). The difference
+  [-1.148, -0.007] rules out a positive introspective effect; its upper bound sits at zero,
+  so the claim is "no positive access effect", not "introspection hurts".
+- **R12:** adds the pre-registered informative framing, and the order is monotonic: the more
+  the prompt talks about injection, the lower the identification (neutral 2.57 >
+  introspective 1.99 > informative 1.65). The informative framing also lost 15/96 answers to
+  refusal or off-list replies.
+- **For Paper 2:** this is the same framing control as CALIPER's C20, measured at a tenth of
+  the scale with a different readout, and pointing the same way.
+
+**A-G1 (rules grading of R3).**
+- Of 24 cells, the concept appears in coherent output (KL < 0.5) in only 2; nearly every
+  other "exact" identification comes when the model is breaking (KL up to 23).
+- The onset is concept-dependent: telescope surfaces from KL 0.14, elephant only from 12.9.
+- **For CALIPER:** the generated-text identification numbers in Study 3 (C15/C16, the
+  50%-to-7% swing) cannot be read without the KL of each trial. APERTURE's KL meter
+  (`aperture.metrics`) is next-token KL against the clean run. S-0 adopts it twice: to
+  build impact-matched random vectors (match KL, as Ferrara does with downstream effect),
+  and to report identification inside coherence bands.
+
+**A-R4, A-R5, A-R6 (open-ended detection, 2B-9B, five layers).**
+- No clean detection plus identification in any of 24 + 40 + 24 cells.
+- The only YES answers are joy, an affect confound: excited tone, never naming joy.
+- The signature transcript is L21 volcano at KL 0.01, answering "NO ... caldera". The model
+  denies detection while the concept leaks into the same reply. That is a probe-report gap
+  in a single transcript.
+- **For CALIPER:** a design rule. Detection prompts need the affect confound handled by
+  stratifying emotion concepts, and a concept leaking into a "NO" reply is a
+  readout-dependence case worth counting in S-2.
+
+**A-R7, A-R8 (probe-report gap; patching).**
+- The concept is decodable downstream (probe 1.00 at L20 from injection at L13; shuffled
+  control 0.00) and causally potent for output (+6.15 nats paired), yet it is reported 17% of
+  the time.
+- **For CALIPER:** these establish that APERTURE's vectors were *live*, in contrast to the
+  template-tail vectors CALIPER found dead. The one difference in recipe (whole-sentence
+  means vs template tail) is what S-1 isolates.
+- The probe test set was 10 samples, so read 1.00 as "very high". Both runs are lost, so
+  they are motivation only.
+
+**A-R9 (naturalistic).**
+- Directions from injection decode concepts in passages that never name them: 0.688
+  [0.438, 0.875] against 0.062 chance.
+- This holds only after mean-centring. The raw dot product classified 14/16 as "dolphin",
+  exactly chance.
+- The report side is reading comprehension, because the passage stays in context, so the
+  0.000 "gap" is uninformative.
+- **For CALIPER:** this is the strongest available answer to "injected states are
+  off-distribution". It is lost, so S-11 re-runs it. The centring lesson goes into every L2
+  cosine.
+
+**A-F1 (confound hardening, partial).**
+- P4 holds.
+- The c04 flag (introspective 41.7% unparseable, half of it the word "thought") is the
+  confound's mechanism showing in the failure mode.
+- Hit rates moved by 3 and 2 of 96 from R11 under greedy decoding: 8-bit kernels across
+  library versions. That is a reproducibility source CALIPER had not measured.
+- Nothing else is read until S-3 completes the run.
+
+**What APERTURE's notebook does not support, so CALIPER will not claim it.**
+- Any APERTURE number as a CALIPER measurement, except A-F1, which is archived.
+- The beta log-frequency coefficient from R10. APERTURE's own note says do not report it.
+- R9's verbal report accuracy as introspection.
