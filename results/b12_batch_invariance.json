@@ -1,0 +1,200 @@
+{
+  "per_neuron_seed": true,
+  "neurons": 50,
+  "restarts": 2,
+  "steps": 1600,
+  "layer": 6,
+  "reference_batch": 32,
+  "comparisons": {
+    "b8_vs_b32": {
+      "n_units": 50,
+      "n_flips": 10,
+      "flips": [
+        [
+          198,
+          0.7621,
+          0.9877
+        ],
+        [
+          877,
+          0.8596,
+          0.9951
+        ],
+        [
+          1062,
+          0.8726,
+          0.9802
+        ],
+        [
+          1520,
+          0.2152,
+          0.9981
+        ],
+        [
+          1833,
+          0.1147,
+          0.9784
+        ],
+        [
+          1889,
+          0.9748,
+          0.8876
+        ],
+        [
+          1940,
+          0.9152,
+          0.9902
+        ],
+        [
+          2262,
+          0.9722,
+          0.2475
+        ],
+        [
+          2610,
+          0.9501,
+          0.8992
+        ],
+        [
+          2788,
+          0.9041,
+          0.9951
+        ]
+      ],
+      "flip_rate": 0.2,
+      "wilson_95": [
+        0.6696,
+        0.8876
+      ],
+      "median_abs_delta": 0.0068,
+      "p99_abs_delta": 0.824108,
+      "max_abs_delta": 0.8637,
+      "pass": false,
+      "within_floor": false
+    },
+    "b1_vs_b32": {
+      "n_units": 50,
+      "n_flips": 9,
+      "flips": [
+        [
+          94,
+          0.8337,
+          0.976
+        ],
+        [
+          198,
+          0.7708,
+          0.9877
+        ],
+        [
+          882,
+          0.9808,
+          0.6344
+        ],
+        [
+          1134,
+          0.9909,
+          0.9174
+        ],
+        [
+          1520,
+          0.8934,
+          0.9981
+        ],
+        [
+          1940,
+          0.7577,
+          0.9902
+        ],
+        [
+          2705,
+          0.9961,
+          0.9205
+        ],
+        [
+          2742,
+          0.8394,
+          0.987
+        ],
+        [
+          2788,
+          0.8785,
+          0.9951
+        ]
+      ],
+      "flip_rate": 0.18,
+      "wilson_95": [
+        0.692,
+        0.9023
+      ],
+      "median_abs_delta": 0.0055,
+      "p99_abs_delta": 0.510243,
+      "max_abs_delta": 0.6079,
+      "pass": false,
+      "within_floor": false
+    }
+  },
+  "noise_floor": {
+    "kind": "restart-only, same batch size, same units, same session",
+    "control_restarts": 5,
+    "reference_restarts": 2,
+    "n_units": 50,
+    "n_flips": 8,
+    "flips": [
+      [
+        882,
+        0.9604,
+        0.6344
+      ],
+      [
+        1134,
+        0.9926,
+        0.9174
+      ],
+      [
+        1649,
+        0.9742,
+        0.9334
+      ],
+      [
+        1889,
+        0.999,
+        0.8876
+      ],
+      [
+        2262,
+        0.9962,
+        0.2475
+      ],
+      [
+        2277,
+        0.9329,
+        0.9967
+      ],
+      [
+        2610,
+        0.9843,
+        0.8992
+      ],
+      [
+        2788,
+        0.9111,
+        0.9951
+      ]
+    ],
+    "flip_rate": 0.16,
+    "wilson_95": [
+      0.7149,
+      0.9166
+    ],
+    "median_abs_delta": 0.0033,
+    "max_abs_delta": 0.7487
+  },
+  "external_floor": {
+    "kind": "restart-only, B-7 L6 (r=5) vs B-1b L6 (r=2), 50 shared units",
+    "flip_rate": 0.2
+  },
+  "n_flips_total": 19,
+  "n_flips_worst_arm": 10,
+  "VERDICT": "FAIL - the worst batch-size arm flips 10 units, beyond the 8-flip floor from restart changes alone. Before reading this as reduction order: arms run without --independent-units still share early stopping across the batch and seed by position, so batch size changes training length and initialisation too"
+}

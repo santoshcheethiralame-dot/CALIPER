@@ -389,6 +389,42 @@ readout swing that C40 showed matches no computable rule. They need the C40 numb
 - Uncommitted edits to `PROJECT_NOTES_COMPLETE.md` (81 lines). About 50 other "modified"
   files are line-ending churn only.
 
+### B-12 control arm lands (2026-10-05 11:16) - **FAIL BY THE FILED RULE, BUT BATCH FLIPS ARE INDISTINGUISHABLE FROM RESTART FLIPS**
+
+`results/b12_ctl_b032_r5.jsonl`: the same 50 units at batch 32, 5 restarts instead of 2,
+position-keyed per-neuron seeding as in the other arms. 44/50 pass (0.88, against 40/50 at
+2 restarts), 49.6 s/unit. The report (`results/b12_batch_invariance.json`, rewritten 11:17
+under the per-arm verdict by the relaunched queue) reads:
+
+| comparison | flips | rate | median \|d\| | max \|d\| |
+|---|---|---|---|---|
+| **control: restarts 2 -> 5, batch 32** | **8/50** | 0.16 | 0.0033 | 0.749 |
+| batch 8 vs batch 32 | 10/50 | 0.20 | 0.0068 | 0.864 |
+| batch 1 vs batch 32 | 9/50 | 0.18 | 0.0055 | 0.608 |
+
+**Filed verdict: FAIL**, because the worst arm (10) exceeds the floor (8). The rule as filed
+compares two counts without a test, and the margin is one or two units on n=50. Paired on
+units against the control's flips, batch 8 has 6 flips the control lacks and the control has
+4 that batch 8 lacks, exact binomial p = 0.75. For batch 1 the split is 6 vs 5, p = 1.0.
+**Batch-size flips are statistically indistinguishable from restart-count flips at this n.**
+This reading is post hoc and labelled as such; the filed verdict stands as recorded.
+
+What B-12 can and cannot say. It shows that on the coupled estimator, changing batch size
+moves verdicts about as much as changing restart count: 16-20% of units at n=50. It cannot
+attribute anything to float reduction order. Every arm here still shares early stopping
+across the batch and seeds by position (§6b, 5 Oct), so batch size changes training length
+and initialisation too. The question B-12 was filed to answer moves to B-14, which removes
+both couplings.
+
+Side result: the restart 2 -> 5 change raises the pass rate (40 -> 44), as B-1 did (77 ->
+91 at n=100). Restart count is a lever on recovery, not only on the agreement signal.
+
+**Watcher incident.** `caliper-after-b12` exited with code -1 some time between 09:59 (a
+sleep event in the System log) and 10:34, when the queue was relaunched. Cause not
+identified; the machine did not reboot (last boot 1 Oct). It never started B-14, and the
+CPU sat idle from 11:17 to 13:17. Restarted by hand at 13:17: B-12 report rewritten (exit 0)
+and **B-14 started at 13:17.**
+
 ### B-12 - batch invariance with per-neuron seeding (2026-10-05, control arm still running) - **SEEDING DID NOT CLOSE IT**
 
 GPT-2 L6, the first 50 units of B-1b's pool, 2 restarts, 1600 steps, `--per-neuron-seed`.
