@@ -187,6 +187,53 @@ the random arm.
 **C21 is the open run.** It is run 1 of the pre-arXiv list and the only one that
 decides whether "we reproduce their protocol" is true or false. See §7 A-1.
 
+### Runs C38-C58 and the B-series — registry rows added 5 Oct 2026 *(reconstructed)*
+
+The registry stopped at C37 on 7 Sep. Everything after that was written up in §4, §6b or
+§7.8 but never got its row here, so the table below back-fills it from the archived
+artifacts. Pass counts were recomputed from the jsonl on 5 Oct, under both rules in use:
+**align** = `align_selected > 0.95` (the rule the AUC failure labels use) and **gate** =
+align plus `k2_gain < 0.01` (the rule `e01_gate.py` reports). The two differ by 0-4 units
+per arm, which is where the 247-vs-248 and 283-vs-287 discrepancies came from.
+
+**Two ID problems, recorded rather than renumbered.** There are two §4 headings for
+"Cross-validating the flag thresholds", one labelled C37 and one C38. The C37 *registry*
+row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
+`PIVOTS.md` but never appeared in this notebook at all.
+
+| ID | Date | Exp | n | Config | Artifact | One-line result |
+|---|---|---|---|---|---|---|
+| C38 | 2026-09-07 | threshold CV (duplicate of C37's heading) | 100 | 5-fold | — | Held-out R2 transfers (74 -> 69% at 5% cost); z_mean 74 -> 58%; disagreement 74 -> 53% |
+| C39 | 2026-09-07 | Gemma refit, forced, first attempt | 420 | all seven alphas transcribed as 0 | `data/s3/g_refit_*.jsonl` | **VOID GRID.** One number kept: concept-position residual norm 36,245 |
+| C40 | 2026-09-07 | audit of the S3 positive control | 30 | rescoring of `s3_generation.jsonl` | — | **The reproduction figure was wrong.** Pre-registered scorer gives **2/30 = 6.7%**, not 10.0%; "27% / 7%" matched no rule |
+| C41 | 2026-09-07 | required-N without C37's filters | 18 | stratified worst / marginal / pass | `results/s1_required_n_unbiased.json` | C37's attribution was wrong; failures are not a data shortage |
+| C42 | 2026-09-07 | steps sweep | 9 | 200-5000 steps, 2 restarts | `results/s1_steps_sweep.json` | Over-optimisation hypothesis refuted |
+| C43 | 2026-09-07 | seed lottery | 9 | many seeds per unit | `results/s1_seed_lottery.json` | n1503 spans 0.066 to 0.983 on the seed alone; corr(test R2, alignment) +0.953, so picking by held-out R2 wins the lottery |
+| C44 | 2026-09-07 | Gemma session re-run (guard event) | — | — | Kaggle log | All-zero guard fired and saved the run; read-position fix confirmed in production |
+| C45/C46 | 2026-09-07 | Gemma forced, vectors refit at concept, real + random | 420 + 420 | alpha-frac 0-0.40 | `data/s3/g2_forced_norm1.jsonl`, `g2_forced_random_norm1.jsonl` | **OUTCOME A3: random significantly ABOVE real**, reported as an anomaly per the filed rule |
+| C47 | 2026-09-08 | S1 multi-seed confirmatory | 100 | | `results/s1_multiseed.jsonl` | 76/100 [0.668, 0.833]: no improvement, FAIL |
+| C48 | 2026-09-08 | Gemma refit vectors, steering control | 150 | alpha-frac 0-0.76 | `data/s3/gval_steer_norm1.jsonl` | Semantic steering 10/30 at 40% of norm: weak but real |
+| C49 | 2026-09-08 | A-8 on-manifold (span) control | 420 | same grid as C45 | `data/s3/g2_forced_span_norm1.jsonl` | Off-manifold account refuted |
+| C50-C52 | 2026-09-08 | A-14 validated-steering window, real / random / span | 300 each | alpha-frac 0.30-0.60 | `data/s3/gw_forced_*.jsonl` | OUTCOME B2: no significant difference |
+| C53 | 2026-09-08 | E0.1 gate, Pythia-160m | 100 | gate config | `results/e01_gate_pythia.jsonl` | 94 align / **93 gate** of 100; FAIL its bar at a different rate |
+| C54 | 2026-09-08 | Study 2 P1, planted random directions | 24 | 8 plants x 0.10/0.20/0.40 | `data/s2/p1_plant.jsonl` | **VOID.** Median recovery 0.0069 |
+| C55 | 2026-09-08 | Study 2 P2, same plants, depth | 40 | 0.40, extract L37-L55 | `data/s2/p2_plant.jsonl` | **VOID.** Median recovery 0.0073 at every depth |
+| **C56** | 2026-09-08 | **Study 2 P1b, planted real concept vectors** | 24 | 8 plants x 0.20/0.40/0.60, primary 0.40 | `data/s2/p1b_plant.jsonl` | **FAIL as filed:** 3/8 plants beat null A at 0.40 (needed 6/8), median recovery **0.1557** vs null A **0.1870** (needed > 0.30). Manipulation check passed. Detail in §4 |
+| C57 | 2026-09-08 | P1b residual analysis | — | offline | **no artifact** | **NEVER RUN.** Needs the extracted vectors as `.npz`; no `.npz` exists anywhere in the repo |
+| **C58** | 2026-09-08 | concept-bank Gram matrix | 30 vectors | alpha 0 | `data/s2/gram.config.json` | Median off-diagonal \|cos\| **0.4216**, p90 0.733, max 0.852 |
+| B-0 | 2026-09-09 | device equivalence, n=16 | 16 | CPU vs CUDA | `data/b11/device_equivalence.json` | 5/16 flip pass/fail; max \|d\| 0.66 |
+| B-0b | 2026-09-10 | device equivalence, n=50 | 50 | | `data/b11/device_equivalence_n50.json` | 4/50 flip; batch composition changes the answer |
+| B-1 | 2026-09-09 | restart agreement, 5 restarts | 100 | GPT-2 L6 | `results/b1_stability_gpt2.jsonl` | 91/100; AUC R2 0.913 vs restart 0.845, DeLong p=0.11: underpowered as filed |
+| **B-1b** | 2026-09-09 | **primary endpoint** | 300 | GPT-2 L6, 2 restarts | `results/b1b_primary_gpt2.jsonl` | 248 align / 247 gate; 52 failures; **AUC R2 0.942 vs restart 0.778, DeLong p=1.8e-07** (recomputed 5 Oct) |
+| B-2b | 2026-09-10 | primary endpoint, Pythia-160m | 300 | L6, 2 restarts | `results/b1b_primary_pythia.jsonl` | **287 align / 283 gate**; 13 failures; AUC 0.993 vs 0.899, p=0.11 |
+| B-2s | 2026-09-10 | Pythia n=100, 5 restarts | 3 | | `results/b1_stability_pythia.jsonl` (untracked) | **ABANDONED** after two empty exits. 3 orphan rows on disk |
+| B-11 | 2026-09-09 | Pythia scale ladder | 50 x 4 | Kaggle T4 | `data/b11/b11_pythia-*.jsonl` | 48/48/48/31 of 50 (70m / 160m / 410m / 1.4b) |
+| B-11s | 2026-09-10 | steps check, 3200 steps | 50 x 2 | Kaggle T4 | `data/b11/*_s3200.jsonl` | 1.4b 31 -> 36; scale claim withdrawn as under-fitting |
+| B-7 | 2026-10-04 | layer sweep, GPT-2 | 50 x 3 | L2 / L6 / L10, 5 restarts, pool 300 | `results/b7_layer{02,06,10}_gpt2.jsonl` | 25/43/45 align (24/43/45 gate). **Legs are independent samples, not paired** (see §4, 5 Oct audit) |
+| B-8 | 2026-10-04 | GPT-Neo-125m | 100 | L10 | `results/b8_gptneo125m.jsonl` | 59/100; **AUC R2 0.715 vs restart 0.582**, p=0.0086 |
+| B-10 | 2026-10-04 | required-N per signal | 50 x 4 | 2k/4k/8k/16k nested prefixes, 2 restarts | `results/b10_required_n.jsonl` | Pass 0.16/0.56/0.66/0.80; R2 ahead of restart at every N. Script `experiments/b10_required_n.py` was **untracked** at commit time |
+| B-12 | 2026-10-04/05 | batch invariance, per-neuron seed on | 50 x 3 (+ control running) | batch 32 / 8 / 1 | `results/b12_fix_b{032,008,001}.jsonl` | 40/36/37 pass. **10 and 9 of 50 flip vs batch 32 with seeding fixed.** Control arm in flight |
+
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
 APERTURE (`projects\mirror`, package `aperture`) is the predecessor programme. It
@@ -235,6 +282,198 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### Audit of every run to date (2026-10-05) - **THE 4 OCT WRITE-UPS CARRY THREE INDEPENDENCE ERRORS**
+
+Every Study 1 jsonl was re-scored from disk (`align_selected`, both pass rules, all four
+signal AUCs, DeLong restart-minus-R2), the Study 2 plants were re-summarised against their
+pre-registration, and the 4 Oct code was read line by line. The headline survives. Several
+4 Oct readings do not, and they share one cause: **units were treated as independent where
+they are not, or as identical where they are different.**
+
+**What survives, recomputed.** B-1b: 52 failures of 300, AUC held-out R2 **0.942** vs
+restart agreement **0.778**, DeLong diff -0.164, **p = 1.8e-07**. Held-out R2 beats restart
+agreement in **every Study 1 arm that has more than two failures** (B-1, B-1b, B-2b, B-7 x3,
+B-8, B-10 x4, B-12 x3, B-11 1.4b x2). The only reversal is Pythia-70m, which has two
+failures. Many arms reuse B-1b's units, so this is consistency, not 15 replications.
+
+**Correction 1 - B-7's legs are not paired. The 4 Oct "paired" reading is withdrawn.**
+`rng.choice(3072)` draws the same *indices* at every layer, but neuron 1234 at layer 2 and
+neuron 1234 at layer 6 are different neurons with different weights. Index-matching pairs
+nothing. The check: under independence, with pass rates 0.50 / 0.86 / 0.90 (align rule),
+the expected pattern counts match what was observed almost exactly.
+
+| L2 L6 L10 | observed | expected if independent |
+|---|---|---|
+| fail pass pass | 20 | 19.4 |
+| pass pass pass | 19 | 19.4 |
+| fail fail pass | 3 | 3.2 |
+| fail fail fail | 0 | 0.3 |
+
+So "no unit fails at every depth" and "depth changes *which* units fail" are what three
+independent draws produce, not findings. What B-7 does show is unpaired: pass rate rises
+from 0.48 (gate rule, Wilson about [0.35, 0.62]) at L2 to 0.86 and 0.90, a real depth
+effect between independent samples of units. The retraction of "two regimes" in commit
+3e3593b stands; the reasoning offered for it does not. `analyse_b7_depth.py` and
+`tests/test_analyse_b7_depth.py` assert the pairing, so they guard an invalid design.
+
+**Correction 2 - batching couples units through early stopping, not only through
+initialisation.** In `fit_batch`, `since` resets whenever *any* unit improves, and the whole
+batch stops only when *none* has improved for `patience` steps. A unit's training length
+therefore depends on its batch-mates. The docstring says the opposite. Measured on a
+synthetic 16-unit set with `--per-neuron-seed` on: the batch ran **3,200** optimiser steps
+(both restarts to the cap); the same units fitted alone stopped at as few as **952**. That is
+a second coupling mechanism, independent of the stacked-randn one that per-neuron seeding
+fixed, and it predicts exactly what B-12 now shows: smaller batches stop earlier and pass
+less (below).
+
+**Correction 3 - the "20% restart-only floor" is confounded with batch composition.** B-7 L6
+and B-1b share their first 50 units in the same order. The first 32 sat in an identical
+first batch in both runs, so they differ only in restart count: **4/32 flip (12.5%)**. The
+last 18 were a batch of 18 in B-7 and part of a batch of 32 in B-1b, so they also differ in
+initialisation and stopping: **6/18 flip (33%)**. The restart-only floor is nearer 12% than
+20%, and B-12's amended criterion imports the larger, confounded figure.
+
+**Correction 4 - B-12's verdict compares unlike quantities.** `total_flips` sums flips over
+*both* small-batch comparisons (b8 and b1 vs b32) and tests the sum against the flips of
+*one* control comparison. With two arms each sitting at the floor, the verdict fires FAIL.
+`tests/test_b12_verdict.py` only ever builds one comparison, so it cannot see this. The
+verdict line must not be quoted; compare each arm to the control separately.
+
+**Correction 5 - B-10's 8k leg does not reproduce B-1b.** It was documented as the
+consistency check against the primary arm. On the same 50 units it passes **33** against
+B-1b's **41** (40/50 verdicts agree). Cause, from the code: `collect` truncates to
+`max_tokens` *before* shuffling, so B-1b's 8k is the first 8,000 tokens of the stream, while
+B-10's 8k is a random 8,000 of the first 16,000. A different token sample changes 10 of 50
+verdicts. **Token sample is a fourth variance component**, next to restarts, batch and
+device. B-10 also labels failure by alignment alone, while the gate adds `k2_gain`.
+
+**Correction 6 - B-10's commit message overstates significance.** "Significantly so where
+powered" lists 2k at p = 0.061. That is not significant. The arms at or above 20 failures are
+2k (p = 0.061) and 4k (p = 0.017); 8k (p = 0.001) carries 17 failures and is flagged
+underpowered by the script itself. Direction is consistent at every N; significance is
+clean at one powered arm.
+
+**Correction 7 - S1-2's criterion drifted before the run.** The script docstring says the
+criterion is judged on the `cascade` arm; the code judges it on the best of all deflation
+arms, including `resp_only`, which was added after it measured higher. There is no
+`preregistration-s1-2*.md`. Response deflation subtracts the unit-coefficient linear term
+`(X @ basis).sum(1)`, not the fitted nonlinearity, so it is not a deflation in the usual
+sense. S1-2 must be filed properly before it runs: cascade arm primary as originally
+written, best-of-arms exploratory.
+
+**Correction 8 - B-8 claims more than it isolates.** "Only the training corpus differs"
+is too strong: GPT-Neo also alternates local and global attention and was trained with
+different hyperparameters. The defensible claim is "model family". The ground truth itself
+was re-verified on GPT-Neo on 5 Oct: `s . w + b` reproduces `c_fc` with relative error
+3e-07 and correlation 1.0000000000 at L6 and L10. The "layer-6 correlation 0.698" quoted
+in §7.8 is the linear correlation with the *post-GELU* response, not a ground-truth check.
+The L6 null rests on **4 units** and a median alignment of 0.0026, below the random-direction
+median of about 0.024. Below-chance is not what an ordinary hard unit looks like. It needs
+a 20-unit run with per-unit diagnostics before it is called a property of the model.
+Separately: **the flag itself is weaker on GPT-Neo** (AUC held-out R2 **0.715**, restart
+0.582). The headline 0.94 is a GPT-2 number.
+
+**Correction 9 - Study 3's reproduction figure.** C40 found the pre-registered scorer gives
+**6.7%**, not the 10.0% in `s3-results.md`. Several downstream documents
+(`PROJECT_NOTES_COMPLETE.md` §5.2, the review deck) still quote 10.0% and the 27% / 7%
+readout swing that C40 showed matches no computable rule. They need the C40 numbers.
+
+**Missing or orphan artifacts found.**
+- C57 cannot be run: no extracted-vector `.npz` exists anywhere in the repo.
+- `experiments/b10_required_n.py`, `run_queue_detached.sh`, `caliper_queue.cmd` and all
+  `b12_*` results were untracked on 5 Oct.
+- `results/b1_stability_pythia.jsonl` holds 3 orphan rows from the abandoned B-2s.
+- `data/s3/g_refit_steer_placeholder.jsonl` is byte-identical in size to
+  `g_refit_steer_norm1.jsonl` (90,438). It is either a duplicate or misnamed.
+- Uncommitted edits to `PROJECT_NOTES_COMPLETE.md` (81 lines). About 50 other "modified"
+  files are line-ending churn only.
+
+### B-12 - batch invariance with per-neuron seeding (2026-10-05, control arm still running) - **SEEDING DID NOT CLOSE IT**
+
+GPT-2 L6, the first 50 units of B-1b's pool, 2 restarts, 1600 steps, `--per-neuron-seed`.
+
+| batch | pass (align) | flips vs batch 32 | pass only in the small batch | pass only at 32 | median \|d align\| |
+|---|---|---|---|---|---|
+| 32 | 40/50 | — | — | — | — |
+| 8 | 36/50 | **10/50** | 3 | 7 | 0.0068 |
+| 1 | 37/50 | **9/50** | 3 | 6 | 0.0055 |
+
+Batch 8 against batch 1: 11 flips. Only **7 of 50** units give an identical alignment (to
+1e-6) at batch 8 and batch 32, although every unit's initial parameters are now bitwise
+identical across batch sizes. Float reduction order alone would leave most units identical to
+several decimals. **The residual is the coupled early stopping** (Correction 2), and its
+direction fits: units pass more often in the large batch, where batch-mates keep training
+alive.
+
+Two consequences. First, the B-12 filing reads a FAIL as "reduction order in the batched
+GEMM". That branch is not identified while stopping is coupled. Second, the B-1b headline
+was produced with coupled stopping, at batch 32 with partial final batches. **It must be
+re-run after the stopping fix** before it goes in a paper. Batch-32 coupling plausibly
+trained units *longer*, so the corrected failure rate may rise.
+
+The control arm (`b12_ctl_b032_r5`, 5 restarts at batch 32) failed once at 07:36 with exit
+-1 after 24 s and was relaunched by the queue at 07:54. When it lands, read each small-batch
+arm against it separately, not the summed verdict.
+
+> **Correction, 5 Oct 2026 (later the same morning).** The sentence above saying every
+> unit's initial parameters are "now bitwise identical across batch sizes" is wrong.
+> `--per-neuron-seed` seeds by *position in the batch*, not by neuron (§6b, 5 Oct). Units at
+> matching positions share a start, and the identical-output units are exactly those
+> (positions 1, 2, 3, 6, 37, 38). B-12's flips therefore come from two couplings,
+> position-keyed initialisation and shared stopping, not from stopping alone. The B-12
+> design cannot isolate either from reduction order. B-14 runs with both removed.
+
+### B-10 - required-N per signal (2026-10-04) - **R2 LEADS AT EVERY N; THE 8k LEG IS NOT B-1b**
+
+`results/b10_required_n.jsonl`, GPT-2 L6, 50 units (B-1b's first 50), 2 restarts, one
+16,000-token stimulus with 2k/4k/8k/16k nested prefixes. Failure = alignment < 0.95.
+
+| tokens | pass | failures | AUC R2 | AUC restart | AUC disagree | restart - R2 | p |
+|---|---|---|---|---|---|---|---|
+| 2,000 | 0.16 | 42 | 1.000 | 0.938 | 0.711 | -0.063 | 0.061 |
+| 4,000 | 0.56 | 22 | 0.985 | 0.847 | 0.679 | -0.138 | **0.017** |
+| 8,000 | 0.66 | 17 | 0.925 | 0.724 | 0.842 | -0.201 | 0.001 (underpowered) |
+| 16,000 | 0.80 | 10 | 0.770 | 0.718 | 0.793 | — | underpowered |
+
+Recovery rises with data: at least 16k tokens for a usable pass rate at this restart count.
+Held-out R2's AUC *falls* as failures get rarer. At 16k, disagreement nominally leads, inside
+overlapping CIs. The 2k AUC of 1.000 with a degenerate bootstrap CI [1.0, 1.0] reflects 42
+failures against 8 passes; it is not a precision claim. The 8k leg passes 33 of the 50 units
+B-1b passes 41 of (Correction 5).
+
+### B-8 and B-7 - flag AUCs per arm (2026-10-04, added 5 Oct)
+
+The 4 Oct write-ups gave pass rates only. AUCs, failure = alignment < 0.95:
+
+| arm | failures | AUC R2 | AUC restart | AUC disagree | restart - R2, p |
+|---|---|---|---|---|---|
+| GPT-2 L2 (B-7) | 25 | 0.950 | 0.789 | 0.861 | -0.162, 0.0089 |
+| GPT-2 L6 (B-7, 5 restarts) | 7 | 0.944 | 0.817 | 0.850 | -0.126, 0.039 |
+| GPT-2 L10 (B-7) | 5 | 0.818 | 0.729 | **0.951** | -0.089, 0.22 |
+| GPT-Neo-125m L10 (B-8) | 41 | **0.715** | 0.582 | 0.546 | -0.133, 0.0086 |
+
+The ranking R2 > restart holds everywhere. Its *size* does not transfer: on GPT-Neo every
+signal is weak, and the flag that is "free and good" on GPT-2 discriminates at 0.72.
+
+### C56 / C58 - Study 2 P1b and the concept-bank Gram matrix (2026-09-08, back-filled 5 Oct) - **FAIL AS FILED**
+
+Never written up here; recorded only in `PIVOTS.md` P7 and a script docstring. Gemma-3-27B,
+plant at L37, 8 real concept vectors, 16 prompts, version `2026-09-08c`. Primary cell 0.40 of
+the 36,245 concept-token norm, per `preregistration-s2-p1b.md`.
+
+| alpha-frac | median recovery | median null A (other concept) | median null B (random) | plants beating null A | median steered prompts /16 |
+|---|---|---|---|---|---|
+| 0.20 | 0.1544 | 0.1257 | 0.0068 | 4/8 | 2 |
+| **0.40 (primary)** | **0.1557** | **0.1870** | 0.0066 | **3/8** | 6.5 |
+| 0.60 | 0.5795 | 0.4913 | 0.0085 | 4/8 | 7.5 |
+
+Criterion (6/8 plants beat null A **and** median recovery > 0.30): **FAIL** on both legs. The
+manipulation check passed. Recovery sits 20-80x above the random null at every strength, so
+difference-of-means lands in concept space, but it is no closer to the planted concept than to
+another concept. C58 (`data/s2/gram.config.json`): the bank's median off-diagonal |cos| is
+**0.4216**, p90 0.733, max 0.852. Null A is the inter-concept floor, which is why it is so
+high. The 0.60 cell is reported, not used: it was excluded from the primary in advance.
 
 ### B-2b - the primary endpoint on a second family (2026-09-10) - **ORDERING REPLICATES, SIGNIFICANCE DOES NOT**
 
@@ -2260,6 +2499,18 @@ direction at a time. It is the November go/no-go.
 
 ## 5. Findings so far (running conclusions)
 
+> **STATE OF THE FINDINGS, 5 Oct 2026 - read before quoting anything below.** Study 1's
+> primary endpoint (B-1b, p = 1.8e-07) stands as measured, and the ranking held-out R2 >
+> restart agreement holds in every arm with more than two failures. Four qualifiers now
+> travel with it: (i) every Study 1 number so far was fitted with batch-coupled early
+> stopping, so B-1b must be re-run after the fix before it is a paper number; (ii) pass/fail
+> verdicts move with restart count (~12%), batch composition (~20-33%), token sample (10/50)
+> and device, so single pass rates are soft; (iii) the flag's strength is family-dependent
+> (AUC 0.94 on GPT-2 L6, 0.72 on GPT-Neo L10); (iv) depth findings are unpaired. Study 2 P1b
+> failed as filed. Study 3's reproduction figure is 6.7% (C40), not 10.0%, and the only
+> validated-vector Gemma measurement (C45/C46) came out A3, random above real. Detail in §4,
+> "Audit of every run to date".
+
 1. **The unit-level instrument fails silently on ~23% of real neurons**, with
    restart agreement giving no warning, while a perfect solution exists and is
    reachable by fitting one extra dimension. (C4, C9, C10, C13)
@@ -2343,6 +2594,24 @@ open and block the wording of Paper A section 4.1.
 
 ## 6. Open questions & confounds
 
+- **Coupled early stopping in `fit_batch` (added 5 Oct, standing, unfixed).** Patience is
+  shared across the batch, so a unit's training length depends on its batch-mates. Every
+  batched Study 1 run carries it. Fix: per-unit patience with an active mask, and freeze
+  stopped units by restoring their parameters after `opt.step()`. Zeroing their gradients is
+  not enough, because Adam's momentum keeps moving them. Then a test that a unit fitted alone
+  equals the same unit fitted inside a shuffled batch.
+- **Token sample is a variance component (added 5 Oct).** Same units, same config, a
+  different 8k token draw: 10/50 verdicts change (B-10 vs B-1b). `collect` truncates before
+  shuffling, so "8k tokens" means different things in different scripts.
+- **Is the failure class real or under-training?** If fixing the stopping rule moves many
+  B-1b failures to passes, part of the "silent failure" rate is an optimiser artefact, as at
+  1.4b. Each failure should be classified as under-trained (R2 still rising) or wrong basin
+  (R2 converged near 1 at a wrong direction) after the re-run.
+- **GPT-Neo L6 below-chance alignment (0.0026 on 4 units).** Unexplained; ground truth
+  verified exact there on 5 Oct. Needs n >= 20 and per-unit diagnostics.
+- **Why is the flag weak on GPT-Neo (AUC 0.715)?** Unknown. If it is the heavy failure rate
+  (41/100) or the family, the headline recommendation needs a family qualifier.
+
 - **Trial-number confound (standing, known, partially fixed).** Concept is
   perfectly confounded with trial index — elephant is always "Trial 1", freedom
   always "Trial 30" — and the trial number appears in the prompt. Every reported
@@ -2415,6 +2684,17 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-05 | **B-13 LANDED: `--independent-units`.** `fit_batch` gains `unit_ids` (seed by neuron id) and `per_neuron_stop` (a per-unit patience counter; a unit stops recording once its own patience runs out). Both opt-in, so completed runs keep their meaning. `e01_gate.py --independent-units` turns both on and writes `independent_units` into the summary. Verified both ways on the test's 5-unit set: under the old rule, alone vs in a shuffled batch gives worst agreement **0.9728** and \|dR2\| 0.108; under the new one **1.000000** and 6e-07. Three new tests in `tests/test_batched.py`: the old seeding is position-keyed, alone equals in-batch, and the shared rule runs a unit longer. Bundle rebuilt | `caliper/batched.py`, `experiments/e01_gate.py`, `tests/test_batched.py` |
+| 2026-10-05 | **`--per-neuron-seed` WAS NEVER UNIT SEEDING. IT SEEDS BY POSITION IN THE BATCH.** `_per_neuron_stack` used `range(n)`, so a unit's stream depended on where it sat in its batch, not on which neuron it was. In B-12 the units that came out identical at batch 8 and batch 32 sit mostly at matching in-batch positions (1, 2, 3, 6, 37, 38). The 4 Oct B-12 docstring's "init is now bitwise identical across batch sizes" holds only for those positions. So B-12's arms carry two couplings, position-keyed init and shared stopping, and cannot isolate reduction order | `caliper/batched.py` docstring, §4 B-12 |
+| 2026-10-05 | **B-12's verdict is now judged per arm against the floor.** The summed version is kept as `n_flips_total`, with `n_flips_worst_arm` and per-arm `within_floor` beside it. The new test fails on the old logic (a two-arm case at the floor read FAIL) and passes on the new. The running B-12 process loaded the old script, so after its control arm lands, rerun `b12_batch_invariance.py` (all arms skip as complete) to rewrite the report | `experiments/b12_batch_invariance.py`, `tests/test_b12_verdict.py` |
+| 2026-10-05 | **S1-2 PUT ON HOLD IN THE QUEUE.** The queue would have started it straight after B-12, without a filed prereg. Editing a running bash script is unsafe, so the script was renamed `experiments/s1_2_deflation.py.hold`. The queue's S1-2 step will then fail cleanly and the queue stops. Rename it back to run it. The prereg is now filed, and the code judges the cascade arm as filed, with best-of-arms printed as exploratory | `docs/preregistration-s1-2-deflation.md` |
+| 2026-10-05 | **B-14 FILED: B-1b re-run with `--independent-units`.** Same 300 units, tokens, restarts and steps. Primary DeLong endpoint unchanged; decision table, failure classification (wrong basin = held-out R2 > 0.99) and McNemar against B-1b fixed in advance | `docs/preregistration-b14-primary-rerun.md` |
+| 2026-10-05 | **B-7 analysis now reports the independence null.** `analyse_b7_depth.py` prints the expected count per pattern under independent layers next to the observed count. Its test now asserts the counts sit within 3 of the expectation and that the shared indices are not read as pairing. `results/b7_depth_structure.txt` regenerated (it had been committed as a binary, UTF-16 file) | `experiments/analyse_b7_depth.py`, `tests/test_analyse_b7_depth.py` |
+| 2026-10-05 | **NO NEW STUDY 1 NUMBER GOES IN THE PAPER UNTIL THE STOPPING FIX LANDS AND B-1b IS RE-RUN.** The 5 Oct audit found batch-coupled early stopping in `fit_batch`; B-12 shows it moves 9-10 of 50 verdicts even with per-neuron seeding. Queue order after B-12's control arm: stopping fix + invariance test, then B-1b re-run (B-13), then everything else | §4 audit, §7.8 status 5 Oct |
+| 2026-10-05 | **S1-2 IS NOT RUN UNTIL IT HAS A FILED PRE-REGISTRATION.** The criterion drifted from the cascade arm to best-of-arms in code, with no prereg file. File `preregistration-s1-2-deflation.md` with the cascade arm primary as originally written; resp_only and best-of-arms exploratory | §4 audit, Correction 7 |
+| 2026-10-05 | **B-7 IS REPORTED UNPAIRED.** Index-matched units across layers are different neurons, and the pattern counts match independence. The paired analysis and its test are kept in the repo as a record but not cited | §4 audit, Correction 1 |
+| 2026-10-05 | **B-12's summed verdict is not quoted.** Each small-batch arm is compared to the control on its own | §4 audit, Correction 4 |
+| 2026-10-05 | **The positive-control figure is 6.7% everywhere.** C40's correction never propagated to `PROJECT_NOTES_COMPLETE.md` or the deck | §4 audit, Correction 9 |
 | 2026-10-04 | **THE BUNDLE PARITY TEST COULD NOT SEE A MISSING MODULE, AND THE GAP WAS ONE IMPORT AWAY FROM FIRING.** `SHIPPED` is an explicit 8-file list, so adding a helper and importing it from a bundled script leaves all eight files byte-identical to source — every hash test passes — while the bundle is unrunnable, because the import fails only on Kaggle. Adding `planted_units` today would have done exactly that, had the script been on the manifest. New check walks each bundled file's AST and asserts every first-party import resolves inside the bundle, deciding locality from the **source** tree: deciding it from the bundle classifies as ours only the modules already shipped, which are precisely the ones that cannot be missing. That first version passed against a deliberately broken bundle, and only passed-and-failed-both-ways counts as a working tripwire | `tests/test_kaggle_bundle.py` |
 | 2026-10-04 | **B-12's FILED CRITERION WAS STRICTER THAN THE INSTRUMENT'S OWN REPEATABILITY, SO IT WAS AMENDED BEFORE THE RUN.** It demanded zero pass/fail flips across batch sizes, but B-7 L6 (r=5) against B-1b L6 (r=2) on the same 50 units gives 10 of 50 verdict flips (20%) from restart count alone - and batch size perturbs float32 reduction order, which is no smaller a perturbation. Under the filed criterion, ordinary restart noise would have been scored as "flips remain", firing the branch that claims silent failure depends on estimator implementation. B-12 now runs a fourth arm at the reference batch size with a different restart count and judges batch flips against control flips, reporting the external 20% alongside. `--control-restarts 0` restores the strict version. **A criterion stricter than the measurement noise is unfalsifiable, not strict** | `experiments/b12_batch_invariance.py`, `tests/test_b12_verdict.py` |
 | 2026-10-04 | **S1-2 GAINED A MULTIPLICATIVE ARM, AND ITS 0.80 CRITERION IS DELIBERATELY NOT EXTENDED TO IT.** The deflation result is coupling-dependent - response-only beats the projected method by 0.05 additive (0.995 vs 0.945) but 0.42 multiplicative (0.930 vs 0.506) - so additive-only would have characterised the effect only where it is smallest and omitted the case the paper's explanation rests on. The pre-registered 0.80 bar stays on the additive cells, because the 0.5213 joint baseline it is defined against comes from `e03_required_n.json`, which planted additive units; the archived baseline is written as `null` on multiplicative rows so it cannot be misread. The plant moved to `experiments/planted_units.py` so the gated structure can be tested, since the whole justification is a claim about that function | `experiments/planted_units.py`, `experiments/s1_2_deflation.py`, `tests/test_planted_units.py` |
@@ -2890,6 +3170,58 @@ literature scout named a reviewer objection we had not planned for.
 
 **Critical path to a submittable paper:** B-1 → B-2 → B-3 → (B-6 if triggered) → B-8 → B-9
 → draft. About 30 CPU-hours total, which is three or four overnight runs.
+
+> **STATUS AND NEXT QUEUE, 5 Oct 2026 - supersedes the Tier 0 table below, which is stale
+> (B-1 "RUNNING", B-2 "QUEUED").**
+>
+> | run | state |
+> |---|---|
+> | B-0, B-0b, B-1, B-1b, B-2b, B-11, B-11s, B-7, B-8, B-10 | done, archived |
+> | B-2s | abandoned (3 orphan rows) |
+> | B-3 spec sheet / B-4 restart curve / B-5 combination | not run as separate artifacts; B-1b's analysis covers B-3's core |
+> | B-6 | not triggered (B-1b went straight to n=300) |
+> | B-9 (third scale point) | not run |
+> | B-12 | three arms done, control arm running since 07:54 |
+> | S1-2 | not run; blocked on a filed prereg (6b, 5 Oct) |
+>
+> **Next queue, in order. Each needs its criterion filed before it runs.**
+>
+> 1. **B-13 · Stopping fix + invariance test (code, ~1 day, no long compute).** Per-unit
+>    patience and an active mask in `fit_batch`. Stopped units are frozen by restoring their
+>    parameters after each `opt.step()`, so Adam's momentum cannot move them. Add a test that
+>    unit i alone equals unit i in a shuffled batch of 8 to within 1e-5, with fp64 and
+>    deterministic algorithms on. Rebuild the Kaggle bundle. *Failure branch:* if units still
+>    differ, the residual really is reduction order, and B-12's original branch applies.
+> 2. **B-14 · B-1b re-run on the fixed estimator (n=300, GPT-2 L6, ~12 h CPU).** Same
+>    units, restarts, tokens and seeds. Primary endpoint unchanged (DeLong restart vs R2),
+>    with a paired cluster bootstrap on the AUC difference beside it. For every failure,
+>    record whether held-out R2 was still rising at stop (under-trained) or converged
+>    (wrong basin). *Failure branch:* if the gap shrinks below 0.10, B-1b's p-value was partly
+>    a stopping artefact, and the paper says so.
+> 3. **B-15 · Replicates for soft labels (3 replicates x 100 units, GPT-2 L6, ~14 h).**
+>    Different per-unit seeds and token draws. Report each unit's failure fraction,
+>    test-retest ICC of every signal, and the share of boundary units near 0.95. Turns the
+>    verdict noise into a measured quantity rather than a caveat.
+> 4. **S1-2 · Deflation gate, filed properly (synthetic, ~4 h).** Add two arms before
+>    running: whitening plus a moment / AGOP warm start, and response deflation of the
+>    *fitted* g1(v1 . x) with backfitting. Report the minimum principal-angle cosine beside
+>    the mean.
+> 5. **B-16 · SwiGLU K=2 ground truth on SmolLM2-135M (~6 h CPU).** Each gated unit reads
+>    exactly two directions (gate and up rows times the RMSNorm gain). This is the first real,
+>    not planted, K=2 test, and the cheapest answer to "only GPT-2-class models".
+> 6. **B-17 · GPT-Neo L6, n=20 with per-unit diagnostics (~1 h).** Settles whether the
+>    below-chance 0.0026 is a model property or a pipeline fault.
+> 7. **B-18 · One model at or above 0.5B on the headline comparison** (Qwen2.5-0.5B or
+>    OLMo-1B, n=100, Kaggle, steps scaled to width per B-11s). Answers the scale objection
+>    without repeating B-11's under-fitting.
+> 8. **B-19 · New ground-truth-free signals scored on B-14's fits (offline, minutes):** R2 on
+>    active tokens only, rank-2 minus rank-1 R2 gap, active-token count over d, and a residual
+>    test for a missing direction. On-thesis: more checks calibrated against the same truth.
+>
+> **Not before the above:** SAE encoder rows as a second substrate; PolyPythias seed spread;
+> Study 3 as its own short paper with an impact-matched control (Ferrara 2608.20569 now
+> covers the norm-matched-random result on 8 other models, and our own C45/C46 A3 agrees with
+> it).
 
 ---
 

@@ -87,6 +87,16 @@ same scale** — only the training corpus differs, and the Wilson intervals do n
 failure rate that does not carry its model and layer is not a result. (It is *not* rankable
 against the depth spread below, which is an aggregate over shifting populations.)
 
+> **CORRECTED 5 October 2026.** The paired reading below is withdrawn. B-7 draws the same
+> unit *indices* at every layer, but neuron *i* at layer 2 and neuron *i* at layer 6 are
+> different neurons, so nothing is paired. The pattern counts match what three independent
+> draws would give (e.g. fail-pass-pass observed 20, expected 19.4; fail at all three
+> observed 0, expected 0.3). What B-7 supports is the unpaired rise in pass rate with depth.
+> The GPT-Neo comparison is also narrowed from "only the corpus differs" to "model family",
+> since GPT-Neo's attention pattern and training recipe differ too. Every pass rate on this
+> page was produced with batch-coupled early stopping, found the same day. See
+> `docs/LAB_NOTEBOOK.md` §4, "Audit of every run to date".
+
 **But the depth effect is not what the pass rates suggest.** B-7 ran the *same* 50 units at
 all three layers — the unit draw depends only on the seed and `d_model`, both fixed across
 layers — so the failure sets can be compared unit by unit. They barely overlap:
