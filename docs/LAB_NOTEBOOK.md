@@ -423,7 +423,7 @@ Side result: the restart 2 -> 5 change raises the pass rate (40 -> 44), as B-1 d
 sleep event in the System log) and 10:34, when the queue was relaunched. Cause not
 identified; the machine did not reboot (last boot 1 Oct). It never started B-14, and the
 CPU sat idle from 11:17 to 13:17. Restarted by hand at 13:17: B-12 report rewritten (exit 0)
-and **B-14 started at 13:17.**
+and **B-14 started at 13:17.** It died within minutes, and the task exited with 0xC000013A, the console-close / Ctrl+C status. The task is Interactive, so it opens a visible bash window, and closing that window kills the run. The -1 this morning was most likely the same thing. Switching to a windowless S4U logon needs admin rights (access denied), so the task now starts bash through `powershell -WindowStyle Hidden ... Start-Process -WindowStyle Hidden -Wait`. **B-14 restarted at 13:26 (PID 19284)** with no window. The stdout log stays empty until Python flushes its buffer; progress is the row count of `results/b14_primary_gpt2_indep.jsonl`.
 
 ### B-12 - batch invariance with per-neuron seeding (2026-10-05, control arm still running) - **SEEDING DID NOT CLOSE IT**
 
