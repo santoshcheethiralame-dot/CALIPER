@@ -255,6 +255,22 @@ warning, but a narrower one.
   - readout disagreement on identical trials;
   - TOST equivalence of random versus live at the published operating point.
 
+**Additions from the APERTURE audit (6 Oct, `docs/APERTURE_INHERITANCE.md`):**
+- S-1 and S-2 gain APERTURE's vector recipe as a third extraction arm: whole-sentence
+  residual means against a same-category negative.
+- S-2 scores APERTURE's three-flag gate (stability = agreement, probe = functional,
+  steering = positive control) beside CALIPER's generation-based steering control.
+- S-2 records the "As an AI" disclaimer rate against alpha for live and random vectors,
+  testing whether the perturbation, not the concept, switches the disclaimer off.
+- Forced-choice identification in S-2, S-5 and S-7 is scored with APERTURE's gamma
+  prior-null estimator.
+- Concept banks are stratified by domain, with emotion concepts reported separately
+  (affect confound).
+- S-11 (R9 naturalistic re-run) is promoted from optional to planned, since Paper 2's
+  reviewers will raise the off-distribution objection.
+- S-13 is a new optional run bridging L2 and L3: a dose-response sweep along the
+  Assistant Axis.
+
 **S-3 · A-F1, finish APERTURE's confound hardening (Kaggle, about 10 GPU-hours, free tier).**
 The 13 remaining files run under the frozen prereg (`mirror/docs/prereg/2026-07-30-f1-confound-hardening.md`),
 scored once with `aperture/f1_score.py`. No interim scoring of the 11 files already in.
