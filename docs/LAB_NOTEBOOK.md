@@ -283,6 +283,61 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Cross-arm analyses on archived runs (2026-10-06, offline) - **R2 AHEAD IN 6/6 ARMS, POOLED -0.152; ABOUT 10% OF UNITS NO RESTART COUNT REACHES**
+
+`experiments/analyse_cross_arm.py`, output `results/cross_arm_analysis.json`. No model, no
+fitting. Every arm here used the coupled estimator; B-14 will replace the GPT-2 L6 row.
+
+**1. Cross-arm meta-analysis of restart agreement minus held-out R2.** One arm per
+(model, layer) condition, so no two arms share units. Arms with fewer than 5 failures are
+listed and not pooled.
+
+| arm | n | failures | AUC restart | AUC R2 | diff | p |
+|---|---|---|---|---|---|---|
+| GPT-2 L6 (B-1b) | 300 | 52 | 0.778 | 0.942 | -0.164 | 1.8e-07 |
+| Pythia-160m L6 (B-2b) | 300 | 13 | 0.899 | 0.993 | -0.094 | 0.11 |
+| GPT-2 L2 (B-7) | 50 | 25 | 0.789 | 0.950 | -0.162 | 0.0089 |
+| GPT-2 L10 (B-7) | 50 | 5 | 0.729 | 0.818 | -0.089 | 0.22 |
+| GPT-Neo-125m L10 (B-8) | 100 | 41 | 0.582 | 0.715 | -0.133 | 0.0086 |
+| Pythia-1.4b L12, 3200 steps (B-11s) | 50 | 14 | 0.746 | 0.996 | -0.250 | 0.00019 |
+| *Pythia-70m (2 failures, not pooled)* | 50 | 2 | 0.865 | 0.615 | +0.250 | 0.43 |
+| *Pythia-410m (2 failures, not pooled)* | 50 | 2 | 0.771 | 1.000 | -0.229 | 0.28 |
+
+DerSimonian-Laird random effects over the 6 pooled arms: **-0.152, 95% CI [-0.192, -0.112],
+I2 = 0.00**. A bootstrap over whole arms gives mean -0.148 [-0.194, -0.110]. R2 is ahead in
+6/6 pooled arms. The gap is remarkably homogeneous across models, layers and families,
+although the arms' absolute AUCs vary widely (R2 from 0.72 to 1.00). This is the right form
+for the paper's "across every arm" claim: one estimate with an arm-level interval, not a
+vote count. The DeLong SE for the 5-failure arm is rough.
+
+**2. B-4, the restart-count curve (descriptive).** AUC of restart agreement built from the
+first k of 5 stored restarts, against the 5-restart fit's failure label:
+
+| arm | failures | k=2 | k=3 | k=4 | k=5 | held-out R2 |
+|---|---|---|---|---|---|---|
+| B-7 L6 | 7 | 0.834 | 0.781 | 0.774 | 0.817 | 0.944 |
+| B-12 control | 6 | 0.735 | 0.705 | 0.655 | 0.761 | 0.837 |
+
+More restarts do **not** make restart agreement a better failure predictor here. The curve
+is flat within noise and sits below R2 at every k. The theory's predicted rise with k is
+not seen. Its predicted ceiling below R2 is. With 6-7 failures this is descriptive only.
+
+**3. A share of units no restart count reaches.** With a two-class model (a fraction pi
+never recovered; the rest succeed per restart with probability q; best-of-k passes if any
+restart succeeds):
+
+| pair of runs | pass at k=2 | pass at k=5 | pi | q | one-class model predicts at k=5 |
+|---|---|---|---|---|---|
+| E0.1 gate -> B-1 (n=100) | 0.77 | 0.91 | **0.080** | 0.60 | 0.975 |
+| B-12 b32 -> control (n=50) | 0.80 | 0.88 | **0.118** | 0.70 | 0.982 |
+
+A single shared per-restart success rate overpredicts k=5 by 7-10 points in both pairs. The
+data fit a class of roughly **8-12% of units that more restarts do not fix.** "Run more
+restarts" is therefore not a remedy for silent failure. The paired B-12 table also shows the
+idealisation breaking: 2 units pass at k=2 and fail at k=5, which best-of-k cannot produce if
+selection always picked a succeeding restart. Selection is by held-out R2 between routes, so
+it does not.
+
 ### Audit of every run to date (2026-10-05) - **THE 4 OCT WRITE-UPS CARRY THREE INDEPENDENCE ERRORS**
 
 Every Study 1 jsonl was re-scored from disk (`align_selected`, both pass rules, all four
