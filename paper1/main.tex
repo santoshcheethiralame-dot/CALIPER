@@ -1,0 +1,361 @@
+\documentclass[10pt]{article}
+\usepackage{tmlr}
+% \usepackage[preprint]{tmlr}   % for the arXiv version
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Drafting marks. \tbd{} = waiting on B-14 (the re-run on the fixed estimator).
+% \prov{} = a number measured with the coupled estimator; replace or confirm after B-14.
+\newcommand{\tbd}[1]{\textcolor{red}{[TBD: #1]}}
+\newcommand{\prov}[1]{\textcolor{orange}{#1}}
+\newcommand{\note}[1]{\textcolor{blue}{[#1]}}
+
+\title{Restart Agreement Is Not Correctness:\\Calibrating Interpretability's Reliability Checks\\Against Exact Ground Truth}
+
+\author{\name Anonymous authors\\ \addr Paper under double-blind review}
+
+\def\month{MM}
+\def\year{2026}
+\def\openreview{\url{https://openreview.net/forum?id=XXXX}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Interpretability methods are usually trusted on the strength of checks that need no ground
+truth: an estimate is believed if independent restarts agree on it, if two methods agree,
+or if it fits held-out data. None of these checks has itself been calibrated against a
+known answer, because the known answer is exactly what is missing. We point out one place
+where it is not missing. The pre-activation of an MLP neuron is exactly the inner product of
+its layer's normalised residual stream with the neuron's input weight column, so the
+direction the neuron reads is written in the weights. Using this as a reference standard, we
+score a maximally-informative-dimensions style estimator and the checks used to vouch for it
+on \tbd{n} units of GPT-2 small, with replications across depth, model family and training
+corpus. The estimator fails silently on \tbd{x}\% of units. Agreement across restarts, the
+most common check, predicts these failures \tbd{markedly} worse than held-out fit, a quantity
+every fit already computes (AUC \tbd{0.78 vs 0.94}; pooled across six model and layer
+conditions, $\Delta$AUC $=$ \prov{$-0.15$}, 95\% CI \prov{$[-0.19,-0.11]$}). Restart
+agreement adds nothing once unit difficulty is accounted for, while held-out fit does, and
+about one unit in ten is never recovered at any restart count we tried. In the vocabulary of
+metrology, restart agreement is a check of precision, not of trueness. We release the bench,
+the pre-registrations and every run.
+\end{abstract}
+
+% ======================================================================
+\section{Introduction}
+
+When an interpretability method returns a direction, a feature or a circuit, the
+practitioner rarely knows the right answer. The result is therefore trusted on the strength
+of internal checks. The most common is agreement: run the method again from a different
+random initialisation, or with a different seed for the dictionary, and keep what comes
+back. Sparse-autoencoder features are judged by whether they reappear across seeds
+\citep{paulo2025sparse,song2025position}, concept activation vectors by whether their scores
+are stable across training runs \citep{kim2018tcav}, ICA and NMF components by whether
+repeated runs cluster together \citep{himberg2004icasso,brunet2004metagenes}, and neurons
+by whether they recur across independently trained models \citep{gurnee2024universal}. A
+recent position paper asks the community to report run-to-run consistency routinely, as a
+proxy for recovering ground truth \citep{song2025position}.
+
+Agreement is a measure of how repeatable a result is. Whether it also measures whether the
+result is right is an empirical question, and one that is hard to ask, because answering it
+needs the ground truth whose absence motivated the check. Measurement science separates the
+two properties explicitly. In the international vocabulary of metrology, \emph{precision}
+is the closeness of agreement between repeated measurements, while \emph{trueness} is the
+closeness of their average to a reference value, and trueness ``is not related to random
+measurement error'' \citep{vim2012}. An instrument can be precise and wrong. Metrology's
+answer is calibration: an instrument is checked against a reference standard before its
+readings on unknowns are trusted, a principle that also governs high-assurance sensing
+\citep{shah2020calibration}.
+
+This paper supplies a reference standard for one interpretability instrument and uses it to
+calibrate the checks practitioners rely on. The standard is free. An MLP neuron's
+pre-activation is $z = \mathbf{w}^\top \mathbf{s} + b$, where $\mathbf{s}$ is the output of
+the layer norm that feeds the MLP and $\mathbf{w}$ the neuron's input weight column. With
+respect to $\mathbf{s}$, the neuron reads exactly one direction, and that direction can be
+read off the weights (Section~\ref{sec:substrate}). Any method that claims to recover what a
+unit responds to from stimulus and response alone can be scored against it, on units shaped
+by training rather than built by hand, in unlimited supply.
+
+We use it to ask a narrow question with a broad reach: \emph{when a direction-recovery
+estimator fails, which of the checks available without ground truth notices?} Our
+contributions are:
+\begin{enumerate}
+  \item \textbf{A calibration bench.} Exact per-unit ground truth on real trained language
+  models, an estimator from the receptive-field literature
+  \citep{sharpee2004mid,williamson2015equivalence}, four ground-truth-free reliability
+  checks, and a pre-registered protocol for scoring the checks by how well they predict
+  failure.
+  \item \textbf{Restart agreement is a weak and redundant check.} Held-out fit predicts
+  silent failure better in every condition we ran, with a pooled gap of \prov{0.15} AUC and
+  no detectable heterogeneity across models, layers and families. Restart agreement adds
+  nothing beyond simple unit-difficulty predictors, while held-out fit does
+  (Section~\ref{sec:results}).
+  \item \textbf{More restarts are not a remedy.} The pattern of pass rates across restart
+  counts is inconsistent with a single per-restart success probability, and implies that
+  roughly \prov{8--12\%} of units are not recovered at any number of restarts.
+  \item \textbf{An error budget.} Verdicts move with restart count, batch composition, token
+  sample and hardware; failure rates move with depth and model family. We report each
+  component, so that a single quoted failure rate carries its conditions.
+\end{enumerate}
+We do not claim that models resemble brains. We claim that interpretability and systems
+neuroscience share a measurement problem, and that the discipline neuroscience built for it,
+calibration against a preparation where the answer is known, transfers.
+
+% ======================================================================
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Stability as a reliability check.} Agreement across random restarts or resamples
+is a long-standing proxy for reliability in unsupervised estimation: run-to-run clustering
+of ICA components \citep{himberg2004icasso}, consensus clustering for NMF
+\citep{brunet2004metagenes}, and, in interpretability, seed consistency of sparse-autoencoder
+features \citep{paulo2025sparse,song2025position,gerasimov2026unstable}. Song et al.
+validate run-to-run consistency against ground truth on synthetic dictionaries, where it
+tracks ground-truth recovery over training in aggregate \citep{song2025position}; we ask
+whether agreement identifies \emph{which individual} estimates are wrong, on real trained
+models. Gerasimov et al. find that seed-stable SAE features carry most of the reconstruction
+signal while unstable ones reflect reproducible subspaces resolved differently per seed
+\citep{gerasimov2026unstable}; our results are compatible, since stability can track
+importance without tracking correctness. Warnings that stability is not correctness exist
+in clustering \citep{bendavid2006sober}, and the failure of agreement between independently
+built versions as evidence of correctness is classic in software reliability
+\citep{knight1986nversion}. \note{add the usage-census table as an appendix}
+
+\paragraph{Predictability before stability.} The PCS framework for veridical data science
+uses ``predictability as a reality check'', screens models on prediction before assessing
+stability, and lists random initial values in gradient descent among the perturbations
+stability should survive \citep{yu2020veridical}. Our result is a ground-truth test of that
+ordering: the predictability check outperforms the stability check. Restart agreement
+estimates how much of the initialisation distribution flows into a basin, which is evidence
+about the basin's size rather than its correctness \citep{nehzati2026restarts}.
+
+\paragraph{Ground truth in interpretability evaluation.} Benchmarks with known answers
+plant or compile them \citep{gupta2024interpbench}, or synthesise features
+\citep{song2025position}. Weight-based interpretability reads weights as the object of
+analysis; we use them as a scoring key for methods that never look at weights.
+
+\paragraph{Misleading metrics elsewhere.} Widely adopted checks have misled before:
+saliency maps that pass visual inspection yet are insensitive to the model
+\citep{adebayo2018sanity}, adversarial defences that look robust until evaluated adaptively
+\citep{athalye2018obfuscated}, and security classifiers whose standard metrics hide failure
+under evasion \citep{gardiner2016security,arp2022dos}. Construct reliability is not construct
+validity \citep{jacobs2021measurement}, and evaluating AI systems is a measurement problem
+\citep{wallach2025position}.
+
+\note{Section to be tightened after the related-work broadening report; cite CAST/surrogate
+endpoints only once the counts are verified.}
+
+% ======================================================================
+\section{An exact reference standard for unit directions}
+\label{sec:substrate}
+
+Let $\mathbf{x}\in\mathbb{R}^{d}$ be the residual stream entering an MLP block,
+$\mathbf{s} = \mathrm{LN}(\mathbf{x}) = \boldsymbol{\gamma}\odot\mathbf{u} +
+\boldsymbol{\beta}$ the output of its layer norm, where $\mathbf{u}$ is the normalised,
+zero-mean input, and $W_{\text{in}}\in\mathbb{R}^{d\times d_{\text{mlp}}}$ the MLP's input
+weights. Neuron $j$'s pre-activation is $z_j = \mathbf{w}_j^\top\mathbf{s} + b_j$ and its
+response is $y_j = \mathrm{GELU}(z_j)$. As a function of $\mathbf{s}$, the response depends
+on exactly one direction, $\mathbf{w}_j$. We verify the identity numerically
+(Table~\ref{tab:verify}).
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lcc}
+\toprule
+model & max relative error of $\mathbf{w}^\top\mathbf{s}+b$ & correlation \\
+\midrule
+GPT-2 small & $3.3\times10^{-6}$ & 1.0000000000 \\
+Pythia-160m & $1.7\times10^{-4}$ & 1.0000000000 \\
+GPT-Neo-125m (layers 6, 10) & $3\times10^{-7}$ & 1.0000000000 \\
+\bottomrule
+\end{tabular}
+\caption{The pre-activation is reproduced from the layer-norm output and the weight column.
+Differences are float32 accumulation order.}
+\label{tab:verify}
+\end{table}
+
+\paragraph{One direction is not identifiable, and we remove it.} Because $\mathbf{u}$ has
+zero mean across coordinates, $\mathbf{s}\cdot(\boldsymbol{1}/\boldsymbol{\gamma})$ is
+constant on every token. The component of $\mathbf{w}_j$ along $\boldsymbol{1}/\boldsymbol{\gamma}$
+only shifts the bias and cannot be recovered from data. In GPT-2 small its median share of
+$\|\mathbf{w}_j\|^2$ is about $5\times10^{-4}$; at layer 6 no unit has a share large enough
+to cap the attainable cosine below our bar, at layer 2 four of 3{,}072 do. We report alignment
+against $\mathbf{w}_j$ and, where fitted directions were saved, against its identifiable
+part. \note{B-14 has no saved directions; every later run does.}
+
+\paragraph{Scope.} The standard holds for a unit reading its own layer's layer-norm output.
+It does not extend to residual-stream features, sparse-autoencoder latents or behavioural
+directions, and whether calibrations transfer to them is an assumption this paper tests only
+\tbd{in the transfer experiment, if it lands} (Section~\ref{sec:limits}).
+
+% ======================================================================
+\section{The instrument and the checks}
+\label{sec:method}
+
+\paragraph{Stimulus and response.} We stream public-domain prose (Project Gutenberg) through
+the model in 128-token sequences, drop position 0, and record $\mathbf{s}$ and $y_j$ for
+8{,}000 tokens at the chosen layer. Units are drawn uniformly from the layer's 3{,}072.
+
+\paragraph{Estimator.} A rank-$k$ bottleneck regression $y \approx g(V^\top \mathbf{s})$,
+with $V\in\mathbb{R}^{d\times k}$ orthonormalised by QR and $g$ a two-hidden-layer tanh
+network of width 64, fitted by Adam (learning rate $3\times10^{-3}$, 1{,}600 steps) on
+standardised inputs and responses, with 20\% of tokens held out and early stopping on
+held-out $R^2$. This is the likelihood-equivalent family of maximally informative dimensions
+\citep{sharpee2004mid,williamson2015equivalence}. The first restart is warm-started from a
+ridge-regression direction; the rest are random. We use two routes to a rank-1 answer:
+\emph{direct} (fit $k{=}1$) and \emph{cascade} (fit $k{=}2$, then search the best direction
+within the plane), and select between them by held-out $R^2$. Units are fitted in batches
+with per-unit initialisation and per-unit early stopping, so a unit's fit does not depend on
+its batch-mates (Appendix~\ref{app:deviations}).
+
+\paragraph{Failure.} A fit fails when $|\cos(\hat{\mathbf{v}},\mathbf{w}_j)| < 0.95$. We also
+report threshold sweeps from 0.90 to 0.98 and alignment as a continuous outcome.
+
+\paragraph{Checks scored.} Each is computable without $\mathbf{w}_j$:
+\begin{itemize}
+  \item \emph{held-out $R^2$} of the selected fit;
+  \item \emph{restart agreement}, the median pairwise $|\cos|$ between restarts of the direct
+  route;
+  \item \emph{restart $R^2$ spread}, max minus min held-out $R^2$ across restarts;
+  \item \emph{route agreement}, $|\cos|$ between the direct and cascade directions.
+  \note{Earlier drafts and runs used a ``disagreement'' quantity that depended on
+  $\mathbf{w}_j$; it is withdrawn.}
+\end{itemize}
+
+\paragraph{Protocol.} The primary endpoint, filed before the run, is DeLong's test for two
+correlated ROC curves \citep{delong1988comparing}: AUC of restart agreement minus AUC of
+held-out $R^2$ at predicting failure, on the same units. Secondary analyses (paired bootstrap,
+PR-AUC, threshold sweep, calibration, nuisance baselines with incremental cross-validated AUC,
+permuted-label and ground-truth-signal controls) were filed before the run's outputs were
+opened, and the analysis code was developed on an earlier, already-unblinded run.
+
+% ======================================================================
+\section{Results}
+\label{sec:results}
+
+\subsection{The estimator fails silently on a minority of units}
+\tbd{B-14: pass rate with Wilson CI; median and minimum alignment; failure classes
+(wrong basin vs under-fitted).} On the earlier coupled run, 52 of 300 units failed while the
+median alignment across all units was \prov{0.994}; aggregate statistics hide the failures.
+Classical closed-form estimators fail almost completely on the same units: spike-triggered
+averaging recovers 0 of 30, decorrelated STA 1 of 30, spike-triggered covariance 0 of 30,
+against 26 of 30 for the fitted estimator, because the stimulus is non-Gaussian and GELU is
+non-monotone over the range these units occupy. A random-direction null bounds chance fit at
+$R^2 \le 0.044$.
+
+\subsection{Restart agreement is a weaker predictor of failure than held-out fit}
+\tbd{B-14 primary: AUCs, DeLong difference, p, bootstrap CI, decision-table verdict.}
+\prov{On the coupled run: restart agreement 0.778, held-out $R^2$ 0.942, $\Delta = -0.164$,
+$p = 1.8\times10^{-7}$, bootstrap 95\% CI $[-0.224,-0.106]$.} \tbd{figure: ROC curves;
+threshold sweep.}
+
+\subsection{Restart agreement adds nothing beyond unit difficulty}
+Four pre-fit descriptors of each unit (fraction of tokens on which it is active, mean
+pre-activation, response kurtosis, and the GELU first-order coefficient) predict failure on
+their own with cross-validated AUC \prov{0.844}. Adding held-out $R^2$ raises this to
+\prov{0.907}; adding restart agreement leaves it at \prov{0.841}. \tbd{confirm on B-14.}
+
+\subsection{The gap is consistent across models, layers and families}
+Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs vary widely,
+from a held-out-$R^2$ AUC of 0.72 on GPT-Neo to 1.00 on Pythia-1.4B, but the gap does not:
+random-effects pooling gives $\Delta$AUC \prov{$-0.152$}, 95\% CI \prov{$[-0.192,-0.112]$},
+$I^2 = 0$, and held-out $R^2$ is ahead in all six. \note{all arms were fitted with the coupled
+estimator; re-run the GPT-2 L6 and Pythia arms on the fixed one and re-pool.}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrccc}
+\toprule
+condition & $n$ & failures & AUC restart & AUC held-out $R^2$ & $\Delta$ \\
+\midrule
+GPT-2 small, layer 6 & 300 & 52 & 0.778 & 0.942 & $-0.164$ \\
+Pythia-160m, layer 6 & 300 & 13 & 0.899 & 0.993 & $-0.094$ \\
+GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ \\
+GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ \\
+GPT-Neo-125m, layer 10 & 100 & 41 & 0.582 & 0.715 & $-0.133$ \\
+Pythia-1.4B, layer 12, 3{,}200 steps & 50 & 14 & 0.746 & 0.996 & $-0.250$ \\
+\midrule
+random effects & & & & & \prov{$-0.152\ [-0.192, -0.112]$} \\
+\bottomrule
+\end{tabular}
+\caption{\prov{Provisional: coupled estimator.} One arm per condition; arms with fewer than
+five failures are excluded from pooling.}
+\label{tab:arms}
+\end{table}
+
+\subsection{More restarts do not fix it}
+Restart agreement computed from the first $k$ of five stored restarts does not predict
+failure better as $k$ grows, and stays below held-out $R^2$ at every $k$ (descriptive; 6--7
+failures per arm). Pass rates at two and five restarts are inconsistent with a single
+per-restart success probability, which predicts 97.5--98\% at five restarts against an
+observed 88--91\%. A two-class model attributes this to \prov{8--12\%} of units that are not
+recovered at any restart count. \tbd{replicate with B-15.}
+
+\subsection{An error budget for single-unit verdicts}
+\tbd{variance decomposition from B-15: restarts, batch, token sample, device, layer, family.}
+Known so far: at fixed units, changing the restart count from two to five changes about 12\%
+of verdicts; changing the 8{,}000-token sample changes 10 of 50; running on a GPU instead of
+a CPU changes 4 of 50. Pass rates differ with depth (0.48, 0.86, 0.90 at layers 2, 6, 10) and
+with model family at fixed depth (GPT-Neo-125m 0.59 vs GPT-2 0.90 at layer 10). A failure
+rate is a property of a model, a layer and a configuration, not of the estimator alone.
+
+% ======================================================================
+\section{Why agreement can be confidently wrong}
+\label{sec:why}
+
+Restart agreement measures how much of the initialisation distribution flows into the basin
+the estimator ends in. If a wrong basin is large, restarts agree on it, and agreement grows
+with the number of restarts exponentially faster than evidence that the basin is the only one
+\citep{nehzati2026restarts}. Single-neuron regression with a biased, non-monotone activation is
+a known source of such basins: gradient descent on a single neuron with bias fails from a
+large fraction of initialisations \citep{vardi2021learning}, and the units that fail here sit
+in GELU's non-monotone region, where the first-order signal that guides early optimisation
+nearly vanishes. Held-out fit, by contrast, measures the basin's loss. Because the true
+direction attains $R^2 = 1$ on every unit we inspected, a wrong basin pays for its wrongness
+in fit, and the predictability check sees what the stability check cannot. Label-free
+estimates of correctness are never guaranteed \citep{garg2022leveraging}; held-out fit is a
+necessary condition, not a certificate.
+
+% ======================================================================
+\section{Limitations and scope}
+\label{sec:limits}
+\begin{itemize}
+  \item The reference standard covers MLP units reading their own layer. \tbd{transfer
+  experiment: SAE encoder rows or transcoders.}
+  \item Models are small (124M--160M, plus a 1.4B arm that needed twice the optimisation
+  budget). \tbd{one model at or above 0.5B.}
+  \item One estimator family. The checks are estimator-agnostic, but their AUCs are not.
+  \item The 0.95 bar is a convention; threshold sweeps are reported.
+  \item Held-out tokens share sequences with training tokens in the runs reported here.
+  \tbd{sequence-level split in B-15.}
+\end{itemize}
+
+\section{Conclusion}
+\tbd{after B-14.}
+
+\bibliography{references}
+\bibliographystyle{tmlr}
+
+\appendix
+\section{Deviations from pre-registered plans}
+\label{app:deviations}
+\tbd{table: what changed, why, whether data had been seen, effect. Include: batch-coupled
+early stopping and position-keyed seeding (fixed; B-14 re-run); the ground-truth-dependent
+disagreement field (withdrawn); B-12 verdict arithmetic; B-7 pairing (withdrawn); S1-2
+criterion restored.}
+
+\section{Threats to validity}
+\tbd{construct, internal, external, statistical-conclusion; from the rigor report.}
+
+\section{Usage census}
+\tbd{34 instances of agreement used as a reliability check; from the census notes.}
+
+\end{document}
