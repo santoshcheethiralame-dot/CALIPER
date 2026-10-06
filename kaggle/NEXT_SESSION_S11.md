@@ -118,8 +118,10 @@ with contextlib.redirect_stderr(ERR):
             for n in contexts}
 torch.save({"acts": acts, "dirs": dirs}, "/kaggle/working/s11_activations.pt")
 ERR.close()
-import shutil; shutil.make_archive("/kaggle/working/s11", "zip", "/kaggle/working",
-                                   base_dir=".")
+import zipfile
+with zipfile.ZipFile("/kaggle/working/s11.zip", "w") as z:
+    for f in sorted(glob.glob("/kaggle/working/s11_*")):
+        z.write(f, os.path.basename(f))
 print("DOWNLOAD /kaggle/working/s11.zip")
 ```
 
