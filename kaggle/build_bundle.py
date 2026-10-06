@@ -24,6 +24,7 @@ INCLUDE = [
     "caliper/batched.py",
     "caliper/estimator.py",
     "caliper/runtime.py",
+    "caliper/sae.py",
     "experiments/e01_gate.py",
     "experiments/b1_signal_calibration.py",
     "experiments/kaggle_device_equivalence.py",

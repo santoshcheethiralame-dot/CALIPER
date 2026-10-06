@@ -72,6 +72,22 @@ ap.add_argument("--sequence-split", action="store_true",
                 help="shuffle whole sequences, not tokens, before fit_batch takes its first "
                      "20%% as the held-out set, so held-out tokens never share a sequence "
                      "with training tokens. Opt-in: it changes every held-out R2.")
+ap.add_argument("--target", choices=("mlp", "sae"), default="mlp",
+                help="mlp: units are MLP neurons, reference = input weight column (every run "
+                     "before 7 Oct). sae: units are latents of the jbloom GPT-2 small residual "
+                     "SAE at --layer, reference = the mean-removed encoder column "
+                     "(caliper/sae.py, docs/preregistration-tsae-transfer.md)")
+ap.add_argument("--sae-min-log-density", type=float, default=-3.0,
+                help="sae only: exclude latents firing on fewer than 10^x of tokens")
+ap.add_argument("--fit-seed", type=int, default=0,
+                help="seed for every fit (fit_batch and fit_cascade). 0 reproduces every "
+                     "earlier run; B-15 varies it")
+ap.add_argument("--corpus-seed", type=int, default=0,
+                help="seed for sample_corpus, which decides which tokens make the stimulus. "
+                     "0 reproduces every earlier run")
+ap.add_argument("--split-seed", type=int, default=0,
+                help="seed for collect's row order, which decides the 20%% held-out set. "
+                     "0 reproduces every earlier run")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -81,13 +97,21 @@ ck = Checkpoint(a.out)
 
 model, tok = load_model(a.model)
 rng = np.random.default_rng(0)
-if a.neuron_pool:
+sae = None
+if a.target == "sae":
+    from caliper.sae import draw_latents, load_sae
+    sae = load_sae(a.layer)
+    # Drawn evenly across density quartiles, then shuffled once so that --neuron-pool
+    # prefixes stay a fair sample of every quartile.
+    pool = draw_latents(sae, a.neuron_pool or a.neurons, a.sae_min_log_density)
+    neurons = rng.permutation(pool)[:a.neurons]
+elif a.neuron_pool:
     neurons = rng.choice(a.d_mlp, size=a.neuron_pool, replace=False)[:a.neurons]
 else:
     neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
-p = collect(model, tok, sample_corpus(n_docs=300, seed=0), layer=a.layer,
-            neurons=neurons, max_tokens=a.tokens, seed=0,
-            shuffle="sequence" if a.sequence_split else "token")
+p = collect(model, tok, sample_corpus(n_docs=300, seed=a.corpus_seed), layer=a.layer,
+            neurons=neurons, max_tokens=a.tokens, seed=a.split_seed,
+            shuffle="sequence" if a.sequence_split else "token", sae=sae)
 dirs = None if a.no_save_directions else Path(a.out.replace(".jsonl", "_dirs"))
 if dirs is not None:
     dirs.mkdir(parents=True, exist_ok=True)
@@ -103,14 +127,14 @@ for start in range(0, len(todo), a.batch):
     Y = p.response[:, idx]
     indep = dict(unit_ids=p.neurons[idx], per_neuron_stop=True) if a.independent_units else {}
     d1 = fit_batch(p.stimulus, Y, k=1, n_restarts=a.restarts, steps=a.steps,
-                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
+                   seed=a.fit_seed, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
     d2 = fit_batch(p.stimulus, Y, k=2, n_restarts=a.restarts, steps=a.steps,
-                   seed=0, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
+                   seed=a.fit_seed, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
     for j, i in enumerate(idx):
         n = int(p.neurons[i])
         wu = p.weights[:, i] / np.linalg.norm(p.weights[:, i])
         c = fit_cascade(p.stimulus, p.response[:, i], k=1,
-                        n_restarts=a.restarts, steps=a.steps, seed=0)
+                        n_restarts=a.restarts, steps=a.steps, seed=a.fit_seed)
         ad = abs(subspace_alignment(d1[j].subspace, wu[:, None]))
         ac = abs(subspace_alignment(c.subspace, wu[:, None]))
         use_cascade = c.test_r2 > d1[j].test_r2
@@ -149,6 +173,7 @@ for start in range(0, len(todo), a.batch):
             # the pairs survive the run, so keep them, not just their median.
             "stability_pairs": d1[j].stability_pairs,
             "n_restarts": a.restarts,
+            **({"log_density": round(float(sae["log_density"][n]), 4)} if sae is not None else {}),
         })
     el = time.time() - t0
     print(f"  {len(ck.rows())}/{int(alive.sum())} neurons  {el:.0f}s "
@@ -169,6 +194,8 @@ summary = {
     "n_restarts": a.restarts, "steps": a.steps, "batch": a.batch,
     "tokens": a.tokens, "per_neuron_seed": bool(a.per_neuron_seed),
     "independent_units": bool(a.independent_units),
+    "target": a.target, "fit_seed": a.fit_seed, "corpus_seed": a.corpus_seed,
+    "split_seed": a.split_seed,
     "sequence_split": bool(a.sequence_split),
     "directions_dir": str(dirs) if dirs is not None else None,
     "neuron_pool": a.neuron_pool,

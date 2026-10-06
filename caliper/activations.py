@@ -93,28 +93,53 @@ def collect(
     skip_first=1,
     seed=0,
     shuffle="token",
+    sae=None,
 ):
     """Stream text through the model, capturing stimulus/response pairs.
 
     ``skip_first`` drops position 0, whose residual-stream norm is an order of
     magnitude larger than typical tokens and would dominate any least-squares fit.
+
+    With ``sae`` (from `caliper.sae.load_sae`), the units are SAE latents instead of MLP
+    neurons. The stimulus is the residual stream entering block ``layer``, mean-centred
+    per token, which is what the jbloom GPT-2 SAEs were trained on (reconstruction explains
+    0.83 of variance centred against 0.54 raw on our corpus). The response is the latent's
+    ReLU activation. Its pre-activation is exactly (s - b_dec) . W_enc[:, j] + b_enc[j], and
+    because s has zero mean across coordinates the identifiable reference is the encoder
+    column with its own mean removed.
     """
     block = _blocks(model)[layer]
     neurons = np.asarray(neurons)
     captured = {}
 
-    def hook_stim(_module, _inp, out):
-        captured["stim"] = out.detach()
+    if sae is None:
+        def hook_stim(_module, _inp, out):
+            captured["stim"] = out.detach()
 
-    def hook_resp(_module, _inp, out):
-        captured["pre"] = out.detach()
+        def hook_resp(_module, _inp, out):
+            captured["pre"] = out.detach()
 
-    handles = [
-        _mlp_ln(block).register_forward_hook(hook_stim),
-        _mlp_in(block).register_forward_hook(hook_resp),
-    ]
+        handles = [
+            _mlp_ln(block).register_forward_hook(hook_stim),
+            _mlp_in(block).register_forward_hook(hook_resp),
+        ]
+        weights = _mlp_in_weight(block)[:, neurons]
 
-    act_fn = torch.nn.functional.gelu
+        def respond(stim, pre):
+            return torch.nn.functional.gelu(pre)[:, :, neurons]
+    else:
+        def hook_pre(_module, args):
+            x = args[0].detach()
+            captured["stim"] = x - x.mean(-1, keepdim=True)
+
+        handles = [block.register_forward_pre_hook(hook_pre)]
+        w_enc = torch.as_tensor(sae["W_enc"][:, neurons], dtype=torch.float32)
+        b_enc = torch.as_tensor(sae["b_enc"][neurons], dtype=torch.float32)
+        b_dec = torch.as_tensor(sae["b_dec"], dtype=torch.float32)
+        weights = (w_enc - w_enc.mean(0, keepdim=True)).numpy()
+
+        def respond(stim, pre):
+            return torch.relu((stim.float() - b_dec) @ w_enc + b_enc)
     stim_chunks, resp_chunks, total = [], [], 0
     rng = np.random.default_rng(seed)
 
@@ -127,7 +152,7 @@ def collect(
                 if len(batch) < batch_size:
                     continue
                 total += _run_batch(
-                    model, batch, captured, act_fn, neurons,
+                    model, batch, captured, respond,
                     stim_chunks, resp_chunks, skip_first,
                 )
                 batch = []
@@ -149,7 +174,7 @@ def collect(
     return Probe(
         stimulus=stimulus[order],
         response=response[order],
-        weights=_mlp_in_weight(block)[:, neurons],
+        weights=weights,
         neurons=neurons,
         layer=layer,
     )
@@ -172,15 +197,16 @@ def _order(n, block, rng, mode):
     return np.concatenate([np.flatnonzero(seq == k) for k in rng.permutation(seq.max() + 1)])
 
 
-def _run_batch(model, batch, captured, act_fn, neurons, stim_out, resp_out, skip_first):
+def _run_batch(model, batch, captured, respond, stim_out, resp_out, skip_first):
     ids = torch.tensor(batch)
     with torch.no_grad():
         model(ids)
-    stim = captured["stim"][:, skip_first:, :]
-    resp = act_fn(captured["pre"][:, skip_first:, :])[:, :, neurons]
+        stim = captured["stim"][:, skip_first:, :]
+        pre = captured.get("pre")
+        resp = respond(stim, None if pre is None else pre[:, skip_first:, :])
     d_model = stim.shape[-1]
     stim_out.append(stim.reshape(-1, d_model).float().numpy())
-    resp_out.append(resp.reshape(-1, len(neurons)).float().numpy())
+    resp_out.append(resp.reshape(-1, resp.shape[-1]).float().numpy())
     return stim_out[-1].shape[0]
 
 

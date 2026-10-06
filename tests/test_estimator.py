@@ -242,3 +242,22 @@ def test_sequence_order_keeps_sequences_whole():
     assert len(runs) == len(set(runs)) == n // block
     legacy = np.random.default_rng(0).permutation(n)
     assert np.array_equal(_order(n, block, np.random.default_rng(0), "token"), legacy)
+
+
+def test_single_unit_fit_is_independent_of_run_history():
+    """Before 7 Oct 2026 the head's initialisation came from torch's global RNG, so the
+    same unit and seed gave different fits depending on what the process had run before.
+    The fit must now be a function of its inputs and seed alone."""
+    import torch
+    from caliper.estimator import fit
+    rng = np.random.default_rng(0)
+    X = rng.standard_normal((2000, 32)).astype(np.float32)
+    w = rng.standard_normal(32); w /= np.linalg.norm(w)
+    y = np.maximum(X @ w, 0) + 0.01 * rng.standard_normal(2000)
+    a = fit(X, y, k=1, n_restarts=1, steps=150, seed=3)
+    torch.manual_seed(12345); torch.randn(1000)          # disturb the global RNG
+    b = fit(X, y, k=1, n_restarts=1, steps=150, seed=3)
+    assert np.allclose(a.subspace, b.subspace) and a.test_r2 == b.test_r2
+    state = torch.get_rng_state()
+    fit(X, y, k=1, n_restarts=1, steps=10, seed=3)
+    assert torch.equal(state, torch.get_rng_state()), "fit must not consume the global RNG"
