@@ -111,10 +111,19 @@ MODELS = {
     "gemma12": "google/gemma-3-12b-it",       # gated; bf16 fits 2xT4 memory (S-1)
     "qwen":   "Qwen/Qwen2.5-32B-Instruct",    # ungated; Vogel replication
     "olmo":   "allenai/OLMo-2-0325-32B-Instruct",  # ungated; post-training analysis
+    # S-2's small models: unquantised on a T4, so precision is not a confound there.
+    "qwen3b": "Qwen/Qwen2.5-3B-Instruct",
+    "qwen7b": "Qwen/Qwen2.5-7B-Instruct",
+    "gemma4b": "google/gemma-3-4b-it",        # gated
 }
+# Tokens that must all appear in a /kaggle/input mount path for it to count as that model.
+KAGGLE_HINTS = {"gemma": ["gemma", "27b"], "gemma12": ["gemma", "12b"], "qwen": ["qwen", "32b"],
+                "olmo": ["olmo"], "qwen3b": ["qwen", "3b"], "qwen7b": ["qwen", "7b"],
+                "gemma4b": ["gemma", "4b"]}
 # Billions of parameters, for the memory guard. A run with --model-path is checked against
 # --model's entry, so pass the matching --model.
-PARAMS_B = {"gemma": 27, "gemma12": 12, "qwen": 32, "olmo": 32}
+PARAMS_B = {"gemma": 27, "gemma12": 12, "qwen": 32, "olmo": 32, "qwen3b": 3.1, "qwen7b": 7.6,
+            "gemma4b": 4.3}
 # Bytes per parameter by quantisation, with headroom for activations and the unquantised
 # embeddings. 4-bit NF4 with double quantisation stores about 0.55 B/param in practice.
 BYTES_PER_PARAM = {"4bit": 0.75, "8bit": 1.25, "none": 2.2}
@@ -474,7 +483,13 @@ def find_kaggle_input(hint=""):
         if "config.json" in filenames and depth <= 6:
             found.append(dirpath)
     if hint:
-        preferred = [p for p in found if hint.lower() in p.lower()]
+        # Every token must appear in the mount path: "qwen7b" is no substring of a Kaggle
+        # path like /kaggle/input/qwen2.5/transformers/7b-instruct/1, and with several
+        # models attached the old substring test fell through to the shortest path.
+        toks = KAGGLE_HINTS.get(hint, [hint])
+        preferred = [p for p in found if all(t in p.lower() for t in toks)]
+        if found and not preferred:
+            print(f"  !! no attached model matches {toks}; candidates: {found}", flush=True)
         found = preferred or found
     if found:
         found.sort(key=len)
