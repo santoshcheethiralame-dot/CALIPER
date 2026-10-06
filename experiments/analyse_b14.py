@@ -99,27 +99,27 @@ def paired_bootstrap(sa, sb, fail, n_boot=2000, seed=0):
     return [float(np.percentile(out, 2.5)), float(np.percentile(out, 97.5))]
 
 
-def ln_null_ceiling(ids, layer):
+def ln_null_ceiling(ids, layer, model_name="gpt2"):
     """Cosine ceiling from the 1/gamma component of each unit's weight column.
 
     The ln_2 output is gamma * z + beta with z zero-mean across coordinates, so s . (1/gamma)
     is constant on every token and w's component along 1/gamma cannot be recovered."""
-    from caliper.activations import _blocks, _mlp_in_weight, load_model
-    model, _ = load_model("gpt2")
+    from caliper.activations import _blocks, _mlp_in_weight, _mlp_ln, load_model
+    model, _ = load_model(model_name)
     block = _blocks(model)[layer]
-    u = 1.0 / block.ln_2.weight.detach().numpy()
+    u = 1.0 / _mlp_ln(block).weight.detach().numpy()
     u /= np.linalg.norm(u)
     W = _mlp_in_weight(block)[:, ids]
     share = (u @ W) ** 2 / (W ** 2).sum(0)
     return np.sqrt(1.0 - share)
 
 
-def nuisance_features(ids, layer, tokens):
+def nuisance_features(ids, layer, tokens, model_name="gpt2"):
     """Pre-fit unit descriptors, recomputed exactly as e01_gate.py collects its stimulus."""
     import torch
     from scipy.stats import kurtosis
     from caliper.activations import _blocks, _mlp_in, collect, load_model, sample_corpus
-    model, tok = load_model("gpt2")
+    model, tok = load_model(model_name)
     p = collect(model, tok, sample_corpus(n_docs=300, seed=0), layer=layer,
                 neurons=np.asarray(ids), max_tokens=tokens, seed=0)
     bias = _mlp_in(_blocks(model)[layer]).bias.detach().numpy()[ids]
@@ -152,6 +152,7 @@ def main():
     ap.add_argument("--reference", default=None,
                     help="B-1b's rows, for the verdict-agreement McNemar (secondary 1)")
     ap.add_argument("--layer", type=int, default=6)
+    ap.add_argument("--model", default="gpt2", help="model the rows were fitted on")
     ap.add_argument("--tokens", type=int, default=8000)
     ap.add_argument("--summary", default=None, help="e01_gate summary json, for s/unit")
     ap.add_argument("--scramble", type=int, default=None,
@@ -306,7 +307,7 @@ def main():
                                            "not fitted directions (deviation from addendum 1 "
                                            "items 1-2)")
     if not a.no_model:
-        ceil = ln_null_ceiling(ids, a.layer)
+        ceil = ln_null_ceiling(ids, a.layer, a.model)
         limited = ceil < PASS
         rep["ln_null_ceiling"] = {"units_with_ceiling_below_bar": [int(i) for i in
                                                                    np.array(ids)[limited]],
@@ -316,7 +317,7 @@ def main():
             ds = delong(list(sig["restart agreement"][keep]), list(sig["held-out R2"][keep]),
                         list(fail[keep]))
             rep["ln_null_ceiling"]["primary_without_limited_units"] = {"diff": ds[2], "p": ds[5]}
-        feats = nuisance_features(ids, a.layer, a.tokens)
+        feats = nuisance_features(ids, a.layer, a.tokens, a.model)
         base = np.column_stack(list(feats.values()))
         rep["nuisance"] = {k: roc(list(-v if k != "response kurtosis" else v), list(fail))[1]
                            for k, v in feats.items()}
