@@ -23,19 +23,27 @@ def load_sae(layer):
     return out
 
 
-def draw_latents(sae, n, min_log_density=-3.0, n_bins=4, seed=0):
-    """n latents drawn evenly across density quantiles of the eligible latents.
+def firing_counts(sae, stimulus, chunk=4096):
+    """How many tokens of ``stimulus`` each latent fires on (pre-activation > 0)."""
+    counts = np.zeros(sae["W_enc"].shape[1], dtype=np.int64)
+    centred = stimulus - sae["b_dec"]
+    for start in range(0, sae["W_enc"].shape[1], chunk):
+        z = centred @ sae["W_enc"][:, start:start + chunk] + sae["b_enc"][start:start + chunk]
+        counts[start:start + chunk] = (z > 0).sum(0)
+    return counts
 
-    A latent firing on a fraction 10^x of tokens fires about 8000 * 10^x times in an
-    8,000-token stimulus, so latents below ``min_log_density`` are excluded as unfittable.
-    The eligible set is split into ``n_bins`` equal-count density bins, the difficulty dial:
-    sparse latents are the analogue of the sparse, heavy-tailed neurons that fail most.
+
+def draw_by_firing(counts, n, min_events=100, n_bins=4, seed=0):
+    """n latents drawn evenly across quartiles of their observed firing count.
+
+    The SAE's own density statistics come from OpenWebText and transfer poorly to our
+    stimulus (correlation 0.5 in log space; latents rated 10^-2.8 fired 7 and 17 times in
+    8,000 tokens). Eligibility is therefore set on the stimulus actually fitted: at least
+    ``min_events`` firings, since E0.3 found one-direction recovery needs about 200.
     """
     rng = np.random.default_rng(seed)
-    dens = sae["log_density"]
-    eligible = np.flatnonzero(dens >= min_log_density)
-    ordered = eligible[np.argsort(dens[eligible])]
+    eligible = np.flatnonzero(counts >= min_events)
+    ordered = eligible[np.argsort(counts[eligible], kind="stable")]
     groups = np.array_split(ordered, n_bins)
     per = [n // n_bins + (1 if k < n % n_bins else 0) for k in range(n_bins)]
-    chosen = np.concatenate([rng.choice(g, size=c, replace=False) for g, c in zip(groups, per)])
-    return np.sort(chosen)
+    return np.concatenate([rng.choice(g, size=c, replace=False) for g, c in zip(groups, per)])

@@ -77,8 +77,12 @@ ap.add_argument("--target", choices=("mlp", "sae"), default="mlp",
                      "before 7 Oct). sae: units are latents of the jbloom GPT-2 small residual "
                      "SAE at --layer, reference = the mean-removed encoder column "
                      "(caliper/sae.py, docs/preregistration-tsae-transfer.md)")
-ap.add_argument("--sae-min-log-density", type=float, default=-3.0,
-                help="sae only: exclude latents firing on fewer than 10^x of tokens")
+ap.add_argument("--sae-min-events", type=int, default=100,
+                help="sae only: eligible latents fire at least this many times in the "
+                     "stimulus actually fitted (T-SAE prereg, Amendment 1)")
+ap.add_argument("--units", default=None,
+                help="comma-separated unit ids to fit, overriding the random draw (used by "
+                     "operating-point pilots that must fit the same units under two budgets)")
 ap.add_argument("--fit-seed", type=int, default=0,
                 help="seed for every fit (fit_batch and fit_cascade). 0 reproduces every "
                      "earlier run; B-15 varies it")
@@ -99,12 +103,22 @@ model, tok = load_model(a.model)
 rng = np.random.default_rng(0)
 sae = None
 if a.target == "sae":
-    from caliper.sae import draw_latents, load_sae
+    from caliper.sae import draw_by_firing, firing_counts, load_sae
     sae = load_sae(a.layer)
-    # Drawn evenly across density quartiles, then shuffled once so that --neuron-pool
-    # prefixes stay a fair sample of every quartile.
-    pool = draw_latents(sae, a.neuron_pool or a.neurons, a.sae_min_log_density)
-    neurons = rng.permutation(pool)[:a.neurons]
+    # Two passes: collect the stimulus once, count how often every latent fires on it, then
+    # draw evenly across firing-count quartiles. Shuffled once so --neuron-pool prefixes stay
+    # a fair sample of every quartile.
+    p0 = collect(model, tok, sample_corpus(n_docs=300, seed=a.corpus_seed), layer=a.layer,
+                 neurons=np.arange(1), max_tokens=a.tokens, seed=a.split_seed,
+                 shuffle="sequence" if a.sequence_split else "token", sae=sae)
+    counts = firing_counts(sae, p0.stimulus)
+    if a.units:
+        neurons = np.array([int(u) for u in a.units.split(",")])
+    else:
+        pool = draw_by_firing(counts, a.neuron_pool or a.neurons, a.sae_min_events)
+        neurons = rng.permutation(pool)[:a.neurons]
+elif a.units:
+    neurons = np.array([int(u) for u in a.units.split(",")])
 elif a.neuron_pool:
     neurons = rng.choice(a.d_mlp, size=a.neuron_pool, replace=False)[:a.neurons]
 else:
@@ -173,7 +187,8 @@ for start in range(0, len(todo), a.batch):
             # the pairs survive the run, so keep them, not just their median.
             "stability_pairs": d1[j].stability_pairs,
             "n_restarts": a.restarts,
-            **({"log_density": round(float(sae["log_density"][n]), 4)} if sae is not None else {}),
+            **({"log_density": round(float(sae["log_density"][n]), 4),
+                "firing_events": int(counts[n])} if sae is not None else {}),
         })
     el = time.time() - t0
     print(f"  {len(ck.rows())}/{int(alive.sum())} neurons  {el:.0f}s "
