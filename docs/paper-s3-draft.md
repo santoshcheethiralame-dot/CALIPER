@@ -79,7 +79,7 @@ Our contributions are the following.
 - A reproduction of the reported detection effect on free hardware, in 4-bit, with the
   original prompt, layer, and scoring rule.
 - A demonstration that the detection rate reported from generated text is a property of
-  the readout. The same injection yields 50% or 7% depending only on the strength chosen,
+  the readout. The same injection yields 43% or 0% depending only on the strength chosen,
   while the first-token probability is flat.
 - The content-free control, pre-registered. At the operating point matching the published
   number, a random vector reproduces the effect. At lower strengths a concept-specific
@@ -166,16 +166,21 @@ stable under every scoring rule we tried.
 The same model, layer, prompt and vectors give very different numbers depending on how the
 answer is read.
 
-| α | detection, generated-text readout | P(YES), first-token readout |
-|---|---|---|
-| 0 | 0% | 0.000 |
-| 2 | 50% | 0.429 |
-| 4 | 23% | 0.504 |
-| 6 | 27% | 0.417 |
-| 8 | 7% | 0.430 |
+*Corrected 7 October 2026 (notebook C40). The table previously read 50 / 23 / 27 / 7% at
+α = 2/4/6/8. The 27% and 7% match no rule computable from the archived data. Below are both
+filed rules.*
 
-The first-token probability is flat from α=2 upward. The generated-text rate ranges from 7%
-to 50% over the same interval. Reading the 210 generated responses shows why. At high
+| α | detection, pre-registered scorer | detection, "YES anywhere" | P(YES), first-token readout |
+|---|---|---|---|
+| 0 | 0% | 16.7% | 0.000 |
+| 2 | 43% | 50% | 0.429 |
+| 4 | 17% | 23% | 0.504 |
+| 6 | 7% | 33% | 0.417 |
+| 8 | 0% | 10% | 0.430 |
+
+The first-token probability is flat from α=2 upward. Over the same interval, the
+generated-text rate runs from 43% to 0% under the pre-registered scorer, and from 50% to 10%
+under the permissive one. The two rules do not even agree on the shape. Reading the 210 generated responses shows why. At high
 strength the model's output is dominated by the injected concept and never reaches an
 answer. At low strength it answers readily, and the answer is about nothing in particular.
 A detection rate from generated text is therefore a joint property of the model, the
@@ -295,7 +300,7 @@ low strength. A prompt that primes the model to expect interference is not a neu
 of whether it notices interference.
 
 The generated-text detection rate is the number the literature reports, and Section 3.2
-shows it swinging from 7% to 50% across strengths over which the first-token probability
+shows it swinging from 43% to 0% across strengths over which the first-token probability
 does not move. The published figure is therefore a statement about a decoding procedure as
 much as about a model. Any comparison across papers, models, or strengths that does not fix
 the readout is not a comparison.

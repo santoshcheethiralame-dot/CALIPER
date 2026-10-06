@@ -51,8 +51,8 @@ reference placeholders remain bracketed on purpose.
 
 | claim | evidence | status |
 |---|---|---|
-| The detection effect reproduces in 4-bit on free hardware | 3/30 at α=6, CI 3.5% to 25.6%, vs 10.8%; 0/30 at α=0 | supported |
-| The generated-text rate is a property of the readout | 50% / 23% / 27% / 7% at α=2/4/6/8 vs flat 0.43 to 0.50 first-token | supported |
+| The detection effect reproduces in 4-bit on free hardware | 2/30 at α=6 under the pre-registered scorer, CI 1.8% to 21.3%, vs 10.8%; 0/30 at α=0 *(corrected 7 Oct 2026, notebook C40; was a hand-read 3/30)* | supported, weakly: the interval is wide |
+| The generated-text rate is a property of the readout | 43% / 17% / 7% / 0% at α=2/4/6/8 (pre-registered scorer; corrected 7 Oct 2026, the old 27% and 7% matched no rule) vs flat 0.43 to 0.50 first-token | supported |
 | Injection shifts the first token before any output exists | 0.00003 to 0.417, p=9.3e-9, 28/30 | supported |
 | Our post-hoc-inference hypothesis was wrong | same test; pre-registered as outcome B, observed A | supported |
 | At α=6 a content-free vector reproduces the whole effect | real 0.417 vs random 0.305, p=0.33, 17/30 | supported (pre-registered primary) |

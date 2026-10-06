@@ -157,9 +157,12 @@ strength at which our generated-text rate matched the published one.
 \section{Results}
 
 \subsection{The effect reproduces, at a matched rate rather than a matched protocol}
-Generated-text readout, introspective prompt, $\alpha=6$: 3 of 30 trials scored as
-detections, 10.0\% (Wilson 95\% CI 3.5\%–25.6\% \citep{wilson1927probable}), against the
-published 10.8\%. At $\alpha=0$, 0 of 30, matching the published 0\% false-positive rate.
+% Corrected 7 Oct 2026 (notebook C40): the pre-registered scorer gives 2/30. An earlier
+% draft reported 3/30 = 10.0%, a hand-read subset that matches no filed rule.
+Generated-text readout, introspective prompt, $\alpha=6$: 2 of 30 trials scored as
+detections under the pre-registered scorer, 6.7\% (Wilson 95\% CI 1.8\%–21.3\%
+\citep{wilson1927probable}), against the published 10.8\%, whose value lies inside the
+interval. At $\alpha=0$, 0 of 30, matching the published 0\% false-positive rate.
 Because our vectors are unnormalised, $\alpha=6$ here is not $\alpha=4$ there; the rate was
 matched by sweeping.
 

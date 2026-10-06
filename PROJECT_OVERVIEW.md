@@ -86,7 +86,8 @@ A headline 2026 paper (*Macar et al.*) claimed that Gemma 3 27B could **"detect 
 CALIPER ran a pre-registered audit on Gemma 3 27B on Kaggle GPUs:
 
 1. **The Effect Reproduces:**
-   - CALIPER successfully reproduced the published detection effect (10.0% vs 10.8%, 0% false positives).
+   - CALIPER reproduced the published detection effect: 2/30 = 6.7% (Wilson 95% CI 1.8-21.3%) vs the published 10.8%, with 0/30 false positives.
+     *(Corrected 7 Oct 2026 per notebook C40: the pre-registered scorer gives 2/30. The 10.0% figure was a hand-read 3/30 and is withdrawn.)*
 
 2. **The "Bump / Perturbation Alarm" Discovery (Headline Result):**
    - **The Test:** CALIPER injected **content-free noise vectors** (random Gaussian vectors and shuffled vectors) of the exact same size.

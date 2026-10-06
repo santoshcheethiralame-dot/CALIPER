@@ -141,10 +141,10 @@ you in Review 4.
 |---|---|---|
 | 1 | Recap: three levels; unit level calibrated at Review 3 | — |
 | 2 | **The self-level experiment:** a published claim (Macar et al. 2026) that a 27B model can detect when a thought is injected into its activations; 10.8% detection, 0% false positives | `s3-results.md` |
-| 3 | We reproduced it on a free Kaggle account: 10.0% [3.5, 25.6], 0/30 false positives | §1 |
+| 3 | We reproduced it on a free Kaggle account: 6.7% (2/30) [1.8, 21.3], 0/30 false positives *(corrected 7 Oct 2026, notebook C40; the 10.0% was a hand-read count)* | §1 |
 | 4 | The control nobody had run: an injection with **no content**. At the published operating point it produces the entire effect (real 0.417, random 0.305, p=0.33) | §4 |
 | 5 | Asking the model *about itself* adds nothing: a prompt that never mentions the model is indistinguishable once anything is injected (p=0.44–0.75) | §5 |
-| 6 | The number depends on the readout: 50% or 7% from generated text, flat 0.42 from the first token | §2 |
+| 6 | The number depends on the readout: 43% down to 0% from generated text (pre-registered scorer; corrected 7 Oct 2026), flat 0.42-0.50 from the first token | §2 |
 | 7 | **Our own hypothesis failed and is reported:** we predicted the effect was the model reading its own output; the first-token test refuted it (p=9e-9). Pre-registered, both branches written before the run | §3 |
 | 8 | **Paper A on arXiv** (date) — one slide, the abstract | preprint |
 | 9 | Sem 6 plan: flagship paper in January; Phase A (300 real units) with the causal-ablation gate in April; Study 2 go/no-go decided this month | `semester-plan.md` |
