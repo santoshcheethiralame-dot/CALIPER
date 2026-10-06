@@ -41,7 +41,7 @@ on 300 units of GPT-2 small, with replications across depth, model family and tr
 corpus. The estimator fails on 15\% of units, while median alignment across all units is 0.994. Agreement across restarts, the
 most common check, predicts these failures worse than held-out fit, a quantity every fit
 already computes (AUC 0.79 vs 0.92, $p = 1.8\times10^{-4}$; pooled across six model and layer
-conditions, $\Delta$AUC $= -0.125$, 95\% CI $[-0.165,-0.084]$). The whole advantage comes from
+conditions, $\Delta$AUC $= -0.128$, 95\% CI $[-0.170,-0.087]$). The whole advantage comes from
 under-fitted fits: on fits that converged confidently to a wrong direction, the two checks are
 tied at an AUC of about 0.78, so neither is a reliable guard against the failure that matters
 most. Restart
@@ -275,8 +275,8 @@ restart agreement leaves it at 0.831.
 
 \subsection{The gap is consistent across models, layers and families}
 Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs vary widely,
-from a held-out-$R^2$ AUC of 0.72 on GPT-Neo to 0.99 on Pythia-160m, but the gap does not:
-random-effects pooling gives $\Delta$AUC $-0.125$, 95\% CI $[-0.165,-0.084]$,
+from a held-out-$R^2$ AUC of 0.72 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap does not:
+random-effects pooling gives $\Delta$AUC $-0.128$, 95\% CI $[-0.170,-0.087]$,
 $I^2 = 0$, and held-out $R^2$ is ahead in all six. \note{all arms were fitted with the coupled
 estimator; re-run the GPT-2 L6 and Pythia arms on the fixed one and re-pool.}
 
@@ -288,13 +288,13 @@ estimator; re-run the GPT-2 L6 and Pythia arms on the fixed one and re-pool.}
 condition & $n$ & failures & AUC restart & AUC held-out $R^2$ & $\Delta$ \\
 \midrule
 GPT-2 small, layer 6 (fixed) & 300 & 46 & 0.792 & 0.919 & $-0.127$ \\
-Pythia-160m, layer 6 & 300 & 13 & 0.899 & 0.993 & $-0.094$ \\
+Pythia-160m, layer 6 (fixed) & 300 & 13 & 0.828 & 0.951 & $-0.123$ \\
 GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ \\
 GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ \\
 GPT-Neo-125m, layer 10 & 100 & 41 & 0.582 & 0.715 & $-0.133$ \\
 Pythia-1.4B, layer 12, 3{,}200 steps (fixed) & 50 & 19 & 0.847 & 0.973 & $-0.126$ \\
 \midrule
-random effects & & & & & $-0.125\ [-0.165, -0.084]$ \\
+random effects & & & & & $-0.128\ [-0.170, -0.087]$ \\
 \bottomrule
 \end{tabular}
 \caption{Rows marked fixed use the corrected estimator; \prov{the others are coupled-estimator runs being re-run}. One arm per condition; arms with fewer than

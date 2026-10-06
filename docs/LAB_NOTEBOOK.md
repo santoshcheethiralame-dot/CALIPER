@@ -235,6 +235,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | B-12 | 2026-10-04/05 | batch invariance, per-neuron seed on | 50 x 3 (+ control running) | batch 32 / 8 / 1 | `results/b12_fix_b{032,008,001}.jsonl` | 40/36/37 pass. **10 and 9 of 50 flip vs batch 32 with seeding fixed.** Control arm in flight |
 | **B-11c** | 2026-10-06 | **Pythia-1.4B L12, 3,200 steps, fixed estimator (Kaggle T4)** | 50 | `--independent-units`, saves directions | `data/b11/b11c_pythia-14b_s3200_indep.jsonl`, `_dirs/` | 31/50 pass (B-11s coupled: 36); restart 0.847 vs R2 0.973, diff -0.126, DeLong p=0.032 (permutation p=0.074); **all 19 failures under-fitted**; route agreement AUC 0.910 |
 | **B-14** | 2026-10-05/06 | **primary endpoint re-run, fixed estimator** | 300 | GPT-2 L6, 2 restarts, `--independent-units`, same units as B-1b | `results/b14_primary_gpt2_indep.jsonl`, `results/b14_analysis.json` | 254 align / 252 gate; 46 failures (16 wrong basin, 30 under-fitted); **restart 0.792 vs R2 0.919, diff -0.127, DeLong p=1.8e-04, bootstrap [-0.193, -0.063], permutation p=0.001: HEADLINE STANDS**. By failure class: under-fitted R2 0.993 vs restart 0.796; **wrong basin R2 0.779 vs restart 0.782 (tied)** |
+| **B-2c** | 2026-10-06 | **Pythia-160m L6, fixed estimator** | 300 | same units as B-2b, `--independent-units` | `results/b2c_pythia160m_indep.jsonl`, `results/b2c_analysis.json` | 287/300 pass; 13 failures (2 wrong basin, 11 under-fitted); restart 0.828 vs R2 0.951, diff -0.123, p=0.087 (permutation 0.156): **underpowered, pooling component as filed**; route agreement 0.935; 290/300 agree with B-2b |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -333,6 +334,33 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### B-2c - Pythia-160m on the fixed estimator (2026-10-06 18:42) - **ORDERING HOLDS, UNDERPOWERED AS EXPECTED**
+
+Prereg `docs/preregistration-b2c-b8b-reruns.md`. Same 300 units as B-2b, `--independent-units`,
+local CPU, 08:40-18:42. Analysed once with `analyse_b14.py --model EleutherAI/pythia-160m
+--reference results/b1b_primary_pythia.jsonl`; output in `results/b2c_analysis.json`. Like
+every run before 7 Oct, its cascade head initialisation was unseeded.
+
+| | B-2b (coupled) | **B-2c (fixed)** |
+|---|---|---|
+| pass | 287/300 | **287/300** (0.957 [0.927, 0.975]) |
+| failures: wrong basin / under-fitted | 1 / 12 | **2 / 11** |
+| AUC held-out R2 | 0.993 | **0.951** |
+| AUC restart agreement | 0.899 | **0.828** |
+| restart minus R2 | -0.094, p=0.11 | **-0.123, p=0.087** (bootstrap [-0.263, +0.006]; permutation p=0.156) |
+| AUC route agreement | not recorded | **0.935** |
+
+- **This is a pooling component, as filed.** At 13 failures (fewer than 36) it is underpowered,
+  and its own p-value is not judged. The verdict string printed by the script ("partly a
+  stopping artefact") is worded for B-14 and does not apply.
+- **The coupling mattered little at 160m:** 290/300 verdicts agree with B-2b (5 each way,
+  McNemar p = 1.0).
+- **By class:** only 2 converged-wrong failures, too few to score. On the under-fitted class,
+  R2 0.993 vs restart 0.827.
+- **Incremental over unit-difficulty baselines:** 0.845 alone, 0.880 with R2, 0.842 with
+  restart agreement. This replicates B-14 on a second family.
+- **Re-pooled** with B-2c replacing B-2b: **-0.128 [-0.170, -0.087]**, I2 = 0, R2 ahead in 6/6.
 
 ### S-4 - Study 3 reanalysis with equivalence tests (2026-10-07, offline) - **MOST "INDISTINGUISHABLE" CLAIMS ARE INCONCLUSIVE**
 

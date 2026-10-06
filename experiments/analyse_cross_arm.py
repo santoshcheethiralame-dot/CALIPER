@@ -37,7 +37,8 @@ PAIR_INDEX = [(i, j) for i in range(5) for j in range(i + 1, 5)]   # _pairs orde
 ARMS = {
     # B-14 (fixed estimator, 6 Oct) replaces B-1b (coupled) for this condition.
     "GPT-2 L6 (B-14, fixed)": "results/b14_primary_gpt2_indep.jsonl",
-    "Pythia-160m L6 (B-2b)": "results/b1b_primary_pythia.jsonl",
+    # B-2c (fixed estimator, 6 Oct) replaces B-2b (coupled).
+    "Pythia-160m L6 (B-2c, fixed)": "results/b2c_pythia160m_indep.jsonl",
     "GPT-2 L2 (B-7)": "results/b7_layer02_gpt2.jsonl",
     "GPT-2 L10 (B-7)": "results/b7_layer10_gpt2.jsonl",
     "GPT-Neo-125m L10 (B-8)": "results/b8_gptneo125m.jsonl",

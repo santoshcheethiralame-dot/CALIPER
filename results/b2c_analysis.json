@@ -1,0 +1,309 @@
+{
+  "rows": "results/b2c_pythia160m_indep.jsonl",
+  "scrambled": null,
+  "n": 300,
+  "n_failures": 13,
+  "pass_rate": 0.9567,
+  "pass_wilson_95": [
+    0.9273,
+    0.9745
+  ],
+  "primary": {
+    "auc_restart": 0.8275261324041812,
+    "auc_r2": 0.9509514875368534,
+    "diff_restart_minus_r2": -0.12342535513267228,
+    "se": 0.07215075636436843,
+    "z": -1.7106591995981588,
+    "p": 0.08714404368756261,
+    "verdict": "NOT SIGNIFICANT - B-1b's significance was partly a stopping artefact (UNDERPOWERED: 13 failures < 36; not extended)",
+    "bootstrap_95_diff": [
+      -0.26321361565264006,
+      0.005662020905923207
+    ]
+  },
+  "failure_classes": {
+    "wrong_basin_r2_gt_0.99": 2,
+    "under_fitted": 11
+  },
+  "by_failure_class": {
+    "0.98": {
+      "wrong_basin": {
+        "held-out R2": null,
+        "restart agreement": null,
+        "disagreement": null,
+        "restart R2 spread": null
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 9,
+          "auc": 0.9969028261711188,
+          "ci95": [
+            0.9907084785133565,
+            1.0
+          ]
+        },
+        "restart agreement": {
+          "n_class": 9,
+          "auc": 0.8197831978319783,
+          "ci95": [
+            0.6432394502516453,
+            0.9473577235772357
+          ]
+        },
+        "disagreement": {
+          "n_class": 9,
+          "auc": 0.9132791327913279,
+          "ci95": [
+            0.8586817653890825,
+            0.964769647696477
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 9,
+          "auc": 0.7820363917924894,
+          "ci95": [
+            0.6557975222609369,
+            0.8931475029036005
+          ]
+        }
+      }
+    },
+    "0.99": {
+      "wrong_basin": {
+        "held-out R2": null,
+        "restart agreement": null,
+        "disagreement": null,
+        "restart R2 spread": null
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 11,
+          "auc": 0.9927146024707,
+          "ci95": [
+            0.9838375039594552,
+            0.9987329743427305
+          ]
+        },
+        "restart agreement": {
+          "n_class": 11,
+          "auc": 0.8268926195755464,
+          "ci95": [
+            0.6819369654735508,
+            0.9325467215711118
+          ]
+        },
+        "disagreement": {
+          "n_class": 11,
+          "auc": 0.9094076655052264,
+          "ci95": [
+            0.8644044979410833,
+            0.9486933797909407
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 11,
+          "auc": 0.7697180867912575,
+          "ci95": [
+            0.651211593284764,
+            0.8755543237250554
+          ]
+        }
+      }
+    },
+    "0.995": {
+      "wrong_basin": {
+        "held-out R2": null,
+        "restart agreement": null,
+        "disagreement": null,
+        "restart R2 spread": null
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 12,
+          "auc": 0.9901277584204413,
+          "ci95": [
+            0.9779326364692218,
+            0.9979747386759581
+          ]
+        },
+        "restart agreement": {
+          "n_class": 12,
+          "auc": 0.8244773519163763,
+          "ci95": [
+            0.702086962833914,
+            0.9231054006968641
+          ]
+        },
+        "disagreement": {
+          "n_class": 12,
+          "auc": 0.9065040650406504,
+          "ci95": [
+            0.8603368176538908,
+            0.9471617305458768
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 12,
+          "auc": 0.7511614401858304,
+          "ci95": [
+            0.6442581300813008,
+            0.8562862950058072
+          ]
+        }
+      }
+    }
+  },
+  "vs_reference": {
+    "shared_units": 300,
+    "agree": 290,
+    "pass_here_only": 5,
+    "pass_reference_only": 5,
+    "mcnemar_exact_p": 1.0,
+    "reference_failure_classes": {
+      "wrong_basin_r2_gt_0.99": 1,
+      "under_fitted": 12
+    }
+  },
+  "signals": {
+    "held-out R2": {
+      "roc_auc": 0.9509514875368534,
+      "pr_auc": 0.7627021771164096,
+      "spearman_vs_alignment": 0.4747673015551636
+    },
+    "restart agreement": {
+      "roc_auc": 0.8275261324041812,
+      "pr_auc": 0.16896033776080255,
+      "spearman_vs_alignment": 0.4297710604174613
+    },
+    "disagreement": {
+      "roc_auc": 0.9051192709729295,
+      "pr_auc": 0.22030667515163435,
+      "spearman_vs_alignment": 0.6256849306344826,
+      "delong_minus_r2": {
+        "diff": -0.04583221656392389,
+        "p": 0.2905018576666195
+      }
+    },
+    "restart R2 spread": {
+      "roc_auc": 0.7440364513535245,
+      "pr_auc": 0.10275231593750996,
+      "spearman_vs_alignment": 0.3572079097769384,
+      "delong_minus_r2": {
+        "diff": -0.20691503618332896,
+        "p": 0.000769891570551232
+      }
+    },
+    "route agreement (ground-truth-free)": {
+      "roc_auc": 0.9354060573572769,
+      "pr_auc": 0.35167514831111607
+    }
+  },
+  "secondary_bh": {
+    "disagreement vs R2": {
+      "p": 0.2905018576666195,
+      "q": 0.43575278649992927
+    },
+    "restart R2 spread vs R2": {
+      "p": 0.000769891570551232,
+      "q": 0.002309674711653696
+    },
+    "mcnemar vs reference": {
+      "p": 1.0,
+      "q": 1.0
+    }
+  },
+  "pr_auc_prevalence_baseline": 0.043333333333333335,
+  "disagreement_note": "'disagreement' is |align_direct - align_cascade| and uses the true direction; it is not ground-truth-free",
+  "threshold_sweep": {
+    "0.9": {
+      "failures": 7,
+      "held-out R2": 0.9960994636762555,
+      "restart agreement": 0.772549975621648,
+      "disagreement": 0.8839590443686007,
+      "restart R2 spread": 0.7245246221355436
+    },
+    "0.92": {
+      "failures": 10,
+      "held-out R2": 0.9413793103448276,
+      "restart agreement": 0.8043103448275862,
+      "disagreement": 0.8962068965517241,
+      "restart R2 spread": 0.7196551724137931
+    },
+    "0.95": {
+      "failures": 13,
+      "held-out R2": 0.9509514875368534,
+      "restart agreement": 0.8275261324041812,
+      "disagreement": 0.9051192709729295,
+      "restart R2 spread": 0.7440364513535245
+    },
+    "0.97": {
+      "failures": 17,
+      "held-out R2": 0.9507378923300769,
+      "restart agreement": 0.8104344211182706,
+      "disagreement": 0.8917065059239243,
+      "restart R2 spread": 0.7347744751610892
+    },
+    "0.98": {
+      "failures": 25,
+      "held-out R2": 0.931490909090909,
+      "restart agreement": 0.7833454545454546,
+      "disagreement": 0.8850181818181818,
+      "restart R2 spread": 0.7236363636363636
+    }
+  },
+  "calibration_r2": {
+    "brier": 0.027593834610589684,
+    "reliability_equal_mass_5": [
+      {
+        "mean_predicted": 0.019283421230350862,
+        "observed_rate": 0.016666666666666666,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.020298277120563545,
+        "observed_rate": 0.0,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.024333137211233705,
+        "observed_rate": 0.016666666666666666,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.026613529644505616,
+        "observed_rate": 0.016666666666666666,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.13189149876074918,
+        "observed_rate": 0.16666666666666666,
+        "n": 60
+      }
+    ]
+  },
+  "control_permuted_labels": {
+    "n_perm": 1000,
+    "mean_diff": -0.0004199946395068348,
+    "sd_diff": 0.08707919219324765,
+    "p_abs_ge_observed": 0.156
+  },
+  "control_cheating_signal_auc": 1.0,
+  "identifiable_direction_label": "NOT COMPUTABLE: e01_gate.py archives alignments, not fitted directions (deviation from addendum 1 items 1-2)",
+  "ln_null_ceiling": {
+    "units_with_ceiling_below_bar": [],
+    "median_ceiling": 0.99951171875
+  },
+  "nuisance": {
+    "active fraction": 0.8633074242830341,
+    "z_mean": 0.911551862771375,
+    "response kurtosis": 0.7502010184937015,
+    "GELU first-order coefficient": 0.8863575448941302,
+    "orientation_note": "AUC of each descriptor alone; active fraction, z_mean and GELU coefficient oriented low = suspect"
+  },
+  "incremental_cv_auc": {
+    "baselines": 0.8453497721790405,
+    "baselines + R2": 0.8804610024122219,
+    "baselines + restart agreement": 0.8418654516215491
+  },
+  "seconds_per_unit": 120.3
+}
