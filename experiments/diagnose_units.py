@@ -68,13 +68,16 @@ def main():
     ap.add_argument("--layer", type=int, default=6)
     ap.add_argument("--tokens", type=int, default=8000)
     ap.add_argument("--route", choices=("selected", "direct", "cascade"), default="selected")
+    ap.add_argument("--dtype", choices=("fp32", "fp16"), default="fp32",
+                    help="match the run's precision: fp16 for the local Pythia runs before "
+                         "7 Oct 2026 (B-2b, B-2c)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 
     rows = [json.loads(l) for l in open(a.rows, encoding="utf-8") if l.strip()]
     dirs = Path(a.rows.replace(".jsonl", "_dirs"))
     ids = np.array([r["_key"] for r in rows])
-    model, tok = load_model(a.model)
+    model, tok = load_model(a.model, dtype=torch.float16 if a.dtype == "fp16" else torch.float32)
     p = collect(model, tok, sample_corpus(n_docs=300, seed=0), layer=a.layer,
                 neurons=ids, max_tokens=a.tokens, seed=0)
     block = _blocks(model)[a.layer]
