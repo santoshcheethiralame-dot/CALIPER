@@ -74,8 +74,14 @@ is the closeness of agreement between repeated measurements, while \emph{truenes
 closeness of their average to a reference value, and trueness ``is not related to random
 measurement error'' \citep{vim2012}. An instrument can be precise and wrong. Metrology's
 answer is calibration: an instrument is checked against a reference standard before its
-readings on unknowns are trusted, a principle that also governs high-assurance sensing
-\citep{shah2020calibration}.
+readings on unknowns are trusted, a principle that also governs high-assurance sensing,
+where sensor readings are trusted only through a verifiable chain back to a reference
+\citep{shah2020calibration} and devices are authenticated by their physical signature
+\citep{vaidya2022acoustic}. The pattern is familiar from benchmarking too: metrics that
+suffice for a simple setting become ``necessary, but also not sufficient'' once the system
+under test is more complex \citep{dholakia2025agentic}. Agreement across restarts was
+designed for a simpler question, whether an optimiser converged, and it is now read as
+an answer to a harder one, whether the converged answer is right.
 
 This paper supplies a reference standard for one interpretability instrument and uses it to
 calibrate the checks practitioners rely on. The standard is free. An MLP neuron's
@@ -342,6 +348,16 @@ estimates of correctness are never guaranteed \citep{garg2022leveraging}; held-o
 necessary condition, not a certificate.
 
 % ======================================================================
+\section{Discussion}
+\label{sec:discussion}
+The converged-but-wrong class is the hard case for any reliability check, and the problem
+has the same shape as detecting unreliable behaviour where per-instance labels of the
+offending behaviour are sparse, as in click-fraud detection from traffic analysis
+\citep{nagaraja2019clicktok}. Security research has long treated such signals
+adversarially, assuming a check will be evaded until shown otherwise
+\citep{gardiner2016security,arp2022dos}; interpretability's reliability checks have not
+yet been held to that standard. \tbd{expand after the transfer experiment.}
+
 \section{Limitations and scope}
 \label{sec:limits}
 \begin{itemize}
