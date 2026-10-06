@@ -233,6 +233,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | B-8 | 2026-10-04 | GPT-Neo-125m | 100 | L10 | `results/b8_gptneo125m.jsonl` | 59/100; **AUC R2 0.715 vs restart 0.582**, p=0.0086 |
 | B-10 | 2026-10-04 | required-N per signal | 50 x 4 | 2k/4k/8k/16k nested prefixes, 2 restarts | `results/b10_required_n.jsonl` | Pass 0.16/0.56/0.66/0.80; R2 ahead of restart at every N. Script `experiments/b10_required_n.py` was **untracked** at commit time |
 | B-12 | 2026-10-04/05 | batch invariance, per-neuron seed on | 50 x 3 (+ control running) | batch 32 / 8 / 1 | `results/b12_fix_b{032,008,001}.jsonl` | 40/36/37 pass. **10 and 9 of 50 flip vs batch 32 with seeding fixed.** Control arm in flight |
+| **B-11c** | 2026-10-06 | **Pythia-1.4B L12, 3,200 steps, fixed estimator (Kaggle T4)** | 50 | `--independent-units`, saves directions | `data/b11/b11c_pythia-14b_s3200_indep.jsonl`, `_dirs/` | 31/50 pass (B-11s coupled: 36); restart 0.847 vs R2 0.973, diff -0.126, DeLong p=0.032 (permutation p=0.074); **all 19 failures under-fitted**; route agreement AUC 0.910 |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -331,6 +332,48 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### B-11c - Pythia-1.4B on the fixed estimator (2026-10-06, Kaggle T4) - **THE ORDERING HOLDS; EVERY FAILURE IS UNDER-FITTED**
+
+Prereg `docs/preregistration-b11c-pythia14b-indep.md`. Same 50 units as B-11s (layer 12,
+3,200 steps, 2 restarts) with `--independent-units`. 101 s/unit on one T4. Artifacts: the
+rows, the summary, and 50 direction files under `data/b11/`. The Kaggle output zip contained a
+copy of itself, which was deleted on import. Analysis by `analyse_b14.py --no-model` against
+B-11s; output in `results/b11c_analysis.json`.
+
+| | B-11s (coupled) | **B-11c (fixed)** |
+|---|---|---|
+| pass (alignment >= 0.95) | 36/50 | **31/50** |
+| failures: wrong basin / under-fitted | 0 / 14 | **0 / 19** |
+| AUC held-out R2 | 0.996 | **0.973** |
+| AUC restart agreement | 0.746 | **0.847** |
+| restart minus R2 (DeLong) | -0.250, p=0.00019 | **-0.126, p=0.032**, bootstrap [-0.255, -0.017] |
+| AUC route agreement (ground-truth-free) | not recorded | **0.910** |
+
+1. **Pre-registered endpoints.**
+   - The arm is a pooling component, not a standalone test, as filed.
+   - The DeLong p of 0.032 is not matched by the label-permutation control, where 7.4% of
+     permuted differences are as large. At 19 failures, DeLong is the more liberal of the two
+     (see §6), so this arm's own significance is marginal.
+   - McNemar against B-11s: 43/50 agree. 6 units pass only under the coupled rule and 1 only
+     under the fixed one, exact p = 0.125.
+   - The direction matches B-12: shared stopping trained units longer and passed more of them.
+2. **Every failure is under-fitted.** This is the filed branch. At 1.4B the failure class
+   is an optimisation-budget property: none of the 19 converged (held-out R2 <= 0.99), as in
+   B-11s. The paper reports the 1.4B arm as under-fitting, not silent failure.
+3. **First ground-truth-free method-agreement number.** Route agreement (|cos| between the
+   direct and cascade directions) scores AUC 0.910. That is between restart agreement (0.847)
+   and held-out R2 (0.973).
+4. **Re-pooled** with B-11c replacing B-11s (`analyse_cross_arm.py`): random effects
+   **-0.140 [-0.180, -0.100]**, I2 = 0, arm bootstrap -0.128 [-0.151, -0.104], R2 ahead in 6/6.
+
+**Exploratory, from already-unblinded runs, and the reason for B-14 Addendum 2.** Split by
+failure class, held-out R2's advantage comes almost entirely from under-fitted failures. On
+B-1b, R2 has AUC 0.992 against restart's 0.793 for under-fitted failures, but 0.776 against
+0.729 for the 12 wrong-basin ones. On B-8, wrong-basin gives 0.555 against 0.477. The
+wrong-basin R2 AUC is attenuated by construction, since the class is defined by R2 > 0.99;
+the restart AUC is not. So the converged-but-wrong core is close to invisible to every
+ground-truth-free check measured so far.
 
 ### Cross-arm analyses on archived runs (2026-10-06, offline) - **R2 AHEAD IN 6/6 ARMS, POOLED -0.152; ABOUT 10% OF UNITS NO RESTART COUNT REACHES**
 
@@ -2833,6 +2876,7 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-06 | **B-14 ADDENDUM 2 FILED BEFORE UNBLINDING (230/300 rows): failure-class-stratified AUCs.** Exploratory splits of already-unblinded arms show held-out R2's advantage comes from under-fitted failures. On converged-but-wrong failures, both checks are near chance (B-8: R2 0.555, restart 0.477). B-14 will report AUCs by class, with a sensitivity to the class boundary. If the pattern holds, the paper's claim becomes: the checks catch under-fitting, none catches the converged wrong basin, and here is that class's size | `docs/preregistration-b14-addendum-2.md` |
 | 2026-10-06 | **APERTURE's notebook re-read in full and folded into this one.**
 - **§3:** gains a follow-up with every APERTURE run as A-R1 to A-R12, plus A-F1, and which have data on disk (A-R1, A-R3, A-F1).
 - **Correction:** R11 is now carried by A-F1 c00.

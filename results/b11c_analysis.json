@@ -1,0 +1,165 @@
+{
+  "rows": "data/b11/b11c_pythia-14b_s3200_indep.jsonl",
+  "scrambled": null,
+  "n": 50,
+  "n_failures": 19,
+  "pass_rate": 0.62,
+  "pass_wilson_95": [
+    0.4815,
+    0.7414
+  ],
+  "primary": {
+    "auc_restart": 0.8471986417657046,
+    "auc_r2": 0.9728353140916808,
+    "diff_restart_minus_r2": -0.1256366723259762,
+    "se": 0.058577544727600205,
+    "z": -2.1447923928907775,
+    "p": 0.03196944970401489,
+    "verdict": "HEADLINE STANDS on the fixed estimator (UNDERPOWERED: 19 failures < 36; not extended)",
+    "bootstrap_95_diff": [
+      -0.2547113752122242,
+      -0.01697792869269954
+    ]
+  },
+  "failure_classes": {
+    "wrong_basin_r2_gt_0.99": 0,
+    "under_fitted": 19
+  },
+  "vs_reference": {
+    "shared_units": 50,
+    "agree": 43,
+    "pass_here_only": 1,
+    "pass_reference_only": 6,
+    "mcnemar_exact_p": 0.125,
+    "reference_failure_classes": {
+      "wrong_basin_r2_gt_0.99": 0,
+      "under_fitted": 14
+    }
+  },
+  "signals": {
+    "held-out R2": {
+      "roc_auc": 0.9728353140916808,
+      "pr_auc": 0.9564290636199444,
+      "spearman_vs_alignment": 0.8801923509441749
+    },
+    "restart agreement": {
+      "roc_auc": 0.8471986417657046,
+      "pr_auc": 0.7695962477449768,
+      "spearman_vs_alignment": 0.7322219168341874
+    },
+    "disagreement": {
+      "roc_auc": 0.7232597623089984,
+      "pr_auc": 0.6302280744907526,
+      "spearman_vs_alignment": 0.4628913878164655,
+      "delong_minus_r2": {
+        "diff": -0.24957555178268243,
+        "p": 0.0008641590270052123
+      }
+    },
+    "restart R2 spread": {
+      "roc_auc": 0.629881154499151,
+      "pr_auc": 0.4504759604387479,
+      "spearman_vs_alignment": 0.4014895619023705,
+      "delong_minus_r2": {
+        "diff": -0.34295415959252973,
+        "p": 2.5217296792085712e-05
+      }
+    },
+    "route agreement (ground-truth-free)": {
+      "roc_auc": 0.9100169779286927,
+      "pr_auc": 0.8511568888446842
+    }
+  },
+  "secondary_bh": {
+    "disagreement vs R2": {
+      "p": 0.0008641590270052123,
+      "q": 0.0012962385405078185
+    },
+    "restart R2 spread vs R2": {
+      "p": 2.5217296792085712e-05,
+      "q": 7.565189037625714e-05
+    },
+    "mcnemar vs reference": {
+      "p": 0.125,
+      "q": 0.125
+    }
+  },
+  "pr_auc_prevalence_baseline": 0.38,
+  "disagreement_note": "'disagreement' is |align_direct - align_cascade| and uses the true direction; it is not ground-truth-free",
+  "threshold_sweep": {
+    "0.9": {
+      "failures": 14,
+      "held-out R2": 0.9801587301587301,
+      "restart agreement": 0.7738095238095238,
+      "disagreement": 0.6130952380952381,
+      "restart R2 spread": 0.5257936507936508
+    },
+    "0.92": {
+      "failures": 14,
+      "held-out R2": 0.9801587301587301,
+      "restart agreement": 0.7738095238095238,
+      "disagreement": 0.6130952380952381,
+      "restart R2 spread": 0.5257936507936508
+    },
+    "0.95": {
+      "failures": 19,
+      "held-out R2": 0.9728353140916808,
+      "restart agreement": 0.8471986417657046,
+      "disagreement": 0.7232597623089984,
+      "restart R2 spread": 0.629881154499151
+    },
+    "0.97": {
+      "failures": 23,
+      "held-out R2": 0.9629629629629629,
+      "restart agreement": 0.8792270531400966,
+      "disagreement": 0.7761674718196457,
+      "restart R2 spread": 0.7053140096618358
+    },
+    "0.98": {
+      "failures": 24,
+      "held-out R2": 0.969551282051282,
+      "restart agreement": 0.8814102564102564,
+      "disagreement": 0.8028846153846154,
+      "restart R2 spread": 0.7339743589743589
+    }
+  },
+  "calibration_r2": {
+    "brier": 0.11917271313507204,
+    "reliability_equal_mass_5": [
+      {
+        "mean_predicted": 0.19658034438547556,
+        "observed_rate": 0.0,
+        "n": 10
+      },
+      {
+        "mean_predicted": 0.2049089165066273,
+        "observed_rate": 0.0,
+        "n": 10
+      },
+      {
+        "mean_predicted": 0.22763983622900613,
+        "observed_rate": 0.2,
+        "n": 10
+      },
+      {
+        "mean_predicted": 0.32320030606769334,
+        "observed_rate": 0.7,
+        "n": 10
+      },
+      {
+        "mean_predicted": 0.9253631060564949,
+        "observed_rate": 1.0,
+        "n": 10
+      }
+    ]
+  },
+  "control_permuted_labels": {
+    "n_perm": 1000,
+    "mean_diff": -0.000540747028862479,
+    "sd_diff": 0.0702027457726685,
+    "p_abs_ge_observed": 0.074
+  },
+  "control_cheating_signal_auc": 1.0,
+  "identifiable_direction_label": "NOT COMPUTABLE: e01_gate.py archives alignments, not fitted directions (deviation from addendum 1 items 1-2)",
+  "seconds_per_unit": 101.3
+}

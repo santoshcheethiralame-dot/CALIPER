@@ -40,7 +40,8 @@ ARMS = {
     "GPT-2 L2 (B-7)": "results/b7_layer02_gpt2.jsonl",
     "GPT-2 L10 (B-7)": "results/b7_layer10_gpt2.jsonl",
     "GPT-Neo-125m L10 (B-8)": "results/b8_gptneo125m.jsonl",
-    "Pythia-1.4b L12, 3200 steps (B-11s)": "data/b11/b11_pythia-14b_s3200.jsonl",
+    # B-11c (fixed estimator, 6 Oct) replaces B-11s (coupled) for this condition.
+    "Pythia-1.4b L12, 3200 steps (B-11c, fixed)": "data/b11/b11c_pythia-14b_s3200_indep.jsonl",
     "Pythia-70m (B-11)": "data/b11/b11_pythia-70m.jsonl",
     "Pythia-410m (B-11)": "data/b11/b11_pythia-410m.jsonl",
 }
