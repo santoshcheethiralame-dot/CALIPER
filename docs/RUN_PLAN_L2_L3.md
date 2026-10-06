@@ -53,7 +53,7 @@ notebook under the prefix **A-**.
 | APERTURE item | State | Use in the merged programme |
 |---|---|---|
 | R1-R6 (pipeline, steering, sweeps, detection null at 2B-9B) | R1, R3 data only | Prior: detection is weak in small open models. Cited, not measured |
-| R7 PRG 0.83, R8 patching +6.15, R9 naturalistic 0.688, R10 gamma | **raw data lost** | Motivation only. Re-run cheaply (S-11) if any becomes load-bearing |
+| R7 PRG 0.83, R8 patching +6.15, R9 naturalistic 0.688, R10 gamma | **raw data lost** | Motivation only. Re-run cheaply (S-11) if any becomes load-bearing. **R9 replicated by S-11, 7 Oct: 11/16** |
 | R11 framing control, R12 three-framing prereg (falsified) | **raw data lost** | Replaced as evidence by F1's reference cell, which reproduces R11's gammas inside their CIs (P4 holds) |
 | **F1 confound hardening** (Gemma-2-2B, 12 OFAT configs x 2 framings) | **11 of 24 files archived and hash-verified** | **A-F1, finished as S-3.** Frozen prereg, scorer exists (`aperture/f1_score.py`) |
 | F2-F5 (covariates, PRG CV, audit arm, null robustness) | not run | F4(a), the literature audit of which published claims separate framing from construct, folds into Paper 2's related work. The others are cut |

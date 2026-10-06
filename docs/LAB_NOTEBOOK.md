@@ -237,6 +237,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-14** | 2026-10-05/06 | **primary endpoint re-run, fixed estimator** | 300 | GPT-2 L6, 2 restarts, `--independent-units`, same units as B-1b | `results/b14_primary_gpt2_indep.jsonl`, `results/b14_analysis.json` | 254 align / 252 gate; 46 failures (16 wrong basin, 30 under-fitted); **restart 0.792 vs R2 0.919, diff -0.127, DeLong p=1.8e-04, bootstrap [-0.193, -0.063], permutation p=0.001: HEADLINE STANDS**. By failure class: under-fitted R2 0.993 vs restart 0.796; **wrong basin R2 0.779 vs restart 0.782 (tied)** |
 | **B-2c** | 2026-10-06 | **Pythia-160m L6, fixed estimator** | 300 | same units as B-2b, `--independent-units` | `results/b2c_pythia160m_indep.jsonl`, `results/b2c_analysis.json` | 287/300 pass; 13 failures (2 wrong basin, 11 under-fitted); restart 0.828 vs R2 0.951, diff -0.123, p=0.087 (permutation 0.156): **underpowered, pooling component as filed**; route agreement 0.935; 290/300 agree with B-2b |
 | **B-8b** | 2026-10-06 | **GPT-Neo-125m L10, fixed estimator** | 100 | same units as B-8, `--independent-units` | `results/b8b_gptneo125m_indep.jsonl`, `results/b8b_analysis.json` | 62/100 pass; 38 failures (20 converged-wrong, 18 under-fitted); restart 0.588 vs R2 0.755, diff -0.167, p=0.0022 (bootstrap [-0.277, -0.057], permutation 0.003): **ordering holds**; converged-wrong class: both at chance; route agreement 0.680; 71/100 agree with B-8 |
+| **S-11** | 2026-10-06 | **R9 re-run: naturalistic decoding, gemma-2-2b-it 8-bit L13** | 16 passages | APERTURE `b5bb2fb` unchanged; extraction seeds 0 and 1 | `results/s11_primary.jsonl`, `results/s11_seed1.jsonl`, `results/s11_config.json` | **11/16 = 0.688 [0.413, 0.890]**, p = 1.9e-10 vs 1/16: **criterion k >= 4 met, R9 replicates**; seed 1 10/16; uncentred secondary pending (activations not saved) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -335,6 +336,34 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-11 - R9 re-run, naturalistic decoding (2026-10-06 18:57, Kaggle T4; scored 7 Oct) - **REPLICATES: 11/16, THE SAME COUNT AS R9**
+
+Prereg `docs/preregistration-s11-naturalistic.md`. APERTURE's code pinned at `b5bb2fb` and
+used unchanged; gemma-2-2b-it in 8-bit, layer 13, 12 pairs. Versions: torch 2.11.0+cu128,
+transformers 5.18.0, bitsandbytes 0.50.2, accelerate 1.15.0. The data come from the attempt
+that ended in an IOPub timeout (§6b, 7 Oct). The primary and seed-1 cells had finished and
+written their jsonl before the error. The activations cell never ran. Scored once, by
+`predicted == concept`, on 7 Oct.
+
+| | k/16 | exact 95% CI | one-sided p vs 1/16 |
+|---|---|---|---|
+| **primary (extraction seed 0)** | **11** (0.688) | [0.413, 0.890] | 1.9e-10 |
+| seed 1 | 10 (0.625) | [0.354, 0.848] | 5.1e-09 |
+| R9, 15 Jul (lost) | 11 (0.688) | [0.438, 0.875] as recorded | - |
+
+- **Criterion k >= 4: met.** S-11 replaces R9 as the citable naturalistic result. R9's
+  interval was not Clopper-Pearson; S-11's is.
+- **Misses (primary):** elephant->dolphin, eagle->volcano, dolphin->volcano,
+  harbor->serenity, violin->joy. "volcano" is predicted for 3 passages, 2 of them wrong. Seed 1 changes only one
+  prediction, serenity->joy (15/16 identical), so the seed variance R9 left out is small
+  here.
+- **Verbal report** (secondary, read as comprehension, not introspection): 5 exact,
+  8 related, 3 no. These are identical across seeds, as they should be, since the report does
+  not depend on the directions.
+- **Uncentred classification: pending.** It needs `s11_activations.pt`, which the updated
+  run sheet's Cell 5 produces. A re-run of Cells 3-4 in that session also checks whether
+  11/16 reproduces across sessions.
 
 ### B-8b - GPT-Neo-125m L10 on the fixed estimator (2026-10-06 22:00) - **ORDERING HOLDS; THE CONVERGED-WRONG CLASS IS INVISIBLE TO BOTH CHECKS**
 

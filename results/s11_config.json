@@ -1,0 +1,11 @@
+{
+  "commit": "b5bb2fb",
+  "layer": 13,
+  "n_pairs": 12,
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.18.0",
+    "bitsandbytes": "0.50.2",
+    "accelerate": "1.15.0"
+  }
+}

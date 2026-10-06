@@ -183,6 +183,8 @@ what each result means for the merged programme.
   exactly chance.
 - The report side is reading comprehension, because the passage stays in context, so the
   0.000 "gap" is uninformative.
+- **7 Oct 2026: replicated by S-11** with the same code, 11/16 = 0.688 [0.413, 0.890]
+  (Clopper-Pearson), seed 1 10/16. Cite S-11, not R9 (notebook §4).
 - **For CALIPER:** this is the strongest available answer to "injected states are
   off-distribution". It is lost, so S-11 re-runs it. The centring lesson goes into every L2
   cosine.
