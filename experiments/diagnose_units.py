@@ -14,6 +14,11 @@ For each unit it recomputes the stimulus exactly as e01_gate.py collected it, th
   r2_true       R2 of a leave-one-out running-mean link on s . w: the attainable fit for a
                 link-agnostic estimator at this token count
   r2_fitted     the same for the fitted direction
+  ident_align   |cos(fitted, w_perp)|, w with its unidentifiable 1/gamma component removed
+  firing_corr   |corr(s . fitted, s . w)| over only the tokens where the true unit fires
+                (pre-activation > 0): the stimulus-weighted label restricted to where the
+                response carries information. With euclid_align, ident_align and
+                sigma_align this is the rigor report's four-label table.
   pc1_share     share of stimulus variance on its first principal component
   cos_pc1       |cos(fitted, PC1)|
 
@@ -30,7 +35,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from caliper.activations import _blocks, _mlp_in, collect, load_model, sample_corpus
+from caliper.activations import _blocks, _mlp_in, _mlp_ln, collect, load_model, sample_corpus
 
 
 def r2(y, yhat):
@@ -74,8 +79,10 @@ def main():
                 neurons=ids, max_tokens=a.tokens, seed=0)
     block = _blocks(model)[a.layer]
     bias = _mlp_in(block).bias.detach().numpy()[ids]
+    pre = p.stimulus @ p.weights + bias
     with torch.no_grad():
-        exact = torch.nn.functional.gelu(torch.as_tensor(p.stimulus @ p.weights + bias)).numpy()
+        exact = torch.nn.functional.gelu(torch.as_tensor(pre)).numpy()
+    null = unit(1.0 / _mlp_ln(block).weight.detach().float().numpy())
     S = p.stimulus - p.stimulus.mean(0)
     _, sv, vt = np.linalg.svd(S, full_matrices=False)
     pc1, pc1_share = vt[0], float(sv[0] ** 2 / (sv ** 2).sum())
@@ -86,20 +93,26 @@ def main():
         route = r["picked"] if a.route == "selected" else a.route
         f = unit(d[route][:, 0])
         w = unit(d["w"])
+        w_perp = unit(w - (w @ null) * null)
         y = p.response[:, i]
+        fire = pre[:, i] > 0
         out.append({
             "unit": int(r["_key"]), "route": route,
             "euclid_align": round(float(abs(f @ w)), 4),
+            "ident_align": round(float(abs(f @ w_perp)), 4),
             "sigma_align": round(float(abs(np.corrcoef(S @ f, S @ w)[0, 1])), 4),
+            "firing_corr": (round(float(abs(np.corrcoef((S @ f)[fire], (S @ w)[fire])[0, 1])), 4)
+                            if fire.sum() > 2 else None),
+            "firing_frac": round(float(fire.mean()), 4),
             "r2_exact": round(float(r2(y, exact[:, i])), 6),
             "r2_true": round(float(link_r2(S @ w, y)), 4),
             "r2_fitted": round(float(link_r2(S @ f, y)), 4),
             "cos_pc1": round(float(abs(f @ pc1)), 4),
             "response_sd": round(float(y.std()), 5),
         })
-    summary = {k: float(np.median([o[k] for o in out]))
-               for k in ("euclid_align", "sigma_align", "r2_exact", "r2_true", "r2_fitted",
-                         "cos_pc1")}
+    keys = ("euclid_align", "ident_align", "sigma_align", "firing_corr", "r2_exact", "r2_true",
+            "r2_fitted", "cos_pc1")
+    summary = {k: float(np.median([o[k] for o in out if o[k] is not None])) for k in keys}
     rep = {"rows": a.rows, "model": a.model, "layer": a.layer, "pc1_share": pc1_share,
            "median": summary, "units": out}
     for o in out:
