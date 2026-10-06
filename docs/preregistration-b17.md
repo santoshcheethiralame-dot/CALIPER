@@ -1,6 +1,6 @@
 # Pre-registration: B-17, why GPT-Neo layer 6 fails, read unit by unit
 
-**Filed 7 October 2026, before the run.**
+**Filed 6 October 2026, before the run.**
 
 ## Question
 
@@ -17,7 +17,7 @@ explanations:
    residual stream, and it limits what any stimulus-response estimator can recover.
 3. **Optimisation.** The fit falls short of the response the true direction explains.
 
-## Already ruled out (weights only, no fits, 7 Oct)
+## Already ruled out (weights only, no fits, 6 Oct)
 
 The LayerNorm-null ceiling is not the cause. The cosine ceiling from w's unidentifiable 1/γ
 component is at least 0.9999 for all 3,072 layer-6 units (median 1.0). Per-layer ground-truth

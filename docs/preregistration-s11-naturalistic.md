@@ -1,6 +1,6 @@
 # Pre-registration: S-11, re-running APERTURE's naturalistic arm (R9)
 
-**Filed 7 October 2026, before the run.** Paper 2. Code: APERTURE's own, at mirror commit
+**Filed 6 October 2026, before the run.** Paper 2. Code: APERTURE's own, at mirror commit
 `b5bb2fb` (`aperture.naturalistic.collect_naturalistic_hf`), unchanged. Run sheet:
 `kaggle/NEXT_SESSION_S11.md`.
 

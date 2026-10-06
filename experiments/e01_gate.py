@@ -76,7 +76,7 @@ ap.add_argument("--sequence-split", action="store_true",
                      "with training tokens. Opt-in: it changes every held-out R2.")
 ap.add_argument("--target", choices=("mlp", "sae"), default="mlp",
                 help="mlp: units are MLP neurons, reference = input weight column (every run "
-                     "before 7 Oct). sae: units are latents of the jbloom GPT-2 small residual "
+                     "before 6 Oct). sae: units are latents of the jbloom GPT-2 small residual "
                      "SAE at --layer, reference = the mean-removed encoder column "
                      "(caliper/sae.py, docs/preregistration-tsae-transfer.md)")
 ap.add_argument("--sae-min-events", type=int, default=100,
@@ -96,7 +96,7 @@ ap.add_argument("--split-seed", type=int, default=0,
                      "0 reproduces every earlier run")
 ap.add_argument("--dtype", choices=("fp32", "fp16"), default="fp32",
                 help="model precision. fp16 reproduces the local Pythia runs made under "
-                     "transformers 5 before 7 Oct 2026, which loaded Pythia's stored float16")
+                     "transformers 5 before 6 Oct 2026, which loaded Pythia's stored float16")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 

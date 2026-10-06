@@ -1,6 +1,6 @@
 # Pre-registration: B-15, how much a verdict moves when nothing about the unit changes
 
-**Filed 7 October 2026, before the runs.** It supplies Paper 1's error budget on the fixed
+**Filed 6 October 2026, before the runs.** It supplies Paper 1's error budget on the fixed
 estimator.
 
 ## Question
@@ -55,10 +55,10 @@ B-14's archived rows on two units.
 - An ordering that survives all three arms is reported as robust to initialisation, token
   sample and split.
 
-## Note added 7 October 2026, before any B-15 run
+## Note added 6 October 2026, before any B-15 run
 
 The cascade route's single-unit fits drew their head initialisation from torch's global RNG
-until 7 Oct (`caliper/estimator.py`, `_Bottleneck`). The same unit, seed and thread count gave
+until 6 Oct (`caliper/estimator.py`, `_Bottleneck`). The same unit, seed and thread count gave
 cascade alignments of 0.976, 0.941 and 0.559 depending on run history. B-15 runs on the
 corrected, seeded initialisation. B-14's cascade values therefore cannot be reproduced, and
 B-14 vs B-15 comparisons carry this as a known extra source of variation. The initialisation

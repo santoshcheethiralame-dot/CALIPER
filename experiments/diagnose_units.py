@@ -70,7 +70,7 @@ def main():
     ap.add_argument("--route", choices=("selected", "direct", "cascade"), default="selected")
     ap.add_argument("--dtype", choices=("fp32", "fp16"), default="fp32",
                     help="match the run's precision: fp16 for the local Pythia runs before "
-                         "7 Oct 2026 (B-2b, B-2c)")
+                         "6 Oct 2026 (B-2b, B-2c)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 

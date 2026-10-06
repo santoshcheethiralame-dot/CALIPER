@@ -1,6 +1,6 @@
 # Pre-registration: B-2d, does Pythia's half-precision load move any verdict?
 
-**Filed 7 October 2026, before the run.**
+**Filed 6 October 2026, before the run.**
 
 ## What was found
 
@@ -31,7 +31,7 @@ python experiments/e01_gate.py --model EleutherAI/pythia-160m --layer 6 --d-mlp 
 These are the first 50 of B-2c's units (the same draw, truncated). The comparison is with
 B-2c's rows for the same units, on the **direct route only**: `align_direct` and `stability`.
 The direct route was seeded identically in both runs. B-2c's cascade route ran before the
-7 October head-seeding fix, so cascade and selected values differ for that reason too and
+6 October head-seeding fix, so cascade and selected values differ for that reason too and
 are not compared.
 
 ## Reading, fixed now

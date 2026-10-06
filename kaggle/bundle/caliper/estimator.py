@@ -71,7 +71,7 @@ class _Bottleneck(nn.Module):
             v[:, 0] = torch.as_tensor(init, dtype=v.dtype)
         self.v = nn.Parameter(v)
         # The head's initial weights come from the same seed. nn.Linear draws from torch's
-        # global RNG, so before 7 Oct 2026 the head depended on everything the process had
+        # global RNG, so before 6 Oct 2026 the head depended on everything the process had
         # fitted earlier: the same unit, seed and thread count gave cascade alignments of
         # 0.976, 0.941 and 0.559 depending on run history. fork_rng leaves the global
         # state untouched for the caller.

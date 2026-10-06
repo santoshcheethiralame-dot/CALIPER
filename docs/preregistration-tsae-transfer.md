@@ -1,6 +1,6 @@
 # Pre-registration: T-SAE, does the calibration transfer to SAE latents?
 
-**Filed 7 October 2026, before the run.** Paper 1's transfer experiment, answering the
+**Filed 6 October 2026, before the run.** Paper 1's transfer experiment, answering the
 objection that the reference standard covers only MLP neurons reading their own layer.
 
 ## The reference standard

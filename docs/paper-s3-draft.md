@@ -166,7 +166,7 @@ stable under every scoring rule we tried.
 The same model, layer, prompt and vectors give very different numbers depending on how the
 answer is read.
 
-*Corrected 7 October 2026 (notebook C40). The table previously read 50 / 23 / 27 / 7% at
+*Corrected 6 October 2026 (notebook C40). The table previously read 50 / 23 / 27 / 7% at
 α = 2/4/6/8. The 27% and 7% match no rule computable from the archived data. Below are both
 filed rules.*
 

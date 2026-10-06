@@ -1,6 +1,6 @@
 # Pre-registration: S-4, Study 3 reanalysis (equivalence tests and exact intervals)
 
-**Filed 7 October 2026, before `experiments/analyse_s3_reanalysis.py` is run.** No new data.
+**Filed 6 October 2026, before `experiments/analyse_s3_reanalysis.py` is run.** No new data.
 The archived Study 3 runs are already unblinded, so what is fixed here is the *test and its
 margin*, before the equivalence results are computed.
 

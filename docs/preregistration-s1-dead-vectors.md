@@ -1,6 +1,6 @@
 # Pre-registration: S-1, are dead vectors a read-position effect or a precision artefact?
 
-**Filed 7 October 2026, before any S-1 run.** Paper 2, Part A. Script:
+**Filed 6 October 2026, before any S-1 run.** Paper 2, Part A. Script:
 `experiments/kaggle_s3_positive_control.py` v2026-10-07a. Run sheet:
 `kaggle/NEXT_SESSION_S1.md`.
 

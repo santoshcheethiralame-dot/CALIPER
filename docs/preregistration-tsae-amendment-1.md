@@ -1,6 +1,6 @@
 # T-SAE Amendment 1: an operating-point pilot comes first, and eligibility is set on our stimulus
 
-**Filed 7 October 2026, before any T-SAE run.** The only data seen is from code-path smoke
+**Filed 6 October 2026, before any T-SAE run.** The only data seen is from code-path smoke
 runs (7 latents in total), listed below. No T-SAE run has started.
 
 ## What the smoke runs showed
@@ -61,7 +61,7 @@ The operating point and eligibility are set from failure *counts* and the stimul
 never from the reliability signals' AUCs, which are the quantities under test. This is the
 same procedure that set the MLP operating point (E0.3b) before the MLP gate ran.
 
-## Amendment 2 (7 October 2026, before the pilot runs): the rule's last case, run order
+## Amendment 2 (6 October 2026, before the pilot runs): the rule's last case, run order
 
 - **The missing case.** The rule above does not cover "A above 80% and B below 20%". That
   case uses **B at N = 200**: it is the only budget that fits. The rule is coded in

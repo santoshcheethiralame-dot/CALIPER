@@ -128,7 +128,7 @@ def readable(arm):
     model, rest = arm.split(" (")[0], arm.split(" (")[-1]
     tag = " (fixed)" if "fixed" in rest else " (coupled)"
     return model.replace("GPT-2 L", "GPT-2 small, layer ").replace(" L", ", layer ").replace(
-        ", 3200 steps", "") + tag
+        ", 3200 steps", "").replace("1.4b", "1.4B") + tag
 
 
 def fig_forest():

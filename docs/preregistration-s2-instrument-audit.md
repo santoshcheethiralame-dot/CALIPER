@@ -1,6 +1,6 @@
 # Pre-registration: S-2, do the standard vector health checks detect dead vectors?
 
-**Filed 7 October 2026, before any S-2 run.** Paper 2, Part A. Script:
+**Filed 6 October 2026, before any S-2 run.** Paper 2, Part A. Script:
 `experiments/kaggle_s3_positive_control.py` v2026-10-07a. Run sheet:
 `kaggle/NEXT_SESSION_S2.md`. The judge-scored readout waits for S-12 (kappa ≥ 0.6) and is
 not part of this filing.

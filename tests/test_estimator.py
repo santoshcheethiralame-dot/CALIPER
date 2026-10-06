@@ -245,7 +245,7 @@ def test_sequence_order_keeps_sequences_whole():
 
 
 def test_single_unit_fit_is_independent_of_run_history():
-    """Before 7 Oct 2026 the head's initialisation came from torch's global RNG, so the
+    """Before 6 Oct 2026 the head's initialisation came from torch's global RNG, so the
     same unit and seed gave different fits depending on what the process had run before.
     The fit must now be a function of its inputs and seed alone."""
     import torch

@@ -1,7 +1,7 @@
 """Seed flags must not change any earlier run: defaults reproduce B-14's direct route.
 
 Only the direct-route fields are compared. B-14's cascade fits drew their head
-initialisation from torch's global RNG (fixed 7 Oct 2026), so its cascade numbers depend on
+initialisation from torch's global RNG (fixed 6 Oct 2026), so its cascade numbers depend on
 run history and cannot be reproduced. Run at the default thread count, which B-14 used.
 
 Slow (fits real GPT-2 units for a few minutes), so it runs only with CALIPER_SLOW=1.

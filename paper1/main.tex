@@ -41,11 +41,11 @@ on 300 units of GPT-2 small, with replications across depth, model family and tr
 corpus. The estimator fails on 15\% of units, while median alignment across all units is 0.994. Agreement across restarts, the
 most common check, predicts these failures worse than held-out fit, a quantity every fit
 already computes (AUC 0.79 vs 0.92, $p = 1.8\times10^{-4}$; pooled across six model and layer
-conditions, $\Delta$AUC $= -0.128$, 95\% CI $[-0.170,-0.087]$). The whole advantage comes from
+conditions, $\Delta$AUC $= -0.134$, 95\% CI $[-0.176,-0.091]$). The whole advantage comes from
 under-fitted fits: on fits that converged confidently to a wrong direction, the two checks are
-tied at an AUC of about 0.78, so neither is a reliable guard against the failure that matters
-most. Restart
-agreement adds nothing once unit difficulty is accounted for, while held-out fit does, and
+tied (about 0.78 on GPT-2 small, near chance on GPT-Neo), so neither is a reliable guard
+against the failure that matters most. On GPT-2, restart agreement adds nothing once unit
+difficulty is accounted for, while held-out fit does, and
 about one unit in ten is never recovered at any restart count we tried. In the vocabulary of
 metrology, restart agreement is a check of precision, not of trueness. We release the bench,
 the pre-registrations and every run.
@@ -282,17 +282,20 @@ AUCs in the legend.}
 Four pre-fit descriptors of each unit (fraction of tokens on which it is active, mean
 pre-activation, response kurtosis, and the GELU first-order coefficient) predict failure on
 their own with cross-validated AUC 0.825. Adding held-out $R^2$ raises this to 0.892; adding
-restart agreement leaves it at 0.831.
+restart agreement leaves it at 0.831. On GPT-Neo-125m neither check adds anything (0.707 for
+the descriptors, 0.699 with held-out $R^2$, 0.703 with restart agreement), because half its
+failures are converged-wrong fits that held-out $R^2$ cannot see
+(Section~\ref{sec:classes}).
 
 \subsection{The gap is consistent across models, layers and families}
 Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs vary widely,
-from a held-out-$R^2$ AUC of 0.72 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap does not:
-random-effects pooling gives $\Delta$AUC $-0.128$, 95\% CI $[-0.170,-0.087]$,
-$I^2 = 0$, and held-out $R^2$ is ahead in all six (Figure~\ref{fig:forest}). Three arms
-were fitted with the corrected estimator; the other three are earlier runs whose fits were
-coupled across units (Appendix~\ref{app:deviations}). Re-running the GPT-2 and Pythia-160m arms
-on the corrected estimator moved their gaps from $-0.164$ and $-0.094$ to $-0.127$ and
-$-0.123$. \tbd{GPT-Neo re-run, then re-pool.}
+from a held-out-$R^2$ AUC of 0.76 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap does not:
+random-effects pooling gives $\Delta$AUC $-0.134$, 95\% CI $[-0.176,-0.091]$,
+$I^2 = 0$, and held-out $R^2$ is ahead in all six (Figure~\ref{fig:forest}). Four arms
+were fitted with the corrected estimator; the two GPT-2 depth arms are earlier runs whose fits
+were coupled across units (Appendix~\ref{app:deviations}). Re-running the GPT-2 layer-6,
+Pythia-160m and GPT-Neo arms on the corrected estimator moved their gaps from $-0.164$,
+$-0.094$ and $-0.133$ to $-0.127$, $-0.123$ and $-0.167$.
 
 \begin{figure}[t]
 \centering
@@ -314,10 +317,10 @@ GPT-2 small, layer 6 (fixed) & 300 & 46 & 0.792 & 0.919 & $-0.127$ \\
 Pythia-160m, layer 6 (fixed, float16) & 300 & 13 & 0.828 & 0.951 & $-0.123$ \\
 GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ \\
 GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ \\
-GPT-Neo-125m, layer 10 & 100 & 41 & 0.582 & 0.715 & $-0.133$ \\
+GPT-Neo-125m, layer 10 (fixed) & 100 & 38 & 0.588 & 0.755 & $-0.167$ \\
 Pythia-1.4B, layer 12, 3{,}200 steps (fixed) & 50 & 19 & 0.847 & 0.973 & $-0.126$ \\
 \midrule
-random effects & & & & & $-0.128\ [-0.170, -0.087]$ \\
+random effects & & & & & $-0.134\ [-0.176, -0.091]$ \\
 \bottomrule
 \end{tabular}
 \caption{Rows marked fixed use the corrected estimator; the others are coupled-estimator runs. One arm per condition; arms with fewer than
@@ -326,16 +329,20 @@ five failures are excluded from pooling.}
 \end{table}
 
 \subsection{The checks catch under-fitting, not the converged wrong basin}
+\label{sec:classes}
 Split by failure class (pre-registered before the run's outputs were viewed), held-out $R^2$'s
 advantage is entirely the under-fitted class: AUC 0.993 $[0.985, 0.999]$ against 0.796
 $[0.729, 0.858]$ for restart agreement. On the sixteen fits that converged to a wrong
 direction, the two are tied: 0.779 $[0.700, 0.849]$ and 0.782 $[0.664, 0.872]$. The split
 is unchanged for class boundaries between 0.98 and 0.995. The $R^2$ figure on the
 wrong-basin class is attenuated by construction, since the class is defined by $R^2$;
-restart agreement's is not, and it is no better. On GPT-Neo-125m the same split is starker
-(\prov{0.56 and 0.48}, coupled estimator), and at 1.4B every failure was under-fitted. Held-out fit is the better
-check because most failures are under-fitting; for the converged-wrong minority, about 5\% of
-units here, no ground-truth-free check we measured is reliable.
+restart agreement's is not, and it is no better. On GPT-Neo-125m, where converged-wrong
+fits are 20 of 38 failures, the split is starker: both checks are at chance on that class
+(held-out $R^2$ 0.55 $[0.42, 0.69]$, restart agreement 0.47 $[0.33, 0.62]$) and both work on
+the under-fitted class (0.98 and 0.72). At 1.4B every failure was under-fitted. Held-out fit
+is the better check because most failures are under-fitting; for converged-wrong fits, 5\% of
+units on GPT-2 small and 20\% on GPT-Neo, no ground-truth-free check we measured is
+reliable.
 
 \begin{figure}[t]
 \centering
@@ -368,7 +375,7 @@ held-out $R^2$ (solid), in two runs. Agreement does not catch up as restarts are
 Known so far: at fixed units, changing the restart count from two to five changes about 12\%
 of verdicts; changing the 8{,}000-token sample changes 10 of 50; running on a GPU instead of
 a CPU changes 4 of 50. Pass rates differ with depth (0.48, 0.86, 0.90 at layers 2, 6, 10) and
-with model family at fixed depth (GPT-Neo-125m 0.59 vs GPT-2 0.90 at layer 10). A failure
+with model family at fixed depth (GPT-Neo-125m 0.62 vs GPT-2 0.90 at layer 10). A failure
 rate is a property of a model, a layer and a configuration, not of the estimator alone.
 
 % ======================================================================

@@ -236,7 +236,7 @@ reviewer's first demand.
   token index and dtype first).
 - **Outcome:** the steering-control pass rate per cell.
 
-> **Amended 7 Oct 2026 (feasibility, before any S-1 data):** 27B in 8-bit needs about 34 GB
+> **Amended 6 Oct 2026 (feasibility, before any S-1 data):** 27B in 8-bit needs about 34 GB
 > against 2xT4's 30, and a T4 has no bf16. The precision axis runs on Gemma-3-12B (4-bit, 8-bit,
 > fp16), and 27B keeps one 4-bit cell. See `docs/preregistration-s1-dead-vectors.md`.
 

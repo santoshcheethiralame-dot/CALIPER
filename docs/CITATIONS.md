@@ -812,7 +812,7 @@ say what the full text changed. Formalise into `paper/references.bib` only at FU
 **Never cite a specific claim from an ABS row.** That is the rule the August audit exists
 to enforce.
 
-## 24. Bibliographic metadata check (7 Oct 2026)
+## 24. Bibliographic metadata check (6 Oct 2026)
 
 `paper1/references.bib` was checked entry by entry against Crossref (by DOI, or by title where
 there is no DOI), the arXiv API (authors) and Semantic Scholar (venues and pages for ML
