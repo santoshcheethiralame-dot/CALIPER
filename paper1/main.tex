@@ -37,11 +37,14 @@ where it is not missing. The pre-activation of an MLP neuron is exactly the inne
 its layer's normalised residual stream with the neuron's input weight column, so the
 direction the neuron reads is written in the weights. Using this as a reference standard, we
 score a maximally-informative-dimensions style estimator and the checks used to vouch for it
-on \tbd{n} units of GPT-2 small, with replications across depth, model family and training
-corpus. The estimator fails silently on \tbd{x}\% of units. Agreement across restarts, the
-most common check, predicts these failures \tbd{markedly} worse than held-out fit, a quantity
-every fit already computes (AUC \tbd{0.78 vs 0.94}; pooled across six model and layer
-conditions, $\Delta$AUC $=$ \prov{$-0.14$}, 95\% CI \prov{$[-0.18,-0.10]$}). Restart
+on 300 units of GPT-2 small, with replications across depth, model family and training
+corpus. The estimator fails on 15\% of units, while median alignment across all units is 0.994. Agreement across restarts, the
+most common check, predicts these failures worse than held-out fit, a quantity every fit
+already computes (AUC 0.79 vs 0.92, $p = 1.8\times10^{-4}$; pooled across six model and layer
+conditions, $\Delta$AUC $= -0.125$, 95\% CI $[-0.165,-0.084]$). The whole advantage comes from
+under-fitted fits: on fits that converged confidently to a wrong direction, the two checks are
+tied at an AUC of about 0.78, so neither is a reliable guard against the failure that matters
+most. Restart
 agreement adds nothing once unit difficulty is accounted for, while held-out fit does, and
 about one unit in ten is never recovered at any restart count we tried. In the vocabulary of
 metrology, restart agreement is a check of precision, not of trueness. We release the bench,
@@ -241,9 +244,10 @@ opened, and the analysis code was developed on an earlier, already-unblinded run
 \label{sec:results}
 
 \subsection{The estimator fails silently on a minority of units}
-\tbd{B-14: pass rate with Wilson CI; median and minimum alignment; failure classes
-(wrong basin vs under-fitted).} On the earlier coupled run, 52 of 300 units failed while the
-median alignment across all units was \prov{0.994}; aggregate statistics hide the failures.
+Of 300 GPT-2 layer-6 units, 254 pass (0.847, 95\% CI $[0.80, 0.88]$) and 46 fail, while the
+median alignment across all units is 0.994 and the minimum 0.047; aggregate statistics hide
+the failures. Thirty failures are under-fitted (held-out $R^2 \le 0.99$); sixteen converged
+to a wrong direction with held-out $R^2 > 0.99$.
 Classical closed-form estimators fail almost completely on the same units: spike-triggered
 averaging recovers 0 of 30, decorrelated STA 1 of 30, spike-triggered covariance 0 of 30,
 against 26 of 30 for the fitted estimator, because the stimulus is non-Gaussian and GELU is
@@ -251,21 +255,22 @@ non-monotone over the range these units occupy. A random-direction null bounds c
 $R^2 \le 0.044$.
 
 \subsection{Restart agreement is a weaker predictor of failure than held-out fit}
-\tbd{B-14 primary: AUCs, DeLong difference, p, bootstrap CI, decision-table verdict.}
-\prov{On the coupled run: restart agreement 0.778, held-out $R^2$ 0.942, $\Delta = -0.164$,
-$p = 1.8\times10^{-7}$, bootstrap 95\% CI $[-0.224,-0.106]$.} \tbd{figure: ROC curves;
-threshold sweep.}
+Restart agreement predicts failure with AUC 0.792 and held-out $R^2$ with 0.919; the
+difference is $-0.127$ (DeLong $p = 1.8\times10^{-4}$; paired bootstrap 95\% CI
+$[-0.193,-0.063]$; label-permutation $p = 0.001$). The ordering holds at every failure
+threshold from 0.90 to 0.98, and in precision--recall terms the gap is larger (PR-AUC 0.77
+against 0.32 at a failure prevalence of 0.15). \tbd{figure: ROC curves; threshold sweep.}
 
 \subsection{Restart agreement adds nothing beyond unit difficulty}
 Four pre-fit descriptors of each unit (fraction of tokens on which it is active, mean
 pre-activation, response kurtosis, and the GELU first-order coefficient) predict failure on
-their own with cross-validated AUC \prov{0.844}. Adding held-out $R^2$ raises this to
-\prov{0.907}; adding restart agreement leaves it at \prov{0.841}. \tbd{confirm on B-14.}
+their own with cross-validated AUC 0.825. Adding held-out $R^2$ raises this to 0.892; adding
+restart agreement leaves it at 0.831.
 
 \subsection{The gap is consistent across models, layers and families}
 Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs vary widely,
 from a held-out-$R^2$ AUC of 0.72 on GPT-Neo to 0.99 on Pythia-160m, but the gap does not:
-random-effects pooling gives $\Delta$AUC \prov{$-0.140$}, 95\% CI \prov{$[-0.180,-0.100]$},
+random-effects pooling gives $\Delta$AUC $-0.125$, 95\% CI $[-0.165,-0.084]$,
 $I^2 = 0$, and held-out $R^2$ is ahead in all six. \note{all arms were fitted with the coupled
 estimator; re-run the GPT-2 L6 and Pythia arms on the fixed one and re-pool.}
 
@@ -276,27 +281,32 @@ estimator; re-run the GPT-2 L6 and Pythia arms on the fixed one and re-pool.}
 \toprule
 condition & $n$ & failures & AUC restart & AUC held-out $R^2$ & $\Delta$ \\
 \midrule
-GPT-2 small, layer 6 & 300 & 52 & 0.778 & 0.942 & $-0.164$ \\
+GPT-2 small, layer 6 (fixed) & 300 & 46 & 0.792 & 0.919 & $-0.127$ \\
 Pythia-160m, layer 6 & 300 & 13 & 0.899 & 0.993 & $-0.094$ \\
 GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ \\
 GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ \\
 GPT-Neo-125m, layer 10 & 100 & 41 & 0.582 & 0.715 & $-0.133$ \\
 Pythia-1.4B, layer 12, 3{,}200 steps (fixed) & 50 & 19 & 0.847 & 0.973 & $-0.126$ \\
 \midrule
-random effects & & & & & \prov{$-0.140\ [-0.180, -0.100]$} \\
+random effects & & & & & $-0.125\ [-0.165, -0.084]$ \\
 \bottomrule
 \end{tabular}
-\caption{\prov{Provisional: coupled estimator except the Pythia-1.4B row (fixed).} One arm per condition; arms with fewer than
+\caption{Rows marked fixed use the corrected estimator; \prov{the others are coupled-estimator runs being re-run}. One arm per condition; arms with fewer than
 five failures are excluded from pooling.}
 \label{tab:arms}
 \end{table}
 
 \subsection{The checks catch under-fitting, not the converged wrong basin}
-\tbd{B-14 Addendum 2.} Split by failure class on earlier runs, held-out $R^2$'s advantage
-comes almost entirely from under-fitted failures (on GPT-2 layer 6, AUC 0.99 against 0.79 for
-restart agreement). On fits that converged to a wrong direction, both checks are weak (0.78 and
-0.73 on GPT-2; 0.56 and 0.48 on GPT-Neo). At 1.4B every failure was under-fitted. This class
-split is the paper's most important qualification and is reported for every arm.
+Split by failure class (pre-registered before the run's outputs were viewed), held-out $R^2$'s
+advantage is entirely the under-fitted class: AUC 0.993 $[0.985, 0.999]$ against 0.796
+$[0.729, 0.858]$ for restart agreement. On the sixteen fits that converged to a wrong
+direction, the two are tied: 0.779 $[0.700, 0.849]$ and 0.782 $[0.664, 0.872]$. The split
+is unchanged for class boundaries between 0.98 and 0.995. The $R^2$ figure on the
+wrong-basin class is attenuated by construction, since the class is defined by $R^2$;
+restart agreement's is not, and it is no better. On GPT-Neo-125m the same split is starker
+(\prov{0.56 and 0.48}), and at 1.4B every failure was under-fitted. Held-out fit is the better
+check because most failures are under-fitting; for the converged-wrong minority, about 5\% of
+units here, no ground-truth-free check we measured is reliable.
 
 \subsection{More restarts do not fix it}
 Restart agreement computed from the first $k$ of five stored restarts does not predict

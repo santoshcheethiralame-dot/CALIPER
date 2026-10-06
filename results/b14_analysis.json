@@ -1,0 +1,389 @@
+{
+  "rows": "results/b14_primary_gpt2_indep.jsonl",
+  "scrambled": null,
+  "n": 300,
+  "n_failures": 46,
+  "pass_rate": 0.8467,
+  "pass_wilson_95": [
+    0.8015,
+    0.883
+  ],
+  "primary": {
+    "auc_restart": 0.7915097569325573,
+    "auc_r2": 0.9187350222526532,
+    "diff_restart_minus_r2": -0.12722526532009593,
+    "se": 0.03393409745935983,
+    "z": -3.749186654292589,
+    "p": 0.00017740901029657542,
+    "verdict": "HEADLINE STANDS on the fixed estimator",
+    "bootstrap_95_diff": [
+      -0.1925753166723725,
+      -0.06313120506675807
+    ]
+  },
+  "failure_classes": {
+    "wrong_basin_r2_gt_0.99": 16,
+    "under_fitted": 30
+  },
+  "by_failure_class": {
+    "0.98": {
+      "wrong_basin": {
+        "held-out R2": {
+          "n_class": 16,
+          "auc": 0.7794045275590551,
+          "ci95": [
+            0.6995570866141733,
+            0.8494186761811024
+          ]
+        },
+        "restart agreement": {
+          "n_class": 16,
+          "auc": 0.7822342519685039,
+          "ci95": [
+            0.6643639271653544,
+            0.8715612696850393
+          ]
+        },
+        "disagreement": {
+          "n_class": 16,
+          "auc": 0.7906003937007874,
+          "ci95": [
+            0.7142962598425197,
+            0.8609990157480314
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 16,
+          "auc": 0.6982037401574803,
+          "ci95": [
+            0.5669045275590551,
+            0.8137364665354331
+          ]
+        }
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 30,
+          "auc": 0.9930446194225722,
+          "ci95": [
+            0.9850360892388452,
+            0.9989501312335958
+          ]
+        },
+        "restart agreement": {
+          "n_class": 30,
+          "auc": 0.7964566929133858,
+          "ci95": [
+            0.7291108923884514,
+            0.8578772965879264
+          ]
+        },
+        "disagreement": {
+          "n_class": 30,
+          "auc": 0.7383858267716535,
+          "ci95": [
+            0.656026902887139,
+            0.8236384514435695
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 30,
+          "auc": 0.6872703412073491,
+          "ci95": [
+            0.5964468503937008,
+            0.759019028871391
+          ]
+        }
+      }
+    },
+    "0.99": {
+      "wrong_basin": {
+        "held-out R2": {
+          "n_class": 16,
+          "auc": 0.7794045275590551,
+          "ci95": [
+            0.6995570866141733,
+            0.8494186761811024
+          ]
+        },
+        "restart agreement": {
+          "n_class": 16,
+          "auc": 0.7822342519685039,
+          "ci95": [
+            0.6643639271653544,
+            0.8715612696850393
+          ]
+        },
+        "disagreement": {
+          "n_class": 16,
+          "auc": 0.7906003937007874,
+          "ci95": [
+            0.7142962598425197,
+            0.8609990157480314
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 16,
+          "auc": 0.6982037401574803,
+          "ci95": [
+            0.5669045275590551,
+            0.8137364665354331
+          ]
+        }
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 30,
+          "auc": 0.9930446194225722,
+          "ci95": [
+            0.9850360892388452,
+            0.9989501312335958
+          ]
+        },
+        "restart agreement": {
+          "n_class": 30,
+          "auc": 0.7964566929133858,
+          "ci95": [
+            0.7291108923884514,
+            0.8578772965879264
+          ]
+        },
+        "disagreement": {
+          "n_class": 30,
+          "auc": 0.7383858267716535,
+          "ci95": [
+            0.656026902887139,
+            0.8236384514435695
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 30,
+          "auc": 0.6872703412073491,
+          "ci95": [
+            0.5964468503937008,
+            0.759019028871391
+          ]
+        }
+      }
+    },
+    "0.995": {
+      "wrong_basin": {
+        "held-out R2": {
+          "n_class": 14,
+          "auc": 0.7616704161979753,
+          "ci95": [
+            0.6760404949381328,
+            0.8324029808773904
+          ]
+        },
+        "restart agreement": {
+          "n_class": 14,
+          "auc": 0.7679977502812149,
+          "ci95": [
+            0.639763779527559,
+            0.8670205286839145
+          ]
+        },
+        "disagreement": {
+          "n_class": 14,
+          "auc": 0.7679977502812149,
+          "ci95": [
+            0.6875632733408323,
+            0.8456552305961754
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 14,
+          "auc": 0.6733689538807649,
+          "ci95": [
+            0.5292252530933633,
+            0.8029316647919009
+          ]
+        }
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 32,
+          "auc": 0.9874507874015748,
+          "ci95": [
+            0.976005782480315,
+            0.9968042568897637
+          ]
+        },
+        "restart agreement": {
+          "n_class": 32,
+          "auc": 0.8017962598425197,
+          "ci95": [
+            0.7399114173228346,
+            0.8584061269685039
+          ]
+        },
+        "disagreement": {
+          "n_class": 32,
+          "auc": 0.7515378937007874,
+          "ci95": [
+            0.6694558932086614,
+            0.8309239665354331
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 32,
+          "auc": 0.6988188976377953,
+          "ci95": [
+            0.6202017716535433,
+            0.7747354822834646
+          ]
+        }
+      }
+    }
+  },
+  "vs_reference": {
+    "shared_units": 300,
+    "agree": 256,
+    "pass_here_only": 25,
+    "pass_reference_only": 19,
+    "mcnemar_exact_p": 0.4513808323961257,
+    "reference_failure_classes": {
+      "wrong_basin_r2_gt_0.99": 12,
+      "under_fitted": 40
+    }
+  },
+  "signals": {
+    "held-out R2": {
+      "roc_auc": 0.9187350222526532,
+      "pr_auc": 0.7654977810889269,
+      "spearman_vs_alignment": 0.6675819808173129
+    },
+    "restart agreement": {
+      "roc_auc": 0.7915097569325573,
+      "pr_auc": 0.3220941680893025,
+      "spearman_vs_alignment": 0.5593745661907424
+    },
+    "disagreement": {
+      "roc_auc": 0.7565474152687436,
+      "pr_auc": 0.3108906763971912,
+      "spearman_vs_alignment": 0.5524247257558964,
+      "delong_minus_r2": {
+        "diff": -0.16218760698390966,
+        "p": 1.2232330888661854e-05
+      }
+    },
+    "restart R2 spread": {
+      "roc_auc": 0.6910732625813077,
+      "pr_auc": 0.25194198709887705,
+      "spearman_vs_alignment": 0.425463881419529,
+      "delong_minus_r2": {
+        "diff": -0.2276617596713455,
+        "p": 2.756788681266612e-08
+      }
+    }
+  },
+  "secondary_bh": {
+    "disagreement vs R2": {
+      "p": 1.2232330888661854e-05,
+      "q": 1.834849633299278e-05
+    },
+    "restart R2 spread vs R2": {
+      "p": 2.756788681266612e-08,
+      "q": 8.270366043799836e-08
+    },
+    "mcnemar vs reference": {
+      "p": 0.4513808323961257,
+      "q": 0.4513808323961257
+    }
+  },
+  "pr_auc_prevalence_baseline": 0.15333333333333332,
+  "disagreement_note": "'disagreement' is |align_direct - align_cascade| and uses the true direction; it is not ground-truth-free",
+  "threshold_sweep": {
+    "0.9": {
+      "failures": 27,
+      "held-out R2": 0.9753086419753086,
+      "restart agreement": 0.774657441324108,
+      "disagreement": 0.7319223985890653,
+      "restart R2 spread": 0.6604938271604939
+    },
+    "0.92": {
+      "failures": 30,
+      "held-out R2": 0.9698765432098766,
+      "restart agreement": 0.7848148148148149,
+      "disagreement": 0.7437037037037038,
+      "restart R2 spread": 0.6811728395061728
+    },
+    "0.95": {
+      "failures": 46,
+      "held-out R2": 0.9187350222526532,
+      "restart agreement": 0.7915097569325573,
+      "disagreement": 0.7565474152687436,
+      "restart R2 spread": 0.6910732625813077
+    },
+    "0.97": {
+      "failures": 62,
+      "held-out R2": 0.9123407427487124,
+      "restart agreement": 0.7695174844131201,
+      "disagreement": 0.7644348061805367,
+      "restart R2 spread": 0.6853822174030902
+    },
+    "0.98": {
+      "failures": 77,
+      "held-out R2": 0.9118572010948692,
+      "restart agreement": 0.7850736707238949,
+      "disagreement": 0.7922951487973909,
+      "restart R2 spread": 0.7047056082930523
+    }
+  },
+  "calibration_r2": {
+    "brier": 0.0802577881657977,
+    "reliability_equal_mass_5": [
+      {
+        "mean_predicted": 0.08373902489200537,
+        "observed_rate": 0.0,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.08514188401116435,
+        "observed_rate": 0.03333333333333333,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.08655225993298703,
+        "observed_rate": 0.016666666666666666,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.08984983626511302,
+        "observed_rate": 0.2,
+        "n": 60
+      },
+      {
+        "mean_predicted": 0.4177473848072202,
+        "observed_rate": 0.5166666666666667,
+        "n": 60
+      }
+    ]
+  },
+  "control_permuted_labels": {
+    "n_perm": 1000,
+    "mean_diff": -8.421773365285923e-05,
+    "sd_diff": 0.03827893148637311,
+    "p_abs_ge_observed": 0.001
+  },
+  "control_cheating_signal_auc": 1.0,
+  "identifiable_direction_label": "NOT COMPUTABLE: e01_gate.py archives alignments, not fitted directions (deviation from addendum 1 items 1-2)",
+  "ln_null_ceiling": {
+    "units_with_ceiling_below_bar": [],
+    "median_ceiling": 0.999758780002594
+  },
+  "nuisance": {
+    "active fraction": 0.8207377610407395,
+    "z_mean": 0.8310510099281068,
+    "response kurtosis": 0.8093118794933242,
+    "GELU first-order coefficient": 0.8257446080109552,
+    "orientation_note": "AUC of each descriptor alone; active fraction, z_mean and GELU coefficient oriented low = suspect"
+  },
+  "incremental_cv_auc": {
+    "baselines": 0.8249743238616912,
+    "baselines + R2": 0.8916466963368709,
+    "baselines + restart agreement": 0.8314789455665867
+  },
+  "seconds_per_unit": 227.2
+}

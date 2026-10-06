@@ -35,7 +35,8 @@ PAIR_INDEX = [(i, j) for i in range(5) for j in range(i + 1, 5)]   # _pairs orde
 # One arm per condition; none shares units with another. Arms with < 5 failures cannot
 # carry a DeLong variance and are listed but not pooled.
 ARMS = {
-    "GPT-2 L6 (B-1b)": "results/b1b_primary_gpt2.jsonl",
+    # B-14 (fixed estimator, 6 Oct) replaces B-1b (coupled) for this condition.
+    "GPT-2 L6 (B-14, fixed)": "results/b14_primary_gpt2_indep.jsonl",
     "Pythia-160m L6 (B-2b)": "results/b1b_primary_pythia.jsonl",
     "GPT-2 L2 (B-7)": "results/b7_layer02_gpt2.jsonl",
     "GPT-2 L10 (B-7)": "results/b7_layer10_gpt2.jsonl",

@@ -234,6 +234,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | B-10 | 2026-10-04 | required-N per signal | 50 x 4 | 2k/4k/8k/16k nested prefixes, 2 restarts | `results/b10_required_n.jsonl` | Pass 0.16/0.56/0.66/0.80; R2 ahead of restart at every N. Script `experiments/b10_required_n.py` was **untracked** at commit time |
 | B-12 | 2026-10-04/05 | batch invariance, per-neuron seed on | 50 x 3 (+ control running) | batch 32 / 8 / 1 | `results/b12_fix_b{032,008,001}.jsonl` | 40/36/37 pass. **10 and 9 of 50 flip vs batch 32 with seeding fixed.** Control arm in flight |
 | **B-11c** | 2026-10-06 | **Pythia-1.4B L12, 3,200 steps, fixed estimator (Kaggle T4)** | 50 | `--independent-units`, saves directions | `data/b11/b11c_pythia-14b_s3200_indep.jsonl`, `_dirs/` | 31/50 pass (B-11s coupled: 36); restart 0.847 vs R2 0.973, diff -0.126, DeLong p=0.032 (permutation p=0.074); **all 19 failures under-fitted**; route agreement AUC 0.910 |
+| **B-14** | 2026-10-05/06 | **primary endpoint re-run, fixed estimator** | 300 | GPT-2 L6, 2 restarts, `--independent-units`, same units as B-1b | `results/b14_primary_gpt2_indep.jsonl`, `results/b14_analysis.json` | 254 align / 252 gate; 46 failures (16 wrong basin, 30 under-fitted); **restart 0.792 vs R2 0.919, diff -0.127, DeLong p=1.8e-04, bootstrap [-0.193, -0.063], permutation p=0.001: HEADLINE STANDS**. By failure class: under-fitted R2 0.993 vs restart 0.796; **wrong basin R2 0.779 vs restart 0.782 (tied)** |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -332,6 +333,76 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### B-14 - the primary endpoint on the fixed estimator (2026-10-06 08:23) - **HEADLINE STANDS; THE ADVANTAGE IS ENTIRELY UNDER-FITTING**
+
+Prereg `docs/preregistration-b14-primary-rerun.md` with Addenda 1 and 2, all filed before the
+outputs were viewed. Analysis by `experiments/analyse_b14.py`, developed on B-1b and run once
+on B-14; output in `results/b14_analysis.json`. GPT-2 small L6, the same 300 units, tokens,
+restarts and steps as B-1b, with `--independent-units`. Local CPU, 227 s/unit, started 13:26
+on 5 Oct after the follow-on task died twice. Rows were written by the orphaned Python
+process after its launcher shut down. No directions were saved: the run started before
+direction saving existed.
+
+**Primary (pre-registered decision table).**
+
+| | B-1b (coupled) | **B-14 (fixed)** |
+|---|---|---|
+| pass (alignment) | 248/300 | **254/300 = 0.847** [0.80, 0.88] |
+| failures: wrong basin / under-fitted | 12 / 40 | **16 / 30** |
+| AUC held-out R2 | 0.942 | **0.919** |
+| AUC restart agreement | 0.778 | **0.792** |
+| restart minus R2 (DeLong) | -0.164, p=1.8e-07 | **-0.127, p=1.8e-04** |
+| paired bootstrap 95% | [-0.224, -0.106] | **[-0.193, -0.063]** |
+| label-permutation control | — | **p = 0.001** (null mean -0.0001, sd 0.038) |
+
+**Verdict per the frozen table: diff <= -0.10 and p < 0.05, so the headline stands on the fixed
+estimator.** B-14 replaces B-1b in the paper, and B-1b moves to the appendix as the run that
+found the coupling.
+
+**Secondary (pre-registered).**
+1. **Verdict agreement with B-1b:** 256/300. 25 units pass only on the fixed estimator and 19
+   only on the coupled one, McNemar p = 0.45. On GPT-2 L6 the coupling did not shift the pass
+   rate systematically, unlike B-12 and B-11c.
+2. **Failure classes:** 16 wrong basin (held-out R2 > 0.99), 30 under-fitted.
+3. **PR-AUC** (prevalence 0.153): R2 0.765, restart 0.322.
+4. **Other signals:** the "disagreement" field (ground-truth-dependent, withdrawn) scores 0.757
+   and r2_spread 0.691. Both are below R2 at BH q ~ 0.
+5. **Threshold sweep:** R2 is above restart at every bar from 0.90 to 0.98 (R2 0.91-0.98,
+   restart 0.77-0.79).
+6. **Nuisance baselines and incremental value:** baselines alone (active fraction, z_mean,
+   kurtosis, GELU coefficient) give CV AUC **0.825**; adding R2 gives **0.892**, adding restart
+   agreement **0.831**. Restart agreement adds nothing beyond unit difficulty, and R2 does,
+   replicating B-1b.
+7. **Calibration:** Platt-scaled R2 has Brier score 0.080.
+8. **Controls:** permuted labels p = 0.001; the ground-truth signal scores AUC 1.0.
+9. **LayerNorm-null ceiling:** no unit limited below the bar (median ceiling 0.99976).
+
+**Addendum 2: by failure class (the result that reshapes the paper).**
+
+| class (R2 cut) | n | AUC held-out R2 [95%] | AUC restart agreement [95%] |
+|---|---|---|---|
+| under-fitted (0.99) | 30 | **0.993** [0.985, 0.999] | 0.796 [0.729, 0.858] |
+| wrong basin (0.99) | 16 | **0.779** [0.700, 0.849] | **0.782** [0.664, 0.872] |
+| wrong basin (0.995) | 14 | 0.762 [0.676, 0.832] | 0.768 [0.640, 0.867] |
+
+The split is identical at cutoffs 0.98 and 0.99 and moves little at 0.995. **Held-out R2's
+whole advantage is the under-fitted class. On fits that converged to a wrong direction, the
+two checks are tied at about 0.78.** That is better than chance, far from reliable, and
+replicates the exploratory B-1b split (0.776 vs 0.729). The R2 number on that class is
+attenuated by construction; restart agreement's is not, and it is no better.
+
+**Consequences.**
+- **The claim becomes:** held-out R2 is the better check overall because it catches
+  under-fitting, which is about two-thirds of failures. Neither check reliably catches the
+  converged-wrong third, about 5% of units. A practitioner who relies on restart agreement is
+  worse off on the first and no better off on the second.
+- **Re-run scope:** B-14's gap lies inside B-1b's bootstrap interval and 85% of verdicts
+  agree. So the reduced path applies: re-run Pythia-160m (B-2c) and GPT-Neo (B-8b) on the
+  fixed estimator, plus B-15. The B-7 depth legs stay as coupled-estimator replications in an
+  appendix.
+- **Re-pooled** with B-14 replacing B-1b (B-11c already replaced): random effects
+  **-0.125 [-0.165, -0.084]**, I2 = 0, arm bootstrap -0.122 [-0.141, -0.103], R2 ahead in 6/6.
 
 ### B-11c - Pythia-1.4B on the fixed estimator (2026-10-06, Kaggle T4) - **THE ORDERING HOLDS; EVERY FAILURE IS UNDER-FITTED**
 
@@ -2682,6 +2753,15 @@ direction at a time. It is the November go/no-go.
 
 ## 5. Findings so far (running conclusions)
 
+> **STATE OF THE FINDINGS, 6 Oct 2026 (B-14 landed) - supersedes the 5 Oct note below.**
+> On the fixed estimator the primary endpoint stands: restart agreement 0.792 vs held-out R2
+> 0.919, diff -0.127, p = 1.8e-04, permutation p = 0.001. Pooled over six conditions it is
+> -0.125 [-0.165, -0.084]. **But the advantage is entirely the under-fitted class.** On the 16
+> converged-wrong failures, both checks are tied at about 0.78. Restart agreement adds nothing
+> beyond unit-difficulty baselines (0.825 -> 0.831) and R2 does (-> 0.892). "Method
+> disagreement" is withdrawn (ground-truth-dependent). Route agreement is the replacement and
+> exists only from B-11c on (0.910 there). See §4, B-14.
+>
 > **STATE OF THE FINDINGS, 5 Oct 2026 - read before quoting anything below.** Study 1's
 > primary endpoint (B-1b, p = 1.8e-07) stands as measured, and the ranking held-out R2 >
 > restart agreement holds in every arm with more than two failures. Four qualifiers now
@@ -2876,6 +2956,7 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-06 | **B-14 SETTLES THE RE-RUN SCOPE: the reduced path.** B-14's gap (-0.127) lies inside B-1b's bootstrap interval, and 256/300 verdicts agree (McNemar p = 0.45). Re-run on the fixed estimator, with directions saved and route agreement: B-2c (Pythia-160m L6, n=300), B-8b (GPT-Neo L10, n=100) and B-15 (replicates). B-7's depth legs and the other coupled arms go to an appendix as coupled-estimator replications. **The paper's central claim is reframed around Addendum 2:** held-out R2 catches under-fitting, and no check catches the converged-wrong class | §4 B-14 |
 | 2026-10-06 | **B-14 ADDENDUM 2 FILED BEFORE UNBLINDING (230/300 rows): failure-class-stratified AUCs.** Exploratory splits of already-unblinded arms show held-out R2's advantage comes from under-fitted failures. On converged-but-wrong failures, both checks are near chance (B-8: R2 0.555, restart 0.477). B-14 will report AUCs by class, with a sensitivity to the class boundary. If the pattern holds, the paper's claim becomes: the checks catch under-fitting, none catches the converged wrong basin, and here is that class's size | `docs/preregistration-b14-addendum-2.md` |
 | 2026-10-06 | **APERTURE's notebook re-read in full and folded into this one.**
 - **§3:** gains a follow-up with every APERTURE run as A-R1 to A-R12, plus A-F1, and which have data on disk (A-R1, A-R3, A-F1).
