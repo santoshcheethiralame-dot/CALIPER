@@ -60,3 +60,14 @@ runs (7 latents in total), listed below. No T-SAE run has started.
 The operating point and eligibility are set from failure *counts* and the stimulus alone,
 never from the reliability signals' AUCs, which are the quantities under test. This is the
 same procedure that set the MLP operating point (E0.3b) before the MLP gate ran.
+
+## Amendment 2 (7 October 2026, before the pilot runs): the rule's last case, run order
+
+- **The missing case.** The rule above does not cover "A above 80% and B below 20%". That
+  case uses **B at N = 200**: it is the only budget that fits. The rule is coded in
+  `experiments/tsae_operating_point.py`, which reads `align_selected` only.
+- **Order.** The rule is applied as written: A if it qualifies, then B. A = 3 and B = 9 of 16
+  selects B.
+- **Queue order** (`experiments/rerun_queue2.sh`): pilot A, pilot B, B-15a/b/c, B-17, then the
+  main T-SAE run at the selected point. The main run is last because it is the longest:
+  about 3 min per latent at A, so about 10 h at N = 200, and roughly four times that at B.
