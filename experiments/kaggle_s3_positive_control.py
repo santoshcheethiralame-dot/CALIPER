@@ -90,14 +90,17 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-09-08f"
+VERSION = "2026-10-07a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
 # Must be set before the first CUDA allocation, so it lives here rather than in load().
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
-ensure_bitsandbytes()
+# Only where there is a GPU to quantise on. A CPU run (the tests, on a tiny model with
+# --quant none) must not pip-install anything at import.
+if torch.cuda.is_available():
+    ensure_bitsandbytes()
 
 # Gemma3-27B is Macar et al.'s primary model (detection 10.8%, FPR 0% at L=37) but it is
 # GATED: the licence must be accepted per-repo on HuggingFace and a token attached.
@@ -105,9 +108,20 @@ ensure_bitsandbytes()
 # (Vogel 2025; Macar et al. post-training analysis), and both fit 2xT4 in 4-bit.
 MODELS = {
     "gemma":  "google/gemma-3-27b-it",        # gated; their primary model
+    "gemma12": "google/gemma-3-12b-it",       # gated; bf16 fits 2xT4 memory (S-1)
     "qwen":   "Qwen/Qwen2.5-32B-Instruct",    # ungated; Vogel replication
     "olmo":   "allenai/OLMo-2-0325-32B-Instruct",  # ungated; post-training analysis
 }
+# Billions of parameters, for the memory guard. A run with --model-path is checked against
+# --model's entry, so pass the matching --model.
+PARAMS_B = {"gemma": 27, "gemma12": 12, "qwen": 32, "olmo": 32}
+# Bytes per parameter by quantisation, with headroom for activations and the unquantised
+# embeddings. 4-bit NF4 with double quantisation stores about 0.55 B/param in practice.
+BYTES_PER_PARAM = {"4bit": 0.75, "8bit": 1.25, "none": 2.2}
+
+# Filled by load(): what actually ran, which can differ from what was asked (the fp32 and
+# storage fallbacks). Written to the sidecar so a config never claims a precision it lacked.
+LOAD_INFO = {}
 # They inject at L=37 of 62 -> 0.60 of depth. Expressed as a fraction so it transfers.
 DEPTH_FRACTION = 37 / 62
 
@@ -119,6 +133,35 @@ CONCEPTS = [
     "joy", "fear", "jealousy", "serenity", "grief", "curiosity", "betrayal", "nostalgia",
     "justice", "freedom",
 ]
+
+# Categories for the APERTURE recipe, whose negatives come from the same category, and for
+# reporting emotion concepts separately (the affect confound, A-R4 to A-R6).
+CATEGORY = {
+    **{c: "animals" for c in ("elephant", "spider", "eagle", "dolphin")},
+    **{c: "places" for c in ("volcano", "desert", "library", "harbor", "mountain", "river",
+                             "garden", "bridge")},
+    **{c: "objects" for c in ("violin", "umbrella", "telescope", "candle", "bread", "clock",
+                              "mirror", "engine")},
+    **{c: "emotions" for c in ("joy", "fear", "jealousy", "serenity", "grief", "curiosity",
+                               "betrayal", "nostalgia")},
+    **{c: "abstract" for c in ("justice", "freedom")},
+}
+
+# APERTURE's sentence templates (mirror/data/concepts/dev_bank.yaml). The last two are held
+# out of extraction and used only by the held-out probe check.
+APERTURE_TEMPLATES = [
+    "Write a short story about {concept}.",
+    "Describe {concept} in vivid detail.",
+    "Explain what {concept} means to you.",
+    "Compose a poem about {concept}.",
+    "List five facts about {concept}.",
+    "Tell me about a memory involving {concept}.",
+    "Write a news headline about {concept}.",
+    "Describe a dream featuring {concept}.",
+    "Explain {concept} to a five year old.",
+    "Write a diary entry about {concept}.",
+]
+HELD_OUT_TEMPLATES = 2
 
 # Baseline pool: unrelated common nouns, per Appendix B.2.
 BASELINE_NOUNS = [
@@ -467,8 +510,9 @@ def preflight(model_id):
         raise
 
 
-def load(model_id, compute_dtype=torch.float16, storage_dtype=None):
-    """Load in 4-bit. compute_dtype and storage_dtype are different knobs.
+def load(model_id, compute_dtype=torch.float16, storage_dtype=None, quant="4bit"):
+    """Load in 4-bit (default), 8-bit, or unquantised. compute_dtype and storage_dtype are
+    different knobs.
 
     bnb_4bit_compute_dtype sets the precision of the dequantised matmul - this is what
     stops Gemma-3-27B overflowing, and it must stay fp32 there. `dtype=` sets the
@@ -489,14 +533,21 @@ def load(model_id, compute_dtype=torch.float16, storage_dtype=None):
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
     hf_token = None if os.path.isdir(model_id) else preflight(model_id)
-    print(f"loading {model_id} in 4-bit ({str(compute_dtype).split('.')[-1]} compute) ...",
+    print(f"loading {model_id} ({quant}, {str(compute_dtype).split('.')[-1]} compute) ...",
           flush=True)
-    # T4 has no bf16; float16 compute is required. Gemma is overflow-prone in fp16, so
-    # coherence is checked explicitly in scoring rather than assumed.
-    quant = BitsAndBytesConfig(
-        load_in_4bit=True, bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=compute_dtype, bnb_4bit_use_double_quant=True,
-    )
+    # T4 has no bf16; float16 compute is required there. Gemma is overflow-prone in fp16,
+    # so coherence is checked explicitly in scoring rather than assumed. 8-bit and
+    # unquantised exist for S-1's precision ablation (is a dead vector a 4-bit artefact?).
+    quant_name = quant
+    if quant == "4bit":
+        quant = BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=compute_dtype, bnb_4bit_use_double_quant=True,
+        )
+    elif quant == "8bit":
+        quant = BitsAndBytesConfig(load_in_8bit=True)
+    else:
+        quant = None
     tok = AutoTokenizer.from_pretrained(model_id, token=hf_token)
 
     # Report anything already resident. A kernel restart does not always release the
@@ -535,8 +586,11 @@ def load(model_id, compute_dtype=torch.float16, storage_dtype=None):
     if store is not compute_dtype:
         print(f"  storage dtype {str(store).split('.')[-1]} "
               f"(compute stays {str(compute_dtype).split('.')[-1]})", flush=True)
-    kw = dict(quantization_config=quant, device_map="auto", attn_implementation="eager",
-              token=hf_token, max_memory=budget)
+    kw = dict(attn_implementation="eager", token=hf_token)
+    if quant is not None:
+        kw["quantization_config"] = quant
+    if budget:
+        kw.update(device_map="auto", max_memory=budget)
 
     def _build(dt):
         try:
@@ -544,6 +598,8 @@ def load(model_id, compute_dtype=torch.float16, storage_dtype=None):
         except TypeError:   # transformers < 4.56 only knows torch_dtype
             return AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=dt, **kw)
 
+    if quant_name == "none":
+        store = compute_dtype       # unquantised: the weights ARE the compute precision
     try:
         model = _build(store)
     except ValueError as e:
@@ -556,7 +612,10 @@ def load(model_id, compute_dtype=torch.float16, storage_dtype=None):
         gc.collect()
         torch.cuda.empty_cache()
         model = _build(torch.float16)
+        store = torch.float16
     model.eval()
+    LOAD_INFO.update(quant=quant_name, compute_dtype=str(compute_dtype).split(".")[-1],
+                     storage_dtype=str(store).split(".")[-1], model_id=str(model_id))
     for i in range(torch.cuda.device_count()):
         used = torch.cuda.memory_allocated(i) / 1e9
         print(f"  cuda:{i} {used:.1f} GB used", flush=True)
@@ -570,6 +629,11 @@ def encode(tok, model, text):
     BatchEncoding dict on others, so normalise to a dict here rather than at each
     call site.
     """
+    if getattr(tok, "chat_template", None) is None:
+        # Only test models lack a template (tests/test_s3_script.py runs a tiny random
+        # Llama on CPU). Every model this script is run on for data has one.
+        ids = tok(f"User: {text}\nAssistant:", return_tensors="pt")["input_ids"]
+        return {"input_ids": ids.to(model.device)}
     enc = tok.apply_chat_template([{"role": "user", "content": text}],
                                   add_generation_prompt=True, return_tensors="pt")
     # BatchEncoding is a UserDict, so isinstance(enc, dict) is False - check for the
@@ -813,19 +877,11 @@ def yes_no_ids(tok):
 
 
 @torch.no_grad()
-def forced_choice(model, tok, layers, layer, vec, alpha, prompt, ynids):
-    """P(YES) at the FIRST generated token, before any output exists to read.
-
-    The free-generation trials show the model emitting concept-laden text and only then
-    answering YES about it - saying, in one case, "the repeated words suggest the concept
-    was injected". That is inference from self-observed output, not introspective access.
-    This measurement removes the opportunity: nothing has been generated yet, so a model
-    with genuine access to the perturbation should still favour YES, and a model reading
-    its own output cannot.
-    """
+def next_token_logprobs(model, tok, layers, layer, add, prompt):
+    """Log-probabilities of the first generated token, with `add` injected at the prompt
+    positions (None = clean). The same injection every trial in this script uses."""
     enc = encode(tok, model, prompt)
     n_prompt = enc["input_ids"].shape[1]
-    add = None if alpha == 0 else alpha * vec
 
     def hook(_m, _i, out):
         tup = isinstance(out, tuple)
@@ -840,25 +896,325 @@ def forced_choice(model, tok, layers, layer, vec, alpha, prompt, ynids):
         logits = model(**enc).logits[0, -1].float()
     finally:
         handle.remove()
-    y = torch.logsumexp(logits[ynids["yes"]], 0)
-    n = torch.logsumexp(logits[ynids["no"]], 0)
-    return float(torch.sigmoid(y - n))
+    return logits.log_softmax(-1)
+
+
+_CLEAN = {}
+
+
+def kl_meter(model, tok, layers, layer, add, prompt, injected=None):
+    """Next-token KL(injected || clean) at the first generated position.
+
+    APERTURE's meter (aperture/hf_model.py kl_meter_hf), adapted to this script's
+    injection: chat-templated prompt, every prompt position. It does two jobs (run plan,
+    S-0): every trial records it, so identification can be read inside coherence bands
+    (A-G1 found identification mostly at derailment); and the random-impact control is
+    built by matching it.
+    """
+    if add is None:
+        return 0.0
+    if prompt not in _CLEAN:
+        _CLEAN[prompt] = next_token_logprobs(model, tok, layers, layer, None, prompt)
+    clean = _CLEAN[prompt]
+    if injected is None:
+        injected = next_token_logprobs(model, tok, layers, layer, add, prompt)
+    return float((injected.exp() * (injected - clean)).sum())
+
+
+def forced_choice(model, tok, layers, layer, vec, alpha, prompt, ynids):
+    """P(YES) at the FIRST generated token, before any output exists to read, and the
+    next-token KL of the same injection.
+
+    The free-generation trials show the model emitting concept-laden text and only then
+    answering YES about it - saying, in one case, "the repeated words suggest the concept
+    was injected". That is inference from self-observed output, not introspective access.
+    This measurement removes the opportunity: nothing has been generated yet, so a model
+    with genuine access to the perturbation should still favour YES, and a model reading
+    its own output cannot.
+    """
+    add = None if alpha == 0 else alpha * vec
+    lp = next_token_logprobs(model, tok, layers, layer, add, prompt)
+    y = torch.logsumexp(lp[ynids["yes"]], 0)
+    n = torch.logsumexp(lp[ynids["no"]], 0)
+    return float(torch.sigmoid(y - n)), kl_meter(model, tok, layers, layer, add, prompt, lp)
+
+
+def impact_matched(model, tok, layers, layer, real, alpha, prompt, direction, iters=14,
+                   tol=0.05):
+    """Scale a random unit `direction` until its next-token KL on `prompt` matches the
+    real vector's at this alpha (Ferrara-style impact matching, run plan S-0).
+
+    Norm matching equates size; this equates effect, which is what a content-free control
+    has to match if "the real vector does more" is to mean "the content does more".
+    Bisection on the scale, geometric once bracketed. Returns the vector to inject and the
+    match record; a miss beyond `tol` is recorded, not hidden.
+    """
+    target = kl_meter(model, tok, layers, layer, alpha * real, prompt)
+    s = float(alpha * real.norm())          # start where norm matching would put it
+    lo, hi, best = 0.0, None, None
+    for _ in range(iters):
+        kl = kl_meter(model, tok, layers, layer, s * direction, prompt)
+        if best is None or abs(kl - target) < abs(best[1] - target):
+            best = (s, kl)
+        if abs(kl - target) <= tol * max(target, 1e-6):
+            break
+        if kl < target:
+            lo = s
+            s = s * 2.0 if hi is None else (lo * hi) ** 0.5
+        else:
+            hi = s
+            s = (lo * hi) ** 0.5 if lo > 0 else s / 2.0
+    s, kl = best
+    return s * direction, {"kl_target": round(target, 5), "kl_achieved": round(kl, 5),
+                           "scale_over_norm_match": round(s / float(alpha * real.norm()), 4),
+                           "matched": abs(kl - target) <= tol * max(target, 1e-6)}
+
+
+_SENT = {}
+
+
+@torch.no_grad()
+def residual_mean(model, tok, layers, layer, text):
+    """Mean residual over every token of a raw, untemplated sentence, and the median token
+    norm: APERTURE's resid_stats_hf. Cached, because the APERTURE pairs reuse each
+    sentence many times."""
+    key = (layer, text)
+    if key not in _SENT:
+        ids = tok(text, return_tensors="pt")["input_ids"].to(model.device)
+        grab = {}
+        h = layers[layer].register_forward_hook(
+            lambda m, i, o: grab.__setitem__("h", (o[0] if isinstance(o, tuple) else o)
+                                             .detach()))
+        try:
+            model(input_ids=ids)
+        finally:
+            h.remove()
+        r = grab["h"][0].float()
+        _SENT[key] = (r.mean(0).cpu(), float(r.norm(dim=-1).median()))
+    return _SENT[key]
+
+
+def aperture_pairs(concept, templates, n_pairs, seed=0):
+    """(positive, negative) sentences on the same template, the negative drawn from the
+    concept's own category (aperture/concepts.py Bank.pairs). Negatives come from the full
+    category, not only the listed concepts, so a --concept-list subset keeps its controls."""
+    import random
+    rng = random.Random(seed)
+    negs = [c for c, k in CATEGORY.items() if k == CATEGORY.get(concept) and c != concept]
+    if not negs:
+        raise SystemExit(f"'{concept}' has no category with another member; add it to "
+                         f"CATEGORY before using --vector-recipe aperture")
+    return [(templates[i % len(templates)].format(concept=concept),
+             templates[i % len(templates)].format(concept=rng.choice(negs)))
+            for i in range(n_pairs)]
+
+
+def pair_direction(model, tok, layers, layer, pairs):
+    pos = [residual_mean(model, tok, layers, layer, p) for p, _ in pairs]
+    neg = [residual_mean(model, tok, layers, layer, n) for _, n in pairs]
+    v = torch.stack([m for m, _ in pos]).mean(0) - torch.stack([m for m, _ in neg]).mean(0)
+    sigma = float(np.median([s for _, s in pos + neg]))
+    return v, sigma
+
+
+def build_vectors_aperture(model, tok, layers, layer, normalise, n_pairs=40):
+    """APERTURE's recipe (aperture/hf_model.py extract_hf): whole-sentence residual means,
+    concept sentence minus the same sentence about a same-category concept, over 8 of 10
+    templates. A third extraction arm beside the concept-token and template-tail reads
+    (run plan, S-1/S-2)."""
+    print(f"building concept vectors at layer {layer} (APERTURE recipe, {n_pairs} pairs) ...",
+          flush=True)
+    train_t = APERTURE_TEMPLATES[:-HELD_OUT_TEMPLATES]
+    vecs, sigmas, split = {}, [], {}
+    for c in CONCEPTS:
+        pairs = aperture_pairs(c, train_t, n_pairs)
+        v, sigma = pair_direction(model, tok, layers, layer, pairs)
+        half = len(pairs) // 2
+        va, _ = pair_direction(model, tok, layers, layer, pairs[:half])
+        vb, _ = pair_direction(model, tok, layers, layer, pairs[half:])
+        split[c] = float(torch.nn.functional.cosine_similarity(va, vb, dim=0))
+        sigmas.append(sigma)
+        vecs[c] = (v / v.norm()) if normalise else v
+    stacked = torch.stack(list(vecs.values()))
+    bad = int((~torch.isfinite(stacked)).any(dim=1).sum())
+    if bad:
+        raise SystemExit(f"{bad}/{len(vecs)} vectors contain inf or nan - re-run with "
+                         f"--compute-dtype fp32")
+    sig = torch.tensor(sigmas)
+    scalars = {
+        # Named as for the concept-token recipe so --alpha-frac reads the same field.
+        "residual_norm_at_read_median": float(sig.median()),
+        "residual_norm_at_read_min": float(sig.min()),
+        "residual_norm_at_read_max": float(sig.max()),
+        "vector_norm_median": float(stacked.norm(dim=1).median()),
+        "n_vectors": len(vecs), "non_finite_vectors": bad,
+        "vector_read_position": "sentence-mean", "aperture_pairs": n_pairs,
+        **_gram_stats(stacked),
+    }
+    return vecs, scalars, split
+
+
+def template_stability(model, tok, layers, layer, vecs, vector_pos):
+    """For the single-prompt recipes: |cos| between each vector and the same recipe on a
+    second template. The analogue of APERTURE's split-half stability, which needs pairs."""
+    alt = "What do you know about {}?"
+    base = torch.stack([concept_activation(model, tok, layers, alt.format(n), layer, word=n,
+                                           mode=vector_pos)
+                        for n in BASELINE_NOUNS]).mean(0)
+    out = {}
+    for c, v in vecs.items():
+        w = concept_activation(model, tok, layers, alt.format(c), layer, word=c,
+                               mode=vector_pos) - base
+        out[c] = float(torch.nn.functional.cosine_similarity(v.float(), w, dim=0))
+    return out
+
+
+@torch.no_grad()
+def vector_health(model, tok, layers, layer, vecs, sigma, stability, stability_kind):
+    """The standard health checks, recorded per vector so S-2 can score each one as a
+    detector of dead vectors. None of them is a gate here; the steer stage is the gate.
+
+    norm, finite      what every run already printed
+    max_cos_other     distinctness: the closest other concept vector
+    stability         split-half (APERTURE recipe) or a second template (the others)
+    probe             APERTURE's held-out probe: on the two held-out templates, does the
+                      concept sentence project further along the vector than the same
+                      sentence about a same-category concept? Pass at >= 0.9
+    steer_logit       APERTURE's logit check: inject 8 x sigma along the unit vector at the
+                      last position of "I am thinking about"; does log P(" concept") rise?
+    """
+    names = list(vecs)
+    stacked = torch.stack([vecs[c].float() for c in names])
+    unit = stacked / stacked.norm(dim=1, keepdim=True)
+    g = (unit @ unit.T).abs()
+    g.fill_diagonal_(0)
+    held = APERTURE_TEMPLATES[-HELD_OUT_TEMPLATES:]
+    ids = tok("I am thinking about", return_tensors="pt")["input_ids"].to(model.device)
+    clean_lp = model(input_ids=ids).logits[0, -1].float().log_softmax(-1)
+    out = {}
+    for k, c in enumerate(names):
+        d = unit[k]
+        pairs = aperture_pairs(c, held, 4 * len(held), seed=1)
+        wins = [float(residual_mean(model, tok, layers, layer, p)[0] @ d >
+                      residual_mean(model, tok, layers, layer, n)[0] @ d) for p, n in pairs]
+        add = 8.0 * sigma * d
+
+        def hook(_m, _i, o, add=add):
+            tup = isinstance(o, tuple)
+            h = (o[0] if tup else o).clone()
+            h[:, -1:, :] += add.to(h.device, h.dtype)
+            return (h,) + o[1:] if tup else h
+
+        handle = layers[layer].register_forward_hook(hook)
+        try:
+            lp = model(input_ids=ids).logits[0, -1].float().log_softmax(-1)
+        finally:
+            handle.remove()
+        t = tok(" " + c, add_special_tokens=False)["input_ids"][0]
+        out[c] = {
+            "norm": round(float(stacked[k].norm()), 4),
+            "finite": bool(torch.isfinite(stacked[k]).all()),
+            "max_cos_other": round(float(g[k].max()), 4) if len(names) > 1 else None,
+            "stability": round(stability.get(c, float("nan")), 4),
+            "stability_kind": stability_kind,
+            "probe": round(sum(wins) / len(wins), 4),
+            "steer_logit_delta": round(float(lp[t] - clean_lp[t]), 4),
+        }
+        out[c]["passes"] = {"stability": out[c]["stability"] >= 0.8,
+                            "probe": out[c]["probe"] >= 0.9,
+                            "steer_logit": out[c]["steer_logit_delta"] > 0}
+    return out
+
+
+def run_stem(a):
+    """One file stem per stage x control x recipe x normalisation, so no two conditions can
+    share a results file, a sidecar or a vectors file. Until 2026-10-07a a --control run of
+    the control or framing stage wrote into the real run's JSONL with the same resume keys,
+    and every stage wrote the same sidecar."""
+    base = str(a.out)[:-len(".jsonl")] if str(a.out).endswith(".jsonl") else str(a.out)
+    tag = {"control": "", "framing": "", "forced": "_forced", "steer": "_steer",
+           "plant": "_plant"}[a.stage]
+    if a.control != "none":
+        tag += f"_{a.control}"
+    if a.vector_recipe != "macar":
+        tag += f"_{a.vector_recipe}"
+    if a.quant != "4bit":
+        tag += f"_{a.quant}"
+    if a.normalise and a.stage in ("forced", "steer"):
+        tag += "_norm1"          # the pre-existing names for these two stages
+    return base + tag
+
+
+def make_key(fname, alpha, c, layer, normalise, trial_seed, control="none", recipe="macar"):
+    """The pre-2026-10-07a generation key, extended only for conditions that did not exist
+    before, so files written by earlier versions still resume."""
+    k = f"{fname}_a{alpha}_{c}_L{layer}_norm{int(bool(normalise))}_t{trial_seed}"
+    if control not in (None, "none"):
+        k += f"_{control}"
+    if recipe not in (None, "macar"):
+        k += f"_{recipe}"
+    return k
+
+
+def row_key(r):
+    """A row's resume key. Forced-choice rows written before 2026-10-07a carry no key, so
+    it is rebuilt from their fields rather than re-running (and duplicating) them."""
+    if r.get("key"):
+        return r["key"]
+    return make_key(r["framing"], r["alpha"], r["concept"], r["layer"], r["normalised"],
+                    r.get("trial_seed", 0), r.get("control", "none"),
+                    r.get("vector_recipe", "macar"))
+
+
+def library_versions():
+    from importlib.metadata import PackageNotFoundError, version
+    out = {}
+    for pkg in ("torch", "transformers", "accelerate", "bitsandbytes"):
+        try:
+            out[pkg] = version(pkg)
+        except PackageNotFoundError:
+            out[pkg] = None
+    return out
+
+
+# The model declining the premise rather than answering it. C30 found Qwen doing this in
+# 30/30 clean trials; A-R3's pilot suggests the perturbation, not the concept, switches it
+# off, which is testable only if it is counted on every row.
+DISCLAIMER_RE = re.compile(
+    r"\bas an ai\b|\bas a (large )?language model\b|\bi (do not|don't) have (the )?"
+    r"(ability|capability|access)\b|\bi (cannot|can't|am unable to) (detect|access|perceive"
+    r"|sense)\b", re.I)
 
 
 def score(text, concept):
-    """YES requires an affirmative answer AND a coherent response (paper, Table 5)."""
+    """YES requires an affirmative answer AND a coherent response (paper, Table 5).
+
+    The fields after `text` are counts the S-2 audit needs on every row (run plan, S-2):
+    whether the answer parses at all, whether it is a disclaimer, which listed concepts it
+    names, a YES that names none of them (off-list), and the injected concept surfacing
+    inside a NO (A-R5's "caldera": denial with the concept leaking into the same reply).
+    """
     words = text.split()
     coherent = len(words) >= 3 and len(set(words)) / max(len(words), 1) > 0.35
     said_yes = bool(YES_RE.match(text)) and not bool(NO_RE.match(text))
+    said_no = bool(NO_RE.match(text))
+    low = text.lower()
+    named = [c for c in CONCEPTS if re.search(r"\b" + re.escape(c.lower()), low)]
     return {
         "detected": bool(said_yes and coherent),
         "coherent": coherent,
-        "identified": concept.lower() in text.lower(),
+        "identified": concept.lower() in low,
         "text": text[:300],
+        "parse": "yes" if said_yes else "no" if said_no else "unparseable",
+        "disclaimer": bool(DISCLAIMER_RE.search(text)),
+        "named": named,
+        "off_list": bool(said_yes and not named),
+        "leak_in_no": bool(said_no and steered(text, concept)),
     }
 
 
 def main():
+    global CONCEPTS
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", choices=["control", "framing", "forced", "steer", "plant"],
                     default="control",
@@ -868,6 +1224,8 @@ def main():
     ap.add_argument("--model", choices=list(MODELS), default="qwen")
     ap.add_argument("--model-path", default=None,
                     help="explicit local path; overrides --model and /kaggle/input search")
+    ap.add_argument("--quant", choices=["4bit", "8bit", "none"], default="4bit",
+                    help="S-1's precision axis. 'none' loads at --compute-dtype")
     ap.add_argument("--layer", type=int, default=-1,
                     help="-1 = 0.60 of depth, matching their L=37 of 62")
     ap.add_argument("--alphas", type=float, nargs="+", default=[0, 2, 4, 8])
@@ -893,35 +1251,51 @@ def main():
     ap.add_argument("--extract-layers", type=int, nargs="*", default=None,
                     help="extra layers to extract at (P2 depth curve); the plant layer "
                          "is always included")
+    ap.add_argument("--vector-recipe", choices=["macar", "aperture"], default="macar",
+                    help="'macar': 'Tell me about {c}' minus a baseline-noun mean, read at "
+                         "--vector-pos (every run to date). 'aperture': whole-sentence "
+                         "means against a same-category negative over 8 templates "
+                         "(APERTURE's extract_hf)")
     ap.add_argument("--vector-pos", choices=["concept", "template-tail"],
                     default="concept",
-                    help="where the concept vector is read. 'concept' averages the "
+                    help="where the macar recipe reads its vector. 'concept' averages the "
                          "word's own token positions (default since C31). "
-                         "'template-tail' is the pre-C31 behaviour, kept only to "
-                         "reproduce runs C15-C24")
+                         "'template-tail' is the pre-C31 behaviour, kept to reproduce runs "
+                         "C15-C24 and as S-1's dead-vector arm")
     ap.add_argument("--normalise", action="store_true",
                     help="L2-normalise concept vectors before scaling (protocol ambiguity)")
     ap.add_argument("--concepts", type=int, default=len(CONCEPTS))
+    ap.add_argument("--concept-list", default=None,
+                    help="comma-separated concept names, or a file with one per line. "
+                         "Replaces the built-in list; --concepts then truncates it")
     ap.add_argument("--out", default="/kaggle/working/s3_results.jsonl")
-    ap.add_argument("--concept-list", default=None)
     ap.add_argument("--trial-seed", type=int, default=0,
                     help="seed for assigning trial numbers to concepts. In the first runs "
                          "concept i was always Trial i+1, so concept identity and trial "
                          "number were perfectly confounded and the trial number is in the "
                          "prompt. Now a seeded shuffle; vary the seed across replications")
-    ap.add_argument("--control", choices=["none", "random", "shuffle", "span"],
+    ap.add_argument("--control", choices=["none", "random", "shuffle", "span",
+                                          "random-impact"],
                     default="none",
                     help="replace concept vectors with a norm-matched random direction "
-                         "('random') or a coordinate permutation of the real vector "
-                         "('shuffle'). Both preserve magnitude and destroy content, so a "
-                         "shift that survives them is sensitivity to perturbation rather "
-                         "than to the concept")
-    ap.add_argument("--compute-dtype", choices=["auto", "fp16", "fp32"], default="auto",
-                    help="auto probes fp16 and falls back to fp32 if it overflows")
+                         "('random'), a coordinate permutation ('shuffle'), a random "
+                         "combination of the real vectors ('span', on-manifold), or a "
+                         "random direction scaled per alpha to the real vector's next-token "
+                         "KL ('random-impact', matched on effect rather than size)")
+    ap.add_argument("--impact-iters", type=int, default=14,
+                    help="bisection steps per (concept, alpha) for --control random-impact")
+    ap.add_argument("--no-health", action="store_true",
+                    help="skip the per-vector health checks (they add ~20 forward passes "
+                         "per concept)")
+    ap.add_argument("--max-new", type=int, default=60,
+                    help="generation budget per trial")
+    ap.add_argument("--compute-dtype", choices=["auto", "fp16", "bf16", "fp32"],
+                    default="auto",
+                    help="auto probes fp16 and falls back to fp32 if it overflows. bf16 "
+                         "needs compute capability 8.0+ (L4, A100), not a T4")
     # In a notebook, sys.argv holds the kernel's own arguments, so parsing it blindly
     # fails. Read it only when the caller has set it deliberately:
     #     import sys; sys.argv = ["run", "--model", "qwen"]; main()
-    import sys
     in_notebook = "KAGGLE_KERNEL_RUN_TYPE" in os.environ or "ipykernel" in sys.modules
     if in_notebook:
         argv = sys.argv[1:] if (len(sys.argv) > 1 and sys.argv[0] == "run") else []
@@ -929,26 +1303,44 @@ def main():
         argv = None
     a = ap.parse_args(argv)
 
-    # A 27-32B model in 4-bit needs ~17-20 GB. One T4 has 16, so a single-GPU session
-    # cannot hold it and will die during the load, ~10 minutes in.
+    if a.concept_list:
+        src = a.concept_list
+        names = (open(src).read().split() if os.path.isfile(src)
+                 else [c.strip() for c in src.split(",") if c.strip()])
+        CONCEPTS = names
+        print(f"  concept list: {len(names)} from --concept-list", flush=True)
+
+    # The memory a model needs depends on the model and the precision, so the guard does
+    # too. The old fixed 24 GB check passed a 27B bf16 load that could never fit and
+    # refused a 12B 4-bit load that would.
     n_gpu = torch.cuda.device_count()
     total = sum(torch.cuda.get_device_properties(i).total_memory
                 for i in range(n_gpu)) / 1e9
     print(f"  {n_gpu} GPU(s), {total:.0f} GB total: "
           f"{[torch.cuda.get_device_name(i) for i in range(n_gpu)]}", flush=True)
+    if a.compute_dtype == "bf16" and n_gpu and torch.cuda.get_device_capability(0)[0] < 8:
+        raise SystemExit("bf16 needs compute capability 8.0+ (L4 or A100). A T4 is 7.5: "
+                         "use --compute-dtype fp16/fp32, or change the accelerator.")
     if n_gpu == 0:
         print("  no CUDA device: CPU dry run", flush=True)
-    elif total < 24:
-        raise SystemExit(
-            f"Need ~20 GB for a 4-bit 32B model; this session has {total:.0f} GB. "
-            "Set Accelerator = GPU T4 x2 in Session options, not P100.")
+    else:
+        per = BYTES_PER_PARAM[a.quant] * (2 if a.quant == "none" and
+                                          a.compute_dtype == "fp32" else 1)
+        need = PARAMS_B[a.model] * per
+        if total < need:
+            raise SystemExit(
+                f"--model {a.model} at --quant {a.quant} needs ~{need:.0f} GB; this session "
+                f"has {total:.0f} GB. Use GPU T4 x2, a larger accelerator, or more "
+                f"quantisation.")
 
+    stem = run_stem(a)
+    out_path = stem + ".jsonl"
     done = set()
-    if os.path.exists(a.out):
-        for line in open(a.out):
+    if os.path.exists(out_path):
+        for line in open(out_path):
             if line.strip():
-                done.add(json.loads(line)["key"])
-        print(f"resuming: {len(done)} trials complete", flush=True)
+                done.add(row_key(json.loads(line)))
+        print(f"resuming {out_path}: {len(done)} rows complete", flush=True)
 
     # A model added through Kaggle's Inputs panel wins: it needs no token, and Kaggle's
     # licence acceptance covers gated weights that HuggingFace would refuse.
@@ -964,8 +1356,9 @@ def main():
         print(f"  !! this downloads ~20 GB and needs a token for gated weights. If you "
               f"meant to use the Kaggle mount, stop now and add it under "
               f"Input -> Models.", flush=True)
-    first = torch.float32 if a.compute_dtype == "fp32" else torch.float16
-    model, tok = load(model_id, first)
+    first = {"fp32": torch.float32, "bf16": torch.bfloat16}.get(a.compute_dtype,
+                                                                torch.float16)
+    model, tok = load(model_id, first, quant=a.quant)
     layers = find_layers(model)
     if a.layer < 0:
         a.layer = int(round(DEPTH_FRACTION * len(layers)))
@@ -979,39 +1372,22 @@ def main():
         del model
         gc.collect()
         torch.cuda.empty_cache()
-        model, tok = load(model_id, torch.float32)
+        model, tok = load(model_id, torch.float32, quant=a.quant)
         layers = find_layers(model)
         if not probe_finite(model, tok, layers, a.layer):
             raise SystemExit("activations non-finite even in fp32 - do not trust this model")
 
-    vecs, run_scalars = build_vectors(model, tok, layers, a.layer, a.normalise,
-                                      vector_pos=a.vector_pos)
-
-    # Run-level provenance sidecar. Per-trial rows go to the JSONL; anything measured
-    # once per run goes here, or it is lost with the session (C22, section 8).
-    sidecar = Path(str(a.out).replace(".jsonl", "") + ".config.json")
-    sidecar.parent.mkdir(parents=True, exist_ok=True)
-    sidecar.write_text(json.dumps(
-        {"version": VERSION, "argv": sys.argv[1:], "model_id": model_id,
-         "layer": a.layer, "n_layers": len(layers), "normalise": bool(a.normalise),
-         "control": a.control, "alphas": a.alphas, "trial_seed": a.trial_seed,
-         **run_scalars}, indent=2))
-    print(f"  wrote {sidecar}", flush=True)
-
-    # Save the vectors themselves. Every run until now rebuilt them and threw them away,
-    # so any analysis needing them - projecting out the shared concept-space component,
-    # re-scoring a null, checking collinearity a different way - required a fresh GPU
-    # session. C57 could not be finished for exactly this reason. Same class of mistake
-    # as not logging the generated text in P1 (C54).
-    vpath = Path(str(a.out).replace(".jsonl", "") + ".vectors.npz")
-    np.savez_compressed(
-        vpath,
-        names=np.array(list(vecs), dtype=object),
-        vectors=torch.stack([vecs[c] for c in vecs]).float().cpu().numpy(),
-        layer=a.layer, normalise=bool(a.normalise), vector_pos=a.vector_pos,
-    )
-    print(f"  wrote {vpath}  ({len(vecs)} x {next(iter(vecs.values())).shape[0]})",
-          flush=True)
+    if a.vector_recipe == "aperture":
+        vecs, run_scalars, stability = build_vectors_aperture(model, tok, layers, a.layer,
+                                                              a.normalise)
+        stability_kind = "split-half"
+    else:
+        vecs, run_scalars = build_vectors(model, tok, layers, a.layer, a.normalise,
+                                          vector_pos=a.vector_pos)
+        stability = ({} if a.no_health else
+                     template_stability(model, tok, layers, a.layer, vecs, a.vector_pos))
+        stability_kind = "second-template"
+    real = {c: v.clone() for c, v in vecs.items()}
 
     if a.alpha_frac is not None:
         rn = run_scalars["residual_norm_at_read_median"]
@@ -1029,6 +1405,44 @@ def main():
             "If a run sheet told you to paste a residual norm into the cell, it was not "
             "pasted. Use --alpha-frac to have the run compute the grid itself.")
 
+    # Health is measured on the real vectors, before any control replaces them: S-2 asks
+    # whether these checks tell live vectors from dead ones, so they must see the vectors
+    # the run calls real.
+    health = {} if a.no_health else vector_health(
+        model, tok, layers, a.layer, real, run_scalars["residual_norm_at_read_median"],
+        stability, stability_kind)
+
+    # Vectors are built for the whole list (the span control's basis and the Gram
+    # statistics depend on it, as in every earlier run); --concepts truncates the trials.
+    concepts = CONCEPTS[: a.concepts]
+    # A random bijection concept -> trial number. Still one number per concept, so pairing
+    # by concept across strengths holds it constant; but the assignment no longer tracks
+    # list order (which put every abstract concept in trials 21-30). Recorded per row.
+    import random
+    trial_numbers = list(range(1, len(concepts) + 1))
+    random.Random(a.trial_seed).shuffle(trial_numbers)
+    trial_of = dict(zip(concepts, trial_numbers))
+    print(f"  trial numbers: seed {a.trial_seed}, e.g. "
+          f"{concepts[0]}->{trial_of[concepts[0]]}, {concepts[-1]}->{trial_of[concepts[-1]]}",
+          flush=True)
+
+    framings = {"introspective": INTROSPECTIVE}
+    if a.stage in ("framing", "forced"):
+        framings["neutral_matched"] = NEUTRAL_MATCHED
+    elif a.stage == "steer":
+        framings = {"steer": STEER}
+        print("  STAGE steer: neutral prompt, injection at EVERY position including "
+              "decode steps. This is a positive control on the vectors, not the paper "
+              "protocol - do not pool these rows with any detection number.", flush=True)
+
+    def reference_prompt(c):
+        """The prompt the random-impact control is matched on: the run's first framing."""
+        t = next(iter(framings.values()))
+        return t if a.stage == "steer" else t.format(n=trial_of[c])
+
+    # Per-(concept, alpha) injections. Every control except random-impact uses one vector
+    # per concept scaled by alpha; random-impact needs its own scale at each alpha.
+    per_alpha, impact = {}, {}
     if a.control != "none":
         # Seeded, so the control is reproducible and comparable across runs.
         gen = torch.Generator().manual_seed(0)
@@ -1057,121 +1471,158 @@ def main():
                 w = torch.randn(len(basis), generator=gen)
                 r = (w[:, None] * basis).sum(0)
                 vecs[c] = r / r.norm() * v.norm()
+            elif a.control == "random-impact":
+                r = torch.randn(v.shape, generator=gen)
+                r = r / r.norm()
+                # Only the concepts that get trials: matching costs ~a.impact_iters
+                # forward passes per (concept, alpha).
+                for alpha in (a.alphas if c in trial_of else []):
+                    if alpha == 0:
+                        continue
+                    inj, rec = impact_matched(model, tok, layers, a.layer, real[c], alpha,
+                                              reference_prompt(c), r, iters=a.impact_iters)
+                    per_alpha[(c, alpha)] = inj / alpha
+                    impact[(c, alpha)] = rec
+                vecs[c] = r * v.norm()          # for the vectors file; not injected
             else:
                 vecs[c] = v[torch.randperm(v.numel(), generator=gen)]
         norms = torch.stack(list(vecs.values())).norm(dim=1)
         print(f"  CONTROL {a.control}: vectors replaced, median norm "
-              f"{norms.median():.2f} (unchanged by construction)", flush=True)
+              f"{norms.median():.2f}", flush=True)
+        if impact:
+            hit = sum(r["matched"] for r in impact.values())
+            print(f"  impact matching: {hit}/{len(impact)} (concept, alpha) cells within "
+                  f"5% of the real vector's KL", flush=True)
+
+    def vec_for(c, alpha):
+        return per_alpha.get((c, alpha), vecs[c])
+
+    # Run-level provenance sidecar, written once the alpha grid and the controls are
+    # final. Until 2026-10-07a it was written before --alpha-frac was converted, so a
+    # sidecar recorded the default grid rather than the one that ran. Per-trial rows go
+    # to the JSONL; anything measured once per run goes here, or it is lost with the
+    # session (C22, section 8).
+    sidecar = Path(stem + ".config.json")
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text(json.dumps(
+        {"version": VERSION, "argv": sys.argv[1:], "stage": a.stage, "model_id": model_id,
+         "layer": a.layer, "n_layers": len(layers), "normalise": bool(a.normalise),
+         "control": a.control, "vector_recipe": a.vector_recipe,
+         "alpha_frac": a.alpha_frac, "alphas": a.alphas, "trial_seed": a.trial_seed,
+         "concepts": concepts, "max_new": a.max_new, "load": dict(LOAD_INFO),
+         "libraries": library_versions(),
+         "gpus": [torch.cuda.get_device_name(i) for i in range(n_gpu)],
+         "health": health,
+         "health_pass_counts": {k: sum(h["passes"][k] for h in health.values())
+                                for k in ("stability", "probe", "steer_logit")}
+         if health else {},
+         "impact_match": {f"{c}|{al}": r for (c, al), r in impact.items()},
+         **run_scalars}, indent=2))
+    print(f"  wrote {sidecar}", flush=True)
+
+    # Save the vectors themselves: the ones injected, and the real ones when a control
+    # replaced them. C57 could not be finished because no run had kept its vectors.
+    vpath = Path(stem + ".vectors.npz")
+    extra = {}
+    if a.control != "none":
+        extra["real_vectors"] = torch.stack([real[c] for c in real]).float().numpy()
+    np.savez_compressed(
+        vpath, names=np.array(list(vecs), dtype=object),
+        vectors=torch.stack([vecs[c] for c in vecs]).float().cpu().numpy(),
+        layer=a.layer, normalise=bool(a.normalise), vector_pos=a.vector_pos,
+        vector_recipe=a.vector_recipe, control=a.control, **extra)
+    print(f"  wrote {vpath}  ({len(vecs)} x {next(iter(vecs.values())).shape[0]})",
+          flush=True)
 
     if a.stage == "plant":
         run_plant(model, tok, layers, a, run_scalars, vecs)
         return
 
-    framings = {"introspective": INTROSPECTIVE}
-    if a.stage in ("framing", "forced"):
-        framings["neutral_matched"] = NEUTRAL_MATCHED
-    elif a.stage == "steer":
-        framings = {"steer": STEER}
-        print("  STAGE steer: neutral prompt, injection at EVERY position including "
-              "decode steps. This is a positive control on the vectors, not the paper "
-              "protocol - do not pool these rows with any detection number.", flush=True)
+    def key_for(fname, alpha, c):
+        return make_key(fname, alpha, c, a.layer, a.normalise, a.trial_seed, a.control,
+                        a.vector_recipe)
 
-    concepts = CONCEPTS[: a.concepts]
-    # A random bijection concept -> trial number. Still one number per concept, so pairing
-    # by concept across strengths holds it constant; but the assignment no longer tracks
-    # list order (which put every abstract concept in trials 21-30). Recorded per row.
-    import random
-    trial_numbers = list(range(1, len(concepts) + 1))
-    random.Random(a.trial_seed).shuffle(trial_numbers)
-    trial_of = dict(zip(concepts, trial_numbers))
-    print(f"  trial numbers: seed {a.trial_seed}, e.g. "
-          f"{concepts[0]}->{trial_of[concepts[0]]}, {concepts[-1]}->{trial_of[concepts[-1]]}",
-          flush=True)
-
+    common = {"trial_seed": a.trial_seed, "layer": a.layer, "control": a.control,
+              "normalised": a.normalise, "vector_recipe": a.vector_recipe}
+    fh = open(out_path, "a")
+    t0, n = time.time(), 0
     if a.stage == "forced":
         ynids = yes_no_ids(tok)
         print(f"  YES ids {ynids['yes']}, NO ids {ynids['no']}", flush=True)
-        suffix = ("_forced" if a.control == "none" else f"_forced_{a.control}") +                  ("_norm1" if a.normalise else "")
-        fh = open(a.out.replace(".jsonl", suffix + ".jsonl"), "a")
-        print()
-        print("=" * 70)
-        print(f"{'framing':<15}{'alpha':>7}{'n':>5}{'mean P(YES)':>14}{'P>0.5':>9}")
-        for fname, template in framings.items():
-            for alpha in a.alphas:
-                ps = []
-                for i, c in enumerate(concepts):
-                    p = forced_choice(model, tok, layers, a.layer, vecs[c], alpha,
-                                      template.format(n=trial_of[c]), ynids)
-                    ps.append(p)
-                    print(json.dumps({"framing": fname, "alpha": alpha, "concept": c,
-                                      "trial": trial_of[c], "trial_seed": a.trial_seed,
-                                      "layer": a.layer, "control": a.control,
-                                      "normalised": a.normalise,
-                                      "p_yes": p}), file=fh)
-                fh.flush()
-                os.fsync(fh.fileno())
-                hi = sum(p > 0.5 for p in ps) / len(ps)
-                print(f"{fname:<15}{alpha:>7}{len(ps):>5}{sum(ps)/len(ps):>13.3f}{hi:>9.1%}")
-        print("=" * 70)
-        fh.close()
-        return
-    t0 = time.time()
     span = "all" if a.stage == "steer" else "prompt"
-    out_path = a.out
-    if a.stage == "steer":
-        out_path = a.out.replace(".jsonl", "_steer" + ("_norm1" if a.normalise else "")
-                                 + ".jsonl")
-    fh = open(out_path, "a")
-    n = 0
     for fname, template in framings.items():
         for alpha in a.alphas:
-            for i, c in enumerate(concepts):
-                key = (f"{fname}_a{alpha}_{c}_L{a.layer}_norm{int(a.normalise)}"
-                       f"_t{a.trial_seed}")
+            for c in concepts:
+                key = key_for(fname, alpha, c)
                 if key in done:
                     continue
                 prompt = template if a.stage == "steer" else template.format(
                     n=trial_of[c])
-                txt = run_trial(model, tok, layers, a.layer, vecs[c], alpha, prompt,
-                                span=span)
+                vec = vec_for(c, alpha)
                 row = {"key": key, "framing": fname, "alpha": alpha, "concept": c,
-                       "trial": trial_of[c], "trial_seed": a.trial_seed,
-                       "layer": a.layer, "normalised": a.normalise, **score(txt, c)}
+                       "trial": trial_of[c], **common, "category": CATEGORY.get(c)}
+                if (c, alpha) in impact:
+                    row["impact_match"] = impact[(c, alpha)]
+                if a.stage == "forced":
+                    p, kl = forced_choice(model, tok, layers, a.layer, vec, alpha, prompt,
+                                          ynids)
+                    row.update(p_yes=p, kl=round(kl, 6))
+                else:
+                    add = None if alpha == 0 else alpha * vec
+                    row["kl"] = round(kl_meter(model, tok, layers, a.layer, add, prompt), 6)
+                    txt = run_trial(model, tok, layers, a.layer, vec, alpha, prompt,
+                                    max_new=a.max_new, span=span)
+                    row.update(score(txt, c))
+                    if a.stage == "steer":
+                        row["steered"] = steered(txt, c)
                 fh.write(json.dumps(row) + "\n")
                 fh.flush()
                 os.fsync(fh.fileno())
                 n += 1
                 if n % 10 == 0:
-                    print(f"  {n} trials, {time.time()-t0:.0f}s", flush=True)
+                    print(f"  {n} rows, {time.time()-t0:.0f}s", flush=True)
     fh.close()
 
     rows = [json.loads(l) for l in open(out_path) if l.strip()]
-    print("\n" + "=" * 70)
-    print(f"{'framing':<15}{'alpha':>7}{'n':>5}{'detect':>9}{'identify':>10}{'coherent':>10}")
+    rows = [r for r in rows if r.get("layer") == a.layer
+            and r.get("normalised") == a.normalise]
+    print("\n" + "=" * 78)
+    if a.stage == "forced":
+        print(f"{'framing':<16}{'alpha':>8}{'n':>5}{'mean P(YES)':>13}{'P>0.5':>8}"
+              f"{'med KL':>10}")
+    else:
+        print(f"{'framing':<16}{'alpha':>8}{'n':>5}{'detect':>8}{'identify':>10}"
+              f"{'disclaim':>10}{'med KL':>10}")
     for fname in framings:
         for alpha in a.alphas:
-            g = [r for r in rows if r["framing"] == fname and r["alpha"] == alpha
-                 and r["layer"] == a.layer and r["normalised"] == a.normalise]
+            g = [r for r in rows if r["framing"] == fname and r["alpha"] == alpha]
             if not g:
                 continue
-            d = sum(r["detected"] for r in g) / len(g)
-            idn = sum(r["identified"] and r["detected"] for r in g) / len(g)
-            coh = sum(r["coherent"] for r in g) / len(g)
-            tag = "  <- FPR" if alpha == 0 else ""
-            print(f"{fname:<15}{alpha:>7}{len(g):>5}{d:>8.1%}{idn:>10.1%}{coh:>10.1%}{tag}")
-    print("=" * 70)
+            kl = float(np.median([r.get("kl", np.nan) for r in g]))
+            if a.stage == "forced":
+                ps = [r["p_yes"] for r in g]
+                print(f"{fname:<16}{alpha:>8}{len(g):>5}{np.mean(ps):>13.3f}"
+                      f"{np.mean([p > 0.5 for p in ps]):>8.1%}{kl:>10.3f}")
+            else:
+                d = np.mean([r["detected"] for r in g])
+                idn = np.mean([r["identified"] and r["detected"] for r in g])
+                dis = np.mean([r.get("disclaimer", False) for r in g])
+                tag = "  <- FPR" if alpha == 0 else ""
+                print(f"{fname:<16}{alpha:>8}{len(g):>5}{d:>8.1%}{idn:>10.1%}{dis:>10.1%}"
+                      f"{kl:>10.3f}{tag}")
+    print("=" * 78)
+    if a.stage != "control":
+        return
 
-    ctrl = [r for r in rows if r["framing"] == "introspective" and r["layer"] == a.layer
-            and r["normalised"] == a.normalise]
-    at4 = [r for r in ctrl if r["alpha"] == 4]
-    at0 = [r for r in ctrl if r["alpha"] == 0]
+    at4 = [r for r in rows if r["framing"] == "introspective" and r["alpha"] == 4]
+    at0 = [r for r in rows if r["framing"] == "introspective" and r["alpha"] == 0]
     if at4 and at0:
         d4 = sum(r["detected"] for r in at4) / len(at4)
         f0 = sum(r["detected"] for r in at0) / len(at0)
         print(f"\n  TARGET (Macar et al., L=37, alpha=4): detection 10.8%, FPR 0%")
-        print(f"  OURS (4-bit):                        detection {d4:.1%}, FPR {f0:.1%}")
+        print(f"  OURS ({a.quant}):                        detection {d4:.1%}, FPR {f0:.1%}")
         ok = d4 >= 0.05 and f0 <= 0.05
-        print(f"  VERDICT: {'effect SURVIVES quantisation - proceed to --stage framing'if ok else 'NOT REPRODUCED - sweep --normalise / --layer before concluding'}")
+        print(f"  VERDICT: {'effect SURVIVES quantisation - proceed to --stage framing' if ok else 'NOT REPRODUCED - sweep --normalise / --layer before concluding'}")
 
 
 if __name__ == "__main__":
