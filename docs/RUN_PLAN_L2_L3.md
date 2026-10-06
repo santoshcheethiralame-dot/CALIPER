@@ -236,6 +236,10 @@ reviewer's first demand.
   token index and dtype first).
 - **Outcome:** the steering-control pass rate per cell.
 
+> **Amended 7 Oct 2026 (feasibility, before any S-1 data):** 27B in 8-bit needs about 34 GB
+> against 2xT4's 30, and a T4 has no bf16. The precision axis runs on Gemma-3-12B (4-bit, 8-bit,
+> fp16), and 27B keeps one 4-bit cell. See `docs/preregistration-s1-dead-vectors.md`.
+
 *Criterion:* tail vectors fail the steering control at a rate above concept-position vectors
 in every precision cell. *Failure branch:* if tail vectors pass in bf16, the dead-vector
 result is a quantisation artefact, and the paper reports it as that. That is still a

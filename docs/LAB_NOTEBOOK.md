@@ -335,6 +335,86 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Pythia ran in half precision, unrecorded (2026-10-07) - **FOUND WHILE BUILDING THE L2 HARNESS**
+
+The exact readout check in `tests/test_traits.py` matched GPT-2's logits to 1.3e-5 but
+Pythia-160m's only to a correlation of 0.993. The cause: transformers 5.13, installed
+4 July 2026, loads a checkpoint in the dtype its config stores. Pythia-70m and Pythia-160m
+store float16. GPT-2 and GPT-Neo store none and load in float32. Every local Pythia run since
+July therefore ran in half precision, including B-2b and B-2c, which is in the pooled
+estimate. No run recorded its dtype. Measured on Pythia-160m L6 (20 units, 4,000 tokens,
+same corpus and seed):
+
+| | fp16 load (as run) | fp32 load |
+|---|---|---|
+| ground-truth identity, max relative error | 5.1e-4 | 3.5e-7 |
+| stimulus vs fp32, relative norm | 0.70% | - |
+| response vs fp32, relative norm | 0.69% | - |
+| weight columns | identical (the checkpoint is fp16) | - |
+
+- **Reference intact.** The reference direction is unchanged, and the identity still holds
+  to 5e-4. So this is not a ground-truth error.
+- **Unrecorded precision difference.** It is a precision difference between families that
+  the paper never stated, and Table 1's caption attributed Pythia's larger identity error to
+  "float32 accumulation order". That was wrong, and it is corrected.
+- **Kaggle arms unknown.** No sidecar recorded the transformers version for the Kaggle runs:
+  B-11c (Pythia-1.4B), the ladder and B-0. Their precision is therefore unknown. The Hub
+  config for Pythia-1.4B also stores float16.
+- **Fix:**
+  - `load_model` now pins float32;
+  - `e01_gate.py --dtype fp16` reproduces the old runs;
+  - every summary now records dtype, thread count and library versions.
+- **Follow-up:** B-2d (`docs/preregistration-b2d-precision.md`) re-fits 50 of B-2c's units in
+  float32 and compares the direct route, which is seeded identically. It is queued as
+  `caliper-queue3`, after queue 2.
+
+### GPT-Neo L6 below-chance: the LayerNorm null is ruled out; a per-unit diagnostic built (2026-10-07)
+
+- **The LayerNorm-null ceiling is not the explanation.** Weights alone show it is at least
+  0.9999 for all 3,072 GPT-Neo layer-6 units (median 1.0), 0.9934 at layer 10, and 0.951 for
+  GPT-2 layer 6.
+- **B-17 prereg filed** (`docs/preregistration-b17.md`), with
+  `experiments/diagnose_units.py`, which separates three explanations unit by unit:
+  - `r2_exact`, the pipeline check;
+  - `sigma_align` together with `r2_fitted` vs `r2_true` (a leave-one-out nearest-neighbour
+    link), the geometry check;
+  - `r2_fitted` well below `r2_true`, the optimisation check.
+- **Development data.** The diagnostic was developed on the **first 10 rows of B-8b** (GPT-Neo
+  L10) while B-8b was running. That means 10 of B-8b's alignments were seen before its
+  analysis. B-8b's pre-registered endpoint is the AUC comparison, which these rows do not
+  touch, but the exposure is recorded here.
+- **What those 10 rows showed** (exploratory, not to be cited as a result):
+  - r2_exact = 1.0 on all 10;
+  - two failing units (alignment 0.86-0.87) had sigma_align 0.9997-0.9999 and r2_fitted
+    equal to r2_true. They predict the response as well as w, and differ from it only in
+    directions the stimulus barely occupies;
+  - two others were plain under-fits (r2_fitted 0.66 against r2_true 0.96).
+
+  This is the rigor report's Σ-cosine construct question showing up in real data. It makes
+  the four-label table (raw, identifiable part, stimulus-weighted, firing-region) a
+  must-have for Paper 1.
+
+### T-SAE: SAE latents fail at the MLP operating point; a pilot picks the budget (2026-10-07)
+
+Smoke runs, code path only:
+- **Density eligibility does not transfer.** jbloom's OpenWebText log-densities predict
+  firing on our Gutenberg stimulus poorly (log-log correlation 0.50). Latents rated about
+  1e-2.8 fired 7 and 17 times in 8k tokens.
+- **The latents fail at the MLP operating point.** Even at 117-688 firing events, alignment
+  was only 0.35-0.88 at 8k tokens and 1,600 steps, with R2 short of 1. That is under-fitting,
+  not a broken target: the identity test passes.
+
+Amendments 1 and 2 (`docs/preregistration-tsae-amendment-1.md`):
+- **Eligibility** is counted on the fitted stimulus (`--sae-min-events`).
+- **A 16-latent pilot (T-SAE-0)** compares 8k tokens / 1,600 steps with 16k / 3,200. A rule
+  fixed in advance (`experiments/tsae_operating_point.py`) picks the main-run budget from
+  failure counts only.
+- **Queue:** `rerun_queue2.sh` (task `caliper-queue2`) waits for B-8b, then runs:
+  - the pilot;
+  - B-15a/b/c;
+  - B-17 and its diagnostics;
+  - the main T-SAE run.
+
 ### B-2c - Pythia-160m on the fixed estimator (2026-10-06 18:42) - **ORDERING HOLDS, UNDERPOWERED AS EXPECTED**
 
 Prereg `docs/preregistration-b2c-b8b-reruns.md`. Same 300 units as B-2b, `--independent-units`,
@@ -3024,6 +3104,14 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-07 | **PYTHIA RAN IN FLOAT16 SINCE JULY, UNRECORDED; PRECISION NOW PINNED.** transformers 5.13 loads the stored dtype. Pythia-70m/160m store float16, GPT-2 and GPT-Neo none. Identity error 5.1e-4 (fp16) against 3.5e-7 (fp32); stimulus and response differ by 0.7%; weights identical. `load_model` pins float32, `--dtype fp16` reproduces the old runs, and summaries record the dtype. B-2d queued to measure the verdict effect. Paper 1 Table 1 caption corrected; Appendix A row added; the Pythia arm is labelled float16 | §4 entry; `caliper/activations.py`; `docs/preregistration-b2d-precision.md` |
+| 2026-10-07 | **BIBLIOGRAPHY CHECKED AGAINST CROSSREF, THE ARXIV API AND SEMANTIC SCHOLAR (dblp refused: bot challenge, not bypassed).** Corrections:<br>- calibration-traceability paper's first author is **Ryan** Shah, not Akash;<br>- Vaidya et al.: full authors, 4(2), pp. 1-25;<br>- Knight & Leveson: SE-12(1), 96-109;<br>- Dholakia et al.: LNCS 2026, not 2025;<br>- Arp et al.: 8 authors;<br>- Adebayo et al.: 6 authors and pages;<br>- InterpBench: NeurIPS 2024.<br>Provenance moved from `note` (which printed in the references) to a non-printing `checked` field. Still VERIFY: Song (ACL entry), Kim (pages), Gurnee (venue), Sharpee, Knight's counts, Wallach (authors), Raghu (venue), Bricken (authors) | `paper1/references.bib` |
+| 2026-10-07 | **PAPER 1 TEXT COMPLETE EXCEPT RESULT-DEPENDENT TBDs.**<br>- Figures embedded.<br>- Conclusion written.<br>- Appendices A (deviations), B (threats by validity type), C (usage census, 16 refs added), D (classical baselines and chance) written.<br>- Intro gap corrected to 0.13.<br>- 13 pages, 0 LaTeX errors.<br>The remaining TBDs wait on B-8b, B-15, T-SAE, B-2d and the four-label table | `paper1/main.tex` |
+| 2026-10-07 | **C40 PROPAGATED.** Study 3 reproduces at 2/30 = 6.7% (Wilson 1.8-21.3%), not 10.0%. Dated correction lines in `paper/main.tex`, `PROJECT_OVERVIEW.md`, the sem5 review plan, the S3 draft and its review. The draft's readout table now shows both filed rules (43/17/7/0% pre-registered, 50/23/33/10% permissive). `PROJECT_NOTES_COMPLETE.md` was already edited and remains uncommitted (the user's file) | commit `Propagate the C40 correction` |
+| 2026-10-07 | **S-0 DONE: Study 3 script v2026-10-07a.**<br>Five defects fixed: the unused `--concept-list`; keyed resume missing in forced/steer; the sidecar written before the alpha conversion; colliding stems; `hits[0]` script selection.<br>Added: `--quant`, gemma12 and the small models, a model-aware memory guard, per-trial KL, `--control random-impact`, `--vector-recipe aperture`, per-vector health, and disclaimer/off-list/leak fields.<br>8 CPU tests on the tiny Llama | `experiments/kaggle_s3_positive_control.py`, `tests/test_s3_script.py` |
+| 2026-10-07 | **S-1, S-2, S-11 PRE-REGISTERED, RUN SHEETS WRITTEN.** S-1's precision axis moves to Gemma-3-12B: 27B in 8-bit needs about 34 GB against 2xT4's 30, and a T4 has no bf16. S-11 re-runs R9 with APERTURE's own code pinned at `b5bb2fb`, criterion k >= 4/16 | `docs/preregistration-s1-*.md`, `-s2-*`, `-s11-*`; `kaggle/NEXT_SESSION_S1/S2/S11.md` |
+| 2026-10-07 | **L2 HARNESS SCAFFOLDED; TEAM BRIEFS AND THE S-12 KIT HANDED OFF.** `caliper/traits.py` implements the exact final-layer trait reference (GPT-2: max relative error 1.3e-5, correlation 0.9999999999), DiffMean and a planted fixture. The T-0 stubs carry strict-xfail tests. The S-12 sample (200 items) is drawn, with the key held in a separate file | `caliper/traits.py`, `docs/team/` |
+| 2026-10-07 | **BENCH NAME: three candidates for the user to choose** (CALIPER is taken by arXiv 2606.04915). Collision checks on arXiv ML, PyPI and GitHub:<br>- **GAUGEBLOCK** and **WEIGHTMARK**: clean on all three;<br>- **TRUEMARK**: clean on arXiv and PyPI, but a company owns the GitHub org.<br>Rejected as taken: ETALON, VERNIER, TRUEBENCH, PLUMBLINE, TRACELINE, DATUM, FIDUCIAL, REFGRADE (near "RefGrader") | this row |
 | 2026-10-07 | **THE CASCADE ROUTE WAS NEVER REPRODUCIBLE: its head initialisation came from torch's global RNG.** `_Bottleneck` seeded the direction `v` from a generator but built its MLP head with `nn.Linear`, which draws from the process-wide RNG. So every single-unit `fit` (the cascade route, its polish, `fit_deflate`) depended on everything the process had fitted before. **Found by the B-15 seed smoke test:** unit 2262 reproduced B-14's direct route exactly (align_direct 0.0137, stability 0.8569), but its cascade gave 0.930 against B-14's 0.976 and flipped the verdict. Repeated calls in one process at the same seed and 10 threads gave 0.941, then 0.559.
 - **Scope:** every run's `align_cascade`, and every `align_selected`/`r2_k1` where the cascade won. The direct route (`fit_batch`) and restart agreement were always seeded. The cascade draws were still random draws from the intended distribution, so no result is biased, but none is reproducible to the digit.
 - **Fix:** the head is built inside `torch.random.fork_rng` from the same seed, leaving the global state untouched. The test fails on the old code and passes on the new.

@@ -811,3 +811,35 @@ say what the full text changed. Formalise into `paper/references.bib` only at FU
 
 **Never cite a specific claim from an ABS row.** That is the rule the August audit exists
 to enforce.
+
+## 24. Bibliographic metadata check (7 Oct 2026)
+
+`paper1/references.bib` was checked entry by entry against Crossref (by DOI, or by title where
+there is no DOI), the arXiv API (authors) and Semantic Scholar (venues and pages for ML
+conferences). dblp was not used: its API answered with a bot challenge, and that challenge is
+not to be bypassed. This checks **metadata**. It does not raise any work's reading level in
+the tables above.
+
+**Corrections made:**
+- Shah & Nagaraja (ICISS 2020): the first author is **Ryan** Shah. The entry had "Akash".
+- Vaidya, Prabhakar, Gnani, Shah & Nagaraja: full names; Digital Threats 4(2), pp. 1-25 (online
+  2022, issue 2023).
+- Knight & Leveson: IEEE TSE SE-12(1), 96-109.
+- Dholakia et al.: LNCS proceedings of TPCTC 2025, published 2026.
+- Arp et al.: 8 authors. Adebayo et al.: 6 authors, NeurIPS 2018 pp. 9525-9536. Athalye et al.:
+  ICML 2018 pp. 274-283. Gupta et al. (InterpBench): NeurIPS 2024. Gurnee et al., Nehzati &
+  Cussen, Anani et al.: full author lists.
+
+**Still to check:**
+- Song et al.: the ACL 2026 entry.
+- Kim et al. (TCAV): pages.
+- Gurnee et al.: venue.
+- Sharpee et al.
+- Knight & Leveson: the counts, before quoting them.
+- Wallach et al.: authors.
+- Raghu et al.: Semantic Scholar lists arXiv only.
+- Bricken et al.: authors.
+
+Provenance now lives in a non-printing `checked` field. As `note`, it had been printed in the
+reference list.
+

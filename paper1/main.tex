@@ -184,7 +184,10 @@ GPT-Neo-125m (layers 6, 10) & $3\times10^{-7}$ & 1.0000000000 \\
 \bottomrule
 \end{tabular}
 \caption{The pre-activation is reproduced from the layer-norm output and the weight column.
-Differences are float32 accumulation order.}
+GPT-2 and GPT-Neo were loaded in float32, where the residual error is accumulation order.
+Pythia's checkpoint is stored in float16, and the Pythia runs reported here loaded it at
+that precision; loaded in float32, the same check gives $3.5\times10^{-7}$. The weight columns
+are identical either way.}
 \label{tab:verify}
 \end{table}
 
@@ -308,7 +311,7 @@ restart agreement.}
 condition & $n$ & failures & AUC restart & AUC held-out $R^2$ & $\Delta$ \\
 \midrule
 GPT-2 small, layer 6 (fixed) & 300 & 46 & 0.792 & 0.919 & $-0.127$ \\
-Pythia-160m, layer 6 (fixed) & 300 & 13 & 0.828 & 0.951 & $-0.123$ \\
+Pythia-160m, layer 6 (fixed, float16) & 300 & 13 & 0.828 & 0.951 & $-0.123$ \\
 GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ \\
 GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ \\
 GPT-Neo-125m, layer 10 & 100 & 41 & 0.582 & 0.715 & $-0.133$ \\
@@ -459,6 +462,10 @@ Batch-size control compared summed flips with a single comparison & Each arm jud
 separately & yes & Reported as indistinguishable from restart noise, not as a pass \\
 Token-budget sweep drew its own stimulus & Reported as its own experiment, not as a
 reproduction of the primary run & yes & None on the reported gap \\
+Pythia loaded at its stored float16 by the model library, unrecorded & Precision now pinned
+and recorded per run; 50 units re-fitted in float32 & yes & Stimulus and response move
+0.7\%; identity error $5\times10^{-4}$ against $3.5\times10^{-7}$; verdict effect
+\tbd{B-2d} \\
 Secondary analyses and failure-class split & Filed as two addenda before the primary run's
 outputs were opened & no & --- \\
 \bottomrule
