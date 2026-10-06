@@ -187,6 +187,38 @@ def main():
     rep["failure_classes"] = {"wrong_basin_r2_gt_0.99": int((fail & (r2 > WRONG_BASIN_R2)).sum()),
                               "under_fitted": int((fail & (r2 <= WRONG_BASIN_R2)).sum())}
 
+    # ---- addendum 2: AUCs by failure class (filed before unblinding, exploratory).
+    # Wrong basin = held-out R2 above the cutoff; under-fitted = at or below it. The R2 AUC
+    # on the wrong-basin class is attenuated by construction, since the class is defined by
+    # R2; restart agreement's is not.
+    def class_auc(pos, score, n_boot=1000, seed=0):
+        if pos.sum() < 5:
+            return None
+        idx = pos | ~fail
+        lab, sc = pos[idx], score[idx]
+        from scipy.stats import rankdata
+
+        def fast_auc(x, y):   # Mann-Whitney AUC, ties averaged; positives score high
+            r = rankdata(x)
+            n1 = y.sum()
+            return (r[y].sum() - n1 * (n1 + 1) / 2) / (n1 * (len(y) - n1))
+
+        rng = np.random.default_rng(seed)
+        p_i, n_i = np.flatnonzero(lab), np.flatnonzero(~lab)
+        boots = []
+        for _ in range(n_boot):
+            b = np.concatenate([rng.choice(p_i, len(p_i)), rng.choice(n_i, len(n_i))])
+            boots.append(fast_auc(sc[b], lab[b]))
+        return {"n_class": int(pos.sum()), "auc": roc(list(sc), list(lab))[1],
+                "ci95": [float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))]}
+
+    rep["by_failure_class"] = {}
+    for cut in (0.98, 0.99, 0.995):
+        wb, uf = fail & (r2 > cut), fail & (r2 <= cut)
+        rep["by_failure_class"][str(cut)] = {
+            cls: {k: class_auc(mask, sig[k]) for k in sig}
+            for cls, mask in (("wrong_basin", wb), ("under_fitted", uf))}
+
     # ---- secondary 1: agreement with the reference arm
     if a.reference:
         ref = load(a.reference)
@@ -309,6 +341,9 @@ def main():
           f"bootstrap95 [{p['bootstrap_95_diff'][0]:+.3f}, {p['bootstrap_95_diff'][1]:+.3f}]")
     print(f"VERDICT  {p['verdict']}")
     print(f"failure classes {rep['failure_classes']}")
+    for cls, d in rep["by_failure_class"]["0.99"].items():
+        cells = "  ".join(f"{k} {v['auc']:.3f}" for k, v in d.items() if v)
+        print(f"  {cls} vs pass (R2 cut 0.99): {cells or 'fewer than 5 units'}")
     if "vs_reference" in rep:
         print(f"vs reference {rep['vs_reference']}")
     print(f"permutation control: |diff| >= observed in "
