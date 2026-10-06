@@ -334,6 +334,42 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### S-4 - Study 3 reanalysis with equivalence tests (2026-10-07, offline) - **MOST "INDISTINGUISHABLE" CLAIMS ARE INCONCLUSIVE**
+
+Prereg `docs/preregistration-s4-reanalysis.md` (paired TOST, margin +/-0.10 P(YES), filed
+before the script ran). Script `experiments/analyse_s3_reanalysis.py`, output
+`results/s3_reanalysis.json`. No new data.
+
+| comparison (introspective, paired over 30 concepts) | mean diff | 90% CI | verdict |
+|---|---|---|---|
+| C18 real vs random, alpha 6 | +0.112 | [-0.052, +0.275] | **inconclusive** |
+| C19 shuffle vs random, alpha 2 / 4 / 6 | -0.056 / +0.108 / +0.069 | all straddle +/-0.10 | inconclusive |
+| C20 introspective vs neutral, real, alpha 2 / 4 | +0.059 / +0.023 | [-0.003, +0.121] / [-0.057, +0.103] | inconclusive (alpha 4: p_tost 0.057) |
+| **C20 introspective vs neutral, real, alpha 6** | +0.022 | [-0.023, +0.067] | **equivalent** |
+| C24 real vs random, alpha 32768 | +0.108 | [-0.037, +0.253] | inconclusive |
+| C50-52 real vs random, frac 0.30 | **-0.146** | [-0.265, -0.027] | **different (random above real)** |
+| C50-52 real vs span, frac 0.30 | +0.019 | [-0.051, +0.089] | equivalent |
+| C50-52 at frac 0.40-0.60, both controls | -0.04 to +0.04 | all straddle +/-0.10 | inconclusive |
+
+**Exact interval for the positive control:** 2/30 = 6.7%, Clopper-Pearson 95% [0.8%, 22.1%].
+It does not contradict Macar et al.'s 10.8%; it also does not reproduce it in any useful sense.
+
+**What changes in the record.**
+- §5 findings 6 and 8 and Paper 2 can no longer say real and random vectors are
+  "indistinguishable" at alpha 6, or at 32768. The data cannot exclude a 0.10 difference either
+  way.
+- What survives as equivalence: the neutral and introspective prompts at alpha 6 (C20), and real
+  vs on-manifold span at 30% of norm.
+- What survives as a difference: random *above* real at 30% of the residual norm on validated
+  vectors, the A3 direction.
+- The "perturbation alarm" reading rests on the controls producing large effects of their own
+  (dose-response, in the JSON). It does not rest on equivalence with real vectors, and Paper 2
+  should argue it that way.
+
+Also found: `data/s3/g_refit_steer_placeholder.jsonl` is byte-identical to
+`g_refit_steer_norm1.jsonl` (C39, void grid). It is a duplicate, kept for history and ignored by
+every analysis.
+
 ### B-14 - the primary endpoint on the fixed estimator (2026-10-06 08:23) - **HEADLINE STANDS; THE ADVANTAGE IS ENTIRELY UNDER-FITTING**
 
 Prereg `docs/preregistration-b14-primary-rerun.md` with Addenda 1 and 2, all filed before the
@@ -2753,6 +2789,10 @@ direction at a time. It is the November go/no-go.
 
 ## 5. Findings so far (running conclusions)
 
+> **Study 3 addendum, 7 Oct (S-4):** under paired TOST (margin 0.10), real vs random at alpha 6 and at
+> 32768 is *inconclusive*, not equivalent. Only C20 at alpha 6 (prompt framing) and real vs span
+> at 30% of norm are equivalent. Random is significantly above real at 30% of norm. See §4, S-4.
+>
 > **STATE OF THE FINDINGS, 6 Oct 2026 (B-14 landed) - supersedes the 5 Oct note below.**
 > On the fixed estimator the primary endpoint stands: restart agreement 0.792 vs held-out R2
 > 0.919, diff -0.127, p = 1.8e-04, permutation p = 0.001. Pooled over six conditions it is
