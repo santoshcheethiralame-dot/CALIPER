@@ -16,7 +16,12 @@ Prereg: `docs/preregistration-s1-dead-vectors.md`. Script: `kaggle_s3_positive_c
 
 ## Cell 1 (after any restart)
 
-```bash
+Every block below is one notebook **code cell**, pasted as is. A `%%bash` first line
+makes the cell run as shell. Without it, Kaggle runs the lines as Python and fails
+with `SyntaxError`.
+
+```
+%%bash
 pip install -q -U bitsandbytes accelerate transformers
 ```
 

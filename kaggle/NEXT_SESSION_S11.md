@@ -10,16 +10,23 @@ one T4.
 - **Secrets:** `HF_TOKEN` attached.
 - **Session options:** GPU T4 (x1 is enough), Internet On.
 
+Every block below is one notebook **code cell**, pasted as is. A `%%bash` first line
+makes the cell run as shell. Without it, Kaggle runs the lines as Python and fails
+with `SyntaxError`.
+
 ## Cell 1
 
-```bash
+```
+%%bash
 pip install -q -U bitsandbytes accelerate transformers wordfreq
 pip install -q --no-cache-dir --force-reinstall --no-deps https://github.com/santoshcheethiralame-dot/APERTURE/archive/b5bb2fb4554de04ebe80184e156b151dde9f9662.zip
 ```
 
 ## Cell 2: data files from the same commit
 
-```bash
+```
+%%bash
+rm -rf /kaggle/working/aperture
 git clone -q https://github.com/santoshcheethiralame-dot/APERTURE.git /kaggle/working/aperture
 cd /kaggle/working/aperture && git checkout -q b5bb2fb && ls data/concepts
 ```
