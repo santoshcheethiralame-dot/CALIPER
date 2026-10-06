@@ -237,7 +237,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-14** | 2026-10-05/06 | **primary endpoint re-run, fixed estimator** | 300 | GPT-2 L6, 2 restarts, `--independent-units`, same units as B-1b | `results/b14_primary_gpt2_indep.jsonl`, `results/b14_analysis.json` | 254 align / 252 gate; 46 failures (16 wrong basin, 30 under-fitted); **restart 0.792 vs R2 0.919, diff -0.127, DeLong p=1.8e-04, bootstrap [-0.193, -0.063], permutation p=0.001: HEADLINE STANDS**. By failure class: under-fitted R2 0.993 vs restart 0.796; **wrong basin R2 0.779 vs restart 0.782 (tied)** |
 | **B-2c** | 2026-10-06 | **Pythia-160m L6, fixed estimator** | 300 | same units as B-2b, `--independent-units` | `results/b2c_pythia160m_indep.jsonl`, `results/b2c_analysis.json` | 287/300 pass; 13 failures (2 wrong basin, 11 under-fitted); restart 0.828 vs R2 0.951, diff -0.123, p=0.087 (permutation 0.156): **underpowered, pooling component as filed**; route agreement 0.935; 290/300 agree with B-2b |
 | **B-8b** | 2026-10-06 | **GPT-Neo-125m L10, fixed estimator** | 100 | same units as B-8, `--independent-units` | `results/b8b_gptneo125m_indep.jsonl`, `results/b8b_analysis.json` | 62/100 pass; 38 failures (20 converged-wrong, 18 under-fitted); restart 0.588 vs R2 0.755, diff -0.167, p=0.0022 (bootstrap [-0.277, -0.057], permutation 0.003): **ordering holds**; converged-wrong class: both at chance; route agreement 0.680; 71/100 agree with B-8 |
-| **S-11** | 2026-10-06 | **R9 re-run: naturalistic decoding, gemma-2-2b-it 8-bit L13** | 16 passages | APERTURE `b5bb2fb` unchanged; extraction seeds 0 and 1 | `results/s11_primary.jsonl`, `results/s11_seed1.jsonl`, `results/s11_config.json` | **11/16 = 0.688 [0.413, 0.890]**, p = 1.9e-10 vs 1/16: **criterion k >= 4 met, R9 replicates**; seed 1 10/16; uncentred secondary pending (activations not saved) |
+| **S-11** | 2026-10-06 | **R9 re-run: naturalistic decoding, gemma-2-2b-it 8-bit L13** | 16 passages | APERTURE `b5bb2fb` unchanged; extraction seeds 0 and 1 | `results/s11_primary.jsonl`, `results/s11_seed1.jsonl`, `results/s11_config.json` | **11/16 = 0.688 [0.413, 0.890]**, p = 1.9e-10 vs 1/16: **criterion k >= 4 met, R9 replicates**; seed 1 10/16; second session byte-identical; uncentred 1/16 (15/16 -> dolphin), as R9 predicted |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -361,9 +361,18 @@ written their jsonl before the error. The activations cell never ran. Scored onc
 - **Verbal report** (secondary, read as comprehension, not introspection): 5 exact,
   8 related, 3 no. These are identical across seeds, as they should be, since the report does
   not depend on the directions.
-- **Uncentred classification: pending.** It needs `s11_activations.pt`, which the updated
-  run sheet's Cell 5 produces. A re-run of Cells 3-4 in that session also checks whether
-  11/16 reproduces across sessions.
+- **Second session (7 Oct, the fixed run sheet):** both jsonl are **byte-identical** to the
+  first, although transformers moved from 5.18.0 to 5.19.0. The stderr flood that killed
+  the first attempt was one bitsandbytes line, "MatMul8bitLt: inputs will be cast from
+  bfloat16 to float16", repeated 468,832 times.
+- **Uncentred classification (secondary): 1/16** [0.002, 0.302], p = 0.64 against chance.
+  15 of 16 passages go to "dolphin". This is the collapse R9's notes predicted (R9 had
+  14/16 to dolphin). The cause is a large shared component: the mean activation has norm
+  204, against a median activation norm of 212, and the mean cosine to the mean is 0.96.
+  Centring is what makes the decoding work, so the method section must state it.
+  Re-deriving the centred predictions from the saved tensors matches the jsonl at 16/16.
+  `experiments/analyse_s11.py` -> `results/s11_analysis.json`; activations in
+  `results/s11_activations.pt`. The 40 MB stderr log is not archived.
 
 ### B-8b - GPT-Neo-125m L10 on the fixed estimator (2026-10-06 22:00) - **ORDERING HOLDS; THE CONVERGED-WRONG CLASS IS INVISIBLE TO BOTH CHECKS**
 

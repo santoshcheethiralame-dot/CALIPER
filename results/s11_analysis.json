@@ -1,0 +1,84 @@
+{
+  "centred_matches_jsonl": 16,
+  "centred": {
+    "k": 11,
+    "n": 16,
+    "ci95": [
+      0.4133793635486413,
+      0.8898300452828823
+    ],
+    "p_vs_chance": 1.8491093752752777e-10,
+    "predicted": [
+      [
+        "volcano",
+        3
+      ],
+      [
+        "serenity",
+        2
+      ],
+      [
+        "joy",
+        2
+      ],
+      [
+        "dolphin",
+        1
+      ],
+      [
+        "spider",
+        1
+      ],
+      [
+        "desert",
+        1
+      ],
+      [
+        "library",
+        1
+      ],
+      [
+        "fear",
+        1
+      ],
+      [
+        "jealousy",
+        1
+      ],
+      [
+        "umbrella",
+        1
+      ],
+      [
+        "telescope",
+        1
+      ],
+      [
+        "candle",
+        1
+      ]
+    ]
+  },
+  "uncentred": {
+    "k": 1,
+    "n": 16,
+    "ci95": [
+      0.0015811117227658871,
+      0.30232073843453194
+    ],
+    "p_vs_chance": 0.6439258695482072,
+    "predicted": [
+      [
+        "dolphin",
+        15
+      ],
+      [
+        "telescope",
+        1
+      ]
+    ]
+  },
+  "mean_norm": 203.84535217285156,
+  "median_activation_norm": 212.19984436035156,
+  "mean_cos_to_mean": 0.9565868377685547
+}
