@@ -6,6 +6,8 @@ batched, resumable. Pass rate reported as a Wilson interval, because a bare frac
 """
 import argparse, json, time
 import numpy as np
+import torch
+import transformers
 from pathlib import Path
 from caliper.activations import collect, load_model, sample_corpus
 from caliper.batched import fit_batch
@@ -92,6 +94,9 @@ ap.add_argument("--corpus-seed", type=int, default=0,
 ap.add_argument("--split-seed", type=int, default=0,
                 help="seed for collect's row order, which decides the 20%% held-out set. "
                      "0 reproduces every earlier run")
+ap.add_argument("--dtype", choices=("fp32", "fp16"), default="fp32",
+                help="model precision. fp16 reproduces the local Pythia runs made under "
+                     "transformers 5 before 7 Oct 2026, which loaded Pythia's stored float16")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -99,7 +104,7 @@ t0 = time.time()
 device = pick_device(a.device)
 ck = Checkpoint(a.out)
 
-model, tok = load_model(a.model)
+model, tok = load_model(a.model, dtype={"fp32": torch.float32, "fp16": torch.float16}[a.dtype])
 rng = np.random.default_rng(0)
 sae = None
 if a.target == "sae":
@@ -212,6 +217,9 @@ summary = {
     "target": a.target, "fit_seed": a.fit_seed, "corpus_seed": a.corpus_seed,
     "split_seed": a.split_seed,
     "sequence_split": bool(a.sequence_split),
+    "dtype": str(next(model.parameters()).dtype).replace("torch.", ""),
+    "torch_threads": torch.get_num_threads(),
+    "libraries": {"torch": torch.__version__, "transformers": transformers.__version__},
     "directions_dir": str(dirs) if dirs is not None else None,
     "neuron_pool": a.neuron_pool,
     "pass_rate": round(float(passed.mean()), 4),

@@ -25,8 +25,16 @@ class Probe:
     layer: int
 
 
-def load_model(name="gpt2", device="cpu"):
-    model = AutoModelForCausalLM.from_pretrained(name).to(device).eval()
+def load_model(name="gpt2", device="cpu", dtype=torch.float32):
+    """Load in float32 unless told otherwise.
+
+    transformers 5 loads a checkpoint in the dtype its config stores. Pythia-70m and -160m
+    store float16, so every local Pythia run from 4 July 2026 to 7 October (transformers
+    5.13) ran in half precision, while GPT-2 and GPT-Neo, which store none, ran in float32.
+    Nothing recorded the difference. Pinning it here makes precision a stated choice;
+    pass dtype=torch.float16 to reproduce those runs.
+    """
+    model = AutoModelForCausalLM.from_pretrained(name, dtype=dtype).to(device).eval()
     tokenizer = AutoTokenizer.from_pretrained(name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
