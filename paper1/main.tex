@@ -102,7 +102,7 @@ contributions are:
   checks, and a pre-registered protocol for scoring the checks by how well they predict
   failure.
   \item \textbf{Restart agreement is a weak and redundant check.} Held-out fit predicts
-  silent failure better in every condition we ran, with a pooled gap of \prov{0.15} AUC and
+  silent failure better in every condition we ran, with a pooled gap of 0.13 AUC and
   no detectable heterogeneity across models, layers and families. Restart agreement adds
   nothing beyond simple unit-difficulty predictors, while held-out fit does
   (Section~\ref{sec:results}).
@@ -135,7 +135,8 @@ signal while unstable ones reflect reproducible subspaces resolved differently p
 importance without tracking correctness. Warnings that stability is not correctness exist
 in clustering \citep{bendavid2006sober}, and the failure of agreement between independently
 built versions as evidence of correctness is classic in software reliability
-\citep{knight1986nversion}. \note{add the usage-census table as an appendix}
+\citep{knight1986nversion}. Appendix~\ref{app:census} lists 34 published uses of agreement as a
+reliability check across eight sub-areas.
 
 \paragraph{Predictability before stability.} The PCS framework for veridical data science
 uses ``predictability as a reality check'', screens models on prediction before assessing
@@ -157,9 +158,6 @@ saliency maps that pass visual inspection yet are insensitive to the model
 under evasion \citep{gardiner2016security,arp2022dos}. Construct reliability is not construct
 validity \citep{jacobs2021measurement}, and evaluating AI systems is a measurement problem
 \citep{wallach2025position}.
-
-\note{Section to be tightened after the related-work broadening report; cite CAST/surrogate
-endpoints only once the counts are verified.}
 
 % ======================================================================
 \section{An exact reference standard for unit directions}
@@ -197,7 +195,7 @@ only shifts the bias and cannot be recovered from data. In GPT-2 small its media
 $\|\mathbf{w}_j\|^2$ is about $5\times10^{-4}$; at layer 6 no unit has a share large enough
 to cap the attainable cosine below our bar, at layer 2 four of 3{,}072 do. We report alignment
 against $\mathbf{w}_j$ and, where fitted directions were saved, against its identifiable
-part. \note{B-14 has no saved directions; every later run does.}
+part. The GPT-2 layer-6 run did not save fitted directions; every later run did.
 
 \paragraph{Scope.} The standard holds for a unit reading its own layer's layer-norm output.
 It does not extend to residual-stream features, sparse-autoencoder latents or behavioural
@@ -265,7 +263,17 @@ Restart agreement predicts failure with AUC 0.792 and held-out $R^2$ with 0.919;
 difference is $-0.127$ (DeLong $p = 1.8\times10^{-4}$; paired bootstrap 95\% CI
 $[-0.193,-0.063]$; label-permutation $p = 0.001$). The ordering holds at every failure
 threshold from 0.90 to 0.98, and in precision--recall terms the gap is larger (PR-AUC 0.77
-against 0.32 at a failure prevalence of 0.15). \tbd{figure: ROC curves; threshold sweep.}
+against 0.32 at a failure prevalence of 0.15); see Figures~\ref{fig:roc} and
+\ref{fig:classes} (left).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_roc.pdf}
+\caption{ROC curves for predicting failure ($|\cos| < 0.95$) from each ground-truth-free
+check. Left: the primary run. Right: the 1.4B arm, the first with route agreement recorded.
+AUCs in the legend.}
+\label{fig:roc}
+\end{figure}
 
 \subsection{Restart agreement adds nothing beyond unit difficulty}
 Four pre-fit descriptors of each unit (fraction of tokens on which it is active, mean
@@ -277,8 +285,20 @@ restart agreement leaves it at 0.831.
 Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs vary widely,
 from a held-out-$R^2$ AUC of 0.72 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap does not:
 random-effects pooling gives $\Delta$AUC $-0.128$, 95\% CI $[-0.170,-0.087]$,
-$I^2 = 0$, and held-out $R^2$ is ahead in all six. \note{all arms were fitted with the coupled
-estimator; re-run the GPT-2 L6 and Pythia arms on the fixed one and re-pool.}
+$I^2 = 0$, and held-out $R^2$ is ahead in all six (Figure~\ref{fig:forest}). Three arms
+were fitted with the corrected estimator; the other three are earlier runs whose fits were
+coupled across units (Appendix~\ref{app:deviations}). Re-running the GPT-2 and Pythia-160m arms
+on the corrected estimator moved their gaps from $-0.164$ and $-0.094$ to $-0.127$ and
+$-0.123$. \tbd{GPT-Neo re-run, then re-pool.}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_forest.pdf}
+\caption{Per-condition AUC difference (restart agreement minus held-out $R^2$) with 95\%
+intervals, and the random-effects pooled estimate. No condition's point estimate favours
+restart agreement.}
+\label{fig:forest}
+\end{figure}
 
 \begin{table}[t]
 \centering
@@ -297,7 +317,7 @@ Pythia-1.4B, layer 12, 3{,}200 steps (fixed) & 50 & 19 & 0.847 & 0.973 & $-0.126
 random effects & & & & & $-0.128\ [-0.170, -0.087]$ \\
 \bottomrule
 \end{tabular}
-\caption{Rows marked fixed use the corrected estimator; \prov{the others are coupled-estimator runs being re-run}. One arm per condition; arms with fewer than
+\caption{Rows marked fixed use the corrected estimator; the others are coupled-estimator runs. One arm per condition; arms with fewer than
 five failures are excluded from pooling.}
 \label{tab:arms}
 \end{table}
@@ -310,17 +330,35 @@ direction, the two are tied: 0.779 $[0.700, 0.849]$ and 0.782 $[0.664, 0.872]$. 
 is unchanged for class boundaries between 0.98 and 0.995. The $R^2$ figure on the
 wrong-basin class is attenuated by construction, since the class is defined by $R^2$;
 restart agreement's is not, and it is no better. On GPT-Neo-125m the same split is starker
-(\prov{0.56 and 0.48}), and at 1.4B every failure was under-fitted. Held-out fit is the better
+(\prov{0.56 and 0.48}, coupled estimator), and at 1.4B every failure was under-fitted. Held-out fit is the better
 check because most failures are under-fitting; for the converged-wrong minority, about 5\% of
 units here, no ground-truth-free check we measured is reliable.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_threshold_classes.pdf}
+\caption{Left: AUC of each check as the failure bar moves from 0.90 to 0.98. Right: AUC
+against passing units, separately for under-fitted failures (held-out $R^2 \le 0.99$) and
+fits that converged to a wrong direction, with bootstrap 95\% intervals.}
+\label{fig:classes}
+\end{figure}
 
 \subsection{More restarts do not fix it}
 Restart agreement computed from the first $k$ of five stored restarts does not predict
 failure better as $k$ grows, and stays below held-out $R^2$ at every $k$ (descriptive; 6--7
-failures per arm). Pass rates at two and five restarts are inconsistent with a single
+failures per arm; Figure~\ref{fig:restart}). Pass rates at two and five restarts are inconsistent with a single
 per-restart success probability, which predicts 97.5--98\% at five restarts against an
 observed 88--91\%. A two-class model attributes this to \prov{8--12\%} of units that are not
-recovered at any restart count. \tbd{replicate with B-15.}
+recovered at any restart count. These pass rates come from coupled-estimator runs;
+\tbd{B-15a replicates the curve on the corrected one.}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.5\linewidth]{figures/fig_restart_curve.pdf}
+\caption{Restart-agreement AUC from the first $k$ of five stored restarts (dashed) against
+held-out $R^2$ (solid), in two runs. Agreement does not catch up as restarts are added.}
+\label{fig:restart}
+\end{figure}
 
 \subsection{An error budget for single-unit verdicts}
 \tbd{variance decomposition from B-15: restarts, batch, token sample, device, layer, family.}
@@ -372,7 +410,18 @@ yet been held to that standard. \tbd{expand after the transfer experiment.}
 \end{itemize}
 
 \section{Conclusion}
-\tbd{after B-14.}
+We calibrated the checks that interpretability uses in place of ground truth against a
+reference standard that trained models supply for free: the input weight column of an MLP
+neuron. Restart agreement, the most widely used check, is the weakest of those we scored. It
+trails held-out fit in every condition, adds nothing once unit difficulty is known, and does
+not improve as restarts are added. Held-out fit is the better check, but its advantage comes
+from under-fitted estimates. On estimates that converged confidently to a wrong direction,
+no check we measured is reliable. The practical advice is short: report held-out fit for every
+estimate, do not read agreement across restarts as evidence of correctness, and treat an
+estimate that fits well and agrees with itself as unverified until a reference says otherwise.
+The broader point is about method. A reliability check is itself a measuring instrument, and
+like any instrument it should be calibrated against a known answer before its readings are
+trusted.
 
 \bibliography{references}
 \bibliographystyle{tmlr}
@@ -380,15 +429,150 @@ yet been held to that standard. \tbd{expand after the transfer experiment.}
 \appendix
 \section{Deviations from pre-registered plans}
 \label{app:deviations}
-\tbd{table: what changed, why, whether data had been seen, effect. Include: batch-coupled
-early stopping and position-keyed seeding (fixed; B-14 re-run); the ground-truth-dependent
-disagreement field (withdrawn); B-12 verdict arithmetic; B-7 pairing (withdrawn); S1-2
-criterion restored.}
+Every change made after data had been seen is listed below, with its effect on the reported
+numbers. The laboratory notebook released with the bench dates each one.
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{p{3.5cm}p{4.2cm}p{0.8cm}p{4.6cm}}
+\toprule
+item & change & data seen & effect \\
+\midrule
+Early stopping shared across a batch; restart seeds keyed by batch position &
+Each unit stops on its own held-out curve and is seeded by its own id; the primary run was
+repeated under a new pre-registration & yes &
+Gap $-0.127$ against $-0.164$ before, inside the earlier run's bootstrap interval; 256 of 300
+verdicts unchanged (McNemar $p = 0.45$) \\
+Cascade route's head initialised from the process-wide random state &
+Seeded from the unit's own seed & yes &
+Draws came from the intended distribution, so nothing is biased, but cascade alignments
+before the fix are not reproducible to the digit \\
+A ``method disagreement'' check used $\mathbf{w}_j$ &
+Withdrawn as a ground-truth-free check; replaced by route agreement & yes &
+None on the primary endpoint, which never used it \\
+Failure rule & Alignment below 0.95 alone, fixed before the primary run; an earlier gate
+also required a small rank-2 gain & no & The two rules differ by 0--4 units per run \\
+Depth comparison paired units by neuron index & Pairing withdrawn; layers are independent
+samples & yes & ``Depth changes which units fail'' withdrawn; pass rates by depth stand \\
+Batch-size control compared summed flips with a single comparison & Each arm judged
+separately & yes & Reported as indistinguishable from restart noise, not as a pass \\
+Token-budget sweep drew its own stimulus & Reported as its own experiment, not as a
+reproduction of the primary run & yes & None on the reported gap \\
+Secondary analyses and failure-class split & Filed as two addenda before the primary run's
+outputs were opened & no & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Threats to validity}
-\tbd{construct, internal, external, statistical-conclusion; from the rigor report.}
+\label{app:threats}
+\paragraph{Construct.} Failure means a Euclidean cosine below 0.95 to $\mathbf{w}_j$. Three
+things could make that label mislead.
+(i) The layer-norm null direction cannot be recovered. At layer 6 its ceiling is at least
+0.951 for every unit, so no verdict there is decided by it.
+(ii) The residual stream is anisotropic. A direction can differ from $\mathbf{w}_j$ only in
+directions the stimulus barely occupies and still predict the response as well. For runs with
+saved directions we report the stimulus-weighted cosine, which is the correlation of the two
+projections over tokens. \tbd{four-label table: raw, identifiable part, stimulus-weighted,
+firing-region.}
+(iii) The recorded response is the exact (erf) GELU of the hooked pre-activation, while
+GPT-2 uses a tanh approximation. This changes the link slightly and the reference direction
+not at all.
+The failure-class split is defined by held-out $R^2$, which attenuates $R^2$'s AUC within the
+wrong-basin class. Restart agreement is not attenuated there, and it does no better.
+\paragraph{Internal.} Fit quality and failure share a cause, unit difficulty, so held-out
+$R^2$ could predict failure only by restating difficulty. We report nuisance-only baselines
+and the incremental AUC of each check over them. The coupling defects in
+Appendix~\ref{app:deviations} are fixed in the primary run. Held-out tokens share sequences
+with training tokens. \tbd{B-15c repeats the primary units under a sequence-level split.}
+\paragraph{External.} The models are small and come from two architectures. The units are
+GELU MLP neurons reading a layer-norm output, the stimulus is English prose, and there is one
+estimator family. The checks themselves are estimator-agnostic, but their AUCs need not be.
+\tbd{transfer to sparse-autoencoder latents.}
+\paragraph{Statistical conclusion.} DeLong's variance estimate is unstable when there are few
+failures. Every primary comparison is therefore also given as a paired bootstrap and a
+label-permutation test, and arms with fewer than five failures are not pooled. Pooled
+estimates combine arms that share no units, under a random-effects model. Verdicts on single
+units move with restart count, token sample and hardware. Section~\ref{sec:results} reports
+those components, so that a failure rate carries its conditions.
 
 \section{Usage census}
-\tbd{34 instances of agreement used as a reliability check; from the census notes.}
+\label{app:census}
+We searched for published uses of agreement across restarts, seeds or resamples as grounds
+for trusting a result, choosing a model or its size, or reporting robustness. We verified 34
+instances across eight sub-areas:
+\begin{itemize}
+  \item sixteen use agreement to validate or trust a result;
+  \item twelve use it to select a hyperparameter, a model or the number of components;
+  \item nine report it as robustness.
+\end{itemize}
+Some instances do more than one of these. Thirteen are 2025--2026 interpretability papers.
+Table~\ref{tab:census} lists representative instances. The full list, with quoted passages,
+is released with the bench.
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{p{3.7cm}p{2.1cm}p{7.6cm}}
+\toprule
+sub-area & use & representative instances \\
+\midrule
+ICA & validate & Icasso \citep{himberg2004icasso} \\
+NMF and consensus clustering & select $K$ & \citet{brunet2004metagenes}, staNMF
+\citep{wu2016stanmf}, consensus clustering \citep{monti2003consensus}; counterexamples
+\citep{kotliar2019cnmf,senbabaoglu2014critical} \\
+Topic models and embeddings & select, robustness & \citet{greene2014topics,antoniak2018stability} \\
+Disentanglement & select model & UDR \citep{duan2020udr}, after \citet{locatello2019challenging} \\
+Representation similarity & validate & convergent learning \citep{li2016convergent}, SVCCA
+\citep{raghu2017svcca}, CKA \citep{kornblith2019cka}, universal neurons
+\citep{gurnee2024universal} \\
+Concept-based explanation & validate & TCAV \citep{kim2018tcav}; seed-sensitive
+explanations \citep{madhyastha2019stability} \\
+Sparse dictionaries & validate, train for & \citet{sharkey2022interim,bricken2023monosemanticity},
+\citet{paulo2025sparse}, Archetypal SAE \citep{fel2025archetypal},
+\citet{song2025position,gerasimov2026unstable} \\
+Circuits & validate & certified circuits \citep{anani2026certified} \\
+\bottomrule
+\end{tabular}
+\caption{Where agreement is used as a reliability check. ``Use'' gives the dominant use in the
+cited work.}
+\label{tab:census}
+\end{table}
+
+\section{Classical baselines and the chance level}
+\label{app:baselines}
+On 30 GPT-2 layer-6 units, closed-form receptive-field estimators recover almost nothing
+(Table~\ref{tab:classical}):
+\begin{itemize}
+  \item the spike-triggered average is unbiased only for spherically symmetric stimuli, and
+  decorrelating it helps only partly;
+  \item spike-triggered covariance needs a symmetric nonlinearity.
+\end{itemize}
+These units sit in GELU's non-monotone region over a non-Gaussian stimulus, which defeats all
+three.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+estimator & median $|\cos|$ & minimum & share $\ge 0.95$ \\
+\midrule
+spike-triggered average & 0.287 & 0.003 & 0/30 \\
+decorrelated spike-triggered average & 0.528 & 0.013 & 1/30 \\
+spike-triggered covariance (top eigenvector) & 0.322 & 0.002 & 0/30 \\
+fitted bottleneck (this paper) & 0.995 & 0.575 & 26/30 \\
+\bottomrule
+\end{tabular}
+\caption{Closed-form baselines against the fitted estimator on the same units.}
+\label{tab:classical}
+\end{table}
+
+For the chance level, we drew 2{,}000 random unit directions on 12 units (20{,}000 tokens).
+Their median alignment with $\mathbf{w}_j$ is 0.024 (99th percentile 0.091; the isotropic
+expectation in 768 dimensions is 0.036). Through a binned link, their $R^2$ reaches at most
+0.044 at the 99th percentile, against a median of 0.92 for the true direction under the same
+link. A fit with high held-out $R^2$ is therefore never a chance direction.
 
 \end{document}
