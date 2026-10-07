@@ -742,5 +742,77 @@
     "median_error_share_in_low_variance": 0.5866149968651322
    }
   }
+ },
+ "R5": {
+  "note": "point estimates: 50 x 5-fold; bootstrap: 10 x 5-fold per resample, units grouped so duplicates stay in one fold",
+  "GPT-2 L6 (B-14)": {
+   "cv_auc": {
+    "descriptors": 0.8063745292707977,
+    "+ held-out R2": 0.8803046901745978,
+    "+ restart agreement": 0.8174546388223212
+   },
+   "increment": {
+    "+ held-out R2": {
+     "point": 0.07393016090380011,
+     "boot_ci95": [
+      0.026621240762861185,
+      0.1252504389065412
+     ]
+    },
+    "+ restart agreement": {
+     "point": 0.011080109551523498,
+     "boot_ci95": [
+      -0.013080986448705284,
+      0.043294839639460424
+     ]
+    }
+   }
+  },
+  "GPT-Neo-125m L10 (B-8b)": {
+   "cv_auc": {
+    "descriptors": 0.6490237691001697,
+    "+ held-out R2": 0.6584634974533107,
+    "+ restart agreement": 0.6363157894736842
+   },
+   "increment": {
+    "+ held-out R2": {
+     "point": 0.009439728353140997,
+     "boot_ci95": [
+      -0.018057345779220843,
+      0.06831925287356314
+     ]
+    },
+    "+ restart agreement": {
+     "point": -0.01270797962648551,
+     "boot_ci95": [
+      -0.055106337795885245,
+      0.012662934362934279
+     ]
+    }
+   }
+  },
+  "Pythia-160m L6 (B-2c)": {
+   "cv_auc": {
+    "descriptors": 0.815872420262664,
+    "+ held-out R2": 0.8673385151433931,
+    "+ restart agreement": 0.8190190297507373
+   },
+   "increment": {
+    "+ held-out R2": {
+     "point": 0.05146609488072906,
+     "boot_ci95": [
+      -0.026907046240956203,
+      0.16726866874204782
+     ]
+    },
+    "+ restart agreement": {
+     "point": 0.0031466094880732154,
+     "boot_ci95": [
+      -0.024002286426938302,
+      0.04831655152805664
+     ]
+    }
+   }
+  }
  }
 }
