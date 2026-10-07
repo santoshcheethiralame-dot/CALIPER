@@ -15,7 +15,7 @@ new-stack. That would put version drift (5 of 192 answers in A-F1 vs A-R11) insi
 So c05 neutral is run again on the new stack and becomes the scored file. The old c05
 neutral is kept, and its agreement with the new one is reported as a drift measurement. P2's
 pooled difference still spans two stacks (c00-c04 old, c05-c11 new); this is reported as a
-limitation. Library versions are printed this time (Cell 5).
+limitation. Library versions are printed this time (recovery cell).
 
 **State before the session:** 11 of 24 files are complete and hash-verified locally, 96 rows
 each. These are c00 to c04 for both framings, plus c05 neutral. Missing: c05 introspective
@@ -93,7 +93,7 @@ Do not open or tally any new file.
    `import glob, os, shutil, importlib.metadata`). That is the only edit.
 2. Add Input: session 1's **output** (Your Work > the notebook > Output, or Add Input >
    Notebook Output). Keep `aperture-f1-partial` attached.
-3. Save & Run All (Commit) again. Cell 5 now recovers the new c05 neutral from session 1's
+3. Save & Run All (Commit) again. The recovery cell now picks up the new c05 neutral from session 1's
    output. Cell 6 skips 20 files and runs c10 and c11 (4 files, about 3.2 h).
 4. Cell 7 should print `24 of 24 configs complete` and `broken: []`.
 
