@@ -28,7 +28,12 @@ pip install -q -U bitsandbytes accelerate transformers
 ## Cell 2: load the script by name, not by position
 
 ```python
-import glob, os, sys, gc, torch
+import glob, os, sys, gc, torch, logging, transformers
+# Quiet the per-call library warnings. On 7 Oct a bitsandbytes cast warning, repeated
+# 468,832 times, overflowed papermill's output queue and failed S-11's first attempt.
+logging.getLogger("bitsandbytes").setLevel(logging.ERROR)
+transformers.logging.set_verbosity_error()
+transformers.logging.disable_progress_bar()
 WANT, VER = "kaggle_s3_positive_control.py", "2026-10-07a"
 hits = [h for h in glob.glob("/kaggle/input/**/*.py", recursive=True)
         if os.path.basename(h) == WANT]
@@ -73,8 +78,12 @@ Same cell, with `PRECS = {"4bit": ...}` only, `--model gemma` and `s1_gemma27_..
 ## Cell 4: package the outputs
 
 ```python
-import shutil; shutil.make_archive("/kaggle/working/s1_gemma12", "zip", "/kaggle/working")
-print("DOWNLOAD /kaggle/working/s1_gemma12.zip")
+import zipfile
+TAG = "s1_gemma12"                     # session 2: "s1_gemma27"
+with zipfile.ZipFile(f"/kaggle/working/{TAG}.zip", "w") as z:
+    for f in sorted(glob.glob(f"/kaggle/working/{TAG}_*")):
+        z.write(f, os.path.basename(f))
+print(f"DOWNLOAD /kaggle/working/{TAG}.zip")
 ```
 
 Download before the session expires. Each cell writes a `.jsonl`, a `.config.json` (alphas

@@ -46,7 +46,10 @@ for stage in ("steer", "forced", "framing"):
 ## Cell 4: package the outputs
 
 ```python
-import shutil; shutil.make_archive(f"/kaggle/working/s2_{MODEL}", "zip", "/kaggle/working")
+import zipfile
+with zipfile.ZipFile(f"/kaggle/working/s2_{MODEL}.zip", "w") as z:
+    for f in sorted(glob.glob(f"/kaggle/working/s2_{MODEL}_*")):
+        z.write(f, os.path.basename(f))
 print(f"DOWNLOAD /kaggle/working/s2_{MODEL}.zip")
 ```
 
