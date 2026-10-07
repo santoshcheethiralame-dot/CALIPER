@@ -29,13 +29,19 @@ hours, and the last batch managed 11 files in 8.8 h.
 
 1. **Upload the finished files as a Kaggle Dataset.** Use
    `C:\Users\carbo\Downloads\aperture-f1-partial.zip` (33 files, 4.5 MB) and name the dataset
-   exactly **`aperture-f1-partial`**. The replacement Cell 5 below finds the old c05 neutral
+   exactly **`aperture-f1-partial`**. The recovery cell finds the old c05 neutral
    by that name. Do **not** attach the outputs of the August F1 notebook versions: they hold
-   the old c05 neutral under another path, and Cell 5's check would stop the run.
-2. **Import the notebook.** Upload `projects/mirror/notebooks/f1_confound_hardening.ipynb`
-   (File > Import Notebook).
-3. **Replace Cell 5** (the one that starts `import glob, shutil`) with this. It is the only
-   edit, and it is made on Kaggle's copy only: APERTURE's repo stays untouched.
+   the old c05 neutral under another path, and the recovery cell would stop the run.
+2. **Import the notebook:** `C:\Users\carbo\projects\caliper\kaggle\f1_s3_session.ipynb`
+   (File > Import Notebook). This is APERTURE's `f1_confound_hardening.ipynb` with one
+   change: the recovery cell (the 6th cell, right after the one that defines `NAMES` and
+   `CONFIGS`) is replaced by the code below. Every other cell is byte-identical. Do not edit
+   any cell for session 1.
+
+   *Why a file:* on 7 Oct the hand edit went into the 5th cell, which is the `NAMES` cell,
+   because Kaggle counts cells from 1. Cell 6 then failed with `NameError: NAMES` before any
+   data was made.
+3. For reference, the replaced recovery cell:
 
    ```python
    import glob, os, shutil, importlib.metadata as md
@@ -69,7 +75,9 @@ hours, and the last batch managed 11 files in 8.8 h.
 tab. Cell 6 stops itself after 8 hours, at a file boundary.
 
 Healthy output:
-- Cell 5: `30 files recovered; 3 old-stack c05-neutral files left out`, then the versions.
+- Recovery cell: `30 files recovered; 3 old-stack c05-neutral files left out`, then the
+  versions. If you also see `33 files recovered from earlier versions`, the old recovery
+  cell is still in the notebook: stop and re-import.
 - Cell 6: `skip (complete)` for the 10 files c00-c04, then
   `=== c05 [paraphrase] neutral -> f1_c05_neutral.jsonl (t+0.00h)`.
 - One `extracting 16 vectors at layer ..., seed ...` line per new (layer, seed).
@@ -81,7 +89,8 @@ Do not open or tally any new file.
 
 ## Session 2
 
-1. Open the same notebook and set `SESSION = 2` in Cell 5.
+1. Open the same notebook and set `SESSION = 2` in the recovery cell (the one starting
+   `import glob, os, shutil, importlib.metadata`). That is the only edit.
 2. Add Input: session 1's **output** (Your Work > the notebook > Output, or Add Input >
    Notebook Output). Keep `aperture-f1-partial` attached.
 3. Save & Run All (Commit) again. Cell 5 now recovers the new c05 neutral from session 1's
