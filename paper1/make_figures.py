@@ -98,7 +98,7 @@ def fig_threshold_and_classes():
     ax.legend(loc="lower left")
 
     ax = axes[1]
-    classes = [("under_fitted", "under-fitted"), ("wrong_basin", "converged wrong")]
+    classes = [("under_fitted", "under-fitted"), ("wrong_basin", "converged-wrong")]
     cut = a["by_failure_class"]["0.99"]
     w = 0.36
     for k, name in enumerate(("held-out R2", "restart agreement")):
