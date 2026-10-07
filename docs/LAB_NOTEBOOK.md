@@ -239,6 +239,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-8b** | 2026-10-06 | **GPT-Neo-125m L10, fixed estimator** | 100 | same units as B-8, `--independent-units` | `results/b8b_gptneo125m_indep.jsonl`, `results/b8b_analysis.json` | 62/100 pass; 38 failures (20 converged-wrong, 18 under-fitted); restart 0.588 vs R2 0.755, diff -0.167, p=0.0022 (bootstrap [-0.277, -0.057], permutation 0.003): **ordering holds**; converged-wrong class: both at chance; route agreement 0.680; 71/100 agree with B-8 |
 | **S-11** | 2026-10-06 | **R9 re-run: naturalistic decoding, gemma-2-2b-it 8-bit L13** | 16 passages | APERTURE `b5bb2fb` unchanged; extraction seeds 0 and 1 | `results/s11_primary.jsonl`, `results/s11_seed1.jsonl`, `results/s11_config.json` | **11/16 = 0.688 [0.413, 0.890]**, p = 1.9e-10 vs 1/16: **criterion k >= 4 met, R9 replicates**; seed 1 10/16; second session byte-identical; uncentred 1/16 (15/16 -> dolphin), as R9 predicted |
 | **S-3 / A-F1** | 2026-10-07 | **APERTURE F1 finished: framing confound, gemma-2-2b-it 8-bit, 12 configs x 2 framings** | 24 files x 96 trials | frozen prereg (mirror `9267351`), frozen scorer at `b5bb2fb`, 2,000 draws; c05 neutral re-run on the new stack | `results/s3_f1/`, `results/s3_f1_score.json` | **P1, P2, P3, P4 all hold**: no config reverses (BH, 0 rejections); pooled D = -0.564 [-0.754, -0.375]; neutral hit rate above introspective in 12/12; reference cell reproduces R11. 4 configs flagged >25% unparseable, kept in the pool as filed |
+| **B-15a/b/c** | 2026-10-07 | **Error budget on B-14's first 100 GPT-2 L6 units, fixed estimator** | 3 x 100 | fit seed 1 (5 restarts) / corpus seed 1 / sequence-level split, `--independent-units` | `results/b15{a,b,c}_*.jsonl`, `results/b15_analysis.json` | verdict flips vs B-14 at 0.95: 19% / 25% / 23%; R2 ahead in all three (gap -0.169 / -0.084 / -0.162); sequence split leaves R2 ahead (the prereg's one directional claim); restart curve k=2..5 AUC 0.74/0.70/0.69/0.73 vs R2 0.90 |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -337,6 +338,48 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### B-15 - the error budget (2026-10-07, local CPU; analysed once) - **ONE IN FIVE VERDICTS FLIPS UNDER ANY ONE PERTURBATION; THE R2 LEAD SURVIVES ALL THREE**
+
+**Setup.**
+- Prereg `docs/preregistration-b15-replicates.md`; analysis `experiments/analyse_b15.py`,
+  filed before any B-15 row existed (df3a7fd).
+- Three arms re-fit B-14's first 100 GPT-2 layer-6 units. Each changes one source of
+  randomness: fit seed 1 with 5 restarts, corpus seed 1, or a sequence-level held-out split.
+- Run once: `results/b15_analysis.json`.
+
+| arm | verdict flips vs B-14 at 0.95 | flips at 0.90 | ICC align / R2 / restart | AUC restart / R2 (gap, DeLong p) |
+|---|---|---|---|---|
+| B-15a fit seed | 19% [12, 28] | 6% | 0.60 / 0.63 / 0.40 | 0.726 / 0.896 (-0.169, p = 0.011) |
+| B-15b token sample | 25% [17, 35] | 14% | 0.27 / 0.34 / 0.48 | 0.761 / 0.845 (-0.084, p = 0.14) |
+| B-15c sequence split | 23% [15, 32] | 9% | 0.08 / 0.18 / 0.73 | 0.723 / 0.885 (-0.162, p = 0.017) |
+
+B-14's own gap on the same 100 units is -0.123.
+
+**Reading.**
+- **Single-unit verdicts are fragile.**
+  - About one in five flips when any one source of randomness changes, at the 0.95 bar.
+  - Flips are fewer at 0.90, so many sit near the bar.
+  - Per-unit alignment barely reproduces across token samples or splits: ICC 0.27 and 0.08.
+    The run-level AUC gap is the stable quantity.
+  - Paper 1's "error budget" section now has its numbers.
+- **The R2 lead holds in all three arms.**
+  - It is significant in two. In the token-sample arm the point estimate halves and p = 0.14.
+  - The prereg's one directional claim holds: R2 stays ahead of restart agreement under the
+    sequence-level split.
+  - Held-out R2 barely moves under that split (median shift -2e-6). Sharing sequences
+    between training and held-out tokens was not inflating R2.
+- **Restart curve on the corrected estimator, from B-15a's saved restarts.**
+  - Restart-agreement AUC is 0.74 / 0.70 / 0.69 / 0.73 at k = 2..5, against 0.90 for R2.
+  - More restarts do not help; this replaces Paper 1's coupled-estimator version.
+- **Within-run pass rates (direct route)** are 0.58 / 0.67 / 0.70 / 0.71 at k = 2..5.
+  - The two-class fit gives 28% of units unreachable by the direct route (per-restart success
+    0.56); a single class would predict 0.89 at k = 5.
+  - This is the direct route only, not the selected verdict. It does not replace Paper 1's
+    "about one unit in ten never recovered", which was on selected verdicts across runs.
+    Re-word that claim rather than swap the number.
+- **More diagnostic coverage.** B-15b and B-15c saved directions, so the converged-wrong
+  diagnostics (§4, 7 Oct) can extend to two more GPT-2 fits.
 
 ### S-2 Qwen2.5-3B on v2026-10-07a (2026-10-07, Kaggle) - **FAILED ITS MANIPULATION CHECK: EVERY PERTURBATION ~56x ITS STATED SIZE**
 

@@ -1,0 +1,225 @@
+{
+ "reference": "results/b14_primary_gpt2_indep.jsonl",
+ "arms": {
+  "B-15a (fit seed 1, 5 restarts)": {
+   "shared_units": 100,
+   "flips": {
+    "0.9": {
+     "flips": 6,
+     "rate": 0.06,
+     "ci95": [
+      0.0223,
+      0.126
+     ]
+    },
+    "0.92": {
+     "flips": 9,
+     "rate": 0.09,
+     "ci95": [
+      0.042,
+      0.164
+     ]
+    },
+    "0.95": {
+     "flips": 19,
+     "rate": 0.19,
+     "ci95": [
+      0.1184,
+      0.2807
+     ]
+    },
+    "0.97": {
+     "flips": 19,
+     "rate": 0.19,
+     "ci95": [
+      0.1184,
+      0.2807
+     ]
+    },
+    "0.98": {
+     "flips": 17,
+     "rate": 0.17,
+     "ci95": [
+      0.1023,
+      0.2582
+     ]
+    }
+   },
+   "gap_reference": {
+    "failures": 17,
+    "auc_restart": 0.8101,
+    "auc_r2": 0.9334,
+    "diff": -0.1233,
+    "p": 0.006117810083557943
+   },
+   "gap_arm": {
+    "failures": 18,
+    "auc_restart": 0.7263,
+    "auc_r2": 0.8957,
+    "diff": -0.1694,
+    "p": 0.010533114125442602
+   },
+   "gap_change": -0.0461,
+   "icc": {
+    "alignment": 0.5985,
+    "held-out R2": 0.6262,
+    "restart agreement": 0.4038
+   },
+   "median_r2_shift": 9.9e-05
+  },
+  "B-15b (corpus seed 1)": {
+   "shared_units": 100,
+   "flips": {
+    "0.9": {
+     "flips": 14,
+     "rate": 0.14,
+     "ci95": [
+      0.0787,
+      0.2237
+     ]
+    },
+    "0.92": {
+     "flips": 18,
+     "rate": 0.18,
+     "ci95": [
+      0.1103,
+      0.2695
+     ]
+    },
+    "0.95": {
+     "flips": 25,
+     "rate": 0.25,
+     "ci95": [
+      0.1688,
+      0.3466
+     ]
+    },
+    "0.97": {
+     "flips": 29,
+     "rate": 0.29,
+     "ci95": [
+      0.2036,
+      0.3893
+     ]
+    },
+    "0.98": {
+     "flips": 25,
+     "rate": 0.25,
+     "ci95": [
+      0.1688,
+      0.3466
+     ]
+    }
+   },
+   "gap_reference": {
+    "failures": 17,
+    "auc_restart": 0.8101,
+    "auc_r2": 0.9334,
+    "diff": -0.1233,
+    "p": 0.006117810083557943
+   },
+   "gap_arm": {
+    "failures": 20,
+    "auc_restart": 0.7609,
+    "auc_r2": 0.845,
+    "diff": -0.0841,
+    "p": 0.14333140053105298
+   },
+   "gap_change": 0.0392,
+   "icc": {
+    "alignment": 0.2705,
+    "held-out R2": 0.3441,
+    "restart agreement": 0.4841
+   },
+   "median_r2_shift": 1.4e-05
+  },
+  "B-15c (sequence split)": {
+   "shared_units": 100,
+   "flips": {
+    "0.9": {
+     "flips": 9,
+     "rate": 0.09,
+     "ci95": [
+      0.042,
+      0.164
+     ]
+    },
+    "0.92": {
+     "flips": 13,
+     "rate": 0.13,
+     "ci95": [
+      0.0711,
+      0.212
+     ]
+    },
+    "0.95": {
+     "flips": 23,
+     "rate": 0.23,
+     "ci95": [
+      0.1517,
+      0.3249
+     ]
+    },
+    "0.97": {
+     "flips": 27,
+     "rate": 0.27,
+     "ci95": [
+      0.1861,
+      0.368
+     ]
+    },
+    "0.98": {
+     "flips": 28,
+     "rate": 0.28,
+     "ci95": [
+      0.1948,
+      0.3787
+     ]
+    }
+   },
+   "gap_reference": {
+    "failures": 17,
+    "auc_restart": 0.8101,
+    "auc_r2": 0.9334,
+    "diff": -0.1233,
+    "p": 0.006117810083557943
+   },
+   "gap_arm": {
+    "failures": 22,
+    "auc_restart": 0.7232,
+    "auc_r2": 0.8852,
+    "diff": -0.162,
+    "p": 0.016546397101809177
+   },
+   "gap_change": -0.0387,
+   "icc": {
+    "alignment": 0.0774,
+    "held-out R2": 0.177,
+    "restart agreement": 0.7264
+   },
+   "median_r2_shift": -2e-06
+  }
+ },
+ "restart_curve": {
+  "units": 100,
+  "failures": 18,
+  "k=2": 0.741869918699187,
+  "k=3": 0.7005420054200542,
+  "k=4": 0.6883468834688347,
+  "k=5": 0.7262872628726287,
+  "held-out R2": 0.8956639566395664
+ },
+ "within_run_passes": {
+  "pass@2": 0.58,
+  "pass@3": 0.67,
+  "pass@4": 0.7,
+  "pass@5": 0.71,
+  "units": 100,
+  "two_class": {
+   "pi_unreachable": 0.27752244136015924,
+   "q_per_restart": 0.5559201664233666,
+   "single_class_prediction_at_k5": 0.8856797340800853
+  }
+ },
+ "split_verdict": "R2 stays ahead of restart agreement under a sequence-level split"
+}
