@@ -238,6 +238,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-2c** | 2026-10-06 | **Pythia-160m L6, fixed estimator** | 300 | same units as B-2b, `--independent-units` | `results/b2c_pythia160m_indep.jsonl`, `results/b2c_analysis.json` | 287/300 pass; 13 failures (2 wrong basin, 11 under-fitted); restart 0.828 vs R2 0.951, diff -0.123, p=0.087 (permutation 0.156): **underpowered, pooling component as filed**; route agreement 0.935; 290/300 agree with B-2b |
 | **B-8b** | 2026-10-06 | **GPT-Neo-125m L10, fixed estimator** | 100 | same units as B-8, `--independent-units` | `results/b8b_gptneo125m_indep.jsonl`, `results/b8b_analysis.json` | 62/100 pass; 38 failures (20 converged-wrong, 18 under-fitted); restart 0.588 vs R2 0.755, diff -0.167, p=0.0022 (bootstrap [-0.277, -0.057], permutation 0.003): **ordering holds**; converged-wrong class: both at chance; route agreement 0.680; 71/100 agree with B-8 |
 | **S-11** | 2026-10-06 | **R9 re-run: naturalistic decoding, gemma-2-2b-it 8-bit L13** | 16 passages | APERTURE `b5bb2fb` unchanged; extraction seeds 0 and 1 | `results/s11_primary.jsonl`, `results/s11_seed1.jsonl`, `results/s11_config.json` | **11/16 = 0.688 [0.413, 0.890]**, p = 1.9e-10 vs 1/16: **criterion k >= 4 met, R9 replicates**; seed 1 10/16; second session byte-identical; uncentred 1/16 (15/16 -> dolphin), as R9 predicted |
+| **S-3 / A-F1** | 2026-10-07 | **APERTURE F1 finished: framing confound, gemma-2-2b-it 8-bit, 12 configs x 2 framings** | 24 files x 96 trials | frozen prereg (mirror `9267351`), frozen scorer at `b5bb2fb`, 2,000 draws; c05 neutral re-run on the new stack | `results/s3_f1/`, `results/s3_f1_score.json` | **P1, P2, P3, P4 all hold**: no config reverses (BH, 0 rejections); pooled D = -0.564 [-0.754, -0.375]; neutral hit rate above introspective in 12/12; reference cell reproduces R11. 4 configs flagged >25% unparseable, kept in the pool as filed |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -336,6 +337,83 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-3 / A-F1 - APERTURE's confound hardening finished (2026-10-07, Kaggle T4; scored once) - **ALL FOUR FROZEN PREDICTIONS HOLD: THE FRAMING CONFOUND IS ROBUST AT 2B**
+
+**Governance.**
+- Prereg: APERTURE's `docs/prereg/2026-07-30-f1-confound-hardening.md` (frozen at
+  `9267351`), with its analysis section of 18 Aug.
+- Run sheet: `kaggle/NEXT_SESSION_S3_F1.md`; notebook `kaggle/f1_s3_session.ipynb`.
+
+**The session.**
+- One Kaggle session finished all 14 outstanding files in about 45 minutes. The estimate had
+  been two sessions, from the August batch's 8.8 h for 11 files. Session 2 was not needed.
+- Library versions are in that session's log, not in the outputs. The failed attempt about
+  20 minutes earlier, on the same image, printed torch 2.11.0+cu128, transformers 5.16.1,
+  bitsandbytes 0.50.2 and accelerate 1.14.0.
+
+**Integrity, checked before scoring.**
+- All 24 files have 96 rows, and every report is non-empty.
+- `verify_archive`: `broken: []`.
+- c00-c04 are byte-identical to the August files.
+- c05 neutral is the new-stack file; the old one is kept in `results/s3_f1/oldstack/`.
+
+**Scoring.**
+- Driver: `experiments/score_s3_f1.py`, which calls APERTURE's `score_directory` unchanged.
+- Code: mirror `b5bb2fb`, clean; the bank is byte-identical to the session's.
+- Run once. A deterministic re-run, after the sensitivity line below was added, reproduced
+  every filed number exactly.
+
+| config | arm | D(c) = gamma intro - gamma neutral | 95% CI | hit neutral | hit intro | unparseable n / i |
+|---|---|---|---|---|---|---|
+| c00 | reference | -0.814 | [-1.520, -0.145] | 0.465 | 0.283 | 0.10 / 0.04 |
+| c01 | extract seed 1 | -0.447 | [-1.099, +0.228] | 0.381 | 0.284 | 0.13 / 0.08 |
+| c02 | extract seed 2 | -0.883 | [-1.598, -0.235] | 0.402 | 0.239 | 0.15 / 0.08 |
+| c03 | paraphrase P1 | -0.496 | [-1.120, +0.153] | 0.453 | 0.348 | 0.10 / 0.04 |
+| c04 | paraphrase P2 | -1.385 | [-2.227, -0.647] | 0.598 | 0.286 | 0.09 / **0.42** |
+| c05 | paraphrase P3 | -0.246 | [-0.930, +0.362] | 0.505 | 0.465 | 0.01 / 0.10 |
+| c06 | paraphrase P4 | -0.438 | [-1.132, +0.250] | 0.380 | 0.330 | 0.04 / 0.02 |
+| c07 | paraphrase P5 | -0.939 | [-1.757, -0.196] | 0.564 | 0.369 | **0.43** / **0.32** |
+| c08 | layer 9 | -0.629 | [-1.638, +0.270] | 0.179 | 0.109 | 0.13 / 0.04 |
+| c09 | layer 17 | -0.338 | [-1.236, +0.480] | 0.567 | 0.466 | **0.38** / 0.24 |
+| c10 | alpha 0.5 | -0.776 | [-1.519, -0.085] | 0.344 | 0.188 | 0.00 / 0.00 |
+| c11 | alpha 1.5 | +0.184 | [-1.079, +1.480] | 0.512 | 0.490 | **0.57** / **0.47** |
+
+**Predictions, as frozen:**
+- **P1 holds.** No config's D(c) is significantly positive: 0 BH rejections, every adjusted
+  p = 1.0. The only positive point estimate is c11 (alpha 1.5), +0.18, with an interval
+  spanning zero widely.
+- **P2 holds.** Pooled D = **-0.564 [-0.754, -0.375]**, which excludes zero negatively.
+- **P3 holds.** The neutral hit rate exceeds the introspective one in **12 of 12** configs
+  (bar: 9).
+- **P4 holds.** R11's +2.574 and +1.988 fall inside the reference cell's CIs, [2.16, 3.06]
+  and [1.29, 2.23].
+
+**Decision rule.** "P1 and P2 and P3 all hold": the confound is robust to seed, wording,
+depth and strength. That is, at 2B, one model, 8-bit, greedy decoding, the scope the prereg
+states.
+
+**Flagged configs.**
+- c04, c07, c09 and c11 exceed 25% unparseable in at least one framing.
+- As filed, they are in the table and in the pool.
+- **Not pre-registered**, the pool without them: -0.524 [-0.761, -0.302]. The conclusion
+  does not depend on them.
+- c04's introspective flag is the known A-F1 one: the prompt's vocabulary comes back as the
+  answer. c11's breakdown at alpha 1.5 fits A-R1-R6's derailing above about 1.5.
+
+**c05 drift (declared before the data).**
+- 13 of 96 chosen options and 14 of 96 reports differ between the old-stack and new-stack
+  c05 neutral: same code, same seeds, different library versions.
+- Earlier versions changed 5 of 192 (A-F1 vs A-R11); this is about five times that rate.
+- This justifies re-running c05 neutral. It also means P2's pool mixes stacks (c00-c04 old,
+  c05-c11 new): a stated limitation, not a correction.
+
+**For Paper 2.**
+- Together with C20 at 27B, this gives the framing control at both scales.
+- Paper 2 can cite S-3 for "the introspective framing lowers report accuracy at 2B".
+- **Still with the user:** APERTURE's prereg has an "Outcome" section "to be appended after
+  the run". APERTURE is a human-authored repo, so that entry is the user's to write. The
+  numbers are above.
 
 ### Diagnostics on every arm with saved directions (2026-10-07, offline, exploratory) - **THE CONVERGED-WRONG CLASS IS FUNCTIONALLY CORRECT; UNDER A FUNCTIONAL LABEL THE R2 LEAD WIDENS**
 

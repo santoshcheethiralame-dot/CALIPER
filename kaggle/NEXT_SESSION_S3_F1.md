@@ -110,3 +110,8 @@ which is kept for the drift check.
 Tell me and I will run the frozen scorer once, `aperture/f1_score.py`, against P1 to P4
 and the decision rule. I will register the run as A-F1 / S-3 in CALIPER's notebook, next
 to C20.
+
+## Outcome (7 Oct 2026)
+
+One session finished all 14 files in about 45 minutes, so session 2 was not needed. Scored
+once with the frozen scorer: P1-P4 all hold. Details in the notebook (§3 S-3 / A-F1, §4).
