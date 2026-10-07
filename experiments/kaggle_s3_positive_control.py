@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-07a"
+VERSION = "2026-10-07b"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -1402,6 +1402,15 @@ def main():
         stability = ({} if a.no_health else
                      template_stability(model, tok, layers, a.layer, vecs, a.vector_pos))
         stability_kind = "second-template"
+    # The health checks score the vectors as extracted, raw norm included.
+    raw = {c: v.clone() for c, v in vecs.items()}
+    if a.alpha_frac is not None:
+        # --alpha-frac means "inject this fraction of the residual norm", which holds only
+        # for a unit vector (APERTURE's convention: alpha * sigma * unit direction). Before
+        # 2026-10-07b the raw difference vector was scaled instead; on Qwen2.5-3B its norm
+        # was ~56, so alpha-frac 0.25 injected ~14x the residual norm and every arm sat at
+        # next-token KL ~26 nats (S-2, 7 Oct).
+        vecs = {c: v / v.norm() for c, v in vecs.items()}
     real = {c: v.clone() for c, v in vecs.items()}
 
     if a.alpha_frac is not None:
@@ -1424,7 +1433,7 @@ def main():
     # whether these checks tell live vectors from dead ones, so they must see the vectors
     # the run calls real.
     health = {} if a.no_health else vector_health(
-        model, tok, layers, a.layer, real, run_scalars["residual_norm_at_read_median"],
+        model, tok, layers, a.layer, raw, run_scalars["residual_norm_at_read_median"],
         stability, stability_kind)
 
     # Vectors are built for the whole list (the span control's basis and the Gram

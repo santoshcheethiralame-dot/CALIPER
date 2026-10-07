@@ -67,3 +67,19 @@ not fit.
 
 - No arm is re-run after its results are seen.
 - No alpha is chosen from the data. The gate's 0.5 is fixed here.
+
+## Amendment 1 (7 October 2026, before any S-1 data)
+
+**The grid used the wrong scale.** "Unnormalised vectors, as in every run since C31" and a
+grid in fractions of the residual norm cannot both hold. The script multiplied the raw vector
+by alpha = fraction x residual norm. S-2's first Qwen2.5-3B session showed the result:
+perturbations about 56 times their stated size, with every non-zero alpha saturating next-token
+KL at about 26 nats (S-2 Amendment 1).
+
+**Resolution, script v2026-10-07b:**
+- Vectors are still extracted unnormalised, as in C31.
+- Under `--alpha-frac` they are unit-normalised before injection, so each perturbation is the
+  stated fraction of the residual norm.
+- Raw norms are kept in the per-vector health record. The C31-style absolute scale of any
+  cell can therefore be reconstructed.
+- The steering-pass rule, the arms and the precisions are unchanged.

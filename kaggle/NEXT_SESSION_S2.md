@@ -1,7 +1,7 @@
 # Kaggle sessions: S-2, the instrument audit on small models
 
 Prereg: `docs/preregistration-s2-instrument-audit.md`. Script: `kaggle_s3_positive_control.py`
-**v2026-10-07a**. Plan one session per model: Qwen2.5-3B, Qwen2.5-7B, Gemma-3-4B.
+**v2026-10-07b**. Plan one session per model: Qwen2.5-3B, Qwen2.5-7B, Gemma-3-4B.
 
 ## Before you start
 

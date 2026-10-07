@@ -81,3 +81,26 @@ vectors is reported but not scored.
 
 - No arm, alpha or concept subset is chosen after seeing results.
 - Judge scores do not enter any number here until S-12 passes.
+
+## Amendment 1 (7 October 2026, before any S-2 data on the fixed script)
+
+**What failed.** The first Qwen2.5-3B session ran script v2026-10-07a. It failed its
+manipulation check. `--alpha-frac` set alpha = fraction x residual norm, but the injection
+multiplied the raw concept vector (median norm 56) rather than a unit vector. Every
+non-zero alpha was therefore about 56 times its stated size: 0.25 meant about 14 times the
+residual norm. Every arm, including the random and shuffled controls, sat at a next-token KL
+of about 26 nats.
+
+**What was looked at.** Only the manipulation-check fields: KL by arm and alpha, the
+impact-match records and file integrity. No endpoint of this prereg was computed. That
+session's files are archived as a failed run and enter no analysis.
+
+**The fix (v2026-10-07b).** Under `--alpha-frac` the injected direction is unit-normalised, so
+the perturbation norm is the stated fraction of the residual norm. This is the grid's meaning
+as written above, and APERTURE's convention (alpha x sigma x unit direction).
+- The health checks still score the vectors as extracted. "Norm" in the primary endpoint is
+  the raw norm.
+- The controls are norm-matched to the unit vector.
+- A test now checks that the injected vectors have unit norm.
+
+Everything else in this document is unchanged. Qwen2.5-3B is re-run on v2026-10-07b.

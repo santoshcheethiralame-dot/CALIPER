@@ -87,6 +87,22 @@ def test_control_stage_rows_sidecar_and_resume(s3, monkeypatch, tmp_path):
     assert len(rows(out)) == len(r)                 # resumed: nothing re-run
 
 
+def test_alpha_frac_injects_that_fraction_of_the_residual_norm(s3, monkeypatch, tmp_path):
+    # The injection is alpha * vector, so alpha = frac * residual norm is the stated
+    # perturbation only for a unit vector. S-2 on Qwen2.5-3B (7 Oct) scaled raw vectors of
+    # norm ~56 instead, and every non-zero alpha destroyed the output.
+    import numpy as np
+    for control, tags in (("none", ""), ("random", "_random")):
+        run(s3, monkeypatch, tmp_path, "--alpha-frac", "0", "0.5", "--control", control)
+        cfg = json.load(open(path(tmp_path, tags, ".config.json")))
+        vecs = np.load(path(tmp_path, tags, ".vectors.npz"), allow_pickle=True)["vectors"]
+        assert np.allclose(np.linalg.norm(vecs, axis=1), 1.0, atol=1e-4)
+        rn = cfg["residual_norm_at_read_median"]
+        assert cfg["alphas"] == [0.0, round(0.5 * rn, 3)]
+        raw = [h["norm"] for h in cfg["health"].values()]
+        assert not np.allclose(raw, 1.0)              # health still sees the raw vectors
+
+
 def test_forced_resume_rebuilds_legacy_keys(s3, monkeypatch, tmp_path):
     legacy = path(tmp_path, "_forced")
     c = s3.CONCEPTS[0]

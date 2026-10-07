@@ -338,6 +338,45 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### S-2 Qwen2.5-3B on v2026-10-07a (2026-10-07, Kaggle) - **FAILED ITS MANIPULATION CHECK: EVERY PERTURBATION ~56x ITS STATED SIZE**
+
+**The session ran clean.**
+- Script v2026-10-07a; 7 arms x 3 stages; fp16, unquantised; transformers 5.19.0.
+- All 21 conditions were written, with 120 rows for steer and 240 for forced and framing.
+- No duplicate keys; KL = 0 at alpha 0; all vectors finite; the sidecars are complete.
+
+**The perturbations were not the stated size.**
+- `--alpha-frac` set alpha = fraction x residual norm (84 at layer 21). The injection
+  multiplied the raw concept vector by it. Those vectors are unnormalised, with median norm 56.
+- So alpha-frac 0.25 injected about 14 times the residual norm.
+- Median next-token KL was about 26 nats at every non-zero alpha, in every arm: concept,
+  random, impact-matched, shuffled and span alike. The output distribution was destroyed
+  everywhere.
+- The tail and sentence-mean arms were somewhat lower at 0.25 (15.0 and 23.2). Their raw
+  norms are smaller, but they were saturated too.
+- Impact matching "succeeded" by matching saturated KL to saturated KL.
+
+**What was looked at.** Only manipulation-check fields: KL by arm and alpha, the
+impact-match records and integrity. No S-2 endpoint was computed.
+
+**Why S-0's tests missed it.** They checked KL = 0 at alpha 0 on a tiny random Llama, never
+the size of the perturbation.
+
+**Fix: v2026-10-07b, filed as Amendment 1 in the S-1 and S-2 preregs before any rerun.**
+- Under `--alpha-frac` the injected direction is unit-normalised, so the perturbation is the
+  stated fraction of the residual norm. That is APERTURE's convention: alpha x sigma x unit
+  direction.
+- The health checks still score the raw vectors.
+- New test: `test_alpha_frac_injects_that_fraction_of_the_residual_norm`. It fails on 07a,
+  and all 9 S-3 script tests pass on 07b.
+- Run sheets are pinned to 07b, and `check_sheets.py` now parses indented cells.
+- Files are archived in `results/s2_failed_07a/`, used in no analysis.
+
+**Open: does Study 3 share the problem?** Study 3 stated "alpha 8192 is about 14% of the
+residual norm" from alpha / residual norm, with unnormalised vectors. If those vectors' norms
+were far from 1, Study 3's stated perturbation sizes are off by the same factor. Check
+offline from the C-run vector files before Paper 2 states any perturbation size.
+
 ### S-3 / A-F1 - APERTURE's confound hardening finished (2026-10-07, Kaggle T4; scored once) - **ALL FOUR FROZEN PREDICTIONS HOLD: THE FRAMING CONFOUND IS ROBUST AT 2B**
 
 **Governance.**

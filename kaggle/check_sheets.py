@@ -15,12 +15,14 @@ import ast
 import glob
 import re
 import sys
+import textwrap
 
 MAGIC = re.compile(r"^\s*[!%]", re.M)
 
 
 def cells(text):
-    return re.findall(r"```python\n(.*?)```", text, re.S)
+    # A fence inside a list item is indented with the item; dedent so it parses as pasted.
+    return [textwrap.dedent(c) for c in re.findall(r"```python\n(.*?)```", text, re.S)]
 
 
 def main():

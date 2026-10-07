@@ -1,0 +1,1124 @@
+{
+  "version": "2026-10-07a",
+  "argv": [
+    "--model",
+    "qwen3b",
+    "--quant",
+    "none",
+    "--compute-dtype",
+    "fp16",
+    "--stage",
+    "framing",
+    "--alpha-frac",
+    "0",
+    "0.25",
+    "0.5",
+    "1.0",
+    "--control",
+    "random-impact",
+    "--out",
+    "/kaggle/working/s2_qwen3b_impact.jsonl"
+  ],
+  "stage": "framing",
+  "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/3b-instruct/1",
+  "layer": 21,
+  "n_layers": 36,
+  "normalise": false,
+  "control": "random-impact",
+  "vector_recipe": "macar",
+  "alpha_frac": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "alphas": [
+    0.0,
+    21.002,
+    42.004,
+    84.008
+  ],
+  "trial_seed": 0,
+  "concepts": [
+    "elephant",
+    "spider",
+    "eagle",
+    "dolphin",
+    "volcano",
+    "desert",
+    "library",
+    "harbor",
+    "violin",
+    "umbrella",
+    "telescope",
+    "candle",
+    "bread",
+    "mountain",
+    "river",
+    "clock",
+    "mirror",
+    "bridge",
+    "garden",
+    "engine",
+    "joy",
+    "fear",
+    "jealousy",
+    "serenity",
+    "grief",
+    "curiosity",
+    "betrayal",
+    "nostalgia",
+    "justice",
+    "freedom"
+  ],
+  "max_new": 60,
+  "load": {
+    "quant": "none",
+    "compute_dtype": "float16",
+    "storage_dtype": "float16",
+    "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/3b-instruct/1"
+  },
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "health": {
+    "elephant": {
+      "norm": 55.9655,
+      "finite": true,
+      "max_cos_other": 0.4432,
+      "stability": 0.8938,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 8.9661,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "spider": {
+      "norm": 54.9952,
+      "finite": true,
+      "max_cos_other": 0.2529,
+      "stability": 0.9144,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.265,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "eagle": {
+      "norm": 57.4483,
+      "finite": true,
+      "max_cos_other": 0.4432,
+      "stability": 0.9443,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 11.8104,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "dolphin": {
+      "norm": 56.9781,
+      "finite": true,
+      "max_cos_other": 0.417,
+      "stability": 0.9378,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 10.2241,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "volcano": {
+      "norm": 60.005,
+      "finite": true,
+      "max_cos_other": 0.466,
+      "stability": 0.9733,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.5335,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "desert": {
+      "norm": 63.9964,
+      "finite": true,
+      "max_cos_other": 0.3869,
+      "stability": 0.9875,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 8.4836,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "library": {
+      "norm": 53.8179,
+      "finite": true,
+      "max_cos_other": 0.2539,
+      "stability": 0.9089,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.3745,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "harbor": {
+      "norm": 64.5406,
+      "finite": true,
+      "max_cos_other": 0.1479,
+      "stability": 0.9488,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 11.7698,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "violin": {
+      "norm": 55.6794,
+      "finite": true,
+      "max_cos_other": 0.2763,
+      "stability": 0.9747,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 6.3055,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "umbrella": {
+      "norm": 58.9133,
+      "finite": true,
+      "max_cos_other": 0.2348,
+      "stability": 0.9746,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.4793,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "telescope": {
+      "norm": 54.7911,
+      "finite": true,
+      "max_cos_other": 0.3459,
+      "stability": 0.9755,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.6536,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "candle": {
+      "norm": 52.6439,
+      "finite": true,
+      "max_cos_other": 0.1771,
+      "stability": 0.9495,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -2.9025,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "bread": {
+      "norm": 53.1646,
+      "finite": true,
+      "max_cos_other": 0.2461,
+      "stability": 0.9681,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.6954,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "mountain": {
+      "norm": 55.2248,
+      "finite": true,
+      "max_cos_other": 0.466,
+      "stability": 0.9841,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 6.1337,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "river": {
+      "norm": 51.1382,
+      "finite": true,
+      "max_cos_other": 0.4457,
+      "stability": 0.9451,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.9059,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "clock": {
+      "norm": 52.5467,
+      "finite": true,
+      "max_cos_other": 0.2014,
+      "stability": 0.9774,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 0.6351,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "mirror": {
+      "norm": 51.0447,
+      "finite": true,
+      "max_cos_other": 0.2014,
+      "stability": 0.9709,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 2.4396,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "bridge": {
+      "norm": 51.9579,
+      "finite": true,
+      "max_cos_other": 0.3167,
+      "stability": 0.9226,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.6505,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "garden": {
+      "norm": 54.0474,
+      "finite": true,
+      "max_cos_other": 0.3273,
+      "stability": 0.9858,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 6.6259,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "engine": {
+      "norm": 55.6122,
+      "finite": true,
+      "max_cos_other": 0.1994,
+      "stability": 0.9235,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.7253,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "joy": {
+      "norm": 61.6681,
+      "finite": true,
+      "max_cos_other": 0.4863,
+      "stability": 0.9868,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -4.7305,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "fear": {
+      "norm": 62.7043,
+      "finite": true,
+      "max_cos_other": 0.5467,
+      "stability": 0.9889,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.6148,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "jealousy": {
+      "norm": 68.2849,
+      "finite": true,
+      "max_cos_other": 0.5871,
+      "stability": 0.9919,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 10.1166,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "serenity": {
+      "norm": 51.5843,
+      "finite": true,
+      "max_cos_other": 0.2934,
+      "stability": 0.9565,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.1688,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "grief": {
+      "norm": 62.4441,
+      "finite": true,
+      "max_cos_other": 0.554,
+      "stability": 0.9849,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 2.1442,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "curiosity": {
+      "norm": 65.7445,
+      "finite": true,
+      "max_cos_other": 0.5493,
+      "stability": 0.9853,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.6822,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "betrayal": {
+      "norm": 68.7268,
+      "finite": true,
+      "max_cos_other": 0.5871,
+      "stability": 0.9902,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 9.1369,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "nostalgia": {
+      "norm": 69.7766,
+      "finite": true,
+      "max_cos_other": 0.554,
+      "stability": 0.9843,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -1.4181,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "justice": {
+      "norm": 66.152,
+      "finite": true,
+      "max_cos_other": 0.5484,
+      "stability": 0.9887,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 7.1199,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "freedom": {
+      "norm": 62.5601,
+      "finite": true,
+      "max_cos_other": 0.499,
+      "stability": 0.9852,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.4157,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    }
+  },
+  "health_pass_counts": {
+    "stability": 30,
+    "probe": 30,
+    "steer_logit": 27
+  },
+  "impact_match": {
+    "elephant|21.002": {
+      "kl_target": 35.33498,
+      "kl_achieved": 34.40018,
+      "scale_over_norm_match": 2.0,
+      "matched": true
+    },
+    "elephant|42.004": {
+      "kl_target": 33.33955,
+      "kl_achieved": 34.40018,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "elephant|84.008": {
+      "kl_target": 32.49399,
+      "kl_achieved": 33.12438,
+      "scale_over_norm_match": 0.25,
+      "matched": true
+    },
+    "spider|21.002": {
+      "kl_target": 33.47696,
+      "kl_achieved": 32.86764,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "spider|42.004": {
+      "kl_target": 33.74087,
+      "kl_achieved": 32.69568,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "spider|84.008": {
+      "kl_target": 33.46592,
+      "kl_achieved": 32.71281,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "eagle|21.002": {
+      "kl_target": 34.69585,
+      "kl_achieved": 34.76755,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "eagle|42.004": {
+      "kl_target": 33.8899,
+      "kl_achieved": 34.76755,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "eagle|84.008": {
+      "kl_target": 33.81562,
+      "kl_achieved": 34.76755,
+      "scale_over_norm_match": 0.25,
+      "matched": true
+    },
+    "dolphin|21.002": {
+      "kl_target": 35.46407,
+      "kl_achieved": 34.43031,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "dolphin|42.004": {
+      "kl_target": 36.02306,
+      "kl_achieved": 35.25078,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "dolphin|84.008": {
+      "kl_target": 37.04144,
+      "kl_achieved": 36.03916,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "volcano|21.002": {
+      "kl_target": 36.35637,
+      "kl_achieved": 33.19958,
+      "scale_over_norm_match": 512.0,
+      "matched": false
+    },
+    "volcano|42.004": {
+      "kl_target": 36.32587,
+      "kl_achieved": 33.2139,
+      "scale_over_norm_match": 267.3341,
+      "matched": false
+    },
+    "volcano|84.008": {
+      "kl_target": 36.0778,
+      "kl_achieved": 33.2139,
+      "scale_over_norm_match": 133.667,
+      "matched": false
+    },
+    "desert|21.002": {
+      "kl_target": 36.63863,
+      "kl_achieved": 32.94954,
+      "scale_over_norm_match": 256.0,
+      "matched": false
+    },
+    "desert|42.004": {
+      "kl_target": 36.07866,
+      "kl_achieved": 32.94954,
+      "scale_over_norm_match": 128.0,
+      "matched": false
+    },
+    "desert|84.008": {
+      "kl_target": 34.90153,
+      "kl_achieved": 32.94954,
+      "scale_over_norm_match": 64.0,
+      "matched": false
+    },
+    "library|21.002": {
+      "kl_target": 34.31613,
+      "kl_achieved": 32.62891,
+      "scale_over_norm_match": 8.0,
+      "matched": true
+    },
+    "library|42.004": {
+      "kl_target": 36.58321,
+      "kl_achieved": 32.94212,
+      "scale_over_norm_match": 346.6894,
+      "matched": false
+    },
+    "library|84.008": {
+      "kl_target": 37.7491,
+      "kl_achieved": 32.94212,
+      "scale_over_norm_match": 173.3447,
+      "matched": false
+    },
+    "harbor|21.002": {
+      "kl_target": 32.16844,
+      "kl_achieved": 32.33753,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "harbor|42.004": {
+      "kl_target": 32.79011,
+      "kl_achieved": 32.29974,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "harbor|84.008": {
+      "kl_target": 33.25616,
+      "kl_achieved": 32.57188,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "violin|21.002": {
+      "kl_target": 34.64137,
+      "kl_achieved": 33.04089,
+      "scale_over_norm_match": 2.0,
+      "matched": true
+    },
+    "violin|42.004": {
+      "kl_target": 34.51971,
+      "kl_achieved": 33.04089,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "violin|84.008": {
+      "kl_target": 34.71548,
+      "kl_achieved": 33.28545,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "umbrella|21.002": {
+      "kl_target": 39.38662,
+      "kl_achieved": 33.6666,
+      "scale_over_norm_match": 608.874,
+      "matched": false
+    },
+    "umbrella|42.004": {
+      "kl_target": 38.54489,
+      "kl_achieved": 33.6666,
+      "scale_over_norm_match": 304.437,
+      "matched": false
+    },
+    "umbrella|84.008": {
+      "kl_target": 37.66553,
+      "kl_achieved": 33.6666,
+      "scale_over_norm_match": 152.2185,
+      "matched": false
+    },
+    "telescope|21.002": {
+      "kl_target": 36.72068,
+      "kl_achieved": 36.85471,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "telescope|42.004": {
+      "kl_target": 37.47928,
+      "kl_achieved": 37.08857,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "telescope|84.008": {
+      "kl_target": 37.82745,
+      "kl_achieved": 36.53546,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "candle|21.002": {
+      "kl_target": 40.45418,
+      "kl_achieved": 34.47434,
+      "scale_over_norm_match": 8.0,
+      "matched": false
+    },
+    "candle|42.004": {
+      "kl_target": 40.00673,
+      "kl_achieved": 34.47434,
+      "scale_over_norm_match": 4.0,
+      "matched": false
+    },
+    "candle|84.008": {
+      "kl_target": 39.72303,
+      "kl_achieved": 34.47434,
+      "scale_over_norm_match": 2.0,
+      "matched": false
+    },
+    "bread|21.002": {
+      "kl_target": 33.93509,
+      "kl_achieved": 31.30824,
+      "scale_over_norm_match": 1.0,
+      "matched": false
+    },
+    "bread|42.004": {
+      "kl_target": 33.87524,
+      "kl_achieved": 31.09588,
+      "scale_over_norm_match": 378.0675,
+      "matched": false
+    },
+    "bread|84.008": {
+      "kl_target": 34.05359,
+      "kl_achieved": 31.09756,
+      "scale_over_norm_match": 193.173,
+      "matched": false
+    },
+    "mountain|21.002": {
+      "kl_target": 37.26847,
+      "kl_achieved": 36.8421,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "mountain|42.004": {
+      "kl_target": 35.35718,
+      "kl_achieved": 36.8421,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "mountain|84.008": {
+      "kl_target": 34.43865,
+      "kl_achieved": 34.57402,
+      "scale_over_norm_match": 0.1768,
+      "matched": true
+    },
+    "river|21.002": {
+      "kl_target": 36.97882,
+      "kl_achieved": 34.76917,
+      "scale_over_norm_match": 8.0,
+      "matched": false
+    },
+    "river|42.004": {
+      "kl_target": 35.88748,
+      "kl_achieved": 34.32405,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "river|84.008": {
+      "kl_target": 35.50566,
+      "kl_achieved": 34.73296,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "clock|21.002": {
+      "kl_target": 36.43033,
+      "kl_achieved": 35.04269,
+      "scale_over_norm_match": 4.0,
+      "matched": true
+    },
+    "clock|42.004": {
+      "kl_target": 36.89311,
+      "kl_achieved": 35.2379,
+      "scale_over_norm_match": 4.0,
+      "matched": true
+    },
+    "clock|84.008": {
+      "kl_target": 36.82184,
+      "kl_achieved": 35.04269,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "mirror|21.002": {
+      "kl_target": 37.51807,
+      "kl_achieved": 31.72948,
+      "scale_over_norm_match": 789.6119,
+      "matched": false
+    },
+    "mirror|42.004": {
+      "kl_target": 37.66558,
+      "kl_achieved": 31.72948,
+      "scale_over_norm_match": 394.806,
+      "matched": false
+    },
+    "mirror|84.008": {
+      "kl_target": 36.75314,
+      "kl_achieved": 31.72948,
+      "scale_over_norm_match": 197.403,
+      "matched": false
+    },
+    "bridge|21.002": {
+      "kl_target": 33.66486,
+      "kl_achieved": 33.25997,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "bridge|42.004": {
+      "kl_target": 37.25885,
+      "kl_achieved": 34.2291,
+      "scale_over_norm_match": 256.0,
+      "matched": false
+    },
+    "bridge|84.008": {
+      "kl_target": 39.53111,
+      "kl_achieved": 34.2291,
+      "scale_over_norm_match": 128.0,
+      "matched": false
+    },
+    "garden|21.002": {
+      "kl_target": 34.83026,
+      "kl_achieved": 32.67496,
+      "scale_over_norm_match": 8.0,
+      "matched": false
+    },
+    "garden|42.004": {
+      "kl_target": 35.97913,
+      "kl_achieved": 32.67496,
+      "scale_over_norm_match": 4.0,
+      "matched": false
+    },
+    "garden|84.008": {
+      "kl_target": 37.76471,
+      "kl_achieved": 32.67496,
+      "scale_over_norm_match": 2.0,
+      "matched": false
+    },
+    "engine|21.002": {
+      "kl_target": 32.24033,
+      "kl_achieved": 33.67493,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "engine|42.004": {
+      "kl_target": 32.05656,
+      "kl_achieved": 32.84438,
+      "scale_over_norm_match": 0.125,
+      "matched": true
+    },
+    "engine|84.008": {
+      "kl_target": 31.8096,
+      "kl_achieved": 32.84438,
+      "scale_over_norm_match": 0.0625,
+      "matched": true
+    },
+    "joy|21.002": {
+      "kl_target": 36.8568,
+      "kl_achieved": 34.5428,
+      "scale_over_norm_match": 608.874,
+      "matched": false
+    },
+    "joy|42.004": {
+      "kl_target": 36.87988,
+      "kl_achieved": 34.5428,
+      "scale_over_norm_match": 304.437,
+      "matched": false
+    },
+    "joy|84.008": {
+      "kl_target": 36.84475,
+      "kl_achieved": 34.5428,
+      "scale_over_norm_match": 152.2185,
+      "matched": false
+    },
+    "fear|21.002": {
+      "kl_target": 36.3586,
+      "kl_achieved": 33.47744,
+      "scale_over_norm_match": 608.874,
+      "matched": false
+    },
+    "fear|42.004": {
+      "kl_target": 36.87011,
+      "kl_achieved": 33.47744,
+      "scale_over_norm_match": 304.437,
+      "matched": false
+    },
+    "fear|84.008": {
+      "kl_target": 36.94751,
+      "kl_achieved": 33.47744,
+      "scale_over_norm_match": 152.2185,
+      "matched": false
+    },
+    "jealousy|21.002": {
+      "kl_target": 35.30296,
+      "kl_achieved": 33.9586,
+      "scale_over_norm_match": 4.0,
+      "matched": true
+    },
+    "jealousy|42.004": {
+      "kl_target": 35.23009,
+      "kl_achieved": 33.52931,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "jealousy|84.008": {
+      "kl_target": 35.11354,
+      "kl_achieved": 33.9586,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "serenity|21.002": {
+      "kl_target": 37.30937,
+      "kl_achieved": 33.47186,
+      "scale_over_norm_match": 663.9819,
+      "matched": false
+    },
+    "serenity|42.004": {
+      "kl_target": 37.41357,
+      "kl_achieved": 33.47803,
+      "scale_over_norm_match": 346.6894,
+      "matched": false
+    },
+    "serenity|84.008": {
+      "kl_target": 36.18399,
+      "kl_achieved": 33.47803,
+      "scale_over_norm_match": 173.3447,
+      "matched": false
+    },
+    "grief|21.002": {
+      "kl_target": 32.62883,
+      "kl_achieved": 34.10857,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "grief|42.004": {
+      "kl_target": 32.98802,
+      "kl_achieved": 34.286,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "grief|84.008": {
+      "kl_target": 33.32341,
+      "kl_achieved": 34.19041,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "curiosity|21.002": {
+      "kl_target": 31.29959,
+      "kl_achieved": 32.01188,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "curiosity|42.004": {
+      "kl_target": 31.35147,
+      "kl_achieved": 32.41831,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "curiosity|84.008": {
+      "kl_target": 31.43191,
+      "kl_achieved": 32.76943,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "betrayal|21.002": {
+      "kl_target": 31.03024,
+      "kl_achieved": 29.89609,
+      "scale_over_norm_match": 0.125,
+      "matched": true
+    },
+    "betrayal|42.004": {
+      "kl_target": 31.5979,
+      "kl_achieved": 31.94724,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "betrayal|84.008": {
+      "kl_target": 32.09232,
+      "kl_achieved": 31.52399,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "nostalgia|21.002": {
+      "kl_target": 34.52608,
+      "kl_achieved": 32.80125,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "nostalgia|42.004": {
+      "kl_target": 34.68535,
+      "kl_achieved": 33.05119,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "nostalgia|84.008": {
+      "kl_target": 34.83286,
+      "kl_achieved": 33.01598,
+      "scale_over_norm_match": 1.0,
+      "matched": false
+    },
+    "justice|21.002": {
+      "kl_target": 33.04257,
+      "kl_achieved": 33.75504,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "justice|42.004": {
+      "kl_target": 32.7744,
+      "kl_achieved": 33.99397,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "justice|84.008": {
+      "kl_target": 32.78509,
+      "kl_achieved": 34.11377,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "freedom|21.002": {
+      "kl_target": 33.21566,
+      "kl_achieved": 33.38901,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "freedom|42.004": {
+      "kl_target": 34.02993,
+      "kl_achieved": 34.91351,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "freedom|84.008": {
+      "kl_target": 34.69277,
+      "kl_achieved": 33.92136,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    }
+  },
+  "residual_norm_at_read_median": 84.00785827636719,
+  "residual_norm_at_read_min": 67.91858673095703,
+  "residual_norm_at_read_max": 96.62329864501953,
+  "vector_norm_median": 55.96552276611328,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "concept",
+  "gram_offdiag_median_abs": 0.11182783544063568,
+  "gram_offdiag_mean": 0.1338169425725937,
+  "gram_offdiag_max": 0.5870624780654907,
+  "gram_offdiag_min": -0.14018526673316956,
+  "gram_offdiag_p90_abs": 0.3272876739501953,
+  "gram_top_pairs": [
+    [
+      0.5871,
+      22,
+      26
+    ],
+    [
+      0.554,
+      24,
+      27
+    ],
+    [
+      0.5516,
+      22,
+      24
+    ],
+    [
+      0.5493,
+      22,
+      25
+    ],
+    [
+      0.5484,
+      22,
+      28
+    ],
+    [
+      0.5467,
+      21,
+      24
+    ],
+    [
+      0.5339,
+      22,
+      27
+    ],
+    [
+      0.5081,
+      26,
+      28
+    ],
+    [
+      0.5051,
+      21,
+      22
+    ],
+    [
+      0.499,
+      28,
+      29
+    ]
+  ]
+}
