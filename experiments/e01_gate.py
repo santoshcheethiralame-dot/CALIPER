@@ -97,6 +97,12 @@ ap.add_argument("--split-seed", type=int, default=0,
 ap.add_argument("--dtype", choices=("fp32", "fp16"), default="fp32",
                 help="model precision. fp16 reproduces the local Pythia runs made under "
                      "transformers 5 before 6 Oct 2026, which loaded Pythia's stored float16")
+ap.add_argument("--snr", type=float, default=None,
+                help="add Gaussian noise to every unit's response at this signal-to-noise "
+                     "variance ratio, so the attainable R2 is snr / (1 + snr) instead of 1")
+ap.add_argument("--snr-range", type=float, nargs=2, default=None, metavar=("LO", "HI"),
+                help="as --snr, but each unit draws its own SNR log-uniformly from [LO, HI], "
+                     "so the attainable R2 differs between units and is unknown to the checks")
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -131,6 +137,17 @@ else:
 p = collect(model, tok, sample_corpus(n_docs=300, seed=a.corpus_seed), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=a.split_seed,
             shuffle="sequence" if a.sequence_split else "token", sae=sae)
+snr = {}
+if a.snr is not None or a.snr_range is not None:
+    # Seeded by unit id, so a unit's noise and SNR do not depend on its batch-mates or on
+    # which other units are fitted (N-1, docs/preregistration-n1-response-noise.md).
+    sd = p.response.std(0)
+    for i, u in enumerate(neurons):
+        g = np.random.default_rng([7919, int(u)])
+        lo, hi = a.snr_range if a.snr_range is not None else (a.snr, a.snr)
+        snr[int(u)] = float(np.exp(g.uniform(np.log(lo), np.log(hi))))
+        p.response[:, i] += g.normal(0.0, sd[i] / np.sqrt(snr[int(u)]),
+                                     len(p.response)).astype(p.response.dtype)
 dirs = None if a.no_save_directions else Path(a.out.replace(".jsonl", "_dirs"))
 if dirs is not None:
     dirs.mkdir(parents=True, exist_ok=True)
@@ -173,6 +190,7 @@ for start in range(0, len(todo), a.batch):
             "align_selected": round(sel, 4), "best_available": round(max(ad, ac), 4),
             "picked": "cascade" if use_cascade else "direct",
             "r2_k1": round(float(max(d1[j].test_r2, c.test_r2)), 6),
+            **({"snr": round(snr[int(n)], 4)} if snr else {}),
             "k2_gain": round(float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
             # NOT ground-truth-free: both terms are alignments to w. Kept so every
             # earlier run stays comparable, but it must not be reported as a check a
