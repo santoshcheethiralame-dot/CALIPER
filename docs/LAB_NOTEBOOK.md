@@ -240,6 +240,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-11** | 2026-10-06 | **R9 re-run: naturalistic decoding, gemma-2-2b-it 8-bit L13** | 16 passages | APERTURE `b5bb2fb` unchanged; extraction seeds 0 and 1 | `results/s11_primary.jsonl`, `results/s11_seed1.jsonl`, `results/s11_config.json` | **11/16 = 0.688 [0.413, 0.890]**, p = 1.9e-10 vs 1/16: **criterion k >= 4 met, R9 replicates**; seed 1 10/16; second session byte-identical; uncentred 1/16 (15/16 -> dolphin), as R9 predicted |
 | **S-3 / A-F1** | 2026-10-07 | **APERTURE F1 finished: framing confound, gemma-2-2b-it 8-bit, 12 configs x 2 framings** | 24 files x 96 trials | frozen prereg (mirror `9267351`), frozen scorer at `b5bb2fb`, 2,000 draws; c05 neutral re-run on the new stack | `results/s3_f1/`, `results/s3_f1_score.json` | **P1, P2, P3, P4 all hold**: no config reverses (BH, 0 rejections); pooled D = -0.564 [-0.754, -0.375]; neutral hit rate above introspective in 12/12; reference cell reproduces R11. 4 configs flagged >25% unparseable, kept in the pool as filed |
 | **B-15a/b/c** | 2026-10-07 | **Error budget on B-14's first 100 GPT-2 L6 units, fixed estimator** | 3 x 100 | fit seed 1 (5 restarts) / corpus seed 1 / sequence-level split, `--independent-units` | `results/b15{a,b,c}_*.jsonl`, `results/b15_analysis.json` | verdict flips vs B-14 at 0.95: 19% / 25% / 23%; R2 ahead in all three (gap -0.169 / -0.084 / -0.162); sequence split leaves R2 ahead (the prereg's one directional claim); restart curve k=2..5 AUC 0.74/0.70/0.69/0.73 vs R2 0.90 |
+| **B-17** | 2026-10-07 | **GPT-Neo-125m L6, n=20, per-unit diagnostics** | 20 | fixed estimator, 2 restarts, saved directions | `results/b17_gptneo125m_l6.jsonl`, `results/b17_diagnostics.json` | 0/20 pass, median Euclidean align 0.01; r2_exact = 1 (no pipeline fault); **geometry 17, optimisation 1, other 2**: verdict **geometry**; median sigma-align 0.9998, restart agreement 1.0, R2 0.998 |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -338,6 +339,33 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### B-17 - GPT-Neo layer 6 read with the filed rules (2026-10-07, local CPU) - **GEOMETRY: THE FITS ARE NEARLY ORTHOGONAL TO w YET REPRODUCE ITS PROJECTION**
+
+Prereg `docs/preregistration-b17.md`; 20 units; the diagnostics ran in the queue at 18:48.
+The run was paused 15:40-18:08 by lid-close Modern Standby, and nothing was lost.
+
+**The filed reading rules:**
+- `r2_exact` = 1.0 on every unit, so this is not a pipeline fault.
+- Failures: 20/20. Geometry 17, optimisation 1, other 2. **Verdict: geometry.**
+
+**The numbers.**
+- Median Euclidean alignment is 0.01, and 0.011 to the identifiable part, so the LayerNorm
+  null is not the cause.
+- Median stimulus-weighted alignment is 0.9998, and 0.999 on firing tokens.
+- Median R2 is 0.997 for the truth and 0.994 for the fit. Median restart agreement is 1.0.
+- `cos_pc1` is 0.0003, so the fits are not the stimulus's first PC.
+
+**Reading.**
+- At this layer almost all of w's norm lies in directions the stimulus does not occupy. The
+  estimator finds the identifiable part, and finds it reliably: restarts agree.
+- This explains the 6 Oct "below-chance" median. Fitted directions are orthogonal to w's
+  unidentifiable bulk, not random.
+- It is the extreme case of the converged-wrong finding (§4, 7 Oct). It also shows the
+  Euclidean reference standard is near-meaningless at this layer. Paper 1 must report it, and
+  the simulated panel of 7 Oct asks for it (M5).
+- Not done: a fresh-text diagnostic, and a decomposition of each error across the stimulus
+  covariance eigen-directions. The panel asks for that check.
 
 ### B-15 - the error budget (2026-10-07, local CPU; analysed once) - **ONE IN FIVE VERDICTS FLIPS UNDER ANY ONE PERTURBATION; THE R2 LEAD SURVIVES ALL THREE**
 
