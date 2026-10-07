@@ -72,8 +72,11 @@ def main():
                     help="match the run's precision: fp16 for the local Pythia runs before "
                          "6 Oct 2026 (B-2b, B-2c)")
     ap.add_argument("--corpus-seed", type=int, default=0,
-                    help="0 rebuilds the fitted stimulus; another seed measures the same "
-                         "directions on a fresh token sample")
+                    help="the stimulus seed: the fit's own seed rebuilds the fitted "
+                         "stimulus; another seed measures the same directions on fresh text")
+    ap.add_argument("--exclude-seed", type=int, default=None,
+                    help="drop every document of this corpus seed, so the sample is "
+                         "disjoint from the fit's; default 0 when --corpus-seed is not 0")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 
@@ -82,8 +85,9 @@ def main():
     ids = np.array([r["_key"] for r in rows])
     model, tok = load_model(a.model, dtype=torch.float16 if a.dtype == "fp16" else torch.float32)
     texts = sample_corpus(n_docs=300, seed=a.corpus_seed)
-    if a.corpus_seed != 0:  # drop every document the fit saw, so the sample is disjoint
-        seen = set(sample_corpus(n_docs=300, seed=0))
+    exclude = a.exclude_seed if a.exclude_seed is not None else (0 if a.corpus_seed else None)
+    if exclude is not None and exclude != a.corpus_seed:
+        seen = set(sample_corpus(n_docs=300, seed=exclude))  # documents the fit saw
         texts = [t for t in texts if t not in seen]
     p = collect(model, tok, texts, layer=a.layer,
                 neurons=ids, max_tokens=a.tokens, seed=0)
@@ -124,6 +128,7 @@ def main():
             "r2_fitted", "cos_pc1")
     summary = {k: float(np.median([o[k] for o in out if o[k] is not None])) for k in keys}
     rep = {"rows": a.rows, "model": a.model, "layer": a.layer, "corpus_seed": a.corpus_seed,
+           "exclude_seed": a.exclude_seed,
            "pc1_share": pc1_share,
            "median": summary, "units": out}
     for o in out:

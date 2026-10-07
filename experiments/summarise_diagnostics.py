@@ -29,6 +29,10 @@ WRONG_BASIN_R2 = 0.99
 ARMS = {
     "B-8b GPT-Neo-125m L10": ("results/b8b_gptneo125m_indep.jsonl", "results/b8b_diagnostics"),
     "B-15a GPT-2 L6 (fit seed 1)": ("results/b15a_fitseed1.jsonl", "results/b15a_diagnostics"),
+    "B-15b GPT-2 L6 (corpus seed 1)": ("results/b15b_corpusseed1.jsonl",
+                                        "results/b15b_diagnostics"),
+    "B-15c GPT-2 L6 (sequence split)": ("results/b15c_seqsplit.jsonl",
+                                         "results/b15c_diagnostics"),
     "B-2c Pythia-160m L6": ("results/b2c_pythia160m_indep.jsonl", "results/b2c_diagnostics"),
 }
 

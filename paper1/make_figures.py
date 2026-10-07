@@ -161,11 +161,15 @@ def fig_forest():
 
 def fig_restart_curve():
     rc = json.load(open(os.path.join(ROOT, "results/cross_arm_analysis.json")))["restart_curve"]
+    # Two coupled-estimator runs, then B-15a's corrected-estimator re-fit (square markers).
+    runs = [("run A", "o", d) for d in rc.values()][:1] + \
+           [("run B", "o", d) for d in rc.values()][1:2] + \
+           [("corrected", "s", json.load(open(os.path.join(
+               ROOT, "results/b15_analysis.json")))["restart_curve"])]
     fig, ax = plt.subplots(figsize=(2.7, 2.3))
-    for run, (name, d) in enumerate(rc.items()):
+    for tag, mk, d in runs:
         ks = [2, 3, 4, 5]
-        tag = "run A" if run == 0 else "run B"
-        ax.plot(ks, [d[f"k={k}"] for k in ks], "--", marker="o", ms=3.5, mec="white",
+        ax.plot(ks, [d[f"k={k}"] for k in ks], "--", marker=mk, ms=3.5, mec="white",
                 color=COL["restart agreement"], lw=1.2)
         ax.annotate(f"restart, {tag}", (5.1, d["k=5"]), fontsize=6.5,
                     color=COL["restart agreement"], va="center")

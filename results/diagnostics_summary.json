@@ -118,6 +118,126 @@
       }
     }
   },
+  "B-15b GPT-2 L6 (corpus seed 1)": {
+    "n": 100,
+    "pc1_share": 0.06810901314020157,
+    "max_r2_exact_shortfall": 0.0,
+    "max_align_mismatch": 0.0,
+    "failures": 20,
+    "b17_class": {
+      "geometry": 6,
+      "optimisation": 12,
+      "other": 2
+    },
+    "crossed": {
+      "converged_wrong x geometry": 6,
+      "converged_wrong x other": 1,
+      "under_fitted x optimisation": 12,
+      "under_fitted x other": 1
+    },
+    "converged_wrong": {
+      "n": 7,
+      "euclid_align_median": 0.9265,
+      "sigma_align_median": 0.9995,
+      "stimulus_equivalent": 6,
+      "fresh_sigma_align_median": 0.9994,
+      "fresh_sigma_align_min": 0.9768,
+      "fresh_equivalent": 6,
+      "fresh_r2_shortfall_median": 0.0008000000000000229
+    },
+    "under_fitted": {
+      "n": 13,
+      "euclid_align_median": 0.8448,
+      "sigma_align_median": 0.667,
+      "stimulus_equivalent": 0,
+      "fresh_sigma_align_median": 0.6528,
+      "fresh_sigma_align_min": 0.0217,
+      "fresh_equivalent": 0,
+      "fresh_r2_shortfall_median": 0.2156
+    },
+    "passes_min_sigma_align": 0.1181,
+    "passes_fresh_sigma_align_median": 0.9999,
+    "auc_by_label": {
+      "euclid_lt_0.95": {
+        "failures": 20,
+        "held-out R2": 0.845,
+        "restart agreement": 0.7609375,
+        "diff": -0.08406249999999993
+      },
+      "fresh_sigma_lt_0.99": {
+        "failures": 16,
+        "held-out R2": 0.9784226190476191,
+        "restart agreement": 0.7016369047619048,
+        "diff": -0.2767857142857143
+      },
+      "fresh_r2_shortfall_gt_0.01": {
+        "failures": 15,
+        "held-out R2": 0.984313725490196,
+        "restart agreement": 0.6552941176470588,
+        "diff": -0.3290196078431372
+      }
+    }
+  },
+  "B-15c GPT-2 L6 (sequence split)": {
+    "n": 100,
+    "pc1_share": 0.06700436770915985,
+    "max_r2_exact_shortfall": 0.0,
+    "max_align_mismatch": 0.0,
+    "failures": 22,
+    "b17_class": {
+      "geometry": 8,
+      "optimisation": 13,
+      "other": 1
+    },
+    "crossed": {
+      "converged_wrong x geometry": 7,
+      "converged_wrong x other": 1,
+      "under_fitted x geometry": 1,
+      "under_fitted x optimisation": 13
+    },
+    "converged_wrong": {
+      "n": 8,
+      "euclid_align_median": 0.9370499999999999,
+      "sigma_align_median": 0.99945,
+      "stimulus_equivalent": 7,
+      "fresh_sigma_align_median": 0.9994,
+      "fresh_sigma_align_min": 0.981,
+      "fresh_equivalent": 7,
+      "fresh_r2_shortfall_median": 0.0020000000000000018
+    },
+    "under_fitted": {
+      "n": 14,
+      "euclid_align_median": 0.9090499999999999,
+      "sigma_align_median": 0.81985,
+      "stimulus_equivalent": 1,
+      "fresh_sigma_align_median": 0.82235,
+      "fresh_sigma_align_min": 0.0074,
+      "fresh_equivalent": 1,
+      "fresh_r2_shortfall_median": 0.05449999999999994
+    },
+    "passes_min_sigma_align": 0.9463,
+    "passes_fresh_sigma_align_median": 0.9999,
+    "auc_by_label": {
+      "euclid_lt_0.95": {
+        "failures": 22,
+        "held-out R2": 0.8851981351981352,
+        "restart agreement": 0.7231934731934732,
+        "diff": -0.16200466200466201
+      },
+      "fresh_sigma_lt_0.99": {
+        "failures": 15,
+        "held-out R2": 0.9780392156862745,
+        "restart agreement": 0.6227450980392157,
+        "diff": -0.35529411764705876
+      },
+      "fresh_r2_shortfall_gt_0.01": {
+        "failures": 15,
+        "held-out R2": 0.9945098039215686,
+        "restart agreement": 0.6470588235294118,
+        "diff": -0.3474509803921568
+      }
+    }
+  },
   "B-2c Pythia-160m L6": {
     "n": 300,
     "pc1_share": 0.09941031783819199,
