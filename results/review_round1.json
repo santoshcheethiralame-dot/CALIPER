@@ -1,0 +1,746 @@
+{
+ "R1": {
+  "GPT-2 L6 (B-14)": {
+   "direct-picked, selected label": {
+    "n": 160,
+    "failures": 9,
+    "auc_restart": 0.8005886681383371,
+    "auc_r2": 0.9131714495952906,
+    "diff": -0.11258278145695355
+   },
+   "all units, direct-route label": {
+    "n": 300,
+    "failures": 107,
+    "auc_restart": 0.833494746017142,
+    "auc_r2": 0.894968766645683,
+    "diff": -0.061474020628541015
+   }
+  },
+  "Pythia-160m L6 (B-2c)": {
+   "direct-picked, selected label": {
+    "n": 208,
+    "failures": 4,
+    "auc_restart": 0.8774509803921569,
+    "auc_r2": 0.8872549019607843,
+    "diff": -0.009803921568627416
+   },
+   "all units, direct-route label": {
+    "n": 300,
+    "failures": 36,
+    "auc_restart": 0.8218644781144782,
+    "auc_r2": 0.8930976430976431,
+    "diff": -0.0712331649831649
+   }
+  },
+  "GPT-2 L2 (B-7)": {
+   "direct-picked, selected label": {
+    "n": 28,
+    "failures": 12,
+    "auc_restart": 0.984375,
+    "auc_r2": 0.9947916666666666,
+    "diff": -0.01041666666666663
+   },
+   "all units, direct-route label": {
+    "n": 50,
+    "failures": 31,
+    "auc_restart": 0.9202037351443124,
+    "auc_r2": 0.9728353140916808,
+    "diff": -0.05263157894736836
+   }
+  },
+  "GPT-2 L10 (B-7)": {
+   "direct-picked, selected label": {
+    "n": 43,
+    "failures": 3,
+    "auc_restart": 0.7416666666666667,
+    "auc_r2": 0.75,
+    "diff": -0.008333333333333304
+   },
+   "all units, direct-route label": {
+    "n": 50,
+    "failures": 7,
+    "auc_restart": 0.7308970099667774,
+    "auc_r2": 0.8504983388704319,
+    "diff": -0.11960132890365449
+   }
+  },
+  "GPT-Neo-125m L10 (B-8b)": {
+   "direct-picked, selected label": {
+    "n": 47,
+    "failures": 14,
+    "auc_restart": 0.6103896103896104,
+    "auc_r2": 0.7716450216450217,
+    "diff": -0.16125541125541132
+   },
+   "all units, direct-route label": {
+    "n": 100,
+    "failures": 55,
+    "auc_restart": 0.656969696969697,
+    "auc_r2": 0.8141414141414142,
+    "diff": -0.15717171717171718
+   }
+  },
+  "Pythia-1.4B L12, 3200 steps (B-11c)": {
+   "direct-picked, selected label": {
+    "n": 22,
+    "failures": 2,
+    "auc_restart": 1.0,
+    "auc_r2": 1.0,
+    "diff": 0.0
+   },
+   "all units, direct-route label": {
+    "n": 50,
+    "failures": 27,
+    "auc_restart": 0.8309178743961353,
+    "auc_r2": 0.9565217391304348,
+    "diff": -0.12560386473429952
+   }
+  },
+  "Pythia-70m (B-11)": {
+   "direct-picked, selected label": {
+    "n": 40,
+    "failures": 1,
+    "auc_restart": 0.8717948717948718,
+    "auc_r2": 0.2564102564102564,
+    "diff": 0.6153846153846154
+   },
+   "all units, direct-route label": {
+    "n": 50,
+    "failures": 6,
+    "auc_restart": 0.8049242424242424,
+    "auc_r2": 0.7840909090909091,
+    "diff": 0.02083333333333337
+   }
+  },
+  "Pythia-410m (B-11)": {
+   "direct-picked, selected label": {
+    "n": 37,
+    "failures": 0,
+    "auc_restart": NaN,
+    "auc_r2": NaN,
+    "diff": null
+   },
+   "all units, direct-route label": {
+    "n": 50,
+    "failures": 5,
+    "auc_restart": 0.8977777777777778,
+    "auc_r2": 0.9466666666666667,
+    "diff": -0.04888888888888887
+   }
+  },
+  "Pythia-410m, 3200 steps (B-11)": {
+   "direct-picked, selected label": {
+    "n": 43,
+    "failures": 0,
+    "auc_restart": NaN,
+    "auc_r2": NaN,
+    "diff": null
+   },
+   "all units, direct-route label": {
+    "n": 50,
+    "failures": 5,
+    "auc_restart": 0.9022222222222223,
+    "auc_r2": 0.9688888888888889,
+    "diff": -0.06666666666666665
+   }
+  },
+  "GPT-2 L6 re-fit, fit seed 1 (B-15a)": {
+   "direct-picked, selected label": {
+    "n": 68,
+    "failures": 8,
+    "auc_restart": 0.7416666666666667,
+    "auc_r2": 0.8875,
+    "diff": -0.14583333333333326
+   },
+   "all units, direct-route label": {
+    "n": 100,
+    "failures": 29,
+    "auc_restart": 0.8052452646915979,
+    "auc_r2": 0.9208353569694027,
+    "diff": -0.11559009227780481
+   }
+  },
+  "GPT-2 L6 re-fit, corpus seed 1 (B-15b)": {
+   "direct-picked, selected label": {
+    "n": 44,
+    "failures": 6,
+    "auc_restart": 0.793859649122807,
+    "auc_r2": 0.8333333333333334,
+    "diff": -0.03947368421052633
+   },
+   "all units, direct-route label": {
+    "n": 100,
+    "failures": 43,
+    "auc_restart": 0.8035495716034272,
+    "auc_r2": 0.9375764993880049,
+    "diff": -0.1340269277845777
+   }
+  },
+  "GPT-2 L6 re-fit, sequence split (B-15c)": {
+   "direct-picked, selected label": {
+    "n": 52,
+    "failures": 9,
+    "auc_restart": 0.7829457364341085,
+    "auc_r2": 0.9922480620155039,
+    "diff": -0.2093023255813954
+   },
+   "all units, direct-route label": {
+    "n": 100,
+    "failures": 43,
+    "auc_restart": 0.8331293349653203,
+    "auc_r2": 0.9130966952264382,
+    "diff": -0.07996736026111795
+   }
+  },
+  "GPT-Neo-125m L6 (B-17)": {
+   "direct-picked, selected label": {
+    "n": 6,
+    "failures": 6,
+    "auc_restart": NaN,
+    "auc_r2": NaN,
+    "diff": null
+   },
+   "all units, direct-route label": {
+    "n": 20,
+    "failures": 20,
+    "auc_restart": NaN,
+    "auc_r2": NaN,
+    "diff": null
+   }
+  }
+ },
+ "R3": {
+  "GPT-2 L6 (B-14)": {
+   "n": 300,
+   "failures": 46,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.7915097569325573,
+   "auc_r2": 0.9187350222526532,
+   "diff": -0.12722526532009593,
+   "delong_p": 0.00017740901029657542,
+   "delong_se": 0.03393409745935983,
+   "boot_ci95": [
+    -0.19676694625128377,
+    -0.06256419034577199
+   ]
+  },
+  "Pythia-160m L6 (B-2c)": {
+   "n": 300,
+   "failures": 13,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": true,
+   "auc_restart": 0.8275261324041812,
+   "auc_r2": 0.9509514875368534,
+   "diff": -0.12342535513267228,
+   "delong_p": 0.08714404368756261,
+   "delong_se": 0.07215075636436843,
+   "boot_ci95": [
+    -0.26405119270972927,
+    0.004720584293754772
+   ],
+   "auc_route_agreement": 0.9354060573572769
+  },
+  "GPT-2 L2 (B-7)": {
+   "n": 50,
+   "failures": 25,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.7888,
+   "auc_r2": 0.9504,
+   "diff": -0.16160000000000008,
+   "delong_p": 0.008871041704157215,
+   "delong_se": 0.06175046558528931,
+   "boot_ci95": [
+    -0.2944,
+    -0.04959999999999998
+   ]
+  },
+  "GPT-2 L10 (B-7)": {
+   "n": 50,
+   "failures": 5,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.7288888888888889,
+   "auc_r2": 0.8177777777777778,
+   "diff": -0.0888888888888889,
+   "delong_p": 0.21624679906770053,
+   "delong_se": 0.071883432262897,
+   "boot_ci95": [
+    -0.22222222222222232,
+    0.04444444444444451
+   ]
+  },
+  "GPT-Neo-125m L10 (B-8b)": {
+   "n": 100,
+   "failures": 38,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.5878607809847198,
+   "auc_r2": 0.7553056027164686,
+   "diff": -0.1674448217317488,
+   "delong_p": 0.002232947809257552,
+   "delong_se": 0.05476775318335797,
+   "boot_ci95": [
+    -0.27548811544991514,
+    -0.06153438030560277
+   ],
+   "auc_route_agreement": 0.6799660441426146
+  },
+  "Pythia-1.4B L12, 3200 steps (B-11c)": {
+   "n": 50,
+   "failures": 19,
+   "estimator": "corrected",
+   "device": "Kaggle T4",
+   "precision": "unrecorded",
+   "pooled": true,
+   "auc_restart": 0.8471986417657046,
+   "auc_r2": 0.9728353140916808,
+   "diff": -0.1256366723259762,
+   "delong_p": 0.03196944970401489,
+   "delong_se": 0.058577544727600205,
+   "boot_ci95": [
+    -0.2512733446519525,
+    -0.02376910016977929
+   ],
+   "auc_route_agreement": 0.9100169779286927
+  },
+  "Pythia-70m (B-11)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": false,
+   "auc_restart": 0.8645833333333334,
+   "auc_r2": 0.6145833333333334,
+   "diff": 0.25,
+   "delong_p": 0.4283881662987118,
+   "delong_se": 0.3156753567370501,
+   "boot_ci95": [
+    -0.10416666666666663,
+    0.6666666666666666
+   ]
+  },
+  "Pythia-410m (B-11)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": false,
+   "auc_restart": 0.7708333333333334,
+   "auc_r2": 1.0,
+   "diff": -0.22916666666666663,
+   "delong_p": 0.2797134483547931,
+   "delong_se": 0.2120022678744837,
+   "boot_ci95": [
+    -0.5416666666666667,
+    0.0
+   ]
+  },
+  "Pythia-410m, 3200 steps (B-11)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": false,
+   "auc_restart": 0.7604166666666666,
+   "auc_r2": 1.0,
+   "diff": -0.23958333333333337,
+   "delong_p": 0.1895516067476513,
+   "delong_se": 0.18262223067610314,
+   "boot_ci95": [
+    -0.5,
+    -0.02083333333333337
+   ]
+  },
+  "GPT-2 L6 re-fit, fit seed 1 (B-15a)": {
+   "n": 100,
+   "failures": 18,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7262872628726287,
+   "auc_r2": 0.8956639566395664,
+   "diff": -0.16937669376693776,
+   "delong_p": 0.010533114125442602,
+   "delong_se": 0.06621920722571482,
+   "boot_ci95": [
+    -0.3082655826558265,
+    -0.05348915989159909
+   ],
+   "auc_route_agreement": 0.8905826558265583
+  },
+  "GPT-2 L6 re-fit, corpus seed 1 (B-15b)": {
+   "n": 100,
+   "failures": 20,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7609375,
+   "auc_r2": 0.845,
+   "diff": -0.08406249999999993,
+   "delong_p": 0.14333140053105298,
+   "delong_se": 0.057439470655484035,
+   "boot_ci95": [
+    -0.19782812499999994,
+    0.022499999999999968
+   ],
+   "auc_route_agreement": 0.819375
+  },
+  "GPT-2 L6 re-fit, sequence split (B-15c)": {
+   "n": 100,
+   "failures": 22,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7231934731934732,
+   "auc_r2": 0.8851981351981352,
+   "diff": -0.16200466200466201,
+   "delong_p": 0.016546397101809177,
+   "delong_se": 0.06759671880983198,
+   "boot_ci95": [
+    -0.2954691142191143,
+    -0.029122960372960516
+   ],
+   "auc_route_agreement": 0.7992424242424242
+  },
+  "GPT-Neo-125m L6 (B-17)": {
+   "n": 20,
+   "failures": 20,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false
+  }
+ },
+ "R4": {
+  "six filed arms": {
+   "arms": [
+    "GPT-2 L6 (B-14)",
+    "Pythia-160m L6 (B-2c)",
+    "GPT-2 L2 (B-7)",
+    "GPT-2 L10 (B-7)",
+    "GPT-Neo-125m L10 (B-8b)",
+    "Pythia-1.4B L12, 3200 steps (B-11c)"
+   ],
+   "k": 6,
+   "pooled": -0.1336759005903733,
+   "tau2": 0.0,
+   "Q": 1.0480151836144835,
+   "I2": 0.0,
+   "dl_ci95": [
+    -0.17603399798609393,
+    -0.09131780319465264
+   ],
+   "hksj_ci95": [
+    -0.18922944944626788,
+    -0.0781223517344787
+   ],
+   "prediction_interval95": [
+    -0.19367841700865912,
+    -0.07367338417208746
+   ]
+  },
+  "corrected arms only": {
+   "arms": [
+    "GPT-2 L6 (B-14)",
+    "Pythia-160m L6 (B-2c)",
+    "GPT-Neo-125m L10 (B-8b)",
+    "Pythia-1.4B L12, 3200 steps (B-11c)"
+   ],
+   "k": 4,
+   "pooled": -0.13447357713396846,
+   "tau2": 0.0,
+   "Q": 0.4542581126241642,
+   "I2": 0.0,
+   "dl_ci95": [
+    -0.18221698290440083,
+    -0.08673017136353608
+   ],
+   "hksj_ci95": [
+    -0.2119944063665194,
+    -0.05695274790141752
+   ],
+   "prediction_interval95": [
+    -0.23928138078863243,
+    -0.029665773479304505
+   ]
+  },
+  "paired_permutation_p": {
+   "GPT-2 L6 (B-14)": 0.00019998000199980003,
+   "Pythia-160m L6 (B-2c)": 0.09829017098290171,
+   "GPT-2 L2 (B-7)": 0.0047995200479952005,
+   "GPT-2 L10 (B-7)": 0.17628237176282371,
+   "GPT-Neo-125m L10 (B-8b)": 0.0026997300269973002,
+   "Pythia-1.4B L12, 3200 steps (B-11c)": 0.026597340265973404,
+   "GPT-2 L6 re-fit, fit seed 1 (B-15a)": 0.0032996700329967,
+   "GPT-2 L6 re-fit, corpus seed 1 (B-15b)": 0.137986201379862,
+   "GPT-2 L6 re-fit, sequence split (B-15c)": 0.017198280171982803
+  }
+ },
+ "R6": {
+  "units": 100,
+  "any_restart_pass_at_k (with warm start)": [
+   {
+    "k": 1,
+    "rate": 0.43,
+    "ci95": [
+     0.331391016631383,
+     0.5328662616751536
+    ]
+   },
+   {
+    "k": 2,
+    "rate": 0.59,
+    "ci95": [
+     0.48714420376677087,
+     0.6873800234324292
+    ]
+   },
+   {
+    "k": 3,
+    "rate": 0.69,
+    "ci95": [
+     0.5896854458398009,
+     0.7787112078693289
+    ]
+   },
+   {
+    "k": 4,
+    "rate": 0.72,
+    "ci95": [
+     0.6213329952827327,
+     0.8052063725088184
+    ]
+   },
+   {
+    "k": 5,
+    "rate": 0.74,
+    "ci95": [
+     0.6426879368998965,
+     0.8226055621323475
+    ]
+   }
+  ],
+  "R2_selected_pass_at_k (with warm start)": [
+   {
+    "k": 1,
+    "rate": 0.43,
+    "ci95": [
+     0.331391016631383,
+     0.5328662616751536
+    ]
+   },
+   {
+    "k": 2,
+    "rate": 0.58,
+    "ci95": [
+     0.47711919572391376,
+     0.678014460645203
+    ]
+   },
+   {
+    "k": 3,
+    "rate": 0.67,
+    "ci95": [
+     0.5688272492224369,
+     0.760801465377398
+    ]
+   },
+   {
+    "k": 4,
+    "rate": 0.7,
+    "ci95": [
+     0.6001853238201958,
+     0.7875935795104634
+    ]
+   },
+   {
+    "k": 5,
+    "rate": 0.71,
+    "ci95": [
+     0.6107340410925517,
+     0.7964258107492681
+    ]
+   }
+  ],
+  "any_random_restart_pass_at_k": [
+   {
+    "k": 1,
+    "rate": 0.5,
+    "ci95": [
+     0.39832112950330106,
+     0.6016788704966989
+    ]
+   },
+   {
+    "k": 2,
+    "rate": 0.66,
+    "ci95": [
+     0.5584667322490413,
+     0.7517764984551557
+    ]
+   },
+   {
+    "k": 3,
+    "rate": 0.7,
+    "ci95": [
+     0.6001853238201958,
+     0.7875935795104634
+    ]
+   },
+   {
+    "k": 4,
+    "rate": 0.72,
+    "ci95": [
+     0.6213329952827327,
+     0.8052063725088184
+    ]
+   }
+  ],
+  "fits_on_random_restarts": {
+   "one-class": {
+    "q": 0.35618975667154257,
+    "nll": 263.1561764614414,
+    "params": 1,
+    "aic": 528.3123529228828
+   },
+   "two-class": {
+    "q": 0.6915532157747404,
+    "pi_unreachable": 0.2748356764703681,
+    "nll": 253.80781854373936,
+    "params": 2,
+    "aic": 511.6156370874787
+   },
+   "beta-geometric": {
+    "a": 0.4938569821026122,
+    "b": 0.46834288701212706,
+    "nll": 254.01818716045273,
+    "params": 2,
+    "aic": 512.0363743209055
+   }
+  },
+  "note": "models describe 'any restart succeeds' over exchangeable random restarts; nested k treated as independent binomials (descriptive AIC only)"
+ },
+ "R7": {
+  "GPT-2 L6 re-fit, fit seed 1 (B-15a)": {
+   "shared": 100,
+   "failures_reference": 17,
+   "failures_replicate": 18,
+   "kappa": 0.342105263157895,
+   "icc_alignment_angle": 0.6785572990461928
+  },
+  "GPT-2 L6 re-fit, corpus seed 1 (B-15b)": {
+   "shared": 100,
+   "failures_reference": 17,
+   "failures_replicate": 20,
+   "kappa": 0.17218543046357598,
+   "icc_alignment_angle": 0.33462735655612647
+  },
+  "GPT-2 L6 re-fit, sequence split (B-15c)": {
+   "shared": 100,
+   "failures_reference": 17,
+   "failures_replicate": 22,
+   "kappa": 0.2703045685279189,
+   "icc_alignment_angle": 0.23859250326030026
+  }
+ },
+ "R2": {
+  "Euclidean < 0.95": {
+   "failures": 18,
+   "held-out R2": 0.8956639566395664,
+   "restart agreement as filed": 0.7262872628726287,
+   "Euclidean, all 5 restarts": 0.7262872628726287,
+   "Euclidean, random restarts 1-4": 0.7039295392953929,
+   "covariance metric, all 5": 0.6632791327913279,
+   "covariance metric, random 1-4": 0.6571815718157181
+  },
+  "fresh sigma-align < 0.99": {
+   "failures": 13,
+   "held-out R2": 0.9814323607427056,
+   "restart agreement as filed": 0.7541998231653404,
+   "Euclidean, all 5 restarts": 0.7541998231653404,
+   "Euclidean, random restarts 1-4": 0.7294429708222812,
+   "covariance metric, all 5": 0.6896551724137931,
+   "covariance metric, random 1-4": 0.695844385499558
+  }
+ },
+ "R8": {
+  "GPT-2 L6 re-fit, fit seed 1 (B-15a)": {
+   "dim": 768,
+   "condition_number": 17810.136639739194,
+   "effective_rank": 274.7938138960061,
+   "low_variance_dims": 90,
+   "random_vector_expected_share": 0.1171875,
+   "converged-wrong": {
+    "n": 6,
+    "median_error_share_in_low_variance": 0.9572269676453653
+   },
+   "under-fitted": {
+    "n": 12,
+    "median_error_share_in_low_variance": 0.3057747861167991
+   }
+  },
+  "GPT-Neo-125m L10 (B-8b)": {
+   "dim": 768,
+   "condition_number": 44207.85464084832,
+   "effective_rank": 259.3718455351731,
+   "low_variance_dims": 102,
+   "random_vector_expected_share": 0.1328125,
+   "converged-wrong": {
+    "n": 20,
+    "median_error_share_in_low_variance": 0.9464290030271785
+   },
+   "under-fitted": {
+    "n": 18,
+    "median_error_share_in_low_variance": 0.5525545001557726
+   }
+  },
+  "Pythia-160m L6 (B-2c)": {
+   "dim": 768,
+   "condition_number": 1336251786.2380135,
+   "effective_rank": 204.86219201091674,
+   "low_variance_dims": 94,
+   "random_vector_expected_share": 0.12239583333333333,
+   "converged-wrong": {
+    "n": 2,
+    "median_error_share_in_low_variance": 0.8099868741330277
+   },
+   "under-fitted": {
+    "n": 11,
+    "median_error_share_in_low_variance": 0.20340971820773837
+   }
+  },
+  "GPT-Neo-125m L6 (B-17)": {
+   "dim": 768,
+   "condition_number": 126174.64784197007,
+   "effective_rank": 333.530835899923,
+   "low_variance_dims": 101,
+   "random_vector_expected_share": 0.13151041666666666,
+   "converged-wrong": {
+    "n": 13,
+    "median_error_share_in_low_variance": 0.5798001895101417
+   },
+   "under-fitted": {
+    "n": 7,
+    "median_error_share_in_low_variance": 0.5866149968651322
+   }
+  }
+ }
+}

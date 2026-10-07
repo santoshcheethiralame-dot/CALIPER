@@ -10,7 +10,9 @@ non-Gaussian, and GELU is non-monotonic over the range these neurons actually oc
 c = E[f'(z)] toward zero and empties the spike-triggered average of signal.
 """
 import json
+import sys
 import numpy as np
+from scipy.linalg import eigh
 from caliper.activations import collect, load_model, sample_corpus
 from caliper.estimator import fit, subspace_alignment
 
@@ -22,9 +24,13 @@ p = collect(m, tok, sample_corpus(n_docs=200, seed=0), layer=6,
 
 X = p.stimulus - p.stimulus.mean(0)
 C = X.T @ X / len(X)
-Cinv = np.linalg.inv(C + 1e-3 * np.trace(C) / C.shape[0] * np.eye(C.shape[0]))
+Creg = C + 1e-3 * np.trace(C) / C.shape[0] * np.eye(C.shape[0])
+Cinv = np.linalg.inv(Creg)
 cos = lambda u, v: abs(float(u @ v / (np.linalg.norm(u) * np.linalg.norm(v))))
 
+STC_ONLY = "--stc-only" in sys.argv
+old = ({r["neuron"]: r for r in json.load(open("results/e05_classical_baselines.json"))["records"]}
+       if STC_ONLY else {})
 rows = []
 for i, n in enumerate(p.neurons):
     w, y = p.weights[:, i], p.response[:, i]
@@ -32,12 +38,20 @@ for i, n in enumerate(p.neurons):
         continue
     sta = X.T @ (y - y.mean()) / len(X)
     S = X[y > np.quantile(y, 0.95)]
-    stc = np.linalg.eigh(Cinv @ (S.T @ S / len(S) - C))[1][:, -1]
-    f1 = fit(p.stimulus, y, k=1, n_restarts=3, steps=1200, seed=0)
+    # Spike-triggered covariance: the centred ensemble's covariance against the prior's, as
+    # the symmetric-definite problem dC v = lam C v, ranked by |lam|. Until 7 Oct 2026 this
+    # took eigh of the non-symmetric Cinv @ dC on an uncentred ensemble, which eigh does not
+    # support.
+    lam, vec = eigh(np.cov(S, rowvar=False) - C, Creg)
+    stc = vec[:, np.argmax(np.abs(lam))]
+    if STC_ONLY:
+        bottleneck = old[int(n)]["bottleneck"]
+    else:
+        f1 = fit(p.stimulus, y, k=1, n_restarts=3, steps=1200, seed=0)
+        bottleneck = abs(subspace_alignment(f1.subspace, (w / np.linalg.norm(w))[:, None]))
     rows.append({"neuron": int(n), "sta": cos(sta, w),
                  "decorrelated_sta": cos(Cinv @ sta, w), "stc_top": cos(stc, w),
-                 "bottleneck": abs(subspace_alignment(
-                     f1.subspace, (w / np.linalg.norm(w))[:, None]))})
+                 "bottleneck": bottleneck})
     print(f"  n{rows[-1]['neuron']:<5d} STA={rows[-1]['sta']:.3f} "
           f"decorr={rows[-1]['decorrelated_sta']:.3f} STC={rows[-1]['stc_top']:.3f} "
           f"fitted={rows[-1]['bottleneck']:.3f}", flush=True)

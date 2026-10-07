@@ -15,8 +15,9 @@
 \newcommand{\tbd}[1]{\textcolor{red}{[TBD: #1]}}
 \newcommand{\prov}[1]{\textcolor{orange}{#1}}
 \newcommand{\note}[1]{\textcolor{blue}{[#1]}}
+\newcommand{\benchname}{\tbd{bench name}}
 
-\title{Restart Agreement Is Not Correctness:\\Calibrating Interpretability's Reliability Checks\\Against Exact Ground Truth}
+\title{Restart Agreement Is Not Correctness:\\Calibrating Reliability Checks for Direction Recovery\\Against Exact Ground Truth}
 
 \author{\name Anonymous authors\\ \addr Paper under double-blind review}
 
@@ -36,25 +37,21 @@ known answer, because the known answer is exactly what is missing. We point out 
 where it is not missing. The pre-activation of an MLP neuron is exactly the inner product of
 its layer's normalised residual stream with the neuron's input weight column, so the
 direction the neuron reads is written in the weights. Using this as a reference standard, we
-score a maximally-informative-dimensions style estimator and the checks used to vouch for it
-on 300 units of GPT-2 small, with replications across depth, model family and training
-corpus. The estimator fails on 15\% of units, while median alignment across all units is 0.994. Agreement across restarts, the
-most common check, predicts these failures worse than held-out fit, a quantity every fit
-already computes (AUC 0.79 vs 0.92, $p = 1.8\times10^{-4}$; pooled across six model and layer
-conditions, $\Delta$AUC $= -0.134$, 95\% CI $[-0.176,-0.091]$). The whole advantage comes from
-under-fitted fits. The other failures fit as well as the reference but point away from it,
-and on them the two checks are tied. In the five runs that saved fitted directions, 39 of 43
-such fits produce the reference's projection on text the fit never saw and predict the unit
-as well as it does. They differ from it only in directions the residual stream barely uses,
-so the Euclidean label calls them failures although nothing in the data separates them
-from the reference. Labelled by function
-instead, held-out fit predicts failure with AUC 0.97 to 0.98 and its lead over restart
-agreement grows. On GPT-2, restart agreement adds nothing once unit difficulty is accounted
-for, while held-out fit does, and some units are never recovered at any restart count we
-tried. One verdict in five flips when a single source of randomness changes, so a failure
-rate is a property of its configuration. In the vocabulary of
-metrology, restart agreement is a check of precision, not of trueness. We release the bench,
-the pre-registrations and every run.
+score a single-index estimator related to maximally informative dimensions, and the checks
+used to vouch for it, on 300 units of GPT-2 small, with replications across depth and model
+family. The estimator misses the reference direction on 15\% of units. Agreement across
+restarts predicts these failures worse than held-out fit (AUC 0.79 vs 0.92,
+$p = 1.8\times10^{-4}$; pooled across six conditions, $\Delta$AUC $= -0.134$, 95\% CI
+$[-0.189,-0.078]$). The advantage comes from under-fitted estimates. On the third of failures
+that fit as well as the reference but point elsewhere, neither check is reliable. An
+exploratory analysis traces these fits to a known identifiability limit: they differ from the
+reference almost entirely in directions the stimulus barely occupies, and on held-out text
+from the same distribution they predict the unit as well as the reference does. Restart
+agreement does not improve with more restarts or when measured in the stimulus metric, and
+single-unit verdicts are fragile: one in five flips when one source of randomness changes.
+Our responses are noiseless, so the true direction fits perfectly; whether held-out fit keeps
+its lead when the attainable fit varies between units is tested separately \tbd{N-1}. We
+release the bench, the pre-registrations and every run.
 \end{abstract}
 
 % ======================================================================
@@ -62,10 +59,10 @@ the pre-registrations and every run.
 
 When an interpretability method returns a direction, a feature or a circuit, the
 practitioner rarely knows the right answer. The result is therefore trusted on the strength
-of internal checks. The most common is agreement: run the method again from a different
+of internal checks. A common one is agreement: run the method again from a different
 random initialisation, or with a different seed for the dictionary, and keep what comes
 back. Sparse-autoencoder features are judged by whether they reappear across seeds
-\citep{paulo2025sparse,song2025position}, concept activation vectors by whether their scores
+\citep{song2025position}, and often they do not \citep{paulo2025sparse}; concept activation vectors by whether their scores
 are stable across training runs \citep{kim2018tcav}, ICA and NMF components by whether
 repeated runs cluster together \citep{himberg2004icasso,brunet2004metagenes}, and neurons
 by whether they recur across independently trained models \citep{gurnee2024universal}. A
@@ -82,10 +79,7 @@ measurement error'' \citep{vim2012}. An instrument can be precise and wrong. Met
 answer is calibration: an instrument is checked against a reference standard before its
 readings on unknowns are trusted, a principle that also governs high-assurance sensing,
 where sensor readings are trusted only through a verifiable chain back to a reference
-\citep{shah2020calibration} and devices are authenticated by their physical signature
-\citep{vaidya2022acoustic}. The pattern is familiar from benchmarking too: metrics that
-suffice for a simple setting become ``necessary, but also not sufficient'' once the system
-under test is more complex \citep{dholakia2025agentic}. Agreement across restarts was
+\citep{shah2020calibration}. Agreement across restarts was
 designed for a simpler question, whether an optimiser converged, and it is now read as
 an answer to a harder one, whether the converged answer is right.
 
@@ -106,22 +100,22 @@ contributions are:
   models, an estimator from the receptive-field literature
   \citep{sharpee2004mid,williamson2015equivalence}, four ground-truth-free reliability
   checks, and a pre-registered protocol for scoring the checks by how well they predict
-  failure.
-  \item \textbf{Restart agreement is a weak and redundant check.} Held-out fit predicts
-  silent failure better in every condition we ran, with a pooled gap of 0.13 AUC and
-  no detectable heterogeneity across models, layers and families. Restart agreement adds
-  nothing beyond simple unit-difficulty predictors, while held-out fit does
-  (Section~\ref{sec:results}).
-  \item \textbf{Fits that look confidently wrong are right on the data.} Fits that score
-  well yet point away from the reference match it on fresh text, so no data-driven check can
-  or should flag them. Under a functional failure label the case for held-out fit gets
-  stronger (Section~\ref{sec:classes}).
-  \item \textbf{More restarts are not a remedy.} The pattern of pass rates across restart
-  counts is inconsistent with a single per-restart success probability. It implies that a
-  share of units is not recovered at any number of restarts: 8 to 12\% on earlier runs, and
-  28\% for one of the estimator's two routes on the corrected estimator.
-  \item \textbf{An error budget.} Verdicts move with restart count, batch composition, token
-  sample and hardware; failure rates move with depth and model family. We report each
+  failure (Appendix~\ref{app:bench}).
+  \item \textbf{Restart agreement is the weaker check.} Held-out fit predicts failure better
+  in each of the six conditions with at least five failures, with a pooled gap of 0.13 AUC.
+  The lead shrinks but holds when restart agreement is scored on the estimation route it
+  actually measures (Section~\ref{sec:results}; every run is listed in
+  Appendix~\ref{app:arms}).
+  \item \textbf{The hard case is an identifiability limit.} Neither check detects fits that
+  converge to a direction other than the reference. In an exploratory analysis these fits
+  differ from the reference in directions the stimulus barely occupies, and they are
+  equivalent to it on held-out text from the same distribution
+  (Section~\ref{sec:identifiability}).
+  \item \textbf{More restarts are not a remedy.} Restart agreement does not improve as
+  restarts are added, and about a quarter of units are not recovered by the direct route
+  within four random restarts (Section~\ref{sec:restarts}).
+  \item \textbf{An error budget.} Verdicts move with restart count, token sample, held-out
+  split and hardware; failure rates move with depth and model family. We report each
   component, so that a single quoted failure rate carries its conditions.
 \end{enumerate}
 We do not claim that models resemble brains. We claim that interpretability and systems
@@ -136,7 +130,8 @@ calibration against a preparation where the answer is known, transfers.
 is a long-standing proxy for reliability in unsupervised estimation: run-to-run clustering
 of ICA components \citep{himberg2004icasso}, consensus clustering for NMF
 \citep{brunet2004metagenes}, and, in interpretability, seed consistency of sparse-autoencoder
-features \citep{paulo2025sparse,song2025position,gerasimov2026unstable}. Song et al.
+features, which is often low \citep{paulo2025sparse,gerasimov2026unstable} and has been
+proposed as a routine report \citep{song2025position}. Song et al.
 validate run-to-run consistency against ground truth on synthetic dictionaries, where it
 tracks ground-truth recovery over training in aggregate \citep{song2025position}; we ask
 whether agreement identifies \emph{which individual} estimates are wrong, on real trained
@@ -159,8 +154,30 @@ about the basin's size rather than its correctness \citep{nehzati2026restarts}.
 
 \paragraph{Ground truth in interpretability evaluation.} Benchmarks with known answers
 plant or compile them \citep{gupta2024interpbench}, or synthesise features
-\citep{song2025position}. Weight-based interpretability reads weights as the object of
-analysis; we use them as a scoring key for methods that never look at weights.
+\citep{song2025position,chanin2026synthsaebench}. Reading an MLP's input columns as the
+patterns its neurons detect goes back at least to \citet{geva2021keyvalue}; we use them as a
+scoring key for methods that never look at weights.
+
+\paragraph{Evaluating the evaluations.} Closest to our aim are audits of the metrics
+themselves. \citet{chanin2026benchmarks} audits the metrics of SAEBench
+\citep{karvonen2025saebench} against reseed noise and synthetic ground truth, and
+SynthSAEBench plants realistic features at scale and reproduces the gap between
+reconstruction and latent quality \citep{chanin2026synthsaebench}.
+\citet{makelov2024principled} scores sparse autoencoders against supervised dictionaries.
+Probing has control tasks \citep{hewitt2019control}, and automated interpretability scores
+have been found not to separate trained from random networks \citep{heap2025random}. These
+works plant or supervise their ground truth and mostly score methods. Ours is read off a
+trained network's weights, and we score the checks.
+
+\paragraph{Identifiability in receptive-field estimation.} Systems neuroscience has long known
+that a filter estimated from natural stimuli is determined only within the subspace the
+stimulus explores. Normalised reverse correlation divides by the stimulus covariance and has
+to regularise its poorly sampled directions \citep{theunissen2001strf,wu2006sysid};
+spike-triggered estimators are consistent only under conditions on the stimulus distribution
+\citep{paninski2003convergence}; and priors are used to fill the unexplored directions
+\citep{park2011localized}. Methods there are also validated on systems whose answer is known
+\citep{jonas2017microprocessor}. Section~\ref{sec:identifiability} finds the same limit in
+trained language models, where it makes a Euclidean reference standard imperfect.
 
 \paragraph{Misleading metrics elsewhere.} Widely adopted checks have misled before:
 saliency maps that pass visual inspection yet are insensitive to the model
@@ -190,7 +207,7 @@ on exactly one direction, $\mathbf{w}_j$. We verify the identity numerically
 model & max relative error of $\mathbf{w}^\top\mathbf{s}+b$ & correlation \\
 \midrule
 GPT-2 small & $3.3\times10^{-6}$ & 1.0000000000 \\
-Pythia-160m & $1.7\times10^{-4}$ & 1.0000000000 \\
+Pythia-160m & $5.1\times10^{-4}$ & 1.0000000000 \\
 GPT-Neo-125m (layers 6, 10) & $3\times10^{-7}$ & 1.0000000000 \\
 \bottomrule
 \end{tabular}
@@ -228,8 +245,9 @@ the model in 128-token sequences, drop position 0, and record $\mathbf{s}$ and $
 with $V\in\mathbb{R}^{d\times k}$ orthonormalised by QR and $g$ a two-hidden-layer tanh
 network of width 64, fitted by Adam (learning rate $3\times10^{-3}$, 1{,}600 steps) on
 standardised inputs and responses, with 20\% of tokens held out and early stopping on
-held-out $R^2$. This is the likelihood-equivalent family of maximally informative dimensions
-\citep{sharpee2004mid,williamson2015equivalence}. The first restart is warm-started from a
+held-out $R^2$. This is a single-index model fitted by least squares. It is related to
+maximally informative dimensions \citep{sharpee2004mid} through the equivalence between
+information-theoretic and likelihood-based estimators \citep{williamson2015equivalence}. The first restart is warm-started from a
 ridge-regression direction; the rest are random. We use two routes to a rank-1 answer:
 \emph{direct} (fit $k{=}1$) and \emph{cascade} (fit $k{=}2$, then search the best direction
 within the plane), and select between them by held-out $R^2$. Units are fitted in batches
@@ -241,13 +259,14 @@ report threshold sweeps from 0.90 to 0.98 and alignment as a continuous outcome.
 
 \paragraph{Checks scored.} Each is computable without $\mathbf{w}_j$:
 \begin{itemize}
-  \item \emph{held-out $R^2$} of the selected fit;
+  \item \emph{held-out $R^2$} of the selected fit. It is a validation score: the same held-out
+  tokens drive early stopping and the choice between routes;
   \item \emph{restart agreement}, the median pairwise $|\cos|$ between restarts of the direct
-  route;
+  route. Most runs use two restarts, the first warm-started from a ridge direction, so this
+  is a single cosine. The cascade route has no restarts, and it supplied the selected fit for
+  140 of the 300 primary units (Section~\ref{sec:matched});
   \item \emph{restart $R^2$ spread}, max minus min held-out $R^2$ across restarts;
   \item \emph{route agreement}, $|\cos|$ between the direct and cascade directions.
-  \note{Earlier drafts and runs used a ``disagreement'' quantity that depended on
-  $\mathbf{w}_j$; it is withdrawn.}
 \end{itemize}
 
 \paragraph{Protocol.} The primary endpoint, filed before the run, is DeLong's test for two
@@ -256,31 +275,42 @@ held-out $R^2$ at predicting failure, on the same units. Secondary analyses (pai
 PR-AUC, threshold sweep, calibration, nuisance baselines with incremental cross-validated AUC,
 permuted-label and ground-truth-signal controls) were filed before the run's outputs were
 opened, and the analysis code was developed on an earlier, already-unblinded run.
+Appendix~\ref{app:status} classifies every reported result as confirmatory, pre-specified
+secondary or exploratory.
 
 % ======================================================================
 \section{Results}
 \label{sec:results}
 
-\subsection{The estimator fails silently on a minority of units}
+\subsection{The estimator fails on a minority of units}
 Of 300 GPT-2 layer-6 units, 254 pass (0.847, 95\% CI $[0.80, 0.88]$) and 46 fail, while the
 median alignment across all units is 0.994 and the minimum 0.047; aggregate statistics hide
 the failures. Thirty failures are under-fitted (held-out $R^2 \le 0.99$). Sixteen reach held-out
 $R^2 > 0.99$ but point away from $\mathbf{w}_j$; we call these converged-wrong, the name
-the pre-registration uses, and Section~\ref{sec:classes} shows they are wrong only in weight
-space.
+the pre-registration uses.
 Classical closed-form estimators fail almost completely on the same units: spike-triggered
-averaging recovers 0 of 30, decorrelated STA 1 of 30, spike-triggered covariance 0 of 30,
-against 26 of 30 for the fitted estimator, because the stimulus is non-Gaussian and GELU is
+averaging recovers 0 of 30, decorrelated STA 1 of 30 and spike-triggered covariance 0 of 30
+(as a symmetric generalised eigenproblem), against 26 of 30 for the fitted estimator, because the stimulus is non-Gaussian and GELU is
 non-monotone over the range these units occupy. A random-direction null bounds chance fit at
 $R^2 \le 0.044$.
 
 \subsection{Restart agreement is a weaker predictor of failure than held-out fit}
 Restart agreement predicts failure with AUC 0.792 and held-out $R^2$ with 0.919; the
 difference is $-0.127$ (DeLong $p = 1.8\times10^{-4}$; paired bootstrap 95\% CI
-$[-0.193,-0.063]$; label-permutation $p = 0.001$). The ordering holds at every failure
+$[-0.193,-0.063]$; a paired permutation test that swaps the two checks within units gives
+$p = 0.0002$). The ordering holds at every failure
 threshold from 0.90 to 0.98, and in precision--recall terms the gap is larger (PR-AUC 0.77
 against 0.32 at a failure prevalence of 0.15); see Figures~\ref{fig:roc} and
 \ref{fig:classes} (left).
+
+\paragraph{Matching the checks' targets.}\label{sec:matched} Restart agreement looks only at the
+direct route, while the failure label scores the selected fit, which came from the cascade
+route for 37 of the 46 failures. On the 160 units where the direct route was selected, the
+gap is $-0.113$ (9 failures). Scored instead against the direct route's own alignment, the
+estimate restart agreement actually measures, the gap halves to $-0.061$ (107 failures). Part
+of the headline gap is therefore a mismatch between the checks' targets. Held-out $R^2$ still
+leads under every matching we tried, in every arm with enough failures
+(Appendix~\ref{app:arms}).
 
 \begin{figure}[t]
 \centering
@@ -291,20 +321,30 @@ AUCs in the legend.}
 \label{fig:roc}
 \end{figure}
 
-\subsection{Restart agreement adds nothing beyond unit difficulty}
-Four pre-fit descriptors of each unit (fraction of tokens on which it is active, mean
+\subsection{Restart agreement adds little beyond unit difficulty}
+Four difficulty descriptors of each unit (fraction of tokens on which it is active, mean
 pre-activation, response kurtosis, and the GELU first-order coefficient) predict failure on
 their own with cross-validated AUC 0.825. Adding held-out $R^2$ raises this to 0.892; adding
-restart agreement leaves it at 0.831. On GPT-Neo-125m neither check adds anything (0.707 for
-the descriptors, 0.699 with held-out $R^2$, 0.703 with restart agreement), because half its
-failures are converged-wrong fits. These match the reference on the data, so no check that
-reads the data can separate them from passing units (Section~\ref{sec:classes}).
+restart agreement leaves it at 0.831. Three of those descriptors are computed from the true
+pre-activation, so they are oracle covariates that a practitioner cannot compute. With
+descriptors computed from the response alone \tbd{R5: response-only baseline and increments
+with bootstrap intervals, GPT-2, GPT-Neo, Pythia}. On GPT-Neo-125m neither check adds anything
+over the oracle descriptors (0.707 alone, 0.699 with held-out $R^2$, 0.703 with restart
+agreement), because half its failures are converged-wrong fits, which neither check detects
+(Section~\ref{sec:classes}).
 
 \subsection{The gap is consistent across models, layers and families}
 Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs vary widely,
-from a held-out-$R^2$ AUC of 0.76 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap does not:
-random-effects pooling gives $\Delta$AUC $-0.134$, 95\% CI $[-0.176,-0.091]$,
-$I^2 = 0$, and held-out $R^2$ is ahead in all six (Figure~\ref{fig:forest}). Four arms
+from a held-out-$R^2$ AUC of 0.76 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap varies
+less. Random-effects pooling gives $\Delta$AUC $-0.134$, with a Hartung-Knapp-Sidik-Jonkman
+95\% CI of $[-0.189,-0.078]$ and a 95\% prediction interval of $[-0.194,-0.074]$. Pooling only
+the four corrected-estimator arms gives $-0.134$ $[-0.212,-0.057]$. Six arms give little power
+to detect heterogeneity ($Q = 1.05$), so we read $I^2 = 0$ as an absence of evidence. Held-out
+$R^2$ is ahead in all six point estimates (Figure~\ref{fig:forest}), but the stratified
+bootstrap interval includes zero for Pythia-160m and GPT-2 layer 10 (Table~\ref{tab:arms}).
+Two further arms, Pythia-70m and Pythia-410m, had two failures each and are not pooled; on
+Pythia-70m restart agreement is ahead ($+0.25$, interval $[-0.10, +0.67]$;
+Appendix~\ref{app:arms}). Four arms
 were fitted with the corrected estimator; the two GPT-2 depth arms are earlier runs whose fits
 were coupled across units (Appendix~\ref{app:deviations}). Re-running the GPT-2 layer-6,
 Pythia-160m and GPT-Neo arms on the corrected estimator moved their gaps from $-0.164$,
@@ -314,67 +354,89 @@ $-0.094$ and $-0.133$ to $-0.127$, $-0.123$ and $-0.167$.
 \centering
 \includegraphics[width=\linewidth]{figures/fig_forest.pdf}
 \caption{Per-condition AUC difference (restart agreement minus held-out $R^2$) with 95\%
-intervals, and the random-effects pooled estimate. No condition's point estimate favours
-restart agreement.}
+intervals, and the random-effects pooled estimate. No pooled condition's point estimate
+favours restart agreement; Appendix~\ref{app:arms} lists the unpooled arms.}
 \label{fig:forest}
 \end{figure}
 
 \begin{table}[t]
 \centering
-\small
-\begin{tabular}{lrrccc}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrcccc}
 \toprule
-condition & $n$ & failures & AUC restart & AUC held-out $R^2$ & $\Delta$ \\
+condition & $n$ & failures & AUC restart & AUC held-out $R^2$ & $\Delta$ & bootstrap 95\% CI \\
 \midrule
-GPT-2 small, layer 6 (fixed) & 300 & 46 & 0.792 & 0.919 & $-0.127$ \\
-Pythia-160m, layer 6 (fixed, float16) & 300 & 13 & 0.828 & 0.951 & $-0.123$ \\
-GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ \\
-GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ \\
-GPT-Neo-125m, layer 10 (fixed) & 100 & 38 & 0.588 & 0.755 & $-0.167$ \\
-Pythia-1.4B, layer 12, 3{,}200 steps (fixed) & 50 & 19 & 0.847 & 0.973 & $-0.126$ \\
+GPT-2 small, layer 6 (fixed) & 300 & 46 & 0.792 & 0.919 & $-0.127$ & $[-0.197, -0.063]$ \\
+Pythia-160m, layer 6 (fixed, float16) & 300 & 13 & 0.828 & 0.951 & $-0.123$ & $[-0.264, +0.005]$ \\
+GPT-2 small, layer 2 & 50 & 25 & 0.789 & 0.950 & $-0.162$ & $[-0.294, -0.050]$ \\
+GPT-2 small, layer 10 & 50 & 5 & 0.729 & 0.818 & $-0.089$ & $[-0.222, +0.044]$ \\
+GPT-Neo-125m, layer 10 (fixed) & 100 & 38 & 0.588 & 0.755 & $-0.167$ & $[-0.275, -0.062]$ \\
+Pythia-1.4B, layer 12, 3{,}200 steps (fixed) & 50 & 19 & 0.847 & 0.973 & $-0.126$ & $[-0.251, -0.024]$ \\
 \midrule
-random effects & & & & & $-0.134\ [-0.176, -0.091]$ \\
+random effects (HKSJ) & & & & & $-0.134$ & $[-0.189, -0.078]$ \\
 \bottomrule
 \end{tabular}
-\caption{Rows marked fixed use the corrected estimator; the others are coupled-estimator runs. One arm per condition; arms with fewer than
-five failures are excluded from pooling.}
+\caption{Rows marked fixed use the corrected estimator; the others are coupled-estimator runs.
+One arm per condition; arms with fewer than five failures are excluded from pooling and listed
+in Appendix~\ref{app:arms}. Bootstrap intervals resample failures and passes separately
+(2{,}000 resamples).}
 \label{tab:arms}
 \end{table}
 
-\subsection{Converged-wrong fits are wrong only in weight space}
+\subsection{The checks catch under-fitting; neither catches converged-wrong fits}
 \label{sec:classes}
 Split by failure class (pre-registered before the run's outputs were viewed), held-out $R^2$'s
 advantage is entirely the under-fitted class: AUC 0.993 $[0.985, 0.999]$ against 0.796
-$[0.729, 0.858]$ for restart agreement. On the sixteen converged-wrong fits the two are tied:
-0.779 $[0.700, 0.849]$ and 0.782 $[0.664, 0.872]$. The split is unchanged for class
-boundaries between 0.98 and 0.995. On GPT-Neo-125m, where converged-wrong fits are 20 of 38
-failures, both checks are at chance on them (held-out $R^2$ 0.55 $[0.42, 0.69]$, restart
-agreement 0.47 $[0.33, 0.62]$) and both work on the under-fitted class (0.98 and 0.72). At
-1.4B every failure was under-fitted.
+$[0.729, 0.858]$ for restart agreement. That part is close to mechanical, because the class is
+defined by held-out $R^2 \le 0.99$ and only 18 of the 254 passing units fall below that line.
+On the sixteen converged-wrong fits the two checks are tied: 0.779 $[0.700, 0.849]$ and 0.782
+$[0.664, 0.872]$. The split is unchanged for class boundaries between 0.98 and 0.995. On
+GPT-Neo-125m, where converged-wrong fits are 20 of 38 failures, both checks are at chance on
+them (held-out $R^2$ 0.55 $[0.42, 0.68]$, restart agreement 0.47 $[0.33, 0.61]$) and both work
+on the under-fitted class (0.98 and 0.72). At 1.4B every failure was under-fitted. In the words
+of the filed reading rule, neither check sees the hard case. Its size is 5\% of units on GPT-2
+small and 20\% on GPT-Neo layer 10.
 
-The converged-wrong fits pass every test the data allow. For the five runs that saved
-fitted directions, we rebuilt each unit's stimulus and compared the fitted direction with
-$\mathbf{w}_j$ by the correlation of their projections over tokens, which we call
-stimulus-weighted alignment. We measured it on the 8{,}000 fitted tokens and again on
-8{,}000 tokens drawn from documents the fit never saw. On the fresh text, 39 of the 43
-converged-wrong fits have stimulus-weighted alignment of at least 0.99 (all 20 on GPT-Neo,
-the lowest 0.994). On that text their leave-one-out fit falls short of $\mathbf{w}_j$'s by
-a median of 0.0004 to 0.0035 (Table~\ref{tab:functional}), while their Euclidean alignment
-is only 0.91 to 0.94. The difference lies in directions the residual stream barely occupies,
-which the response does not constrain. A check that reads only stimulus and response
-has nothing to find in them. The under-fitted failures are different: on the fresh text their
-median stimulus-weighted alignment is 0.65 to 0.95, and their fit falls short of
-$\mathbf{w}_j$'s by 0.05 to 0.22.
+\subsection{Why converged-wrong fits escape: identifiability (exploratory)}
+\label{sec:identifiability}
+The reference standard of Section~\ref{sec:substrate} is exact in weight space, but a
+stimulus-response estimator can only recover a direction within the subspace its stimulus
+explores, a limit familiar from receptive-field estimation \citep{theunissen2001strf,
+paninski2003convergence,wu2006sysid}. The residual stream is strongly anisotropic
+\citep{timkey2021rogue}. Across our arms the stimulus covariance $C$ has a condition number
+between $1.8\times10^{4}$ and $1.3\times10^{9}$, and the bottom 1\% of its variance is spread
+over 90 to 102 of the 768 directions. The analyses below test whether this explains the
+converged-wrong class. They were filed as exploratory after the class split had been seen.
 
-Relabelling failures by function rather than by angle (stimulus-weighted alignment below 0.99
-on the fresh text) strengthens the main result. Held-out $R^2$ predicts functional failure
-with AUC 0.97 to 0.98 in all five runs, restart agreement with 0.62 to 0.82, and the gap
-widens in each. The functional label is not independent of held-out $R^2$, since both
-depend on how the fitted direction projects the stimulus. We therefore report it as a
-sensitivity analysis beside the pre-registered Euclidean label, not in its place. The primary
-GPT-2 run did not save directions. Three re-fits of its first 100 units, each changing one
-source of randomness (Section~\ref{sec:budget}), give 18 of 21 converged-wrong fits
-equivalent on fresh text.
+For runs that saved their fitted directions we compared each fitted direction
+$\hat{\mathbf{v}}$ with $\mathbf{w}_j$ by their cosine under $C$,
+$\hat{\mathbf{v}}^\top C\mathbf{w}_j / (\hat{\mathbf{v}}^\top C\hat{\mathbf{v}}\,
+\mathbf{w}_j^\top C\mathbf{w}_j)^{1/2}$, which equals the correlation of their projections over
+tokens. We call it stimulus-weighted alignment, and measured it on the fitted tokens and again
+on 8{,}000 tokens from documents the fit never saw. On the fresh text, converged-wrong fits
+reach a stimulus-weighted alignment of at least 0.99 in every arm we examined: 20 of 20 on
+GPT-Neo layer 10; 5 of 6, 6 of 7 and 7 of 8 in three re-fits of the primary GPT-2 units; and 1
+of 2 on Pythia-160m (Table~\ref{tab:functional}). Their leave-one-out fit there falls short of
+$\mathbf{w}_j$'s by a median of 0.0004 to 0.0035, while their Euclidean alignment is only 0.91
+to 0.94. Decomposing each error $\hat{\mathbf{v}}-\mathbf{w}_j$ across the eigen-directions of
+$C$ shows where the difference lies. In the three arms we decomposed, 81 to 96\% of a
+converged-wrong fit's error energy sits in the directions carrying the bottom 1\% of stimulus
+variance. A random vector would put 12 to 13\% there, and under-fitted fits put 20 to 55\%.
+A GPT-Neo layer-6 run is the extreme case. All 20 units fail the Euclidean bar, at a median
+alignment of 0.01, yet their stimulus-weighted alignment is 0.9998 and restarts agree at 1.0.
+At that layer almost all of each $\mathbf{w}_j$ lies where the stimulus has no variance.
+
+Two limits apply. First, the equivalence is predictive and in-distribution. Steering or
+patching along $\hat{\mathbf{v}}$ pushes activations into exactly the low-variance directions
+where $\hat{\mathbf{v}}$ and $\mathbf{w}_j$ differ, and interventions that act through such
+dormant directions are known to mislead \citep{makelov2024subspace}. Second, the
+stimulus-weighted label is not independent of held-out $R^2$, since both depend on how
+$\hat{\mathbf{v}}$ projects the stimulus. Table~\ref{tab:functional} therefore reports AUCs
+under a functional failure label only as a sensitivity analysis: held-out $R^2$ scores 0.97 to
+0.98 under it largely by construction. What the analysis does establish is narrower. On this
+substrate the Euclidean reference standard is imperfect, and its imperfection concentrates in
+the very class that both checks miss.
 
 \begin{table}[t]
 \centering
@@ -392,11 +454,12 @@ Pythia-160m, layer 6 & 2 & 1 & 16 & 0.817 / 0.984 & $-0.167$ ($-0.123$) \\
 GPT-Neo-125m, layer 10 & 20 & 20 & 16 & 0.701 / 0.971 & $-0.270$ ($-0.167$) \\
 \bottomrule
 \end{tabular}
-\caption{Converged-wrong fits measured on fresh text. Equivalent: stimulus-weighted alignment
+\caption{Converged-wrong fits measured on fresh text (exploratory). Equivalent: stimulus-weighted alignment
 of at least 0.99 on 8{,}000 tokens from documents the fit never saw. Functional label: a unit
 fails if that alignment is below 0.99. $\Delta$ is AUC(restart agreement) minus AUC(held-out
 $R^2$), with the same rows' Euclidean-label value in brackets. The GPT-2 rows are three
-re-fits of the primary run's first 100 units. Exploratory, as filed.}
+re-fits of the primary run's first 100 units. The functional label is not independent of
+held-out $R^2$, so its AUCs are a sensitivity analysis, not evidence for the headline.}
 \label{tab:functional}
 \end{table}
 
@@ -410,19 +473,27 @@ converged-wrong fits, with bootstrap 95\% intervals.}
 \end{figure}
 
 \subsection{More restarts do not fix it}
+\label{sec:restarts}
 Restart agreement computed from the first $k$ of five stored restarts does not predict
 failure better as $k$ grows, and stays below held-out $R^2$ at every $k$
 (Figure~\ref{fig:restart}). This holds in two coupled-estimator runs (6 and 7 failures) and
 in a corrected-estimator re-fit of 100 primary units (18 failures), where restart agreement
-scores 0.74, 0.70, 0.69 and 0.73 at $k = 2$ to 5 against 0.90 for held-out $R^2$.
+scores 0.74, 0.70, 0.69 and 0.73 at $k = 2$ to 5 against 0.90 for held-out $R^2$. Other
+operationalisations do no better. In the same re-fit, agreement over the four random restarts
+alone scores 0.70, and agreement measured as the cosine under the stimulus covariance scores
+0.66, against 0.73 as filed (exploratory).
 
-Pass rates at two and five restarts are inconsistent with a single per-restart success
-probability. In the coupled runs, a single probability predicts 97.5--98\% at five restarts
-against an observed 88--91\%, and a two-class model attributes the shortfall to 8 to 12\% of
-units that are not recovered at any restart count. The corrected re-fit saved its restarts
-for the direct route only. That route passes 58\% of units at two restarts and 71\% at five,
-against 89\% predicted by a single probability, and the two-class model puts 28\% of units out
-of its reach. The cascade route recovers some of these, so 18\% of selected verdicts fail.
+Pass rates are inconsistent with a single per-restart success probability. In the coupled
+runs, a single probability predicts 97.5--98\% at five restarts against an observed 88--91\%.
+In the corrected re-fit, the direct route recovers 50, 66, 70 and 72\% of units within one to
+four random restarts. A model with a share of units that no restart reaches fits these rates
+far better than a single probability (AIC 511.6 against 528.3). So does a model in which each
+unit has its own success probability (AIC 512.0), and the data cannot tell the two apart. We
+therefore claim only that about a quarter of units are not recovered by the direct route
+within four random restarts. The cascade route recovers some of them, so 18\% of selected
+verdicts fail, and in an earlier step-budget sweep each of six hard units reached an alignment
+of at least 0.93 at some budget. Recovery is limited by this estimator and its budget, not
+ruled out.
 
 \begin{figure}[t]
 \centering
@@ -436,17 +507,20 @@ Agreement does not catch up as restarts are added.}
 \subsection{An error budget for single-unit verdicts}
 \label{sec:budget}
 We re-fitted the primary run's first 100 units three times on the corrected estimator,
-changing one source of randomness each time. Against the original verdicts, a new fit seed
-flips 19\% of them (95\% CI 12--28\%), a new 8{,}000-token sample 25\% (17--35\%), and a
-sequence-level held-out split 23\% (15--32\%). At a 0.90 bar the rates fall to 6--14\%, so
-many flips are units near the bar. Per-unit alignment barely reproduces across token samples
-(ICC 0.27) or splits (0.08), but the run-level comparison does: held-out $R^2$ leads restart
+changing one thing each time: the fit seed together with the restart count (five instead of
+two), the 8{,}000-token sample, or the held-out split, which became sequence-level. Against
+the original verdicts, these flip 19\% (95\% CI 12--28\%), 25\% (17--35\%) and 23\% (15--32\%)
+of them, and verdict agreement is only slight to fair (Cohen's $\kappa$ 0.34, 0.17 and 0.27),
+although the failure count barely moves (17 originally, then 18, 20 and 22). At a 0.90 bar the
+flip rates fall to 6--14\%, so many flips are units near the bar. Per-unit alignment, compared
+as an angle, reproduces moderately across seeds (ICC 0.68) and poorly across token samples
+(0.33) or splits (0.24). The run-level comparison is steadier: held-out $R^2$ leads restart
 agreement in all three re-fits, by 0.169, 0.084 and 0.162 (DeLong $p = 0.011$, 0.14 and
-0.017), against 0.123 for the original fit of the same units. Earlier runs add two more
-components: changing the restart count from two to five changes about 12\% of verdicts, and
-running on a GPU instead of a CPU changes 4 of 50. Pass rates differ with depth (0.48, 0.86, 0.90 at layers 2, 6, 10) and
-with model family at fixed depth (GPT-Neo-125m 0.62 vs GPT-2 0.90 at layer 10). A failure
-rate is a property of a model, a layer and a configuration, not of the estimator alone.
+0.017), against 0.123 for the original fit of the same units. Earlier runs add two
+components: changing the restart count from two to five changes 13 to 16\% of verdicts, and
+running on a GPU instead of a CPU changes 4 of 50. Pass rates differ with depth (0.50, 0.86,
+0.90 at layers 2, 6, 10) and with model family at fixed depth (GPT-Neo-125m 0.62 vs GPT-2
+0.90 at layer 10). A failure rate should therefore be quoted with its configuration.
 
 % ======================================================================
 \section{Why agreement can be confidently wrong}
@@ -459,26 +533,31 @@ with the number of restarts exponentially faster than evidence that the basin is
 a known source of such basins: gradient descent on a single neuron with bias fails from a
 large fraction of initialisations \citep{vardi2021learning}, and the units that fail here sit
 in GELU's non-monotone region, where the first-order signal that guides early optimisation
-nearly vanishes. Held-out fit, by contrast, measures the basin's loss. Because the true
-direction attains $R^2 = 1$ on every unit we inspected, a wrong basin pays for its wrongness
-in fit, and the predictability check sees what the stability check cannot. The fits that do
-not pay are the converged-wrong ones of Section~\ref{sec:classes}, and they are not wrong in
-any way the data record. Label-free
+nearly vanishes. Held-out fit, by contrast, measures the basin's loss. Because our
+responses are noiseless functions of $\mathbf{w}_j^\top\mathbf{s}$, the true direction attains
+$R^2 = 1$ on every unit we inspected, so a wrong basin pays for its wrongness in fit and the
+predictability check sees what the stability check cannot. The fits that do not pay are the
+converged-wrong ones, which differ from the reference only where the stimulus has almost no
+variance (Section~\ref{sec:identifiability}). Whether held-out fit keeps its lead when the
+attainable fit varies between units, as it does with noisy responses, is tested in
+\tbd{N-1}. Label-free
 estimates of correctness are never guaranteed \citep{garg2022leveraging}; held-out fit is a
 necessary condition, not a certificate.
 
 % ======================================================================
 \section{Discussion}
 \label{sec:discussion}
-We expected the hard case to be a fit that is wrong yet fits perfectly. On this substrate
-the fits that looked like that are equivalent to the reference on the data, and the failures
-that remain fit worse, which held-out fit detects. Whether that holds where the reference is
-less exact is a question for transfer. Detecting the remaining failures has the same shape as
-detecting unreliable behaviour where per-instance labels of the offending behaviour are
-sparse, as in click-fraud detection from traffic analysis \citep{nagaraja2019clicktok}. Security research has long treated such signals
-adversarially, assuming a check will be evaded until shown otherwise
-\citep{gardiner2016security,arp2022dos}; interpretability's reliability checks have not
-yet been held to that standard. \tbd{expand after the transfer experiment.}
+We expected the hard case to be a fit that is wrong yet fits perfectly, and it exists:
+neither check detects it. On this substrate the exploratory analysis says why. These fits
+differ from the reference only where the stimulus has almost no variance, so the data cannot
+separate them from it. Receptive-field estimation from natural stimuli meets the same limit
+and handles it with priors over the unexplored directions \citep{park2011localized}. For
+interpretability the consequence is practical. A direction recovered from activations is
+pinned down only within the subspace those activations explore, and an agreement check
+cannot reach outside it, however many restarts it uses. Security research has long treated
+reliability signals adversarially, assuming a check will be evaded until shown otherwise
+\citep{gardiner2016security,arp2022dos}; interpretability's reliability checks have not yet
+been held to that standard. \tbd{expand after the transfer experiment.}
 
 \section{Limitations and scope}
 \label{sec:limits}
@@ -487,10 +566,16 @@ yet been held to that standard. \tbd{expand after the transfer experiment.}
   experiment: SAE encoder rows or transcoders.}
   \item Models are small: 124M to 160M parameters, plus a single 1.4B arm that needed twice
   the optimisation budget.
-  \item One estimator family. The checks are estimator-agnostic, but their AUCs are not.
-  \item The 0.95 bar is Euclidean, and it counts as failures some fits that match the
-  reference on the data. Threshold sweeps and a functional label are reported as sensitivity
-  analyses.
+  \item One estimator family, a single-index model fitted by least squares. The checks are
+  estimator-agnostic, but their AUCs are not.
+  \item Responses are noiseless functions of the reference direction, so the attainable fit is
+  known and equal to 1 for every unit. \tbd{N-1 result.}
+  \item The 0.95 bar is Euclidean, and the stimulus leaves part of each reference direction
+  unidentifiable (Section~\ref{sec:identifiability}). Threshold sweeps and a functional label
+  are reported as sensitivity analyses.
+  \item In most runs restart agreement uses two restarts of one route, the first warm-started
+  (Section~\ref{sec:matched}), and held-out $R^2$ is a validation score reused for early
+  stopping and route selection.
   \item Most runs hold out tokens from the same sequences as their training tokens. A
   sequence-level split of 100 primary units leaves held-out $R^2$ unchanged (median shift
   $2\times10^{-6}$) and its lead over restart agreement intact.
@@ -499,17 +584,16 @@ yet been held to that standard. \tbd{expand after the transfer experiment.}
 \section{Conclusion}
 We calibrated the checks that interpretability uses in place of ground truth against a
 reference standard that trained models supply for free: the input weight column of an MLP
-neuron. Restart agreement, the most widely used check, is the weakest of those we scored. It
-trails held-out fit in every condition, adds nothing once unit difficulty is known, and does
-not improve as restarts are added. Held-out fit is the better check, and its advantage comes
-from under-fitted estimates. Estimates that fit well yet point away from the reference differ
-from it only in directions the stimulus does not use, so a data-driven check has nothing to
-flag. The practical advice is short: report held-out fit for every estimate, do not read
-agreement across restarts as evidence of correctness, and remember that a direction that fits
-well is pinned down only within the subspace its stimulus explores.
-The broader point is about method. A reliability check is itself a measuring instrument, and
-like any instrument it should be calibrated against a known answer before its readings are
-trusted.
+neuron. Restart agreement is the weaker of the two checks we compared most closely. It trails
+held-out fit in every pooled condition and does not improve with more restarts or in a
+better-suited metric. Held-out fit's advantage comes from under-fitted estimates. Estimates
+that fit well but point away from the reference escape both checks, and on this substrate
+they differ from the reference only where the stimulus has almost no variance. The practical
+advice is short: report held-out fit for every estimate, do not read agreement across
+restarts as evidence of correctness, and treat a recovered direction as determined only
+within the subspace its stimulus explores. A reliability check is itself a measuring
+instrument, and like any instrument it should be calibrated against a known answer before its
+readings are trusted.
 
 \bibliography{references}
 \bibliographystyle{tmlr}
@@ -553,9 +637,45 @@ and recorded per run; 50 units re-fitted in float32 & yes & Stimulus and respons
 \tbd{B-2d} \\
 Secondary analyses and failure-class split & Filed as two addenda before the primary run's
 outputs were opened & no & --- \\
+First primary run (B-1) & After an interim look at 64 units, the sample was raised to 300 and
+the primary moved from five restarts to two & yes & The five-restart arm (100 units, 9 failures)
+gave 0.845 vs 0.913 ($\Delta$AUC $-0.068$, DeLong $p = 0.11$). Interim and pilot tables below \\
+Reading of the converged-wrong class & The filed rule ("neither check sees the hard case") is
+kept as the primary reading; an identifiability analysis was added & yes & No pre-registered
+number changes; Section~\ref{sec:identifiability} is exploratory \\
+Review-round analyses & Route-matched comparison, HKSJ pooling, paired permutation test,
+response-only baseline, pass@$k$ models, error spectrum; plan filed before running & yes &
+All reported as exploratory (Appendix~\ref{app:status}) \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Disclosures the filings require.} Two filings commit the paper to reproducing what
+was known before the primary criteria were set. A pilot of 8 hand-picked units at 10 seeds
+each, read as a detector before the first filing:
+
+\begin{center}
+\scriptsize
+\begin{tabular}{llccl}
+\toprule
+group & unit & median alignment & spread over 10 seeds & verdict at 0.95 \\
+\midrule
+hard & 527 & 0.9163 & 0.0474 & fail, stable \\
+hard & 1503 & 0.3251 & 0.9169 & fail, unstable \\
+hard & 2723 & 0.9668 & 0.0377 & pass \\
+hard & 2023 & 0.7343 & 0.3309 & fail, unstable \\
+hard & 1180 & 0.9883 & 0.0215 & pass \\
+hard & 1625 & 0.9131 & 0.0658 & fail, stable \\
+pass & 3066 & 0.9999 & 0.0003 & pass \\
+pass & 2053 & 1.0000 & 0.0001 & pass \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The expectation recorded then was that restart agreement would separate severe
+failures and miss subtle ones. The sample size of the first primary run was increased after
+an underpowered interim look at 64 units with 6 failures, when held-out $R^2$ scored 0.891,
+restart agreement 0.822, method disagreement 0.718 and restart $R^2$ spread 0.618.
 
 \section{Threats to validity}
 \label{app:threats}
@@ -565,7 +685,7 @@ things could make that label mislead.
 0.951 for every unit, so no verdict there is decided by it.
 (ii) The residual stream is anisotropic. A direction can differ from $\mathbf{w}_j$ only in
 directions the stimulus barely occupies and still predict the response as well. This happens:
-it is what the converged-wrong fits are (Section~\ref{sec:classes}). For the five runs with
+it is what the converged-wrong fits are (Section~\ref{sec:identifiability}). For the runs with
 saved directions we computed four labels per unit: the raw cosine, the cosine to the
 identifiable part of $\mathbf{w}_j$, the stimulus-weighted alignment, and the same alignment
 restricted to tokens where the unit fires. The first two differ by a median of 0.001 and at
@@ -582,11 +702,13 @@ the same projections, so neither is independent of the held-out $R^2$ check. Bot
 reported beside the pre-registered Euclidean label, not in its place.
 \paragraph{Internal.} Fit quality and failure share a cause, unit difficulty, so held-out
 $R^2$ could predict failure only by restating difficulty. We report nuisance-only baselines
-and the incremental AUC of each check over them. The coupling defects in
+and the incremental AUC of each check over them; three of the four original descriptors use
+the true pre-activation, so we also report a baseline built from the response alone. The coupling defects in
 Appendix~\ref{app:deviations} are fixed in the primary run. Held-out tokens share sequences
 with training tokens in most runs; repeating 100 primary units under a sequence-level split
 changes held-out $R^2$ by a median of $2\times10^{-6}$ and leaves its lead intact.
-\paragraph{External.} The models are small and come from two architectures. The units are
+\paragraph{External.} The models are small and come from three families, two of which
+(GPT-Neo and Pythia) share a training corpus. The units are
 GELU MLP neurons reading a layer-norm output, the stimulus is English prose, and there is one
 estimator family. The checks themselves are estimator-agnostic, but their AUCs need not be.
 \tbd{transfer to sparse-autoencoder latents.}
@@ -596,6 +718,90 @@ label-permutation test, and arms with fewer than five failures are not pooled. P
 estimates combine arms that share no units, under a random-effects model. Verdicts on single
 units move with restart count, token sample and hardware. Section~\ref{sec:results} reports
 those components, so that a failure rate carries its conditions.
+
+\section{Every arm}
+\label{app:arms}
+Every run of the estimator on disk, including arms that are not pooled. $\Delta$ is
+AUC(restart agreement) minus AUC(held-out $R^2$) against the Euclidean label; the bootstrap
+interval resamples failures and passes separately. The last two columns are the
+route-matched comparisons of Section~\ref{sec:matched}: $\Delta$ on units where the direct
+route was selected, and $\Delta$ against the direct route's own alignment, with the failure
+count in brackets. The GPT-Neo layer-6 run has no passing unit, so no AUC exists; its
+diagnostics are in Section~\ref{sec:identifiability}. Precision for the Pythia-1.4B arm,
+run on a Kaggle GPU, was not recorded. Exploratory except where the arm's own filing says
+otherwise.
+
+\begin{table}[h]
+\centering
+\tiny
+\setlength{\tabcolsep}{3pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllrrccccccc}
+\toprule
+arm & estimator & precision & $n$ & fail & AUC restart & AUC $R^2$ & $\Delta$ & bootstrap 95\% CI & $\Delta$ direct-picked & $\Delta$ direct label & pooled \\
+\midrule
+GPT-2 L6 (B-14) & corrected & fp32 & 300 & 46 & 0.792 & 0.919 & $-$0.127 & [$-$0.197, $-$0.063] & $-$0.113 (9) & $-$0.061 (107) & yes \\
+Pythia-160m L6 (B-2c) & corrected & fp16 & 300 & 13 & 0.828 & 0.951 & $-$0.123 & [$-$0.264, $+$0.005] & $-$0.010 (4) & $-$0.071 (36) & yes \\
+GPT-2 L2 (B-7) & coupled & fp32 & 50 & 25 & 0.789 & 0.950 & $-$0.162 & [$-$0.294, $-$0.050] & $-$0.010 (12) & $-$0.053 (31) & yes \\
+GPT-2 L10 (B-7) & coupled & fp32 & 50 & 5 & 0.729 & 0.818 & $-$0.089 & [$-$0.222, $+$0.044] & $-$0.008 (3) & $-$0.120 (7) & yes \\
+GPT-Neo-125m L10 (B-8b) & corrected & fp32 & 100 & 38 & 0.588 & 0.755 & $-$0.167 & [$-$0.275, $-$0.062] & $-$0.161 (14) & $-$0.157 (55) & yes \\
+Pythia-1.4B L12, 3200 steps (B-11c) & corrected & unrecorded & 50 & 19 & 0.847 & 0.973 & $-$0.126 & [$-$0.251, $-$0.024] & $+$0.000 (2) & $-$0.126 (27) & yes \\
+Pythia-70m (B-11) & coupled & fp16 & 50 & 2 & 0.865 & 0.615 & $+$0.250 & [$-$0.104, $+$0.667] & $+$0.615 (1) & $+$0.021 (6) & no \\
+Pythia-410m (B-11) & coupled & fp16 & 50 & 2 & 0.771 & 1.000 & $-$0.229 & [$-$0.542, $+$0.000] & --- (0) & $-$0.049 (5) & no \\
+Pythia-410m, 3200 steps (B-11) & coupled & fp16 & 50 & 2 & 0.760 & 1.000 & $-$0.240 & [$-$0.500, $-$0.021] & --- (0) & $-$0.067 (5) & no \\
+GPT-2 L6 re-fit, fit seed 1 (B-15a) & corrected & fp32 & 100 & 18 & 0.726 & 0.896 & $-$0.169 & [$-$0.308, $-$0.053] & $-$0.146 (8) & $-$0.116 (29) & no \\
+GPT-2 L6 re-fit, corpus seed 1 (B-15b) & corrected & fp32 & 100 & 20 & 0.761 & 0.845 & $-$0.084 & [$-$0.198, $+$0.022] & $-$0.039 (6) & $-$0.134 (43) & no \\
+GPT-2 L6 re-fit, sequence split (B-15c) & corrected & fp32 & 100 & 22 & 0.723 & 0.885 & $-$0.162 & [$-$0.295, $-$0.029] & $-$0.209 (9) & $-$0.080 (43) & no \\
+GPT-Neo-125m L6 (B-17) & corrected & fp32 & 20 & 20 & --- & --- & --- & --- & --- (6) & --- (20) & no \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\section{Status of each result}
+\label{app:status}
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{p{2.6cm}p{11cm}}
+\toprule
+status & results \\
+\midrule
+Confirmatory & The primary endpoint: DeLong $\Delta$AUC on the 300 GPT-2 layer-6 units
+(Section~\ref{sec:results}). \\
+Pre-registered replications & The Pythia-160m, GPT-Neo layer-10 and Pythia-1.4B re-runs on the
+corrected estimator, each under its own filing. \\
+Pre-specified secondary & Paired bootstrap, PR-AUC, threshold sweep, nuisance-baseline
+increments and the failure-class split (two addenda filed before the primary outputs were
+opened); the B-15 error budget, restart curve and sequence-level split; the GPT-Neo layer-6
+reading rules. \\
+Exploratory & Random-effects pooling across arms (the pooling rule was set when every arm's
+result was known); the route-matched comparison; the identifiability analysis, functional label
+and error spectrum; the response-only difficulty baseline; the pass@$k$ model comparison;
+function-space and random-only restart agreement; $\kappa$ and angle ICCs; the paired
+permutation test. The plan for the last group was filed before it ran. \\
+Pending, filed & The response-noise experiment \tbd{N-1}; the transfer experiment
+\tbd{T-SAE}; the float32 Pythia re-fit \tbd{B-2d}. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{The bench}
+\label{app:bench}
+\benchname{} ships what is needed to score any direction-recovery method, or any reliability
+check, against the reference standard of Section~\ref{sec:substrate}:
+\begin{itemize}
+  \item the stimulus recipe: corpus, document and token seeds, 128-token sequences with
+  position 0 dropped, and the 8{,}000-token budget;
+  \item the unit lists for every model and layer used here, with each unit's reference column
+  and its layer-norm null direction;
+  \item every fitted row, the saved fitted directions and restarts, and the stimulus
+  diagnostics of Section~\ref{sec:identifiability};
+  \item the estimator and the command line that regenerates each arm, the analysis scripts,
+  every pre-registration and the laboratory notebook.
+\end{itemize}
+A new check is scored by computing it for each unit's fit and passing the per-unit values to
+the analysis script, which returns its AUC against the reference label and its paired
+comparison with held-out $R^2$. \tbd{licence and anonymised link}.
 
 \section{Usage census}
 \label{app:census}
@@ -607,7 +813,10 @@ instances across eight sub-areas:
   \item twelve use it to select a hyperparameter, a model or the number of components;
   \item nine report it as robustness.
 \end{itemize}
-Some instances do more than one of these. Thirteen are 2025--2026 interpretability papers.
+Some instances do more than one of these. A few, such as convergent learning and universal
+neurons, ask whether independently trained networks converge, which is a scientific question
+rather than a check on an estimate; we count them because they cite agreement as evidence that
+a recovered unit or feature is real. Thirteen are 2025--2026 interpretability papers.
 Table~\ref{tab:census} lists representative instances. The full list, with quoted passages,
 is released with the bench.
 
