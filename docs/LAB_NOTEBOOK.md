@@ -337,6 +337,69 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Diagnostics on every arm with saved directions (2026-10-07, offline, exploratory) - **THE CONVERGED-WRONG CLASS IS FUNCTIONALLY CORRECT; UNDER A FUNCTIONAL LABEL THE R2 LEAD WIDENS**
+
+Filed as exploratory in `docs/preregistration-b17.md` ("diagnose_units.py is also run on
+every arm with saved directions"). It answers the 6 Oct open question: is the 0.95
+Euclidean bar measuring identifiability rather than estimator error?
+
+Method:
+- **Script.** `diagnose_units.py` was run on B-8b, B-15a (B-14's first 100 GPT-2 units, fit
+  seed 1) and B-2c. B-14 saved no directions. B-11c was skipped: Pythia-1.4B is not cached
+  locally (about 2.9 GB), and all its failures were under-fitted.
+- **New flag.** `--corpus-seed`, added today. A non-zero seed drops every document the fit
+  saw, so the sample is document-disjoint; seed 1 shared 75 of 300 documents before the
+  filter.
+- **Regression check.** Seed 0 reproduces the earlier diagnostics exactly (B-8b, all
+  fields).
+- **Pipeline check.** `r2_exact` = 1 to 1e-6 in every arm.
+- **Summary.** `experiments/summarise_diagnostics.py` -> `results/diagnostics_summary.json`.
+
+| arm | converged-wrong | Euclidean align (median) | sigma-align, fitted text | still >= 0.99 on fresh text | fresh R2 shortfall vs truth |
+|---|---|---|---|---|---|
+| B-8b GPT-Neo L10 | 20 | 0.909 | 0.9998 | **20/20** (min 0.994) | 0.0004 |
+| B-15a GPT-2 L6 | 6 | 0.930 | 0.9998 | 5/6 | 0.0014 |
+| B-2c Pythia L6 | 2 | 0.924 | 0.987 | 1/2 | 0.0035 |
+
+The under-fitted failures are the opposite case. Their sigma-align on fresh text is 0.73
+(Pythia) to 0.95 (GPT-Neo), and they fall short of the truth's R2 by 0.08-0.13. Under the
+B-17 reading rules they are "optimisation" failures; the converged-wrong ones are
+"geometry".
+
+**Reading.**
+- **Converged-wrong fits are functionally right, not wrong.** They point up to about 25
+  degrees away from w in weight space. But on the model's own activations, fitted text or
+  fresh, they produce the same projection as w, and they predict the unit's response as
+  well as w does.
+- **The gap is in directions the residual stream does not use.** What separates them from w
+  is unidentifiable from any stimulus of this kind.
+- **Why both checks are at chance on this class.** That is expected (§4 B-8b): no
+  data-driven check can see a difference the data do not contain. The Euclidean reference
+  standard labels them failures.
+- **Labelled by function, the ordering strengthens.** Each failure label is applied to the
+  same rows:
+
+| arm | label | failures | AUC R2 | AUC restart | restart - R2 |
+|---|---|---|---|---|---|
+| B-8b | Euclidean < 0.95 (filed) | 38 | 0.755 | 0.588 | -0.167 |
+| B-8b | fresh sigma < 0.99 | 16 | 0.971 | 0.701 | -0.270 |
+| B-15a | Euclidean < 0.95 | 18 | 0.896 | 0.726 | -0.169 |
+| B-15a | fresh sigma < 0.99 | 13 | 0.981 | 0.754 | -0.227 |
+| B-2c | Euclidean < 0.95 | 13 | 0.951 | 0.828 | -0.123 |
+| B-2c | fresh sigma < 0.99 | 16 | 0.984 | 0.817 | -0.167 |
+
+The fresh-R2-shortfall label gives the same picture (diffs -0.241, -0.239, -0.147). It
+shares its quantity with the held-out R2 check, so it is partly circular. The sigma label
+is the cleaner one, though it is not independent of R2 either, since both read the response
+geometry.
+
+**Consequences for Paper 1, not yet applied:**
+- "No ground-truth-free check catches the converged-wrong fit" is true, but for a stronger
+  reason than stated: there is nothing to catch.
+- The reference standard needs a functional companion label, reported as a sensitivity
+  analysis.
+- The GPT-Neo "incremental value" null (§4 B-8b) is likely an artefact of the same class.
+
 ### S-11 - R9 re-run, naturalistic decoding (2026-10-06 18:57, Kaggle T4; scored 7 Oct) - **REPLICATES: 11/16, THE SAME COUNT AS R9**
 
 Prereg `docs/preregistration-s11-naturalistic.md`. APERTURE's code pinned at `b5bb2fb` and
