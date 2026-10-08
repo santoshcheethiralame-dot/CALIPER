@@ -89,3 +89,33 @@ units), P2 at 5 of 6, and P3 at 0.957 vs 0.306. Run once on X-1.
 
 - No unit, seed, threshold or class boundary is changed after seeing output.
 - The cross-sample check is not tuned. It is the single |cos| between two fits.
+
+## Addendum 1 (8 October 2026, before any X-1 run)
+
+**Added prediction P4, from an exploratory pass on earlier arms.** The pass is in
+`experiments/explore_patterns.py`, Q1/Q2, and notebook §4 of 8 Oct.
+
+**What the earlier arms showed.** The quantity is the share of the fitted direction's squared
+norm lying in the stimulus eigendirections that carry the bottom 1% of variance. It is
+ground-truth-free: it needs one fit and the stimulus covariance. It separated converged-wrong
+from passing units at these AUCs:
+- 0.953 on GPT-Neo layer 10;
+- 0.941, 0.961 and 0.947 on three GPT-2 layer-6 re-fits;
+- 0.972 on Pythia-160m layer 6.
+
+Held-out R2 scored 0.55 to 0.72 on the same comparisons. The same share computed for the true
+w did not predict the class (AUC 0.17 to 0.50).
+
+**P4.** On X-1a, comparing converged-wrong with passing units:
+- AUC(fitted-direction low-variance share) is at least 0.85;
+- AUC(fitted-direction low-variance share) minus AUC(held-out R2) has a stratified bootstrap
+  95% CI above 0.
+
+**Definition.** The bottom-1%-variance eigendirections of X-1a's own stimulus covariance, as
+for P3. With fewer than 8 converged-wrong units, P4 is reported as underpowered.
+
+**Code.** Added to `experiments/analyse_x1.py` before any X-1 row exists. On the development
+pair (B-15a/b) it reports P4 as underpowered (6 units).
+
+**Status.** P1 to P3 are unchanged. P4 is confirmatory for this new check: the units are fresh
+and the threshold and definition are fixed here.

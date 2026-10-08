@@ -128,5 +128,7 @@
   },
   "low_variance_dims": 90,
   "holds": true
- }
+ },
+ "P4": "underpowered: 6 converged-wrong units (< 8)",
+ "P4_all_failures_auc_vhat_low_share": 0.7642276422764228
 }

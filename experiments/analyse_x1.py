@@ -139,7 +139,22 @@ def main():
                  "low_variance_dims": int(low.shape[1]),
                  "holds": (share["converged-wrong"] is not None and share["converged-wrong"] >= 0.70
                            and share["under-fitted"] is not None and share["under-fitted"] < 0.50)}
-    print(json.dumps({k: rep[k] for k in ("units", "P1", "P2", "P3")}, indent=1, default=float))
+
+    # P4 (Addendum 1): the fitted direction's own low-variance share, a ground-truth-free
+    # check computable from one fit and the stimulus covariance.
+    vshare = np.array([float(((low.T @ unit_dir(a.a, A[k])[0]) ** 2).sum()) for k in ks])
+    r2 = np.array([-A[k]["r2_k1"] for k in ks])
+    keep = cw | ~fail
+    y = cw[keep]
+    if cw.sum() < 8:
+        rep["P4"] = f"underpowered: {int(cw.sum())} converged-wrong units (< 8)"
+    else:
+        a_v, a_r = auc(vshare[keep], y), auc(r2[keep], y)
+        ci = boot_diff(vshare[keep], r2[keep], y)
+        rep["P4"] = {"auc_vhat_low_share": a_v, "auc_held_out_r2": a_r, "diff": a_v - a_r,
+                     "diff_ci95": ci, "holds": a_v >= 0.85 and ci[0] > 0}
+    rep["P4_all_failures_auc_vhat_low_share"] = auc(vshare, fail)
+    print(json.dumps({k: rep[k] for k in ("units", "P1", "P2", "P3", "P4")}, indent=1, default=float))
     json.dump(rep, open(ROOT / a.out, "w"), indent=1, default=float)
 
 
