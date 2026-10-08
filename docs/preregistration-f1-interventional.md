@@ -76,3 +76,18 @@ Both must hold for the primary to hold.
 - Code is written and tested on two units of B-15a before the run; those two fits are
   discarded and re-run in the queue.
 - No unit is dropped. A unit whose re-fit fails to run is reported as missing.
+
+## Clarification (9 October 2026, before any F-1 data; the pilot fits are discarded)
+
+- "The base run's settings" governs. B-8b: `--restarts 2`, fit seed 0. **B-15a: `--restarts 5
+  --fit-seed 1`** (the parenthetical above wrongly gave restarts 2 for both).
+- Unit lists, drawn as specified and fixed now: `results/f1_units_b8b.json` (20 converged-wrong,
+  18 under-fitted, 20 passing) and `results/f1_units_b15a.json` (6, 12, 20). The comma lists the
+  queue reads are `results/f1_units_*.txt`.
+- Implementation: `experiments/e01_gate.py --augment {targeted,random,natural} --augment-n 2000`.
+  The held-out rows stay the first 1,600 of the natural stimulus (test_frac is rescaled so the
+  split does not move). The exact response is the model's own MLP input layer followed by the
+  erf GELU; on 500 natural tokens it reproduces the recorded responses to 2.4e-7.
+- Order: queue 7 (`experiments/rerun_queue7.sh`), after queue 6. GPT-2 arms first.
+- The residual-intervention arm (secondary 5) needs the pre-norm residual, which the pipeline
+  does not capture; it is built after the primary arms run, before its own data exist.

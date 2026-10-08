@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import transformers
 from pathlib import Path
-from caliper.activations import collect, load_model, sample_corpus
+from caliper.activations import _blocks, _mlp_in, collect, load_model, sample_corpus
 from caliper.batched import fit_batch
 from caliper.estimator import fit_cascade, subspace_alignment
 from caliper.runtime import Checkpoint, pick_device
@@ -111,6 +111,13 @@ ap.add_argument("--snr", type=float, default=None,
 ap.add_argument("--snr-range", type=float, nargs=2, default=None, metavar=("LO", "HI"),
                 help="as --snr, but each unit draws its own SNR log-uniformly from [LO, HI], "
                      "so the attainable R2 differs between units and is unknown to the checks")
+ap.add_argument("--augment", choices=("targeted", "random", "natural"), default=None,
+                help="F-1: add --augment-n samples to the fitting set only. 'targeted': stimulus "
+                     "rows pushed into the eigen-directions carrying the bottom 1%% of stimulus "
+                     "variance; 'random': pushed isotropically; both answered by the unit's exact "
+                     "function. 'natural': fresh tokens from documents disjoint from the corpus. "
+                     "The held-out rows are unchanged (docs/preregistration-f1-interventional.md)")
+ap.add_argument("--augment-n", type=int, default=2000)
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -166,6 +173,44 @@ if a.snr is not None or a.snr_range is not None:
         snr[int(u)] = float(np.exp(g.uniform(np.log(lo), np.log(hi))))
         p.response[:, i] += g.normal(0.0, sd[i] / np.sqrt(snr[int(u)]),
                                      len(p.response)).astype(p.response.dtype)
+test_frac = 0.2
+if a.augment is not None:
+    if snr or a.target != "mlp":
+        raise SystemExit("--augment is defined for noiseless MLP units only")
+    n_test = int(len(p.stimulus) * 0.2)
+    fit_rows = p.stimulus[n_test:]
+    if a.augment == "natural":
+        seen = set(corpus())
+        fresh = [t for t in sample_corpus(n_docs=300, seed=a.corpus_seed + 1) if t not in seen]
+        q = collect(model, tok, fresh, layer=a.layer, neurons=neurons,
+                    max_tokens=a.augment_n, seed=a.split_seed, shuffle="token")
+        extra_s, extra_r = q.stimulus[:a.augment_n], q.response[:a.augment_n]
+        if len(extra_s) < a.augment_n:
+            raise SystemExit(f"only {len(extra_s)} fresh tokens for --augment-n {a.augment_n}")
+    else:
+        g = np.random.default_rng(0)
+        base = fit_rows[g.choice(len(fit_rows), a.augment_n, replace=False)].astype(np.float64)
+        centred = fit_rows - fit_rows.mean(0)
+        if a.augment == "targeted":
+            lam, vec = np.linalg.eigh(np.cov(fit_rows, rowvar=False))
+            low = np.cumsum(lam) / lam.sum() <= 0.01
+            d = g.standard_normal((a.augment_n, int(low.sum()))) @ vec[:, low].T
+        else:
+            d = g.standard_normal((a.augment_n, fit_rows.shape[1]))
+        d *= np.median(np.linalg.norm(centred, axis=1)) / np.linalg.norm(d, axis=1, keepdims=True)
+        extra_s = (base + d).astype(p.stimulus.dtype)
+        block = _blocks(model)[a.layer]
+        with torch.no_grad():
+            pre = _mlp_in(block)(torch.as_tensor(extra_s, dtype=next(model.parameters()).dtype))
+            extra_r = torch.nn.functional.gelu(pre.float())[:, neurons].numpy().astype(
+                p.response.dtype)
+        print(f"  augment {a.augment}: {a.augment_n} rows"
+              + (f", {int(low.sum())} low-variance directions" if a.augment == "targeted" else ""),
+              flush=True)
+    p.stimulus = np.concatenate([p.stimulus, extra_s])
+    p.response = np.concatenate([p.response, extra_r])
+    test_frac = n_test / len(p.stimulus)
+    assert int(len(p.stimulus) * test_frac) == n_test
 dirs = None if a.no_save_directions else Path(a.out.replace(".jsonl", "_dirs"))
 if dirs is not None:
     dirs.mkdir(parents=True, exist_ok=True)
@@ -194,9 +239,9 @@ for start in range(0, len(todo), a.batch):
     idx = todo[start:start + a.batch]
     Y = p.response[:, idx]
     indep = dict(unit_ids=p.neurons[idx], per_neuron_stop=True) if a.independent_units else {}
-    d1 = fit_batch(S_fit, Y, k=1, n_restarts=a.restarts, steps=a.steps,
+    d1 = fit_batch(S_fit, Y, k=1, n_restarts=a.restarts, steps=a.steps, test_frac=test_frac,
                    seed=a.fit_seed, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
-    d2 = fit_batch(S_fit, Y, k=2, n_restarts=a.restarts, steps=a.steps,
+    d2 = fit_batch(S_fit, Y, k=2, n_restarts=a.restarts, steps=a.steps, test_frac=test_frac,
                    seed=a.fit_seed, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
     for res in list(d1) + list(d2):
         res.subspace = pad(res.subspace)
@@ -204,7 +249,7 @@ for start in range(0, len(todo), a.batch):
     for j, i in enumerate(idx):
         n = int(p.neurons[i])
         wu = p.weights[:, i] / np.linalg.norm(p.weights[:, i])
-        c = fit_cascade(S_fit, p.response[:, i], k=1,
+        c = fit_cascade(S_fit, p.response[:, i], k=1, test_frac=test_frac,
                         n_restarts=a.restarts, steps=a.steps, seed=a.fit_seed)
         c.subspace = pad(c.subspace)
         ad = abs(subspace_alignment(d1[j].subspace, wu[:, None]))
@@ -227,6 +272,7 @@ for start in range(0, len(todo), a.batch):
             "picked": "cascade" if use_cascade else "direct",
             "r2_k1": round(float(max(d1[j].test_r2, c.test_r2)), 6),
             **({"snr": round(snr[int(n)], 4)} if snr else {}),
+            **({"augment": a.augment, "augment_n": a.augment_n} if a.augment else {}),
             "k2_gain": round(float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
             # NOT ground-truth-free: both terms are alignments to w. Kept so every
             # earlier run stays comparable, but it must not be reported as a check a
@@ -271,6 +317,7 @@ summary = {
     "target": a.target, "fit_seed": a.fit_seed, "corpus_seed": a.corpus_seed,
     "split_seed": a.split_seed,
     "sequence_split": bool(a.sequence_split),
+    "augment": a.augment, "augment_n": a.augment_n if a.augment else None,
     "dtype": str(next(model.parameters()).dtype).replace("torch.", ""),
     "torch_threads": torch.get_num_threads(),
     "libraries": {"torch": torch.__version__, "transformers": transformers.__version__},
