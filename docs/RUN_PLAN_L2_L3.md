@@ -375,7 +375,7 @@ About 70-85 GPU-hours over five months, under a fifth of one account's free quot
 | S-1 | early Nov | tail vectors fail the steering gate in bf16 too | dead vectors reported as a quantisation artefact; Paper 2 leans on S-2 and A-F1 |
 | A-F1 | when finished | frozen P1-P3 | reported as filed; the framing claim narrows to the scales where it holds |
 | **Gate A** | 31 Dec | T-2 failure rate 20-80% and some check's CI excludes 0.5 | Paper 3 becomes L3-only |
-| S-12 | before any judge number is reported | kappa >= 0.6 human-human | judge numbers drop to secondary; rule-scored and first-token readouts carry the claims |
+| S-12 | before any judge number is reported | intra-rater kappa >= 0.6 (pass 1 vs blind pass 2) | judge numbers drop to secondary; rule-scored and first-token readouts carry the claims |
 | **Gate B** | mid-March | at least 32 certified implanted traits | L2b is a limitation; L2 rests on T-2 |
 
 ---
