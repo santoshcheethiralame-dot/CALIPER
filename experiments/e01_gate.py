@@ -91,6 +91,9 @@ ap.add_argument("--fit-seed", type=int, default=0,
 ap.add_argument("--corpus-seed", type=int, default=0,
                 help="seed for sample_corpus, which decides which tokens make the stimulus. "
                      "0 reproduces every earlier run")
+ap.add_argument("--exclude-corpus-seed", type=int, default=None,
+                help="drop every document that corpus seed would sample, so this run's "
+                     "stimulus is document-disjoint from that seed's (X-1)")
 ap.add_argument("--split-seed", type=int, default=0,
                 help="seed for collect's row order, which decides the 20%% held-out set. "
                      "0 reproduces every earlier run")
@@ -107,6 +110,16 @@ ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
 t0 = time.time()
+
+
+def corpus():
+    texts = sample_corpus(n_docs=300, seed=a.corpus_seed)
+    if a.exclude_corpus_seed is not None:
+        seen = set(sample_corpus(n_docs=300, seed=a.exclude_corpus_seed))
+        texts = [t for t in texts if t not in seen]
+    return texts
+
+
 device = pick_device(a.device)
 ck = Checkpoint(a.out)
 
@@ -119,7 +132,7 @@ if a.target == "sae":
     # Two passes: collect the stimulus once, count how often every latent fires on it, then
     # draw evenly across firing-count quartiles. Shuffled once so --neuron-pool prefixes stay
     # a fair sample of every quartile.
-    p0 = collect(model, tok, sample_corpus(n_docs=300, seed=a.corpus_seed), layer=a.layer,
+    p0 = collect(model, tok, corpus(), layer=a.layer,
                  neurons=np.arange(1), max_tokens=a.tokens, seed=a.split_seed,
                  shuffle="sequence" if a.sequence_split else "token", sae=sae)
     counts = firing_counts(sae, p0.stimulus)
@@ -134,7 +147,7 @@ elif a.neuron_pool:
     neurons = rng.choice(a.d_mlp, size=a.neuron_pool, replace=False)[:a.neurons]
 else:
     neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
-p = collect(model, tok, sample_corpus(n_docs=300, seed=a.corpus_seed), layer=a.layer,
+p = collect(model, tok, corpus(), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=a.split_seed,
             shuffle="sequence" if a.sequence_split else "token", sae=sae)
 snr = {}
