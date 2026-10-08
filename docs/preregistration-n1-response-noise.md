@@ -4,7 +4,7 @@
 
 ## Why
 
-**The concern.** Two reviewers in the simulated panel raised the same objection (R2 W1, R3 W5).
+**The concern.** Two reviewers in the 7 Oct internal review raised the same objection.
 Every Paper 1 unit's response is a noiseless function of w·s. So the true direction reaches
 held-out R2 = 1, and any shortfall in R2 is estimator error.
 

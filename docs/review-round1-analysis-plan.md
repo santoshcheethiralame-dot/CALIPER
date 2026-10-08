@@ -1,12 +1,12 @@
-# Review round 1: analyses run in response to the panel (filed 7 Oct 2026, before running)
+# Review round 1: analyses run in response to the internal review (filed 7 Oct 2026, before running)
 
-The simulated panel of 7 Oct asked for these analyses. All are **exploratory**. They change no
+The 7 Oct internal review asked for these analyses. All are **exploratory**. They change no
 pre-registered endpoint, and the paper reports them as exploratory. Script:
 `experiments/analyse_review_round1.py`. Output: `results/review_round1.json`. Every one uses
 archived rows and saved directions only. Where an analysis needs the stimulus, it rebuilds it
 with the run's own corpus seed.
 
-## R1. Route-matched comparison (panel B1)
+## R1. Route-matched comparison (item B1)
 
 The AUC of restart agreement and of held-out R2 in two settings. Both are per arm.
 - **(a)** Units where the direct route was selected.
