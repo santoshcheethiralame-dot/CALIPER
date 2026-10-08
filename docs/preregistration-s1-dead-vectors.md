@@ -83,3 +83,24 @@ KL at about 26 nats (S-2 Amendment 1).
 - Raw norms are kept in the per-vector health record. The C31-style absolute scale of any
   cell can therefore be reconstructed.
 - The steering-pass rule, the arms and the precisions are unchanged.
+
+## Amendment 2 (9 October 2026, before any S-1 data)
+
+**The grid does not transfer to Gemma.** S-2's Gemma-3-4B session showed `--alpha-frac` 0.25
+already saturating next-token KL (about 45 nats, random controls included) and the gate dose
+leaving about 90% of generations incoherent (S-2 Amendment 3). S-1 runs only Gemma models, so
+its grid, as filed, would label vectors in a broken model.
+
+**Resolution, script v2026-10-09a:**
+- Grid: `--calibrate-kl 0.05 0.5 5`, the same targets as S-2 Amendment 3, fixed there from
+  content-free control rows of the Qwen sessions. No S-1 data exist.
+- The calibration runs once per model and precision, so each precision cell of the 12B is
+  compared at the same next-token disruption of a random direction, not at the same raw size.
+  The calibrated alphas and the residual norm are both in every sidecar.
+- **Steering pass:** steered at the 0.5-nat dose and not at alpha 0. The 0.05 and 5-nat cells
+  are reported beside it.
+- **Manipulation check:** at the 0.5-nat dose at least half of each cell's generations are
+  coherent; a cell that fails is reported, not scored. The criterion, the failure branch, the
+  arms and the precisions are unchanged.
+- "No alpha is chosen from the data" still holds: the targets were fixed before any S-1 session,
+  from another study's control rows.

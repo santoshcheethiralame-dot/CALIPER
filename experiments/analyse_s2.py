@@ -5,7 +5,8 @@
     python experiments/analyse_s2.py --dir ... --model qwen3b --out results/s2_qwen3b_analysis.json
 
 Reference label, as filed: a real-arm vector is LIVE if its steer-stage trial is steered at
-alpha-frac 0.5 and not at alpha 0; otherwise DEAD. The three real arms (concept token,
+the gate dose and not at alpha 0; otherwise DEAD. The gate is the second non-zero alpha of the
+grid: alpha-frac 0.5 on the original grid, the 0.5-nat KL target under Amendment 3. The three real arms (concept token,
 template tail, sentence mean) are pooled per model (up to 90 vectors). A model with fewer
 than 5 live or 5 dead vectors is reported but not scored.
 
@@ -16,7 +17,7 @@ Primary: per health statistic, AUC at telling live from dead, with a stratified 
   stability                  split-half or second-template agreement
   probe                      APERTURE's held-out probe accuracy
   logit steering             APERTURE's logit check (delta log P(concept))
-  P(YES) shift               paired t of P(YES) at alpha-frac 0.5 vs 0 across the two
+  P(YES) shift               paired t of P(YES) at the gate dose vs 0 across the two
                              forced-stage framings (df = 1), per vector
 AUC = P(statistic of a live vector > statistic of a dead vector), ties counted half.
 Prediction: norm, distinctness and P(YES) shift near 0.5 (CI includes 0.5); logit steering
@@ -32,6 +33,7 @@ from scipy.stats import rankdata
 ARMS = {"concept token": ("concept_steer{q}", "concept_forced{q}"),
         "template tail": ("tail_steer{q}", "tail_forced{q}"),
         "sentence mean": ("sentence_steer_aperture{q}", "sentence_forced_aperture{q}")}
+GATE = 2
 STATS = ["norm", "distinctness", "stability", "probe", "logit steering", "P(YES) shift"]
 
 
@@ -61,16 +63,16 @@ def vectors(d, model, quant="none"):
     for arm, (steer, forced) in ARMS.items():
         steer, forced = steer.format(q=q), forced.format(q=q)
         cfg = json.load(open(d / f"s2_{model}_{steer}.config.json"))
-        fracs = dict(zip(cfg["alphas"], cfg["alpha_frac"]))
+        pos = {al: i for i, al in enumerate(sorted(cfg["alphas"]))}
         st = rows(d / f"s2_{model}_{steer}.jsonl")
         fo = rows(d / f"s2_{model}_{forced}.jsonl")
         for c in cfg["concepts"]:
-            s = {fracs[r["alpha"]]: r["steered"] for r in st if r["concept"] == c}
-            live = bool(s.get(0.5)) and not bool(s.get(0.0))
+            s = {pos[r["alpha"]]: r["steered"] for r in st if r["concept"] == c}
+            live = bool(s.get(GATE)) and not bool(s.get(0))
             diffs = []
             for fr in sorted({r["framing"] for r in fo}):
-                p = {fracs[r["alpha"]]: r["p_yes"] for r in fo if r["concept"] == c and r["framing"] == fr}
-                diffs.append(p[0.5] - p[0.0])
+                p = {pos[r["alpha"]]: r["p_yes"] for r in fo if r["concept"] == c and r["framing"] == fr}
+                diffs.append(p[GATE] - p[0])
             diffs = np.array(diffs)
             sd = diffs.std(ddof=1)
             t = diffs.mean() / (sd / np.sqrt(len(diffs))) if sd > 0 else np.sign(diffs.mean()) * np.inf

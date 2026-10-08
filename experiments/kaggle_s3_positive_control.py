@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-08a"
+VERSION = "2026-10-09a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -994,6 +994,67 @@ def impact_matched(model, tok, layers, layer, real, alpha, prompt, direction, it
                            "matched": abs(kl - target) <= tol * max(target, 1e-6)}
 
 
+CALIB_SEED = 7919
+
+
+def calibrate_kl(model, tok, layers, layer, dim, targets, start, n_dirs=4, iters=20, tol=0.05):
+    """Find, for each target, the scale at which a seeded random unit direction gives that
+    median next-token KL over fixed prompts. Nothing here depends on the concepts, the arm
+    or the stage, so every run of a model on one layer gets the same grid.
+
+    --alpha-frac scales by the residual norm, which is not a model-independent dose: Gemma-3-4B
+    carries most of its norm in a component every token shares, and alpha-frac 0.25 put it at
+    next-token KL ~45 nats where Qwen sat below 1 (S-2, 9 Oct)."""
+    gen = torch.Generator().manual_seed(CALIB_SEED)
+    dirs = [d / d.norm() for d in torch.randn(n_dirs, dim, generator=gen)]
+    prompts = [INTROSPECTIVE.format(n=1), NEUTRAL_MATCHED.format(n=1), STEER]
+
+    def median_kl(scale):
+        return float(np.median([kl_meter(model, tok, layers, layer, scale * d, q)
+                                for d in dirs for q in prompts]))
+
+    out, s = [], float(start)
+    for t in sorted(targets):
+        lo, hi, best = 0.0, None, None
+        for _ in range(iters):
+            kl = median_kl(s)
+            if best is None or abs(kl - t) < abs(best[1] - t):
+                best = (s, kl)
+            if abs(kl - t) <= tol * t:
+                break
+            if kl < t:
+                lo = s
+                s = s * 2.0 if hi is None else (lo * hi) ** 0.5
+            else:
+                hi = s
+                s = (lo * hi) ** 0.5 if lo > 0 else s / 2.0
+        s, kl = best
+        out.append({"kl_target": t, "kl_achieved": round(kl, 5), "alpha": round(s, 4),
+                    "matched": abs(kl - t) <= tol * t})
+    return out
+
+
+def calibration(a, model, tok, layers, dim, residual_norm, model_id):
+    """Calibrate once per model, precision and layer; later cells of a session reuse the
+    file, so the 21 cells of an S-2 model share one grid."""
+    path = Path(os.path.dirname(os.path.abspath(a.out))) / (
+        f"kl_calibration_{a.model}_{a.quant}_{a.compute_dtype}_L{a.layer}.json")
+    key = {"model_id": model_id, "layer": a.layer, "targets": sorted(a.calibrate_kl),
+           "seed": CALIB_SEED}
+    if path.exists():
+        rec = json.loads(path.read_text())
+        if rec["key"] == key:
+            print(f"  KL calibration reused from {path}", flush=True)
+            return rec["grid"]
+    t0 = time.time()
+    grid = calibrate_kl(model, tok, layers, a.layer, dim, a.calibrate_kl,
+                        start=0.05 * residual_norm)
+    path.write_text(json.dumps({"key": key, "grid": grid,
+                                "seconds": round(time.time() - t0, 1)}, indent=1))
+    print(f"  KL calibration ({time.time() - t0:.0f}s) -> {path}", flush=True)
+    return grid
+
+
 _SENT = {}
 
 
@@ -1260,6 +1321,10 @@ def main():
                          "session was lost to an unfilled 'R = 0.0' placeholder in a run "
                          "sheet: the norm is known here, so the caller should not have to "
                          "paste it back in")
+    ap.add_argument("--calibrate-kl", type=float, nargs="+", default=None, metavar="NATS",
+                    help="set each non-zero alpha so that a seeded random unit direction gives "
+                         "this median next-token KL on fixed prompts; alpha 0 is prepended. "
+                         "The same dose on every model, which --alpha-frac is not")
     ap.add_argument("--n-plants", type=int, default=8,
                     help="planted random directions for --stage plant")
     ap.add_argument("--n-prompts", type=int, default=16,
@@ -1326,6 +1391,10 @@ def main():
     else:
         argv = None
     a = ap.parse_args(argv)
+    if a.calibrate_kl is not None and a.alpha_frac is not None:
+        raise SystemExit("--calibrate-kl and --alpha-frac both set the grid; use one")
+    if a.calibrate_kl is not None and min(a.calibrate_kl) <= 0:
+        raise SystemExit("--calibrate-kl targets must be positive; alpha 0 is added for you")
 
     if a.concept_list:
         src = a.concept_list
@@ -1420,7 +1489,7 @@ def main():
         stability_kind = "second-template"
     # The health checks score the vectors as extracted, raw norm included.
     raw = {c: v.clone() for c, v in vecs.items()}
-    if a.alpha_frac is not None:
+    if a.alpha_frac is not None or a.calibrate_kl is not None:
         # --alpha-frac means "inject this fraction of the residual norm", which holds only
         # for a unit vector (APERTURE's convention: alpha * sigma * unit direction). Before
         # 2026-10-07b the raw difference vector was scaled instead; on Qwen2.5-3B its norm
@@ -1435,6 +1504,19 @@ def main():
         print(f"  alpha grid from fractions {a.alpha_frac} of residual norm {rn:.1f}:",
               flush=True)
         print(f"    {a.alphas}", flush=True)
+    if a.calibrate_kl is not None:
+        dim = next(iter(vecs.values())).numel()
+        grid = calibration(a, model, tok, layers, dim,
+                           run_scalars["residual_norm_at_read_median"], model_id)
+        a.alphas = [0.0] + [g["alpha"] for g in grid]
+        run_scalars["kl_targets"] = [g["kl_target"] for g in grid]
+        run_scalars["kl_calibration"] = grid
+        print(f"  alpha grid from KL targets {run_scalars['kl_targets']} nats: {a.alphas}",
+              flush=True)
+        missed = [g for g in grid if not g["matched"]]
+        if missed:
+            raise SystemExit(f"KL calibration missed {missed}: the grid would not mean what "
+                             f"its targets say. Lower the targets or check the model")
 
     # A grid that is all zeros is never intentional. One session was spent running seven
     # identical alpha=0 conditions because a run sheet's "R = 0.0" placeholder was never

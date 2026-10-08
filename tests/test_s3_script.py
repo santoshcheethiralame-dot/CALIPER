@@ -103,6 +103,41 @@ def test_alpha_frac_injects_that_fraction_of_the_residual_norm(s3, monkeypatch, 
         assert not np.allclose(raw, 1.0)              # health still sees the raw vectors
 
 
+def test_calibrate_kl_grid(s3, monkeypatch, tmp_path):
+    import numpy as np
+    targets = ["0.001", "0.004"]
+    run(s3, monkeypatch, tmp_path, "--calibrate-kl", *targets, "--no-health")
+    cfg = json.load(open(path(tmp_path, ext=".config.json")))
+    grid = cfg["kl_calibration"]
+    assert cfg["kl_targets"] == [0.001, 0.004]
+    assert cfg["alphas"] == [0.0] + [g["alpha"] for g in grid]
+    assert cfg["alphas"] == sorted(cfg["alphas"])
+    for g in grid:
+        assert g["matched"]
+        assert abs(g["kl_achieved"] - g["kl_target"]) <= 0.05 * g["kl_target"]
+    vecs = np.load(path(tmp_path, ext=".vectors.npz"), allow_pickle=True)["vectors"]
+    assert np.allclose(np.linalg.norm(vecs, axis=1), 1.0, atol=1e-4)
+    assert sorted({x["alpha"] for x in rows(path(tmp_path))}) == cfg["alphas"]
+    cal = glob.glob(str(tmp_path / "kl_calibration_*.json"))
+    assert len(cal) == 1
+    # Another stage, arm and control of the same model reuses the file: one grid per model.
+    run(s3, monkeypatch, tmp_path, "--calibrate-kl", *targets, "--no-health",
+        "--stage", "steer", "--control", "random", "--vector-pos", "template-tail")
+    cfg2 = json.load(open(path(tmp_path, "_steer_random", ".config.json")))
+    assert cfg2["alphas"] == cfg["alphas"]
+    assert len(glob.glob(str(tmp_path / "kl_calibration_*.json"))) == 1
+
+
+def test_calibrate_kl_refuses_two_grids(s3, monkeypatch, tmp_path):
+    with pytest.raises(SystemExit):
+        run(s3, monkeypatch, tmp_path, "--calibrate-kl", "0.5", "--alpha-frac", "0", "0.5")
+    with pytest.raises(SystemExit):
+        run(s3, monkeypatch, tmp_path, "--calibrate-kl", "0", "0.5")
+    # The tiny random model's next-token KL saturates near 0.008 nats.
+    with pytest.raises(SystemExit):
+        run(s3, monkeypatch, tmp_path, "--calibrate-kl", "0.5", "--no-health")
+
+
 def test_forced_resume_rebuilds_legacy_keys(s3, monkeypatch, tmp_path):
     legacy = path(tmp_path, "_forced")
     c = s3.CONCEPTS[0]

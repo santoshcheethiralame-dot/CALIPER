@@ -1,7 +1,7 @@
 # Kaggle session: S-1, dead vectors by read position × precision
 
 Prereg: `docs/preregistration-s1-dead-vectors.md`. Script: `kaggle_s3_positive_control.py`
-**v2026-10-08a**. About 2-3 GPU-hours per model.
+**v2026-10-09a** (prereg Amendment 2: KL-calibrated grid). About 2-3 GPU-hours per model.
 
 ## Before you start (once)
 
@@ -34,7 +34,7 @@ import glob, os, sys, gc, torch, logging, transformers
 logging.getLogger("bitsandbytes").setLevel(logging.ERROR)
 transformers.logging.set_verbosity_error()
 transformers.logging.disable_progress_bar()
-WANT, VER = "kaggle_s3_positive_control.py", "2026-10-08a"
+WANT, VER = "kaggle_s3_positive_control.py", "2026-10-09a"
 hits = [h for h in glob.glob("/kaggle/input/**/*.py", recursive=True)
         if os.path.basename(h) == WANT]
 assert len(hits) == 1, f"expected one {WANT}, found {hits}"
@@ -49,7 +49,7 @@ print("loaded", VER)
 ## Cell 3, session 1: Gemma-3-12B, nine cells
 
 ```python
-GRID = ["--alpha-frac", "0", "0.25", "0.5", "1.0"]
+GRID = ["--calibrate-kl", "0.05", "0.5", "5"]     # Amendment 2; not --alpha-frac
 ARMS = {"tail": ["--vector-pos", "template-tail"],
         "concept": ["--vector-pos", "concept"],
         "sentence": ["--vector-recipe", "aperture"]}
@@ -81,7 +81,8 @@ Same cell, with `PRECS = {"4bit": ...}` only, `--model gemma` and `s1_gemma27_..
 import zipfile
 TAG = "s1_gemma12"                     # session 2: "s1_gemma27"
 with zipfile.ZipFile(f"/kaggle/working/{TAG}.zip", "w") as z:
-    for f in sorted(glob.glob(f"/kaggle/working/{TAG}_*")):
+    for f in sorted(glob.glob(f"/kaggle/working/{TAG}_*") +
+                    glob.glob("/kaggle/working/kl_calibration_*.json")):
         z.write(f, os.path.basename(f))
 print(f"DOWNLOAD /kaggle/working/{TAG}.zip")
 ```
@@ -93,6 +94,12 @@ used, precision actually loaded, library versions, per-vector health) and a `.ve
 
 - `read position check:` shows the concept word for the concept arm and a template token
   for the tail arm.
-- `alpha grid from fractions ...` gives four distinct numbers, the first 0.
+- The first cell of each precision prints `KL calibration (...s)`; later cells print
+  `KL calibration reused`. Then `alpha grid from KL targets [0.05, 0.5, 5.0] nats:` with four
+  increasing numbers, the first 0.
+- A cell that stops with `KL calibration missed` is recorded as stopped; do not change the
+  targets.
 - `STAGE steer: ...` and then `10 rows, ...` progress lines; 120 rows per cell.
-- The summary table has an `med KL` column that is 0.000 at alpha 0.
+- The summary table has an `med KL` column that is 0.000 at alpha 0 and rises with alpha.
+- At the 0.5-nat dose, most generations still read as English. Wall-to-wall token salad there
+  is the failure Amendment 2 exists to prevent: note it when you send the zip.

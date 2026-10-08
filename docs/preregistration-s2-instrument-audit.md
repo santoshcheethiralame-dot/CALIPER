@@ -128,3 +128,47 @@ were looked at; no endpoint was computed. The files are archived as a failed run
 
 Qwen2.5-3B (fp16, verified finite: no NaN values and no "!!!" in 2,520 generations) and
 Gemma-3-4B (fp32) are unchanged. The per-model precision is reported with the results.
+
+## Amendment 3 (9 October 2026, before any S-2 session on the new grid)
+
+**What failed.** The Gemma-3-4B session (script v2026-10-08a, fp32) ran cleanly but failed its
+manipulation check. At every non-zero alpha-frac, every arm, the content-free controls included,
+sat at a median next-token KL of 43 to 75 nats, and at the gate dose (0.5) about 90% of the
+steer-stage generations were incoherent. Qwen2.5-7B's concept arm sat at 0.18 / 0.36 / 5.9 nats
+on the same grid.
+
+**Why.** Alpha-frac scales by the residual norm at the read position. Gemma's is large and mostly
+shared across tokens: median 31,450, against concept vectors of median norm 3,909 (12%). On
+Qwen2.5-3B the ratio is 56 / 84 (67%). A fraction of the residual norm is therefore not a dose
+that means the same thing on different models.
+
+**What was looked at.** File integrity, the manipulation-check fields (KL and coherence by arm
+and alpha) and, before the saturation was noticed, the primary output of `analyse_s2.py` for
+that session. That session is reported as scored, next to its failed manipulation check
+(notebook, 9 Oct). It is not pooled with the Qwen models.
+
+**The fix (script v2026-10-09a, `--calibrate-kl`).**
+- Each non-zero alpha is set so that a content-free probe, four seeded random unit directions,
+  gives a fixed median next-token KL over three fixed prompts (the two forced-choice framings
+  at trial 1 and the steer prompt). The calibration never sees a concept vector, an arm or an
+  endpoint. It runs once per model, precision and layer, and every cell of that model reuses it.
+- A target missed by more than 5% stops the run.
+- **Targets: 0.05, 0.5 and 5 nats.** The gate target, 0.5 nats, is the geometric mean (0.44) of
+  the random control's median KL at the old gate dose on the two Qwen models and two framings
+  (4.6, 1.5, 0.03 and 0.20 nats), rounded. The other two sit one decade either side, close to
+  the same controls' geometric means at the old 0.25 and 1.0 doses (0.015 and 7.8). These are
+  content-free control rows only.
+- **The gate becomes the second non-zero dose** (0.5 nats): a vector is live if steered there
+  and not at alpha 0, and the P(YES) shift compares that dose with alpha 0. On the original grid
+  the second non-zero dose is alpha-frac 0.5, so the rule as filed is unchanged for the Qwen
+  runs. `analyse_s2.py` now reads the gate by grid position; on the three existing sessions its
+  output is byte-identical to before.
+- **A manipulation check, fixed now, for every calibrated session:** at the gate dose, at least
+  half of the random-control steer generations are coherent. A model that fails it is reported
+  and not scored.
+
+**Runs.**
+- **Gemma-3-4B is re-run on the calibrated grid** (fp32, all seven arms and three stages). That
+  session is the Gemma-3-4B result for the primary endpoint and the predictions, unchanged.
+- The Qwen sessions passed their manipulation check (graded KL) and stand as filed. A Qwen re-run
+  on the calibrated grid is optional and, if run, is reported as a sensitivity analysis.
