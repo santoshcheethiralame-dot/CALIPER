@@ -843,3 +843,49 @@ the tables above.
 Provenance now lives in a non-printing `checked` field. As `note`, it had been printed in the
 reference list.
 
+
+## 25. Added to `paper1/references.bib` in review round 1 (7 Oct 2026)
+
+Metadata checked against the arXiv API or Crossref on 7 Oct. Claims cited from the three 2026
+or 2024 SAE papers are limited to their abstracts.
+
+| key | id | level | used for |
+|---|---|---|---|
+| chanin2026benchmarks | [2605.18229](https://arxiv.org/abs/2605.18229) | BIB (abstract read) | Audits SAEBench metrics against reseed noise and synthetic ground truth. This is the closest meta-evaluation work |
+| chanin2026synthsaebench | [2602.14687](https://arxiv.org/abs/2602.14687) | BIB (abstract read) | Planted features at scale. Reconstruction vs latent-quality gap. The substrate for an SAE transfer test |
+| karvonen2025saebench | [2503.09532](https://arxiv.org/abs/2503.09532) | BIB | The SAE evaluation suite (ICML 2025) |
+| makelov2024principled | [2405.08366](https://arxiv.org/abs/2405.08366) | BIB (abstract read) | SAEs scored against supervised dictionaries |
+| makelov2024subspace | [2311.17030](https://arxiv.org/abs/2311.17030) | BIB | Interventions through dormant directions mislead. The limit of predictive equivalence |
+| timkey2021rogue | [2109.04404](https://arxiv.org/abs/2109.04404) | BIB | Rogue dimensions, residual-stream anisotropy |
+| geva2021keyvalue | [2012.14913](https://arxiv.org/abs/2012.14913) | BIB | MLP input columns read as detected patterns |
+| hewitt2019control | [1909.03368](https://arxiv.org/abs/1909.03368) | BIB | Control tasks: the probing analogue of calibrating a check |
+| heap2025random | [2501.17727](https://arxiv.org/abs/2501.17727) | BIB | Auto-interp scores do not separate trained from random networks |
+| theunissen2001strf | doi 10.1080/net.12.3.289.316 | BIB | Natural-stimulus STRF estimation; normalised reverse correlation |
+| paninski2003convergence | doi 10.1088/0954-898X/14/3/304 | BIB | Consistency conditions for spike-triggered estimators |
+| wu2006sysid | doi 10.1146/annurev.neuro.29.051605.113024 | BIB | System identification review |
+| park2011localized | doi 10.1371/journal.pcbi.1002219 | BIB | Priors over unexplored stimulus directions |
+| jonas2017microprocessor | doi 10.1371/journal.pcbi.1005268 | BIB | Validating analysis methods on a system with a known answer |
+
+## 26. Leads from the 8 Oct 2026 literature pass (none cited yet)
+
+Every row is ABS: a search summary only. Read and verify each before it carries a claim.
+
+| id | title | level | why it matters |
+|---|---|---|---|
+| [2602.06801](https://arxiv.org/abs/2602.06801) | On the Non-Identifiability of Steering Vectors in LLMs (Venkatesh & Kurapath 2026) | ABS | Orthogonal perturbations keep 95-100% of steering efficacy through null-space ambiguity. The same phenomenon as the converged-wrong class, without a ground truth. Paper 1 §5.6 and Paper 2 |
+| [2505.22637](https://arxiv.org/abs/2505.22637) | Understanding (Un)Reliability of Steering Vectors (Braun et al., ICLR 2025 workshop) | ABS | Vectors from different prompts differ in direction (cos 0.07-0.86) at similar efficacy, and steering reverses on about a third of samples |
+| [2302.07265](https://arxiv.org/abs/2302.07265) | MetaQuantus: the meta-evaluation problem in XAI (Hedström et al., TMLR 2023) | ABS | Evaluates explanation metrics without ground truth. The closest framing to ours, and a TMLR precedent |
+| [1804.06788](https://arxiv.org/abs/1804.06788) | Simulation-based calibration (Talts et al.) | ABS | Calibrating an inference method against simulated known truth: necessary, not sufficient. A framing parallel for the bench |
+| [2601.06730](https://arxiv.org/abs/2601.06730) | Causes of the Rashomon effect (Parikh 2026) | ABS | Statistical multiplicity, which shrinks with data, vs structural multiplicity, which persists. Maps onto under-fitted vs converged-wrong |
+| JMLR v24 23-0149 | Partial order in chaos: consensus on feature attributions in the Rashomon set (Laberge et al. 2023) | ABS | Report only what all good models agree on; a possible remedy |
+| — | Rudin et al., position paper on many good models (ICML 2024) | ABS | Rashomon effect in practice |
+| [2407.12404](https://arxiv.org/abs/2407.12404) | Analyzing the generalization and reliability of steering vectors (Tan et al., NeurIPS 2024) | ABS | Steerability varies widely across inputs, including negative |
+| [2603.04198](https://arxiv.org/abs/2603.04198) | Stable and steerable SAEs with weight regularization (Jedryszek & Crook, ICML 2026) | ABS | Cross-seed SAE consistency as a training target. Census update |
+| [2506.14002](https://arxiv.org/abs/2506.14002) | Provable feature recovery via SAEs | ABS | Maximum-cosine cross-run consistency metric. Census update |
+| [2605.08504](https://arxiv.org/abs/2605.08504), [2601.22966](https://arxiv.org/abs/2601.22966) | Massive activations; attention and residual sinks | ABS | Why the stimulus covariance is so ill-conditioned (condition numbers 1e4 to 1e9) |
+| [2609.30397](https://arxiv.org/abs/2609.30397) | A synthetic ground-truth framework for evaluating XAI methods | ABS | Planted truth by design. Scoop check: the closest found, and it does not use pretrained weights |
+| [2205.08696](https://arxiv.org/abs/2205.08696) | The solvability of interpretability evaluation metrics (Zhou & Shah 2022) | ABS | Proxy metrics can be optimised against; ground-truth alignment can suffer |
+| — | Garcia Barrado et al. 2015/2016 (Stat Med); Hui-Walter; Dendukuri & Joseph | ABS | Diagnostic accuracy under an imperfect reference standard: latent-class corrections. Supports treating the Euclidean label as imperfect |
+
+**Scoop check, 8 Oct.** No work found that scores checks against real pretrained-LM weight
+columns. The closest work plants synthetic ground truth. One search cannot prove absence.

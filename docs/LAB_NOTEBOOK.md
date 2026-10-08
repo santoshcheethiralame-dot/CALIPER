@@ -341,6 +341,44 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Cross-sample agreement (2026-10-08, offline, exploratory) - **DATA-RESAMPLING AGREEMENT CATCHES WHAT RESTART AGREEMENT MISSES, INCLUDING CONVERGED-WRONG FITS**
+
+**Setup.**
+- Not pre-registered. Script `experiments/explore_cross_sample.py`, output
+  `results/cross_sample_agreement.json`.
+- B-15a (fit seed 1), B-15b (corpus seed 1) and B-15c (sequence-level split) re-fit the
+  same 100 GPT-2 layer-6 units and saved their selected directions.
+- Cross-sample agreement is |cos| between a unit's B-15a and B-15b directions.
+- Labels are B-15a's: 18 failures, 6 of them converged-wrong.
+
+| check | all failures | converged-wrong vs pass | under-fitted vs pass |
+|---|---|---|---|
+| held-out R2 | 0.896 | 0.713 | 0.987 |
+| restart agreement | 0.726 | 0.685 | 0.747 |
+| **agreement across token samples (B-15a vs B-15b)** | **0.922** | **0.911** | 0.928 |
+| agreement across held-out splits (B-15a vs B-15c) | 0.914 | 0.846 | 0.948 |
+
+Median cross-sample |cos| is 0.994 for passes, 0.907 for converged-wrong fits and 0.858 for
+under-fitted fits.
+
+**Reading.**
+- **The mechanism matches the identifiability analysis (§4, 7 Oct).** Converged-wrong fits
+  differ from w in directions the stimulus barely excites. Those directions are poorly
+  determined, so they move when the token sample changes. They do not move when only the
+  initialisation changes, which is why restart agreement misses them.
+- **This is PCS's "perturb the data" measured against ground truth.**
+- **The headline consequence.** Agreement is not useless as a check; the kind of
+  perturbation decides what it measures.
+
+**Caveats.**
+- Only 6 converged-wrong units.
+- The two fits differ in restart count (5 vs 2) as well as token sample.
+- The result was found after the B-15 data were seen.
+
+**Next.** A filed test on new units, each fitted twice on document-disjoint samples with
+identical settings, is proposed in `docs/paper1-hardening-plan.md` §1. Not in the paper
+until it runs.
+
 ### S-2 Qwen2.5-7B, fp16 (2026-10-08, Kaggle) - **INVALID AT BASELINE: fp16 OVERFLOW; RE-RUN IN 4-BIT WITH fp32 COMPUTE**
 
 **The session.**
@@ -3520,6 +3558,7 @@ open and block the wording of Paper A section 4.1.
 
 | Date | Decision | Where |
 |---|---|---|
+| 2026-10-08 | **Literature pass and hardening plan.** Leads logged at ABS level in `docs/CITATIONS.md` §26 (steering non-identifiability, MetaQuantus, simulation-based calibration, Rashomon multiplicity, imperfect-reference statistics, massive activations). The scoop check found nothing that scores checks against real pretrained weight columns. The 7 Oct bib additions are logged in §25. Proposals ranked in `docs/paper1-hardening-plan.md`: a cross-sample agreement test, a confirmatory identifiability replication, stimulus diversity, an OOD/interventional check, a second estimator configuration | `docs/` |
 | 2026-10-08 | **Mentor's three citations restored** (vaidya2022, dholakia2025, nagaraja2019, as he guided on 6 Oct). Dropping them rested on an anonymity concern from the 7 Oct review, which assumed self-citation. The mentor is not an author of this paper, so citing his work reveals nothing. Clicktok uses his phrasing. **Mentor's guidance on writing:** the text should be in the author's own style, not externally polished. So the planned prose-polish pass is replaced by an author rewrite | `paper1/main.tex` |
 | 2026-10-07 | **Paper 1 review round 1 applied (internal review, Major Revision).** The pre-registered result stays the headline. The converged-wrong class is reported through Addendum 2's filed reading (neither check sees it), with a new exploratory identifiability section: the error spectrum puts 81-96% of the error in the bottom-1%-variance directions, and B-17 is the extreme case. Functional-label AUCs are demoted to a non-independent sensitivity analysis. The title is narrowed to 'direction recovery'. New in the text: route-matched comparison, HKSJ pooling [-0.189,-0.078], per-arm bootstrap CIs, paired permutation test, pass@k model comparison, restart agreement in the covariance metric (worse, 0.66), kappa and ICC, the B-1 interim and pilot tables (a filed commitment), an all-arms table, a result-status table, a bench appendix, 14 verified references. Citations: shah2020 and gardiner2016 kept; vaidya2022, dholakia2025 and nagaraja2019 dropped from the text, a user decision, reversible. STC recomputed as a symmetric generalised eigenproblem: still 0/30. Number fixes: L2 0.50, Pythia identity 5.1e-4, GPT-Neo CI rounding, 13-16%. Placeholders left: R5, N-1, T-SAE, B-2d, bench name and licence | `paper1/main.tex`, `docs/review-round1-analysis-plan.md`, `results/review_round1.json` |
 | 2026-10-07 | **Paper 1 B-15 placeholders filled; diagnostics extended to B-15b/c.** The restart curve gains the corrected-estimator run (Figure 4). §5.7 error budget written from B-15. The sequence-split limitation and threat are resolved. The ≥0.5B placeholder is dropped: the 1.4B arm covers it. The provisional '8-12%' is kept as the coupled-run estimate and shown beside B-15a's filed direct-route 28%, not replaced, since the two count different things. Converged-wrong equivalence now covers 5 runs, 39/43, and 18/21 on GPT-2. `diagnose_units.py` gains `--exclude-seed`, because B-15b's fit used corpus seed 1. Remaining placeholders: T-SAE (4) and B-2d (1) | `paper1/main.tex`, `results/diagnostics_summary.json` |

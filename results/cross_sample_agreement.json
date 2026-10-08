@@ -1,0 +1,27 @@
+{
+ "units": 100,
+ "failures": 18,
+ "converged_wrong": 6,
+ "auc": {
+  "held-out R2": {
+   "all failures": 0.8956639566395664,
+   "converged-wrong vs pass": 0.7134146341463414,
+   "under-fitted vs pass": 0.9867886178861789
+  },
+  "restart agreement": {
+   "all failures": 0.7262872628726287,
+   "converged-wrong vs pass": 0.6849593495934959,
+   "under-fitted vs pass": 0.7469512195121951
+  },
+  "agreement with b15b_corpusseed1": {
+   "all failures": 0.9220867208672087,
+   "converged-wrong vs pass": 0.9105691056910569,
+   "under-fitted vs pass": 0.9278455284552846
+  },
+  "agreement with b15c_seqsplit": {
+   "all failures": 0.9139566395663956,
+   "converged-wrong vs pass": 0.8455284552845529,
+   "under-fitted vs pass": 0.948170731707317
+  }
+ }
+}
