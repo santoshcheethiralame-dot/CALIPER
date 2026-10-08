@@ -243,6 +243,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-17** | 2026-10-07 | **GPT-Neo-125m L6, n=20, per-unit diagnostics** | 20 | fixed estimator, 2 restarts, saved directions | `results/b17_gptneo125m_l6.jsonl`, `results/b17_diagnostics.json` | 0/20 pass, median Euclidean align 0.01; r2_exact = 1 (no pipeline fault); **geometry 17, optimisation 1, other 2**: verdict **geometry**; median sigma-align 0.9998, restart agreement 1.0, R2 0.998 |
 | **S-2 Qwen2.5-3B** | 2026-10-08 | **Instrument audit: do health checks detect dead vectors?** | 90 vectors (3 real arms x 30) | script v2026-10-07b, fp16, alpha-frac 0/0.25/0.5/1.0 | `results/s2_qwen3b/`, `results/s2_qwen3b_analysis.json` | 34 live / 56 dead (concept 16, tail **4**, sentence 14 of 30). **1 of 4 predictions holds**: norm 0.56 (near 0.5, holds); distinctness 0.78, P(YES) shift **0.37 (inverted)**, logit steering 0.70 (< 0.8) fail. Pooled AUCs largely track arm identity |
 | **S-2 Qwen2.5-7B** | 2026-10-08 | **Instrument audit, second model (4-bit NF4, fp32 compute)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_qwen7b/`, `results/s2_qwen7b_analysis.json` | 32 live / 58 dead: concept 12, tail **3**, sentence 17 of 30. Same pattern as 3B: norm 0.38 (holds, just), distinctness 0.82, **P(YES) shift 0.35 (inverted)**, logit steering 0.63 |
+| **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -341,6 +342,43 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### N-1 response noise (2026-10-08, local; scored once) - **PRIMARY HOLDS: HELD-OUT R2 KEEPS ITS LEAD WHEN THE CEILING VARIES BY UNIT**
+
+**Run.** Queue 4, `e01_gate.py --snr` / `--snr-range`, on B-14's first 100 GPT-2 layer-6 units.
+Per-unit Gaussian noise added to the response, seeded per unit. N-1a done 11:30, N-1b 18:50,
+N-1c 22:23. `analyse_n1.py` run once after all three arms were in.
+
+| arm | failures | AUC restart | AUC R2 | dAUC [boot 95%] | DeLong p | conv-wrong / under-fitted |
+|---|---|---|---|---|---|---|
+| **N-1a, SNR 1-19 per unit (primary)** | 74 | 0.752 | **0.971** | **-0.219 [-0.348, -0.110]** | 0.0004 | 8 / 66 |
+| N-1b, SNR 19 (ceiling 0.95) | 34 | 0.776 | 0.863 | -0.087 [-0.200, 0.024] | 0.13 | 1 / 33 |
+| N-1c, SNR 4 (ceiling 0.80) | 95 | 0.657 | 0.735 | -0.078 [-0.419, 0.181] | 0.65 | 14 / 81 |
+| B-15c, noiseless, sequence split | 22 | 0.723 | 0.885 | -0.162 [-0.295, -0.029] | | |
+| B-15b, noiseless, corpus seed 1 | 20 | | | -0.084 [-0.198, 0.022] | | |
+
+**Primary.** Prediction "dAUC < 0 with a bootstrap CI excluding 0" holds in N-1a. Paired
+permutation p 0.0002.
+
+**Secondaries.**
+- **SNR-normalised R2** (not ground-truth-free): AUC 0.829 in N-1a, below raw R2's 0.971.
+  Raw R2 does better than the ceiling-corrected version because, under noise, a low raw R2 also
+  flags the noisy units, and those units genuinely fail more. The ceiling is not hiding a
+  failure of R2; it is helping it.
+- **N-1b and N-1c** point the same way as the noiseless re-fits but their CIs include 0. N-1b
+  matches B-15b in size (-0.087 vs -0.084). N-1c is near-uninformative: 95 of 100 fail, so
+  the 5 passing units carry the AUC.
+- **Failure rate** rises with noise: 22% noiseless (B-15c), 34% at SNR 19, 74% mixed, 95% at SNR 4.
+- **Class split** (boundary 0.99 x each unit's ceiling): noise mostly adds under-fitted units;
+  converged-wrong goes 1 -> 8 -> 14.
+
+**Reading for Paper 1.**
+- The lead is not an artifact of every unit sharing a ceiling of 1. With per-unit ceilings
+  from 0.50 to 0.95, R2 still wins, by more than in the noiseless arms.
+- Caveat to state: in N-1a part of R2's advantage is that noise both lowers R2 and causes
+  failure. That is the honest practitioner setting (the ceiling is unknown), and it is the
+  pre-registered question.
+- Fills the four N-1 TBDs (abstract l.53, discussion l.552, limitations l.594, status table l.806).
 
 ### S-2 Qwen2.5-7B, 4-bit with fp32 compute (2026-10-08, Kaggle; scored once) - **REPLICATES 3B; THE P(YES)-SHIFT CHECK IS INVERTED EVEN WITHIN THE CONCEPT ARM**
 

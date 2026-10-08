@@ -1,0 +1,118 @@
+{
+ "N-1a (SNR 1-19 per unit, primary)": {
+  "n": 100,
+  "failures": 74,
+  "failure_rate": 0.74,
+  "ceiling_range": [
+   0.5133109456368327,
+   0.9491114865552548
+  ],
+  "auc_restart": 0.752079002079002,
+  "auc_r2": 0.9708939708939709,
+  "diff": -0.21881496881496887,
+  "delong_p": 0.0003650380457204107,
+  "boot_ci95": [
+   -0.34823284823284817,
+   -0.10965436590436595
+  ],
+  "paired_perm_p": 0.00019998000199980003,
+  "auc_r2_over_ceiling (not ground-truth-free)": 0.829002079002079,
+  "class_split": {
+   "converged_wrong": 8,
+   "under_fitted": 66
+  }
+ },
+ "N-1b (SNR 19)": {
+  "n": 100,
+  "failures": 34,
+  "failure_rate": 0.34,
+  "ceiling_range": [
+   0.95,
+   0.95
+  ],
+  "auc_restart": 0.7758467023172906,
+  "auc_r2": 0.8627450980392157,
+  "diff": -0.08689839572192515,
+  "delong_p": 0.13053500216977276,
+  "boot_ci95": [
+   -0.20008912655971478,
+   0.023629679144385022
+  ],
+  "paired_perm_p": 0.13958604139586042,
+  "auc_r2_over_ceiling (not ground-truth-free)": 0.8627450980392157,
+  "class_split": {
+   "converged_wrong": 1,
+   "under_fitted": 33
+  }
+ },
+ "N-1c (SNR 4)": {
+  "n": 100,
+  "failures": 95,
+  "failure_rate": 0.95,
+  "ceiling_range": [
+   0.8,
+   0.8
+  ],
+  "auc_restart": 0.6568421052631579,
+  "auc_r2": 0.7347368421052631,
+  "diff": -0.07789473684210524,
+  "delong_p": 0.6516823129970376,
+  "boot_ci95": [
+   -0.41894736842105257,
+   0.18105263157894735
+  ],
+  "paired_perm_p": 0.7419258074192581,
+  "auc_r2_over_ceiling (not ground-truth-free)": 0.7347368421052631,
+  "class_split": {
+   "converged_wrong": 14,
+   "under_fitted": 81
+  }
+ },
+ "B-15c (noiseless, sequence split)": {
+  "n": 100,
+  "failures": 22,
+  "failure_rate": 0.22,
+  "ceiling_range": [
+   1.0,
+   1.0
+  ],
+  "auc_restart": 0.7231934731934732,
+  "auc_r2": 0.8851981351981352,
+  "diff": -0.16200466200466201,
+  "delong_p": 0.016546397101809177,
+  "boot_ci95": [
+   -0.2954691142191143,
+   -0.029122960372960516
+  ],
+  "paired_perm_p": 0.017198280171982803,
+  "auc_r2_over_ceiling (not ground-truth-free)": 0.8851981351981352,
+  "class_split": {
+   "converged_wrong": 8,
+   "under_fitted": 14
+  }
+ },
+ "B-15b (noiseless, corpus seed 1)": {
+  "n": 100,
+  "failures": 20,
+  "failure_rate": 0.2,
+  "ceiling_range": [
+   1.0,
+   1.0
+  ],
+  "auc_restart": 0.7609375,
+  "auc_r2": 0.845,
+  "diff": -0.08406249999999993,
+  "delong_p": 0.14333140053105298,
+  "boot_ci95": [
+   -0.19782812499999994,
+   0.022499999999999968
+  ],
+  "paired_perm_p": 0.137986201379862,
+  "auc_r2_over_ceiling (not ground-truth-free)": 0.845,
+  "class_split": {
+   "converged_wrong": 7,
+   "under_fitted": 13
+  }
+ },
+ "primary_verdict": "R2 keeps its lead"
+}
