@@ -434,7 +434,7 @@ converged-wrong fit's error energy sits in the directions carrying the bottom 1\
 variance. A random vector would put 12 to 13\% there, and under-fitted fits put 20 to 55\%.
 A GPT-Neo layer-6 run is the extreme case. All 20 units fail the Euclidean bar, at a median
 alignment of 0.01, yet their stimulus-weighted alignment is 0.9998 and restarts agree at 1.0.
-At that layer almost all of each $\mathbf{w}_j$ lies where the stimulus has no variance.
+\tbd{CORRECTION, 8 Oct: the previous sentence here was wrong. At GPT-Neo layer 6 the w columns are ordinary (median low-variance share 0.15). One layer-norm output coordinate is nearly constant (sd 1.6e-5, 5{,}000x below the median); per-coordinate standardisation divides by it, so the fit's arbitrary weight on that coordinate is amplified and carries about 100\% of every fitted direction's norm. Mechanism differs from the other arms (correlated low-variance eigendirections, no near-constant coordinate). Rewrite; numbers in notebook 8 Oct and results/explore\_patterns.json.}
 
 Two limits apply. First, the equivalence is predictive and in-distribution. Steering or
 patching along $\hat{\mathbf{v}}$ pushes activations into exactly the low-variance directions

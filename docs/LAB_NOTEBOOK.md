@@ -341,6 +341,86 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Pattern pass across completed runs (2026-10-08, offline, exploratory) - **A GROUND-TRUTH-FREE CHECK FLAGS CONVERGED-WRONG FITS AT AUC 0.94-0.97; B-17 IS A STANDARDISATION ARTIFACT, AND AN EARLIER READING WAS WRONG**
+
+**Setup.**
+- Script `experiments/explore_patterns.py`, output `results/explore_patterns.json`.
+- Not pre-registered. N-1 and X-1 rows are not read.
+
+**Q2. The fitted direction's low-variance share is a new check.** It is the share of the
+fitted direction's squared norm in the stimulus eigendirections carrying the bottom 1% of
+variance. It is ground-truth-free.
+
+| arm | conv-wrong | AUC v-hat share | AUC held-out R2 | AUC restart | AUC w share (truth) | conv-wrong passing after projecting out the low-variance subspace |
+|---|---|---|---|---|---|---|
+| GPT-Neo L10 (B-8b) | 20 | **0.953** | 0.554 | 0.469 | 0.501 | 20/20 |
+| GPT-2 L6 (B-15a) | 6 | **0.941** | 0.713 | 0.685 | 0.291 | 5/6 |
+| GPT-2 L6 (B-15b) | 7 | **0.961** | 0.602 | 0.726 | 0.427 | 6/7 |
+| GPT-2 L6 (B-15c) | 8 | **0.947** | 0.724 | 0.846 | 0.386 | 7/8 |
+| Pythia-160m L6 (B-2c) | 2 | 0.972 | 0.721 | 0.831 | 0.172 | 2/2 |
+
+**What this changes.**
+- **The 7 Oct mechanism is refined.** Converged-wrong is not a property of the unit: w's own
+  low-variance share does not predict it. It is the fit picking up weight in directions the
+  stimulus barely constrains.
+- **A practitioner can detect this** from one fit and the stimulus covariance.
+- **A practitioner can largely repair it** by reporting the direction projected onto the
+  well-sampled subspace: 40 of the 43 converged-wrong fits then pass.
+- **Filed as a confirmatory test.** X-1 Addendum 1 (P4) tests this on fresh units, filed
+  before any X-1 row (d54860d).
+
+**CORRECTION to the B-17 reading (notebook §4, 7 Oct; Paper 1 §5.6).** The claim "almost all
+of each w lies where the stimulus has no variance" was wrong.
+- **The w columns are ordinary.** At GPT-Neo layer 6 their median low-variance share is 0.15.
+- **One layer-norm output coordinate is nearly constant**: SD 1.65e-5, against a median of
+  0.083.
+- **Every fitted direction puts about 100% of its norm on that coordinate.** The estimator
+  standardises each coordinate (`caliper/estimator.py`: `scale = s.std(0) + 1e-6`) and maps
+  the result back by dividing by `scale`. The fit's arbitrary weight on the constant
+  coordinate is magnified about 5,000-fold.
+- **Why the projections still match.** Each fitted direction is a tiny multiple of w plus a
+  large component on the near-constant coordinate. That component adds nothing to the
+  projection, so corr(v.s, w.s) = ±1.000 at Euclidean cosine about 0.01.
+- **B-17's failure is an estimator artifact**, and a scale floor or projection should fix it.
+- **The other arms differ.** They have no near-constant coordinate; their converged-wrong
+  error lies in correlated low-variance eigendirections.
+- **In the paper**, the §5.6 sentence is replaced by a TBD stating the correction.
+
+**Q3. A layer map of near-constant coordinates** (SD below 1% of the median, over 8,000
+tokens).
+- **GPT-Neo:** 1 to 10 such coordinates in layers 0-9. Layer 6 is the most extreme (minimum
+  SD / median 2e-4). None at layers 10 and 11.
+- **GPT-2:** one, at layer 3 only.
+- **Prediction:** the artifact strikes GPT-Neo layers 0-9 and GPT-2 layer 3. All layers fitted
+  so far except GPT-Neo layer 6 are clean.
+
+**Q4. Failures are mostly flaky, not chronic.** B-14's first 100 units, fitted 4 times:
+- 56 never fail; 22 fail in 1 of 4 fits, 15 in 2, 3 in 3, and 4 in all 4.
+- Chronic failures have median alignment 0.76. Flaky ones sit near the bar (0.967).
+- 18 units were converged-wrong at least once; only 2 of them failed every time.
+
+**Q5. Restart agreement is noisy, not overconfident, except where identifiability collapses.**
+- **In B-14** no failing fit reaches restart agreement 0.99, and 186 of 254 passing fits fall
+  below it (median for passing fits 0.947). The weakness is false alarms on good fits.
+- **At GPT-Neo layer 6** it is the opposite: 19 of 20 failures have agreement of at least
+  0.99. That is confidently wrong.
+
+**Q6. The two failure classes have different causes.**
+- **Under-fitted units are sparse.** Median firing fraction is 0.02-0.05 against 0.12-0.21
+  for passing units, and response SD is about half. That is a statistical limit: too few
+  informative tokens.
+- **Converged-wrong units look like passing units** on both measures. Theirs is a geometric
+  (identifiability) limit. This maps onto statistical vs structural multiplicity
+  (CITATIONS §26).
+
+**Q7. T-SAE.**
+- 3 of 100 latents pass.
+- Median alignment 0.56, median R2 0.70, correlation between them 0.43.
+
+**Proposed, not filed.** Re-fit B-17's 20 units with a scale floor, or with near-constant
+coordinates dropped. The prediction is that most pass, which would confirm the artifact
+directly.
+
 ### Cross-sample agreement (2026-10-08, offline, exploratory) - **DATA-RESAMPLING AGREEMENT CATCHES WHAT RESTART AGREEMENT MISSES, INCLUDING CONVERGED-WRONG FITS**
 
 **Setup.**
