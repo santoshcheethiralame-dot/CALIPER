@@ -244,6 +244,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-2 Qwen2.5-3B** | 2026-10-08 | **Instrument audit: do health checks detect dead vectors?** | 90 vectors (3 real arms x 30) | script v2026-10-07b, fp16, alpha-frac 0/0.25/0.5/1.0 | `results/s2_qwen3b/`, `results/s2_qwen3b_analysis.json` | 34 live / 56 dead (concept 16, tail **4**, sentence 14 of 30). **1 of 4 predictions holds**: norm 0.56 (near 0.5, holds); distinctness 0.78, P(YES) shift **0.37 (inverted)**, logit steering 0.70 (< 0.8) fail. Pooled AUCs largely track arm identity |
 | **S-2 Qwen2.5-7B** | 2026-10-08 | **Instrument audit, second model (4-bit NF4, fp32 compute)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_qwen7b/`, `results/s2_qwen7b_analysis.json` | 32 live / 58 dead: concept 12, tail **3**, sentence 17 of 30. Same pattern as 3B: norm 0.38 (holds, just), distinctness 0.82, **P(YES) shift 0.35 (inverted)**, logit steering 0.63 |
 | **S-2 Gemma-3-4B** | 2026-10-09 | **Instrument audit, third model (fp32, unquantised)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_gemma4b/`, `results/s2_gemma4b_analysis.json` | 41 live / 49 dead. Norm 0.29 (inverted), distinctness 0.64, P(YES) shift 0.57 (holds), logit steering 0.61. **Manipulation check fails: the alpha-frac grid saturates Gemma** (KL 42-75 nats at every non-zero alpha, random controls included; coherence 50% at 0.25). Not comparable with Qwen |
+| **P2-M** | 2026-10-09 | **Is the inverted P(YES) check output steering? (logit-lens answer score)** | 180 vectors (S-2 Qwen-3B, Qwen-7B) | `docs/preregistration-p2m-output-steering.md` (filed before analysis) | `results/p2m_qwen3b.json`, `results/p2m_qwen7b.json` | **Primary holds** (rho 0.26 [0.04, 0.44], 0.29 [0.10, 0.49]); secondary fails: the score does not separate live from dead (AUC 0.39, 0.42, CIs include 0.5) and removing it leaves the inversion (0.367 -> 0.388, 0.353 -> 0.369). Direct path real, not the mechanism of the inversion |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -343,6 +344,37 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### P2-M, logit-lens answer score vs P(YES) shift (2026-10-09, offline; scored once) - **PRIMARY HOLDS, BUT THE DIRECT PATH DOES NOT EXPLAIN THE INVERSION**
+
+**Run.** `experiments/analyse_p2m.py`, filed before analysis. Per real-arm vector v (unit, as
+injected): a(v) = (mean YES unembedding - mean NO unembedding) . (gamma * v), gamma the final
+RMSNorm gain. Weights read by HTTP range requests from the released checkpoints: only the
+unembedding (Qwen-3B: tied embed_tokens; Qwen-7B: lm_head) and the final norm. YES ids 6,
+NO ids 6 per model (the script's `yes_no_ids`). Sanity: the P(YES)-shift AUCs it recomputes
+(0.367, 0.353) equal `analyse_s2.py`'s.
+
+| model | Spearman rho(a, P(YES)-shift t) [95% CI] | AUC of a, live > dead [CI] | P(YES)-shift AUC | after removing a | rho within concept / tail / sentence |
+|---|---|---|---|---|---|
+| Qwen2.5-3B | **0.260 [0.040, 0.445]** | 0.389 [0.272, 0.512] | 0.367 | 0.388 | 0.02 / 0.32 / 0.17 |
+| Qwen2.5-7B | **0.293 [0.095, 0.490]** | 0.424 [0.302, 0.552] | 0.353 | 0.369 | 0.02 / -0.07 / 0.09 |
+
+**Verdicts as filed.**
+- **Primary holds** on both Qwen models: a vector's direct push on the YES-vs-NO logits
+  predicts how much it moves first-token P(YES).
+- **Secondary 1 fails**: dead vectors do not carry clearly more of that component (CIs
+  include 0.5).
+- **Secondary 2**: removing a(v) from the ranks leaves the inversion almost unchanged.
+
+**Reading.**
+- Output steering through the direct path is real but small, and it is mostly between arms:
+  within the concept arm rho is about 0.02 on both models.
+- It does not explain why dead vectors move P(YES) more than live ones. The inversion goes
+  through something else: later layers, or the template-tail position's role in producing the
+  answer. Paper 2 reports the inversion with this partial mechanism and names the indirect
+  paths as untested, as the prereg's failure branch says for the explanation.
+- Next, if wanted: an activation-patching test of the indirect path on the Gemma-kl session
+  (not filed).
 
 ### Dead-vector geometry across the S-2 sessions (2026-10-09, offline, exploratory) - **DEAD VECTORS CARRY MORE OF THE DIRECTION EVERY CONCEPT SHARES; FILED AS P2-G BEFORE NEW DATA**
 
