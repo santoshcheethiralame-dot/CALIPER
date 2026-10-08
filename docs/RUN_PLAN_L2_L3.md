@@ -59,7 +59,7 @@ notebook under the prefix **A-**.
 | F2-F5 (covariates, PRG CV, audit arm, null robustness) | not run | F4(a), the literature audit of which published claims separate framing from construct, folds into Paper 2's related work. The others are cut |
 | **E13 / PLANTED** (verbalizer recovery, attribution, confabulation) | designed, `readouts.py` not built | **S-10**, the verbalizer calibration arm of Paper 3 |
 | F9 32B arm | compute-blocked | Superseded: CALIPER already ran Gemma-3-27B |
-| F11 human grading + kappa | not started | Needed for any judge-scored number. Assigned in §6 |
+| F11 human grading + kappa | not started | Needed for any judge-scored number. One labeller with a blind re-label (S-12) |
 
 **Where the two programmes already overlap, and how that resolves.** The framing control is
 measured twice: A-F1 at 2B with forced choice over 16 concepts, and CALIPER C20 at 27B with
@@ -328,8 +328,9 @@ computed on the same quantised model that reports.
 | S-11 | Re-run of APERTURE R7/R8/R9 if any becomes load-bearing | as designed | ~2 GPU-h |
 
 **S-12 · Human grading and judge validation (labour, no GPU).**
-- About 200 stratified transcripts, two labellers each.
-- Cohen's kappa, human-human and judge-human.
+- About 200 stratified transcripts, labelled by one person, with a blind re-label of a fixed
+  60-item subset at least 7 days later.
+- Cohen's kappa: pass 1 vs pass 2 (intra-rater), and judge-human.
 - Gates every judge-scored number in Papers 2 and 3.
 - **Start in October.** It is pure labour and the item most likely to slip.
 
@@ -379,14 +380,10 @@ About 70-85 GPU-hours over five months, under a fifth of one account's free quot
 
 ---
 
-## 6. Ownership (proposal, for the team to settle)
+## 6. Ownership
 
-| Owner | Lane |
-|---|---|
-| Santosh | L1 and Paper 1; the B-series; integration and statistics across levels |
-| Member 2 | L2: T-0 harness, T-1, T-2, then T-4 |
-| Member 3 | L3 Part A: S-0 to S-3 on Kaggle; Paper 2 lead |
-| Member 4 | S-12 human grading; citation-ledger verification (the MEM rows the papers lean on); L3 Part B tasks S-5, S-6, S-9 |
+Santosh runs everything: every level, every Kaggle session, S-12 and the papers. Nothing is
+handed off (decided 8 Oct 2026).
 
 ---
 

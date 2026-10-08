@@ -6,7 +6,7 @@ Written 8 September 2026, covering July–September 2026.
 
 This file exists because the project has changed direction more than once and the
 reasons are scattered across a lab notebook, three pre-registrations and two vault
-documents. A reader — a mentor, a reviewer, a teammate joining late, or the author in
+documents. A reader — a mentor, a reviewer, or the author in
 six months — should be able to reconstruct why the work looks the way it does without
 reading all of it.
 

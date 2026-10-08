@@ -148,7 +148,7 @@ def planted_fixture(n=512, d=64, snr=4.0, anisotropy=0.0, seed=0):
 
 
 # ----------------------------------------------------------------------------------------
-# Stubs: the team's T-0 work. Each has an xfail test in tests/test_traits.py.
+# Stubs: T-0 work still to do. Each has an xfail test in tests/test_traits.py.
 
 
 def contrastive_prompts(trait, n, seed=0):

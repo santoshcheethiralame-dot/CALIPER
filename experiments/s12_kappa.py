@@ -1,14 +1,15 @@
-"""S-12: agreement between two human labellers, and between humans and a scorer.
+"""S-12: agreement between two labelling passes, and between the labels and a scorer.
 
-    python experiments/s12_kappa.py docs/team/s12_labeller_A.csv docs/team/s12_labeller_B.csv \
-        --key docs/team/s12_key.csv [--judge docs/team/s12_judge.csv]
+    python experiments/s12_kappa.py docs/s12/s12_pass1.csv docs/s12/s12_pass2.csv \
+        --key docs/s12/s12_key.csv [--judge docs/s12/s12_judge.csv]
 
-For each label it reports:
-- Cohen's kappa between labellers A and B, with a bootstrap 95% CI over items;
-- the same for each labeller against the rule scorer (from the key file);
+For each label it reports, on the items both files share:
+- Cohen's kappa between the two files (pass 1 and the blind pass-2 re-label), with a
+  bootstrap 95% CI over items;
+- the same for each file against the rule scorer (from the key file);
 - the same against a judge, when one is given.
 
-The gate (run plan, S-12) is human-human kappa >= 0.6 on the label a judge would replace.
+The gate (run plan, S-12) is pass-1 vs pass-2 kappa >= 0.6 on the label a judge would replace.
 Below it, judge numbers drop to secondary, and rule-scored and first-token readouts carry the
 claims.
 

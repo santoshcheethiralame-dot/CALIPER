@@ -1,9 +1,9 @@
 """S-12: draw the stratified, blinded transcript sample for human grading.
 
-    python experiments/s12_sample.py --n 200 --out docs/team/s12
+    python experiments/s12_sample.py --n 200 --out docs/s12/s12
 
 Writes two files:
-    <out>_items.csv  what labellers see: item id, task, the question, the transcript
+    <out>_items.csv  what the labeller sees: item id, task, the question, the transcript
     <out>_key.csv    what they must not see: source file, row key, alpha, concept, rule
                      scores. Used only by s12_kappa.py
 
@@ -60,7 +60,7 @@ def main():
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--steer-share", type=float, default=0.4)
     ap.add_argument("--seed", type=int, default=12)
-    ap.add_argument("--out", default="docs/team/s12")
+    ap.add_argument("--out", default="docs/s12/s12")
     a = ap.parse_args()
 
     pool = defaultdict(list)
@@ -106,7 +106,7 @@ def main():
     by = defaultdict(int)
     for r in picked:
         by[r["stratum"]] += 1
-    print(f"{len(picked)} items -> {out}_items.csv (labellers) and {out}_key.csv (held back)")
+    print(f"{len(picked)} items -> {out}_items.csv (to label) and {out}_key.csv (held back)")
     for s in sorted(by):
         print(f"  {by[s]:>3}  {s}")
 

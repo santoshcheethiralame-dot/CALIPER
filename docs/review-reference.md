@@ -519,7 +519,7 @@ reframing. It is a question for the mentor, not a decision made.*
 
 | Period | Work | Milestone |
 |---|---|---|
-| **Sep–Oct 2026** | Finish data-requirement measurements; speed up the code; assign team tracks | Phase 0 closes |
+| **Sep–Oct 2026** | Finish data-requirement measurements; speed up the code | Phase 0 closes |
 | **Oct–Dec 2026** | Write up Phase 0 | **arXiv preprint, December** |
 | **Jan–Mar 2027** | Submit to conference or workshop | First submission |
 | **Nov 2026–Jun 2027** | **Phase A** — move to earlier layers where the answer is unknown. Central question: how many independent things does one unit respond to? | Main measurement |
@@ -582,7 +582,6 @@ the main result. Worth asking about department access.
 
 | Risk | Severity | Response |
 |---|---|---|
-| **Only one team member active** | **Highest** | Assign tracks now; ask the mentor for help |
 | Capacity — the work is about equal to the time available, with no slack | High | Already cut scope twice; one more cut held in reserve |
 | Trusting shortcut measurements | High — has caught us repeatedly | Rule: a shortcut is a shortcut. Decide with the real measurement |
 | Being scooped | Medium | The instrument is hard to scoop; preprint in December |

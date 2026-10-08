@@ -142,10 +142,8 @@ push the low end up, because a characterised instrument is the thing reviewers a
 
 ## The three risks that actually decide this
 
-**1. Team.** Four-person capstone, one person executing. The plan has four separable tracks —
-extraction pipeline, estimator and nulls, causal patching, calibration harnesses — and each
-member needs a defensible contribution at review. This is the largest risk in the programme and
-it is not technical. **Resolve in weeks, not months.**
+**1. Capacity of one executor.** All work is done by one person (decided 8 Oct 2026: nothing
+is handed off). The plan is sized for that, and scope cuts are the lever.
 
 **2. Capacity.** 66 person-weeks of core work against 50–70 available is ~1.0× — no slack. Two
 mitigations already applied: battery cut to two variables, Phase A scoped to 300 units. A third
@@ -162,6 +160,5 @@ objective, and check that synthetic conclusions transfer before betting on them.
 
 1. E0.1 gate — new pre-registration with the operating-point transfer question stated in advance
 2. E0.3 required-N table → **Phase 0 closes**
-3. Assign the other three team members to tracks
 4. Mentor meeting: calibration-first vindicated · GPU ask · propose Paper 1
 5. Begin Paper 1 figures while Phase A infrastructure is built
