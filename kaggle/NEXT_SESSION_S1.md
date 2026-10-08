@@ -73,6 +73,10 @@ hardware" outcome. Do not switch them to fp32.
 
 ## Cell 3, session 2: Gemma-3-27B, 4-bit only
 
+**Not yet.** Amendment 3 adds cell S-1M (the published operating point), which needs two new
+script flags (`--inject-from trial`, `--vector-recipe macar-release`). This section is updated
+with the S-1M cell when they land. Run session 1 (12B) first.
+
 Same cell, with `PRECS = {"4bit": ...}` only, `--model gemma` and `s1_gemma27_...` names.
 
 ## Cell 4: package the outputs
