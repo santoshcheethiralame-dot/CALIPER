@@ -242,6 +242,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-15a/b/c** | 2026-10-07 | **Error budget on B-14's first 100 GPT-2 L6 units, fixed estimator** | 3 x 100 | fit seed 1 (5 restarts) / corpus seed 1 / sequence-level split, `--independent-units` | `results/b15{a,b,c}_*.jsonl`, `results/b15_analysis.json` | verdict flips vs B-14 at 0.95: 19% / 25% / 23%; R2 ahead in all three (gap -0.169 / -0.084 / -0.162); sequence split leaves R2 ahead (the prereg's one directional claim); restart curve k=2..5 AUC 0.74/0.70/0.69/0.73 vs R2 0.90 |
 | **B-17** | 2026-10-07 | **GPT-Neo-125m L6, n=20, per-unit diagnostics** | 20 | fixed estimator, 2 restarts, saved directions | `results/b17_gptneo125m_l6.jsonl`, `results/b17_diagnostics.json` | 0/20 pass, median Euclidean align 0.01; r2_exact = 1 (no pipeline fault); **geometry 17, optimisation 1, other 2**: verdict **geometry**; median sigma-align 0.9998, restart agreement 1.0, R2 0.998 |
 | **S-2 Qwen2.5-3B** | 2026-10-08 | **Instrument audit: do health checks detect dead vectors?** | 90 vectors (3 real arms x 30) | script v2026-10-07b, fp16, alpha-frac 0/0.25/0.5/1.0 | `results/s2_qwen3b/`, `results/s2_qwen3b_analysis.json` | 34 live / 56 dead (concept 16, tail **4**, sentence 14 of 30). **1 of 4 predictions holds**: norm 0.56 (near 0.5, holds); distinctness 0.78, P(YES) shift **0.37 (inverted)**, logit steering 0.70 (< 0.8) fail. Pooled AUCs largely track arm identity |
+| **S-2 Qwen2.5-7B** | 2026-10-08 | **Instrument audit, second model (4-bit NF4, fp32 compute)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_qwen7b/`, `results/s2_qwen7b_analysis.json` | 32 live / 58 dead: concept 12, tail **3**, sentence 17 of 30. Same pattern as 3B: norm 0.38 (holds, just), distinctness 0.82, **P(YES) shift 0.35 (inverted)**, logit steering 0.63 |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -340,6 +341,54 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-2 Qwen2.5-7B, 4-bit with fp32 compute (2026-10-08, Kaggle; scored once) - **REPLICATES 3B; THE P(YES)-SHIFT CHECK IS INVERTED EVEN WITHIN THE CONCEPT ARM**
+
+**Run.** Script v2026-10-08a, under prereg Amendment 2. The probe passed: activations and
+generation logits were finite.
+
+**Integrity and manipulation.**
+- 21 files, with the expected row counts and no duplicate keys.
+- 0 NaN in KL or P(YES), and no "!!!" in 2,520 generations.
+- KL is graded on the concept arm: 0.18, 0.36 and 5.9 nats.
+- The impact-matched control tracks the concept arm (0.181 vs 0.178).
+
+**Primary**, from `analyse_s2.py --quant 4bit`, run once:
+- 32 live and 58 dead vectors: concept 12, tail **3**, sentence 17 of 30.
+- Norm 0.380 [0.261, 0.510]: holds, just.
+- Distinctness 0.822 [0.729, 0.904]: fails.
+- **P(YES) shift 0.353 [0.239, 0.473]: fails, below 0.5.**
+- Logit steering 0.625 [0.508, 0.742]: fails.
+- Stability 0.606, probe 0.638.
+
+This is the same 1-of-4 pattern as 3B. Dead tail vectors replicate a third time (C31, 3B,
+7B). The tail arm again gives the largest P(YES) shifts (median t 9.4) and is the least
+distinct.
+
+**Within-arm AUCs, both Qwen models pooled (exploratory, not filed).**
+
+| check | concept token (28 live / 32 dead) | sentence mean (31 live / 29 dead) |
+|---|---|---|
+| norm | 0.317 [0.182, 0.460] | 0.218 [0.099, 0.353] |
+| distinctness | 0.638 [0.478, 0.782] | 0.882 [0.776, 0.963] |
+| stability | 0.406 | 0.364 |
+| probe | 0.500 (every vector passes) | 0.569 |
+| logit steering | 0.517 | 0.694 [0.562, 0.819] |
+| **P(YES) shift** | **0.340 [0.203, 0.492]** | 0.563 [0.413, 0.704] |
+
+**Reading.**
+- **The inversion is not only arm identity.** Within the concept arm, vectors that steer
+  nothing move first-token P(YES) more than vectors that work.
+- **No standard health check identifies live vectors reliably inside an arm**, apart from
+  distinctness in the sentence arm.
+- **Raw norm is inverted in both arms.** Larger raw vectors are more often dead. Under
+  `--alpha-frac` every injection has the same norm, so this is about the vector, not the dose.
+
+**Paper 2 headline candidate.** The check the introspection literature leans on, a
+significant P(YES) shift, is at best uninformative and at worst inverted as a sign that a
+vector is live. It is exploratory within arms, and confirmatory pooled across two models.
+
+**Next.** S-2 Gemma-3-4B (fp32), then S-1.
 
 ### Pattern pass across completed runs (2026-10-08, offline, exploratory) - **A GROUND-TRUTH-FREE CHECK FLAGS CONVERGED-WRONG FITS AT AUC 0.94-0.97; B-17 IS A STANDARDISATION ARTIFACT, AND AN EARLIER READING WAS WRONG**
 
