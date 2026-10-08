@@ -79,7 +79,10 @@ measurement error'' \citep{vim2012}. An instrument can be precise and wrong. Met
 answer is calibration: an instrument is checked against a reference standard before its
 readings on unknowns are trusted, a principle that also governs high-assurance sensing,
 where sensor readings are trusted only through a verifiable chain back to a reference
-\citep{shah2020calibration}. Agreement across restarts was
+\citep{shah2020calibration} and devices are authenticated by their physical signature
+\citep{vaidya2022acoustic}. The pattern is familiar from benchmarking too: metrics that
+suffice for a simple setting become ``necessary, but also not sufficient'' once the system
+under test is more complex \citep{dholakia2025agentic}. Agreement across restarts was
 designed for a simpler question, whether an optimiser converged, and it is now read as
 an answer to a harder one, whether the converged answer is right.
 
@@ -560,7 +563,10 @@ separate them from it. Receptive-field estimation from natural stimuli meets the
 and handles it with priors over the unexplored directions \citep{park2011localized}. For
 interpretability the consequence is practical. A direction recovered from activations is
 pinned down only within the subspace those activations explore, and an agreement check
-cannot reach outside it, however many restarts it uses. Security research has long treated
+cannot reach outside it, however many restarts it uses. Detecting the failures that remain has
+the same shape as detecting unreliable behaviour where our understanding of the offending
+behaviour, in per-instance labels, is sparse, as in click-fraud detection from traffic
+analysis \citep{nagaraja2019clicktok}. Security research has long treated
 reliability signals adversarially, assuming a check will be evaded until shown otherwise
 \citep{gardiner2016security,arp2022dos}; interpretability's reliability checks have not yet
 been held to that standard.
