@@ -1,0 +1,275 @@
+{
+  "rows": "results/tsae_main.jsonl",
+  "scrambled": null,
+  "n": 100,
+  "n_failures": 97,
+  "pass_rate": 0.03,
+  "pass_wilson_95": [
+    0.0103,
+    0.0845
+  ],
+  "primary": {
+    "auc_restart": 0.9450171821305842,
+    "auc_r2": 0.979381443298969,
+    "diff_restart_minus_r2": -0.03436426116838487,
+    "se": 0.0434931960785125,
+    "z": -0.7901065975089903,
+    "p": 0.429465517197549,
+    "verdict": "NOT SIGNIFICANT - B-1b's significance was partly a stopping artefact",
+    "bootstrap_95_diff": [
+      -0.11692439862542958,
+      0.020618556701030966
+    ]
+  },
+  "failure_classes": {
+    "wrong_basin_r2_gt_0.99": 4,
+    "under_fitted": 93
+  },
+  "by_failure_class": {
+    "0.98": {
+      "wrong_basin": {
+        "held-out R2": {
+          "n_class": 5,
+          "auc": 0.6,
+          "ci95": [
+            0.0,
+            1.0
+          ]
+        },
+        "restart agreement": {
+          "n_class": 5,
+          "auc": 0.7333333333333333,
+          "ci95": [
+            0.3333333333333333,
+            1.0
+          ]
+        },
+        "disagreement": {
+          "n_class": 5,
+          "auc": 0.6666666666666666,
+          "ci95": [
+            0.0,
+            1.0
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 5,
+          "auc": 0.8,
+          "ci95": [
+            0.4,
+            1.0
+          ]
+        }
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 92,
+          "auc": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "restart agreement": {
+          "n_class": 92,
+          "auc": 0.9565217391304348,
+          "ci95": [
+            0.8623188405797102,
+            1.0
+          ]
+        },
+        "disagreement": {
+          "n_class": 92,
+          "auc": 0.6612318840579711,
+          "ci95": [
+            0.03260869565217391,
+            0.9963768115942029
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 92,
+          "auc": 0.9456521739130435,
+          "ci95": [
+            0.8513586956521739,
+            1.0
+          ]
+        }
+      }
+    },
+    "0.99": {
+      "wrong_basin": {
+        "held-out R2": null,
+        "restart agreement": null,
+        "disagreement": null,
+        "restart R2 spread": null
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 93,
+          "auc": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "restart agreement": {
+          "n_class": 93,
+          "auc": 0.953405017921147,
+          "ci95": [
+            0.8637992831541219,
+            1.0
+          ]
+        },
+        "disagreement": {
+          "n_class": 93,
+          "auc": 0.6612903225806451,
+          "ci95": [
+            0.053763440860215055,
+            0.996415770609319
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 93,
+          "auc": 0.946236559139785,
+          "ci95": [
+            0.8566308243727598,
+            1.0
+          ]
+        }
+      }
+    },
+    "0.995": {
+      "wrong_basin": {
+        "held-out R2": null,
+        "restart agreement": null,
+        "disagreement": null,
+        "restart R2 spread": null
+      },
+      "under_fitted": {
+        "held-out R2": {
+          "n_class": 93,
+          "auc": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "restart agreement": {
+          "n_class": 93,
+          "auc": 0.953405017921147,
+          "ci95": [
+            0.8637992831541219,
+            1.0
+          ]
+        },
+        "disagreement": {
+          "n_class": 93,
+          "auc": 0.6612903225806451,
+          "ci95": [
+            0.053763440860215055,
+            0.996415770609319
+          ]
+        },
+        "restart R2 spread": {
+          "n_class": 93,
+          "auc": 0.946236559139785,
+          "ci95": [
+            0.8566308243727598,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "signals": {
+    "held-out R2": {
+      "roc_auc": 0.979381443298969,
+      "pr_auc": 0.999368775874553,
+      "spearman_vs_alignment": 0.3680168016801679
+    },
+    "restart agreement": {
+      "roc_auc": 0.9450171821305842,
+      "pr_auc": 0.9982154701925665,
+      "spearman_vs_alignment": 0.30046204620462047
+    },
+    "disagreement": {
+      "roc_auc": 0.6615120274914089,
+      "pr_auc": 0.9677934034276104,
+      "spearman_vs_alignment": -0.1381971364847298,
+      "delong_minus_r2": {
+        "diff": -0.3178694158075601,
+        "p": 0.3061061541198878
+      }
+    },
+    "restart R2 spread": {
+      "roc_auc": 0.9381443298969072,
+      "pr_auc": 0.998009349038417,
+      "spearman_vs_alignment": 0.13668166816681668,
+      "delong_minus_r2": {
+        "diff": -0.04123711340206182,
+        "p": 0.3203370988899031
+      }
+    },
+    "route agreement (ground-truth-free)": {
+      "roc_auc": 0.7285223367697594,
+      "pr_auc": 0.9837161361962444
+    }
+  },
+  "secondary_bh": {
+    "disagreement vs R2": {
+      "p": 0.3061061541198878,
+      "q": 0.3203370988899031
+    },
+    "restart R2 spread vs R2": {
+      "p": 0.3203370988899031,
+      "q": 0.3203370988899031
+    }
+  },
+  "pr_auc_prevalence_baseline": 0.97,
+  "disagreement_note": "'disagreement' is |align_direct - align_cascade| and uses the true direction; it is not ground-truth-free",
+  "threshold_sweep": {
+    "0.9": {
+      "failures": 95,
+      "held-out R2": 0.9852631578947368,
+      "restart agreement": 0.7957894736842105,
+      "disagreement": 0.7147368421052631,
+      "restart R2 spread": 0.7263157894736842
+    },
+    "0.92": {
+      "failures": 95,
+      "held-out R2": 0.9852631578947368,
+      "restart agreement": 0.7957894736842105,
+      "disagreement": 0.7147368421052631,
+      "restart R2 spread": 0.7263157894736842
+    },
+    "0.95": {
+      "failures": 97,
+      "held-out R2": 0.979381443298969,
+      "restart agreement": 0.9450171821305842,
+      "disagreement": 0.6615120274914089,
+      "restart R2 spread": 0.9381443298969072
+    },
+    "0.97": {
+      "failures": 97,
+      "held-out R2": 0.979381443298969,
+      "restart agreement": 0.9450171821305842,
+      "disagreement": 0.6615120274914089,
+      "restart R2 spread": 0.9381443298969072
+    },
+    "0.98": {
+      "failures": 98,
+      "held-out R2": 0.9795918367346939,
+      "restart agreement": 0.9897959183673469,
+      "disagreement": 0.9770408163265306,
+      "restart R2 spread": 0.9081632653061225
+    }
+  },
+  "control_permuted_labels": {
+    "n_perm": 1000,
+    "mean_diff": 0.0007250859106529193,
+    "sd_diff": 0.19419500542867207,
+    "p_abs_ge_observed": 0.869
+  },
+  "control_cheating_signal_auc": 1.0,
+  "identifiable_direction_label": "NOT COMPUTABLE: e01_gate.py archives alignments, not fitted directions (deviation from addendum 1 items 1-2)"
+}

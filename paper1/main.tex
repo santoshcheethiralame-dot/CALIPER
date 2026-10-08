@@ -230,8 +230,10 @@ part. The GPT-2 layer-6 run did not save fitted directions; every later run did.
 
 \paragraph{Scope.} The standard holds for a unit reading its own layer's layer-norm output.
 It does not extend to residual-stream features, sparse-autoencoder latents or behavioural
-directions, and whether calibrations transfer to them is an assumption this paper tests only
-\tbd{in the transfer experiment, if it lands} (Section~\ref{sec:limits}).
+directions, and whether calibrations transfer to them is not established here. A
+pre-registered attempt on sparse-autoencoder latents of GPT-2 failed at the estimator, which
+recovered 3 of 100 latents, so the checks could not be compared there
+(Section~\ref{sec:discussion}).
 
 % ======================================================================
 \section{The instrument and the checks}
@@ -561,13 +563,23 @@ pinned down only within the subspace those activations explore, and an agreement
 cannot reach outside it, however many restarts it uses. Security research has long treated
 reliability signals adversarially, assuming a check will be evaded until shown otherwise
 \citep{gardiner2016security,arp2022dos}; interpretability's reliability checks have not yet
-been held to that standard. \tbd{expand after the transfer experiment.}
+been held to that standard.
+
+Transfer is the open question. Our pre-registered attempt on GPT-2 sparse-autoencoder latents,
+whose encoder rows give an exact reference in the same way, did not reach the comparison. At
+the largest budget we could afford (16{,}000 tokens, 3{,}200 steps), the estimator recovered 3
+of 100 latents, and 93 of the 97 failures were under-fitted. Restart agreement and held-out
+fit then scored 0.945 and 0.979 against only 3 passing units, which says nothing about either
+check. The check practitioners actually rely on for sparse autoencoders, agreement across
+training seeds, needs a substrate with planted features to be calibrated
+\citep{chanin2026synthsaebench}.
 
 \section{Limitations and scope}
 \label{sec:limits}
 \begin{itemize}
-  \item The reference standard covers MLP units reading their own layer. \tbd{transfer
-  experiment: SAE encoder rows or transcoders.}
+  \item The reference standard covers MLP units reading their own layer. A pre-registered
+  transfer attempt to sparse-autoencoder latents failed at the estimator (3 of 100 recovered),
+  so the calibration is untested beyond MLP units.
   \item Models are small: 124M to 160M parameters, plus a single 1.4B arm that needed twice
   the optimisation budget.
   \item One estimator family, a single-index model fitted by least squares. The checks are
@@ -637,8 +649,8 @@ Token-budget sweep drew its own stimulus & Reported as its own experiment, not a
 reproduction of the primary run & yes & None on the reported gap \\
 Pythia loaded at its stored float16 by the model library, unrecorded & Precision now pinned
 and recorded per run; 50 units re-fitted in float32 & yes & Stimulus and response move
-0.7\%; identity error $5\times10^{-4}$ against $3.5\times10^{-7}$; verdict effect
-\tbd{B-2d} \\
+0.7\%; identity error $5\times10^{-4}$ against $3.5\times10^{-7}$; in float32, 1 of 50
+direct-route verdicts flips (median alignment change 0.0002), so the float16 arm stands \\
 Secondary analyses and failure-class split & Filed as two addenda before the primary run's
 outputs were opened & no & --- \\
 First primary run (B-1) & After an interim look at 64 units, the sample was raised to 300 and
@@ -715,7 +727,7 @@ changes held-out $R^2$ by a median of $2\times10^{-6}$ and leaves its lead intac
 (GPT-Neo and Pythia) share a training corpus. The units are
 GELU MLP neurons reading a layer-norm output, the stimulus is English prose, and there is one
 estimator family. The checks themselves are estimator-agnostic, but their AUCs need not be.
-\tbd{transfer to sparse-autoencoder latents.}
+The one transfer attempt, to sparse-autoencoder latents, failed at the estimator.
 \paragraph{Statistical conclusion.} DeLong's variance estimate is unstable when there are few
 failures. Every primary comparison is therefore also given as a paired bootstrap and a
 label-permutation test, and arms with fewer than five failures are not pooled. Pooled
@@ -783,8 +795,9 @@ result was known); the route-matched comparison; the identifiability analysis, f
 and error spectrum; the response-only difficulty baseline; the pass@$k$ model comparison;
 function-space and random-only restart agreement; $\kappa$ and angle ICCs; the paired
 permutation test. The plan for the last group was filed before it ran. \\
-Pending, filed & The response-noise experiment \tbd{N-1}; the transfer experiment
-\tbd{T-SAE}; the float32 Pythia re-fit \tbd{B-2d}. \\
+Pre-registered, reported & The transfer attempt on sparse-autoencoder latents (failed at the
+estimator, 3 of 100 recovered) and the float32 Pythia re-fit (no material effect). \\
+Pending, filed & The response-noise experiment \tbd{N-1}. \\
 \bottomrule
 \end{tabular}
 \end{table}

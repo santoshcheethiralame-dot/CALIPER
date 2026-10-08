@@ -1,0 +1,10 @@
+{
+ "shared": 50,
+ "direct_flips": 1,
+ "flip_ci95": [
+  0.0005062279830408291,
+  0.10646954571149987
+ ],
+ "median_abs_delta_align_direct": 0.00019999999999997797,
+ "reading": "no material effect"
+}
