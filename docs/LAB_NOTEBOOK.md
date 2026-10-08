@@ -341,6 +341,42 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### S-2 Qwen2.5-7B, fp16 (2026-10-08, Kaggle) - **INVALID AT BASELINE: fp16 OVERFLOW; RE-RUN IN 4-BIT WITH fp32 COMPUTE**
+
+**The session.**
+- Script v2026-10-07b.
+- 21 conditions, complete, with the expected row counts.
+
+**Broken before any injection.** At alpha 0, greedy generations were mostly "!", which is
+token 0, the signature of NaN logits. For example: "In the! heart! of!! a!!!!!! bustling!!".
+
+**NaN counts:**
+- 238 of 420 alpha-0 forced-choice P(YES) values;
+- next-token KL in 0, 2, 16 and 30 of 210 steer cells at alpha-frac 0, 0.25, 0.5 and 1.0;
+- next-token KL in up to 300 of 420 forced cells.
+
+**Why the checks missed it.**
+- `probe_finite` checks one clean forward pass's activations, and it passed.
+- When `--compute-dtype` is given explicitly (here fp16), a failed probe was not acted on.
+
+**Qwen2.5-3B is clean.** Same script, fp16: no NaN in 4,200 rows and no "!!!" in 2,520
+generations.
+
+**What was looked at.** Integrity and NaN counts only; no endpoint. The files are archived
+in `results/s2_failed_qwen7b_fp16/`.
+
+**Fix: v2026-10-08a.**
+- `probe_finite` also requires finite logits through a 24-token uninjected generation.
+- An explicit precision that fails the probe is refused.
+- The 9 script tests pass.
+
+**Re-run plan.** Prereg Amendment 2:
+- Qwen2.5-7B with 4-bit NF4 weights and fp32 compute. fp32 unquantised needs about 30.5 GB,
+  more than two T4s, and a T4 has no bf16.
+- The run sheet now sets QUANT and DTYPE per model.
+- `analyse_s2.py` gains `--quant`, because the script leaves "4bit" out of file names. The
+  3B result reproduces exactly with the change.
+
 ### S-2 Qwen2.5-3B on v2026-10-07b (2026-10-08, Kaggle; scored once) - **ONE OF FOUR PREDICTIONS HOLDS; THE P(YES)-SHIFT CHECK IS INVERTED, AND DEAD TAIL VECTORS MOVE P(YES) MOST**
 
 **Run.**

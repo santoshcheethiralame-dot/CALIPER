@@ -29,9 +29,9 @@ from pathlib import Path
 import numpy as np
 from scipy.stats import rankdata
 
-ARMS = {"concept token": ("concept_steer_none", "concept_forced_none"),
-        "template tail": ("tail_steer_none", "tail_forced_none"),
-        "sentence mean": ("sentence_steer_aperture_none", "sentence_forced_aperture_none")}
+ARMS = {"concept token": ("concept_steer{q}", "concept_forced{q}"),
+        "template tail": ("tail_steer{q}", "tail_forced{q}"),
+        "sentence mean": ("sentence_steer_aperture{q}", "sentence_forced_aperture{q}")}
 STATS = ["norm", "distinctness", "stability", "probe", "logit steering", "P(YES) shift"]
 
 
@@ -55,9 +55,11 @@ def rows(path):
     return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
 
 
-def vectors(d, model):
+def vectors(d, model, quant="none"):
     recs = []
+    q = "" if quant == "4bit" else f"_{quant}"     # the script leaves 4bit out of file names
     for arm, (steer, forced) in ARMS.items():
+        steer, forced = steer.format(q=q), forced.format(q=q)
         cfg = json.load(open(d / f"s2_{model}_{steer}.config.json"))
         fracs = dict(zip(cfg["alphas"], cfg["alpha_frac"]))
         st = rows(d / f"s2_{model}_{steer}.jsonl")
@@ -84,9 +86,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", required=True)
     ap.add_argument("--model", required=True)
+    ap.add_argument("--quant", default="none", choices=("none", "4bit", "8bit"))
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    recs = vectors(Path(a.dir), a.model)
+    recs = vectors(Path(a.dir), a.model, a.quant)
     live = np.array([r["live"] for r in recs])
     rep = {"model": a.model, "vectors": len(recs), "live": int(live.sum()), "dead": int((~live).sum()),
            "live_by_arm": {arm: [sum(r["live"] for r in recs if r["arm"] == arm),

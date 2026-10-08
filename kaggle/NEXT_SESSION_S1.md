@@ -1,7 +1,7 @@
 # Kaggle session: S-1, dead vectors by read position × precision
 
 Prereg: `docs/preregistration-s1-dead-vectors.md`. Script: `kaggle_s3_positive_control.py`
-**v2026-10-07b**. About 2-3 GPU-hours per model.
+**v2026-10-08a**. About 2-3 GPU-hours per model.
 
 ## Before you start (once)
 
@@ -34,7 +34,7 @@ import glob, os, sys, gc, torch, logging, transformers
 logging.getLogger("bitsandbytes").setLevel(logging.ERROR)
 transformers.logging.set_verbosity_error()
 transformers.logging.disable_progress_bar()
-WANT, VER = "kaggle_s3_positive_control.py", "2026-10-07b"
+WANT, VER = "kaggle_s3_positive_control.py", "2026-10-08a"
 hits = [h for h in glob.glob("/kaggle/input/**/*.py", recursive=True)
         if os.path.basename(h) == WANT]
 assert len(hits) == 1, f"expected one {WANT}, found {hits}"

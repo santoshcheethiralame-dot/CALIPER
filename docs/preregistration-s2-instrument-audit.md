@@ -104,3 +104,27 @@ as written above, and APERTURE's convention (alpha x sigma x unit direction).
 - A test now checks that the injected vectors have unit norm.
 
 Everything else in this document is unchanged. Qwen2.5-3B is re-run on v2026-10-07b.
+
+## Amendment 2 (8 October 2026, before any re-run of Qwen2.5-7B)
+
+**What failed.** The first Qwen2.5-7B session (script v2026-10-07b, fp16, unquantised) was
+numerically broken at baseline:
+- with no injection, greedy generations were mostly "!" (token 0), the signature of NaN logits;
+- 238 of 420 alpha-0 forced-choice P(YES) values were NaN;
+- next-token KL was NaN in up to 300 of 420 injected forced-choice cells.
+
+The finiteness probe had checked one clean forward pass and passed. When `--compute-dtype` was
+given explicitly, a failed probe was not acted on. Only file integrity and these NaN counts
+were looked at; no endpoint was computed. The files are archived as a failed run.
+
+**The fix.**
+- Script v2026-10-08a also requires finite logits through a short uninjected generation.
+- It refuses an explicit precision that fails the probe, rather than running.
+
+**Qwen2.5-7B is re-run with 4-bit NF4 weights and fp32 compute.**
+- fp32 unquantised needs about 30.5 GB for weights, more than two T4s hold.
+- A T4 has no bf16.
+- This is the same configuration as S-1's 4-bit cells.
+
+Qwen2.5-3B (fp16, verified finite: no NaN values and no "!!!" in 2,520 generations) and
+Gemma-3-4B (fp32) are unchanged. The per-model precision is reported with the results.

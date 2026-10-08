@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-07b"
+VERSION = "2026-10-08a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -737,8 +737,17 @@ def probe_finite(model, tok, layers, layer):
     h = last_token_activation(model, tok, layers, "Tell me about bread", layer)
     ok = bool(torch.isfinite(h).all())
     biggest = h[torch.isfinite(h)].abs().max() if torch.isfinite(h).any() else float("inf")
-    print(f"  probe: max|h| = {biggest:.1f}, all finite = {ok}", flush=True)
-    return ok
+    # One clean forward pass is not enough. Qwen2.5-7B in fp16 passed the check above, then
+    # overflowed during generation: NaN logits decode to token 0 ("!"), and 57% of the
+    # alpha-0 forced-choice P(YES) values were NaN (S-2, 8 Oct). Generate without injection
+    # and require every step's logits to be finite.
+    out = model.generate(**encode(tok, model, STEER), max_new_tokens=24, do_sample=False,
+                         output_scores=True, return_dict_in_generate=True,
+                         pad_token_id=tok.pad_token_id or tok.eos_token_id)
+    gen_ok = all(bool(torch.isfinite(s).all()) for s in out.scores)
+    print(f"  probe: max|h| = {biggest:.1f}, activations finite = {ok}, "
+          f"generation logits finite = {gen_ok}", flush=True)
+    return ok and gen_ok
 
 
 def _gram_stats(stacked):
@@ -1381,7 +1390,14 @@ def main():
               flush=True)
     assert a.layer < len(layers), f"layer {a.layer} >= {len(layers)}"
 
-    if not probe_finite(model, tok, layers, a.layer) and a.compute_dtype == "auto":
+    finite = probe_finite(model, tok, layers, a.layer)
+    if not finite and a.compute_dtype != "auto":
+        # An explicit precision that overflows is refused, not run: before 2026-10-08a this
+        # case fell through and wrote a session of NaN rows.
+        raise SystemExit(f"non-finite activations or logits at --compute-dtype "
+                         f"{a.compute_dtype}. A T4 has no bf16; use --quant 4bit "
+                         f"--compute-dtype fp32 for models too large for fp32")
+    if not finite and a.compute_dtype == "auto":
         print("  fp16 overflowed; reloading in fp32 compute (slower but correct)",
               flush=True)
         del model

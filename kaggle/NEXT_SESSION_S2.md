@@ -1,7 +1,7 @@
 # Kaggle sessions: S-2, the instrument audit on small models
 
 Prereg: `docs/preregistration-s2-instrument-audit.md`. Script: `kaggle_s3_positive_control.py`
-**v2026-10-07b**. Plan one session per model: Qwen2.5-3B, Qwen2.5-7B, Gemma-3-4B.
+**v2026-10-08a**. Plan one session per model: Qwen2.5-3B, Qwen2.5-7B, Gemma-3-4B.
 
 ## Before you start
 
@@ -16,7 +16,9 @@ Prereg: `docs/preregistration-s2-instrument-audit.md`. Script: `kaggle_s3_positi
 ## Cell 3: every arm × stage for one model
 
 ```python
-MODEL, DTYPE = "qwen3b", "fp16"        # qwen7b fp16; gemma4b fp32 (Gemma overflows in fp16)
+MODEL, QUANT, DTYPE = "qwen3b", "none", "fp16"
+# qwen7b: "4bit", "fp32" (fp16 overflows; fp32 does not fit a T4 pair; Amendment 2)
+# gemma4b: "none", "fp32" (Gemma overflows in fp16)
 GRID = ["--alpha-frac", "0", "0.25", "0.5", "1.0"]
 ARMS = {"concept":  ["--vector-pos", "concept"],
         "tail":     ["--vector-pos", "template-tail"],
@@ -27,7 +29,7 @@ ARMS = {"concept":  ["--vector-pos", "concept"],
         "span":     ["--control", "span"]}
 for stage in ("steer", "forced", "framing"):
     for arm, aflags in ARMS.items():
-        sys.argv = ["run", "--model", MODEL, "--quant", "none", "--compute-dtype", DTYPE,
+        sys.argv = ["run", "--model", MODEL, "--quant", QUANT, "--compute-dtype", DTYPE,
                     "--stage", stage, *GRID, *aflags,
                     "--out", f"/kaggle/working/s2_{MODEL}_{arm}.jsonl"]
         print("\n######", stage, arm, flush=True)
