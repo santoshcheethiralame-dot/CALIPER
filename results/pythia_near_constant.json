@@ -1,0 +1,10 @@
+{
+ "EleutherAI/pythia-160m L6": {
+  "near_constant_coords": 0,
+  "min_sd_over_median": 0.8041914316393382
+ },
+ "EleutherAI/pythia-1.4b L12": {
+  "near_constant_coords": 0,
+  "min_sd_over_median": 0.8068807959703447
+ }
+}
