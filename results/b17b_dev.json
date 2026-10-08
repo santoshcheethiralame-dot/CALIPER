@@ -1,0 +1,10 @@
+{
+ "B-17 GPT-Neo L6, as run": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "passes": 0,
+  "median_alignment": 0.01005,
+  "median_share_on_near_constant": 0.9998526573181152,
+  "fits_with_share_gt_0.5": 20
+ }
+}

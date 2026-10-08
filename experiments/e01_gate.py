@@ -91,6 +91,11 @@ ap.add_argument("--fit-seed", type=int, default=0,
 ap.add_argument("--corpus-seed", type=int, default=0,
                 help="seed for sample_corpus, which decides which tokens make the stimulus. "
                      "0 reproduces every earlier run")
+ap.add_argument("--drop-constant-coords", type=float, default=None, metavar="FRAC",
+                help="fit without stimulus coordinates whose SD is below FRAC x the median SD, "
+                     "then put zeros back in those positions of every fitted direction. "
+                     "Per-coordinate standardisation otherwise magnifies the fit's arbitrary "
+                     "weight on a near-constant coordinate (B-17b)")
 ap.add_argument("--exclude-corpus-seed", type=int, default=None,
                 help="drop every document that corpus seed would sample, so this run's "
                      "stimulus is document-disjoint from that seed's (X-1)")
@@ -166,6 +171,20 @@ if dirs is not None:
     dirs.mkdir(parents=True, exist_ok=True)
 print(f"  stimulus {p.stimulus.shape}  ({time.time()-t0:.0f}s)", flush=True)
 
+S_fit, pad = p.stimulus, (lambda V: V)
+if a.drop_constant_coords is not None:
+    sd = p.stimulus.std(0)
+    keep = sd >= a.drop_constant_coords * np.median(sd)
+    S_fit = p.stimulus[:, keep]
+
+    def pad(V):
+        V = np.asarray(V)
+        full = np.zeros((len(keep),) + V.shape[1:], dtype=V.dtype)
+        full[keep] = V
+        return full
+    print(f"  dropped {int((~keep).sum())} near-constant coordinate(s) "
+          f"(SD < {a.drop_constant_coords} x median)", flush=True)
+
 alive = p.response.std(0) > 1e-4
 print(f"  alive: {int(alive.sum())}/{len(alive)} (screened units are reported, not dropped)",
       flush=True)
@@ -175,15 +194,19 @@ for start in range(0, len(todo), a.batch):
     idx = todo[start:start + a.batch]
     Y = p.response[:, idx]
     indep = dict(unit_ids=p.neurons[idx], per_neuron_stop=True) if a.independent_units else {}
-    d1 = fit_batch(p.stimulus, Y, k=1, n_restarts=a.restarts, steps=a.steps,
+    d1 = fit_batch(S_fit, Y, k=1, n_restarts=a.restarts, steps=a.steps,
                    seed=a.fit_seed, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
-    d2 = fit_batch(p.stimulus, Y, k=2, n_restarts=a.restarts, steps=a.steps,
+    d2 = fit_batch(S_fit, Y, k=2, n_restarts=a.restarts, steps=a.steps,
                    seed=a.fit_seed, device=device, per_neuron_seed=a.per_neuron_seed, **indep)
+    for res in list(d1) + list(d2):
+        res.subspace = pad(res.subspace)
+        res.restarts = [pad(q) for q in res.restarts]
     for j, i in enumerate(idx):
         n = int(p.neurons[i])
         wu = p.weights[:, i] / np.linalg.norm(p.weights[:, i])
-        c = fit_cascade(p.stimulus, p.response[:, i], k=1,
+        c = fit_cascade(S_fit, p.response[:, i], k=1,
                         n_restarts=a.restarts, steps=a.steps, seed=a.fit_seed)
+        c.subspace = pad(c.subspace)
         ad = abs(subspace_alignment(d1[j].subspace, wu[:, None]))
         ac = abs(subspace_alignment(c.subspace, wu[:, None]))
         use_cascade = c.test_r2 > d1[j].test_r2
