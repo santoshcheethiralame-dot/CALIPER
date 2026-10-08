@@ -243,6 +243,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-17** | 2026-10-07 | **GPT-Neo-125m L6, n=20, per-unit diagnostics** | 20 | fixed estimator, 2 restarts, saved directions | `results/b17_gptneo125m_l6.jsonl`, `results/b17_diagnostics.json` | 0/20 pass, median Euclidean align 0.01; r2_exact = 1 (no pipeline fault); **geometry 17, optimisation 1, other 2**: verdict **geometry**; median sigma-align 0.9998, restart agreement 1.0, R2 0.998 |
 | **S-2 Qwen2.5-3B** | 2026-10-08 | **Instrument audit: do health checks detect dead vectors?** | 90 vectors (3 real arms x 30) | script v2026-10-07b, fp16, alpha-frac 0/0.25/0.5/1.0 | `results/s2_qwen3b/`, `results/s2_qwen3b_analysis.json` | 34 live / 56 dead (concept 16, tail **4**, sentence 14 of 30). **1 of 4 predictions holds**: norm 0.56 (near 0.5, holds); distinctness 0.78, P(YES) shift **0.37 (inverted)**, logit steering 0.70 (< 0.8) fail. Pooled AUCs largely track arm identity |
 | **S-2 Qwen2.5-7B** | 2026-10-08 | **Instrument audit, second model (4-bit NF4, fp32 compute)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_qwen7b/`, `results/s2_qwen7b_analysis.json` | 32 live / 58 dead: concept 12, tail **3**, sentence 17 of 30. Same pattern as 3B: norm 0.38 (holds, just), distinctness 0.82, **P(YES) shift 0.35 (inverted)**, logit steering 0.63 |
+| **S-2 Gemma-3-4B** | 2026-10-09 | **Instrument audit, third model (fp32, unquantised)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_gemma4b/`, `results/s2_gemma4b_analysis.json` | 41 live / 49 dead. Norm 0.29 (inverted), distinctness 0.64, P(YES) shift 0.57 (holds), logit steering 0.61. **Manipulation check fails: the alpha-frac grid saturates Gemma** (KL 42-75 nats at every non-zero alpha, random controls included; coherence 50% at 0.25). Not comparable with Qwen |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -342,6 +343,59 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-2 Gemma-3-4B, fp32 (2026-10-09, Kaggle; scored once) - **SCORED AS FILED, BUT THE DOSE GRID SATURATES GEMMA: NOT COMPARABLE WITH QWEN, AND S-1 GEMMA MUST NOT LAUNCH ON THIS GRID**
+
+**Run.** Script v2026-10-08a, `gemma-3-4b-it`, fp32 unquantised, layer 20 of 34. 21 files, 4,200
+rows, no duplicate keys, 0 non-finite values, no "!!!" in any generation. The finiteness probe
+passed.
+
+**Primary**, from `analyse_s2.py --model gemma4b`, run once:
+- 41 live and 49 dead vectors: concept 10, tail 9, sentence 22 of 30.
+- Norm 0.287 [0.180, 0.405]: fails, inverted (larger raw vectors are more often dead), as on
+  both Qwen models.
+- Distinctness 0.636 [0.515, 0.754]: fails, just.
+- **P(YES) shift 0.566 [0.444, 0.682]: holds.** Not inverted here, unlike both Qwen models.
+- Logit steering 0.606 [0.485, 0.724]: fails.
+- Stability 0.529, probe 0.585.
+
+**Manipulation check (secondary 1).** The grid is far too strong for this model.
+
+| arm | median next-token KL (nats) at alpha-frac 0.25 / 0.5 / 1.0 | coherent steer generations at 0 / 0.25 / 0.5 / 1.0 |
+|---|---|---|
+| concept | 42.9 / 60.4 / 71.3 | 30 / 20 / 3 / 1 of 30 |
+| random | 50.8 / 66.5 / 70.9 | 30 / 15 / 2 / 0 |
+| random, impact-matched | 44.6 / 60.9 / 68.9 | 30 / 24 / 8 / 1 |
+| sentence | 52.6 / 71.6 / 73.7 | 30 / 13 / 3 / 1 |
+
+Qwen2.5-7B's concept arm sat at 0.18 / 0.36 / 5.9 nats on the same grid. At alpha-frac 0.5,
+where both the live label and the P(YES) shift are read, about 90% of Gemma's generations are
+incoherent (repeated fragments, Tamil and Cyrillic token salad). The live label still means
+something: random, shuffled and span controls never count as steered at any non-zero alpha
+(impact-matched once, 1 of 30 at 0.25), so a live
+vector is one that pushes its concept's tokens out of a broken model. The P(YES) readout at that
+dose is from a broken model.
+
+**Why the grid does not transfer.** Alpha-frac scales by the residual norm at the read position.
+Gemma's is huge and mostly shared across tokens: median 31,450 at the concept token, while the
+concept vectors (each word's activation minus the baseline mean) have a median norm of 3,909,
+12% of it. On Qwen2.5-3B the same ratio is 56 / 84 = 67%. So alpha-frac 0.25 is about 2 concept
+differences on Gemma and about 0.4 on Qwen. Most of Gemma's residual norm is a component every
+token shares (consistent with massive activations), so "a fraction of the residual norm" is not
+a model-independent dose. This is the anisotropy problem of Paper 1 in a different form.
+
+**Status.** Reported as scored, with the manipulation-check failure stated next to it. Not
+pooled with Qwen, and not read as evidence for or against the P(YES)-shift inversion.
+
+**Consequence for S-1.** The S-1 sheets for Gemma-3-12B and 27B use the same
+`--alpha-frac 0 0.25 0.5 1.0` grid and will saturate the same way. **Do not launch them until a
+dose amendment is filed.** Options, to be decided before any further Gemma session:
+1. calibrate the grid per model on the content-free random control only, to fixed next-token
+   KL targets (the script already bisects to a KL target for the impact-matched control);
+2. scale alpha by the median concept-vector norm instead of the residual norm;
+3. use Study 3's grid on the 27B, which is known to give coherent steering there.
+
+Only the manipulation-check fields and the primary output were looked at when this was found.
 
 ### N-1 response noise (2026-10-08, local; scored once) - **PRIMARY HOLDS: HELD-OUT R2 KEEPS ITS LEAD WHEN THE CEILING VARIES BY UNIT**
 
