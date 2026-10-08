@@ -344,6 +344,34 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Dead-vector geometry across the S-2 sessions (2026-10-09, offline, exploratory) - **DEAD VECTORS CARRY MORE OF THE DIRECTION EVERY CONCEPT SHARES; FILED AS P2-G BEFORE NEW DATA**
+
+**Setup.** Not pre-registered. Script `experiments/explore_dead_geometry.py`, output
+`results/explore_dead_geometry.json`. Labels from each session's `analyse_s2.py` output.
+Vectors are the unit directions as injected.
+
+| model | live / 90 | shared share AUC [95% CI] | top-8 share AUC | participation AUC |
+|---|---|---|---|---|
+| Qwen2.5-3B | 34 | **0.349 [0.242, 0.466]** | 0.491 | 0.434 |
+| Qwen2.5-7B | 32 | **0.229 [0.136, 0.332]** | 0.251 | 0.478 |
+| Gemma-3-4B (alpha-frac) | 41 | **0.367 [0.252, 0.484]** | 0.362 | 0.637 |
+
+Shared share = |cos(v, m)|^2, m the mean of the model's 90 real-arm vectors. AUC is P(live >
+dead), so below 0.5 means dead vectors carry more of the shared direction.
+
+**Reading.**
+- On all three sessions dead vectors lie more along the direction every concept shares. As
+  "low shared share means live", the AUC is 0.63 to 0.77, better than most of S-2's standard
+  health checks.
+- Within arms the sign mostly holds (concept 0.36-0.44, sentence 0.21-0.46), the template-tail
+  arm is mixed (0.25-0.60).
+- It overlaps with distinctness (max |cos| to another vector), which scored 0.64-0.88.
+- **Cross-paper reading.** The same geometry as Paper 1's converged-wrong fits: an answer that
+  lives where the representation does not discriminate. See `docs/flagship-plan.md` §2.
+
+**Filed.** `docs/preregistration-p2g-dead-geometry.md`: primary on S-2 Gemma-kl, secondary on
+S-1 cells, filed before either exists.
+
 ### S-2 Gemma-3-4B, fp32 (2026-10-09, Kaggle; scored once) - **SCORED AS FILED, BUT THE DOSE GRID SATURATES GEMMA: NOT COMPARABLE WITH QWEN, AND S-1 GEMMA MUST NOT LAUNCH ON THIS GRID**
 
 **Run.** Script v2026-10-08a, `gemma-3-4b-it`, fp32 unquantised, layer 20 of 34. 21 files, 4,200
@@ -3857,6 +3885,7 @@ open and block the wording of Paper A section 4.1.
 | 2026-10-08 | **Paper 1 updated with the 8 Oct results, as marked drafts.** New text is set in violet (`\draft{}`) for the author's own rewrite; numbers and placement are final. Added: N-1 as a results subsection (`sec:noise`), abstract, why-section and limitations sentences, and three rows in the every-arm table; the low-variance-share diagnostic and cross-sample agreement as an exploratory paragraph in the identifiability section, plus abstract, contribution and conclusion clauses; the corrected GPT-Neo layer-6 diagnosis (near-constant coordinate magnified by standardisation) replacing the withdrawn reading, with a deviations-table row; failure-class unit properties; verdict history across four fits; restart-agreement saturation. Status table: N-1 moved to reported; new exploratory and pending (X-1, B-17b/c/d) rows. Remaining placeholders: X-1, B-17b/c/d, bench name, licence. Build clean (19 pages); every number with two or more decimals matches a value in `results/*.json` or the B-1 pre-registration | `paper1/main.tex` |
 | 2026-10-09 | **Pythia arms checked for near-constant coordinates (same rule as the 8 Oct layer map: SD below 1% of the median).** Pythia-160m layer 6 and Pythia-1.4B layer 12 have none (min SD / median 0.80 and 0.81). With the GPT-2 and GPT-Neo map, every pooled arm is free of the B-17 artifact, so the new Paper 1 limitations sentence holds | `results/pythia_near_constant.json` |
 | 2026-10-09 | **KL-calibrated dose grid (S-2 Amendment 3, S-1 Amendment 2).** Script v2026-10-09a adds `--calibrate-kl`: each non-zero alpha is set so that four seeded random unit directions give a fixed median next-token KL over three fixed prompts; computed once per model, precision and layer and reused by every cell; a target missed by more than 5% stops the run. Targets 0.05 / 0.5 / 5 nats; the gate target is the rounded geometric mean (0.44) of the Qwen random controls' median KL at the old gate dose. The gate is now the second non-zero dose; `analyse_s2.py` reads it by grid position and reproduces the three existing sessions byte for byte. New manipulation check: at the gate, at least half of the random-control (S-2) or cell (S-1) steer generations coherent. Gemma-3-4B re-runs on the new grid as `s2_gemma4b_kl`; Qwen stands as filed. S-1 and S-2 sheets moved to v2026-10-09a. Bundle rebuilt (e01_gate.py was stale from the N-1 / B-17b flags); tests: 3 new calibration tests, S-3 script and bundle suites green | `experiments/kaggle_s3_positive_control.py`, `experiments/analyse_s2.py`, `tests/test_s3_script.py`, both preregs, `kaggle/NEXT_SESSION_S1.md`, `kaggle/NEXT_SESSION_S2.md` |
+| 2026-10-09 | **Scope expanded: programme plan to September 2027.** After a literature pass and a read-across of every finding, the plan is: Paper 1 to TMLR + arXiv by 20 Nov; Paper 2 to ICML 2027 if Gate P2 (15 Jan) passes, else a workshop; a flagship paper (six weight-derived substrates, the methods people use, a calibration table of checks, a theory note on why seed checks are blind to sampling error, and an interventional repair) to NeurIPS 2027 main track; Paper 3 in Sep 2027. Gates F-A (15 Dec), F-B (31 Jan), F-C (15 Mar). P2-G filed. Nothing in Paper 1 changes | `docs/flagship-plan.md`, `docs/preregistration-p2g-dead-geometry.md`, `docs/CITATIONS.md` §27, addenda in `PAPER_STRATEGY.md`, `RUN_PLAN_L2_L3.md`, `timeline.md` |
 | 2026-09-09 | **PAPER STRATEGY FILED, built around a claim-evidence map.** Nine claims are supported today; four need runs that are running or queued. **Four tempting claims are explicitly ruled out**, including *restart agreement does not work* - it reaches AUC 0.778 and catches most failures, so the supportable claim is **dominated, not useless**. An earlier framing in this project said useless and that was wrong | `docs/PAPER_STRATEGY.md` |
 | 2026-09-09 | **B-0's 5-of-16 is a demonstration of EXISTENCE, not a rate.** 31% on n=16 is too thin to quote as an estimate. Either extend to n=50 (~1h) or state existence only - which is enough for the claim we want, that failure classification *can* be hardware-dependent | `docs/PAPER_STRATEGY.md` section 4 |
 | 2026-09-09 | **Three highest-severity rejection risks named with answers**: only small models (abstract, not appendix); only MLP units reading their own layer (unfixable, state it up front); and *where is the method* - which is precisely why TMLR and the E&D track are the targets and a methods main track is not | `docs/PAPER_STRATEGY.md` section 5 |
@@ -4308,6 +4337,27 @@ exactly the "you kept running controls until one worked" reading that the
 pre-registration exists to prevent.
 
 ---
+
+### 7.10 The flagship programme: the plan of record from 9 Oct 2026
+
+The full plan lives in `docs/flagship-plan.md`. Each run gets its own pre-registration, §3 row
+and §4 entry as it lands.
+
+| ID | Run | Compute | Gate / prereg |
+|---|---|---|---|
+| F-0 | Theory note + synthetic simulation: seed checks blind to sampling error | CPU | none (theory) |
+| **F-1** | **Interventional data vs identifiability (targeted / random / natural-token arms)** | CPU | prereg next; **Gate F-A, 15 Dec** |
+| F-2 | Targeted sampling for sparse units; T-SAE re-run | CPU + Kaggle | prereg |
+| F-3 | ReLU substrate (OPT 125m-13b) | CPU + Kaggle | prereg |
+| F-4 | SwiGLU / GeGLU substrate (two-direction truth) | CPU + Kaggle | prereg |
+| F-5 | MoE router substrate (OLMoE-1B-7B) | Kaggle | prereg |
+| F-6 | Unembedding substrate (linear link) | CPU | prereg |
+| F-7 | SAE / transcoder encoders (Gemma Scope) | CPU + Kaggle | prereg |
+| F-8 | Exact L2 trait readout (= T-2) | CPU | T-2's prereg |
+| F-9 / F-10 | Methods panel and the calibration table of checks | both | **Gate F-B 31 Jan, F-C 15 Mar** |
+| F-11 | Scale: Pythia-6.9B/12B, OPT-13B, Qwen2.5-7B | Kaggle | prereg |
+| F-12 | Audit of published vectors with the validated checks | both | prereg |
+| P2-G | Dead-vector geometry (shared share) | offline on S-1 / S-2-kl | **filed 9 Oct** |
 
 ### 7.9 Levels 2 and 3, with APERTURE merged in: the plan of record from 6 Oct 2026
 

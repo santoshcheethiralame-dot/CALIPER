@@ -1,0 +1,143 @@
+{
+ "qwen3b": {
+  "vectors": 90,
+  "live": 34,
+  "scored": true,
+  "shared share": {
+   "auc": 0.3487394957983193,
+   "ci95": [
+    0.24210871848739496,
+    0.46638655462184875
+   ],
+   "median live": 0.03958502046074009,
+   "median dead": 0.12262881961977554,
+   "within-arm auc": {
+    "concept token": 0.4375,
+    "template tail": 0.25,
+    "sentence mean": 0.45982142857142855
+   }
+  },
+  "top-8 share": {
+   "auc": 0.49107142857142855,
+   "ci95": [
+    0.3639705882352941,
+    0.6092436974789915
+   ],
+   "median live": 0.04073619028116242,
+   "median dead": 0.03661861996249691,
+   "within-arm auc": {
+    "concept token": 0.3482142857142857,
+    "template tail": 0.6634615384615384,
+    "sentence mean": 0.4017857142857143
+   }
+  },
+  "participation": {
+   "auc": 0.4338235294117647,
+   "ci95": [
+    0.3119616596638656,
+    0.5493697478991597
+   ],
+   "median live": 0.054560886889691754,
+   "median dead": 0.06502943508149052,
+   "within-arm auc": {
+    "concept token": 0.6651785714285714,
+    "template tail": 0.49038461538461536,
+    "sentence mean": 0.78125
+   }
+  }
+ },
+ "qwen7b": {
+  "vectors": 90,
+  "live": 32,
+  "scored": true,
+  "shared share": {
+   "auc": 0.22898706896551724,
+   "ci95": [
+    0.13631465517241378,
+    0.33193696120689636
+   ],
+   "median live": 0.018743325712570588,
+   "median dead": 0.1328820863061913,
+   "within-arm auc": {
+    "concept token": 0.37037037037037035,
+    "template tail": 0.6049382716049383,
+    "sentence mean": 0.2669683257918552
+   }
+  },
+  "top-8 share": {
+   "auc": 0.2505387931034483,
+   "ci95": [
+    0.15948275862068967,
+    0.3545393318965517
+   ],
+   "median live": 0.017509514809755822,
+   "median dead": 0.031439496679857876,
+   "within-arm auc": {
+    "concept token": 0.24537037037037038,
+    "template tail": 0.5802469135802469,
+    "sentence mean": 0.2171945701357466
+   }
+  },
+  "participation": {
+   "auc": 0.47844827586206895,
+   "ci95": [
+    0.3577586206896552,
+    0.5943022629310344
+   ],
+   "median live": 0.05950729880293968,
+   "median dead": 0.06248516747277277,
+   "within-arm auc": {
+    "concept token": 0.7546296296296297,
+    "template tail": 0.3333333333333333,
+    "sentence mean": 0.9321266968325792
+   }
+  }
+ },
+ "gemma4b": {
+  "vectors": 90,
+  "live": 41,
+  "scored": true,
+  "shared share": {
+   "auc": 0.3668491786958686,
+   "ci95": [
+    0.2523643603782977,
+    0.4843578894972621
+   ],
+   "median live": 0.1486584624446885,
+   "median dead": 0.2620935656367098,
+   "within-arm auc": {
+    "concept token": 0.365,
+    "template tail": 0.5343915343915344,
+    "sentence mean": 0.21022727272727273
+   }
+  },
+  "top-8 share": {
+   "auc": 0.3623693379790941,
+   "ci95": [
+    0.25581134892981583,
+    0.48282727725236435
+   ],
+   "median live": 0.21899746185027058,
+   "median dead": 0.3649441270969783,
+   "within-arm auc": {
+    "concept token": 0.455,
+    "template tail": 0.3439153439153439,
+    "sentence mean": 0.20454545454545456
+   }
+  },
+  "participation": {
+   "auc": 0.6366351418616227,
+   "ci95": [
+    0.5161647585863613,
+    0.7436660029865604
+   ],
+   "median live": 0.009221832876723176,
+   "median dead": 0.002969561022468697,
+   "within-arm auc": {
+    "concept token": 0.55,
+    "template tail": 0.6613756613756614,
+    "sentence mean": 0.7954545454545454
+   }
+  }
+ }
+}

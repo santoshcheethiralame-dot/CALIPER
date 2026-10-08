@@ -2,6 +2,10 @@
 
 **August 2026 → May 2028 · 21 months · written 19 Aug 2026, day 2 of execution**
 
+
+> **Addendum, 9 October 2026.** The dates and staffing below are historical. The live calendar
+> is `docs/flagship-plan.md` §7; the project is run by one person.
+
 ---
 
 ## Assumptions this timeline rests on

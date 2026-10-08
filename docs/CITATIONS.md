@@ -889,3 +889,37 @@ Every row is ABS: a search summary only. Read and verify each before it carries 
 
 **Scoop check, 8 Oct.** No work found that scores checks against real pretrained-LM weight
 columns. The closest work plants synthetic ground truth. One search cannot prove absence.
+
+## 27. Leads from the 9 Oct 2026 scope pass (none cited yet)
+
+Every row is ABS unless stated: a search or abstract summary only. Read and verify each before
+it carries a claim. Rows in §26 are not repeated.
+
+| id | title | level | why it matters |
+|---|---|---|---|
+| [2510.00845](https://arxiv.org/abs/2510.00845) | Mechanistic interpretability as statistical estimation: a variance analysis (Méloux, Portet & Peyrard) | ABS | Recommends routinely reporting stability metrics for circuit discovery. The practice the flagship calibrates |
+| [2502.20914](https://arxiv.org/abs/2502.20914) | Everything, everywhere, all at once: is mechanistic interpretability identifiable? (Méloux et al., ICLR 2025) | ABS | Non-identifiability of circuits and interpretations. Positioning for the identifiability section |
+| [2605.18229](https://arxiv.org/abs/2605.18229) | Are sparse autoencoder benchmarks reliable? (Chanin 2026) | ABS | A metric can have low reseed noise and still measure the wrong thing; remedy proposed is ground truth on synthetic SAEs. Closest framing; we have real-model truth |
+| [2606.12138](https://arxiv.org/abs/2606.12138) | Unstable features, reproducible subspaces: seed dependence in SAEs | ABS | Unstable latents concentrate in reproducible low-rank subspaces: basis ambiguity, the SAE form of our identifiability finding |
+| ICLR 2026 (mlanthology paulo2026iclr-sparse) | Sparse autoencoders trained on the same data learn different features (Paulo & Belrose) | ABS | ~30% of latents shared across seeds; TopK less stable than ReLU+L1 |
+| [2506.15963](https://arxiv.org/abs/2506.15963) | Theoretical understanding of identifiable SAEs (Ferrando, Obeso, Rajamanoharan, Nanda; ICLR 2026) | ABS | Full recovery of ground-truth features not guaranteed in general |
+| [2605.31245](https://arxiv.org/abs/2605.31245) | Toward identifiable sparse autoencoders | ABS | SAEs as statistical estimators; when atoms are identifiable |
+| [2604.11061](https://arxiv.org/abs/2604.11061) | Pando: do interpretability methods work when models won't explain themselves? | ABS | Model-organism benchmark with planted truth. Contrast: truth by construction, not from weights |
+| [2609.03026](https://arxiv.org/abs/2609.03026) | ObserverBench: testing mechanistic estimates for intervention and control (Erramilli 2026) | ABS | Estimation accuracy and action quality diverge; AUROC ranks monitors differently from deployment loss |
+| [2504.13151](https://arxiv.org/abs/2504.13151) | MIB: a mechanistic interpretability benchmark (2025) | ABS | Planted/known-circuit benchmark; positioning |
+| [2603.21396](https://arxiv.org/abs/2603.21396) | Mechanisms of introspective awareness (Macar, Yang, Wang et al.) | ABS | Source of the `macar` vector recipe; detection robust, 0% false positives; emerges with preference optimisation |
+| [2603.05414](https://arxiv.org/abs/2603.05414) | Emergent introspection in AI is content-agnostic (Lederman 2026) | ABS | Models flag that something was injected but often not what. Paper 2 related work |
+| [2602.20031](https://arxiv.org/abs/2602.20031) | Latent introspection: models can detect prior concept injections | ABS | Logit-lens signal in middle layers; sampling-based evaluation understates detection |
+| [2601.01828](https://arxiv.org/abs/2601.01828) | Emergent introspective awareness in LLMs (Lindsey) | ABS | The concept-injection paradigm Paper 2 audits |
+| github wassname/isokl_steering_calibration | Iso-KL steering calibration | ABS (informal) | Bisects steering strength to a KL budget; per-model calibration proposed as a hypothesis. Prior art for S-2 Amendment 3's grid |
+| [2607.10517](https://arxiv.org/abs/2607.10517) | Conditional optimal bridge for Riemannian activation steering | ABS | Best steering strength differs several-fold across 7B models: dose is model-specific |
+| [2604.15557](https://arxiv.org/abs/2604.15557) | Predicting where steering vectors succeed | ABS | Steerability transfers across models as a concept ranking, not as a magnitude |
+| [2311.17030](https://arxiv.org/abs/2311.17030) | An interpretability illusion for subspace activation patching (Makelov et al.) | BIB (cited in Paper 1) | Interventions through dormant directions mislead. The tension F-1 must address |
+| — | Lewi, Butera & Paninski 2009, sequential optimal design of neurophysiology experiments (Neural Computation) | VERIFY | Adaptive stimulus design for receptive-field estimation: neuroscience precedent for F-1 / F-2 |
+| — | Walker et al. 2019, inception loops (Nature Neuroscience) | VERIFY | Closed-loop stimulus synthesis to characterise neurons; precedent for interventional characterisation |
+| — | Efron 1979, bootstrap; Yu & Kumbier 2020, veridical data science (PCS, PNAS) | VERIFY | Data perturbation as the stability that matters; F-0's framing |
+
+**Scoop check, 9 Oct.** Same result as 8 Oct: nothing found that calibrates reliability checks
+against weight-derived truth in pretrained models, or tests an interventional repair for an
+identifiability failure. The closest neighbours are Chanin 2605.18229 (calls for ground truth,
+uses synthetic SAEs) and Venkatesh & Kurapath 2602.06801 (theory, no truth, no repair).

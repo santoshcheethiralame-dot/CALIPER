@@ -7,6 +7,13 @@ Companion to `BENCH_SPEC.md` (what we built), `CITATIONS.md` (what we cite), and
 This is a drafting plan, not a draft. Its most important section is the claim-evidence map,
 because that is where a paper is usually lost.
 
+
+> **Addendum, 9 October 2026.** The venue table in §2 is superseded by
+> `docs/flagship-plan.md` §4: Paper 1 to TMLR and arXiv by 20 November 2026; Paper 2 to ICML
+> 2027 or a workshop (Gate P2, 15 January); a flagship paper to the NeurIPS 2027 main track
+> (Evaluations & Datasets as fallback); Paper 3 in September 2027. The claim-evidence map below
+> still governs Paper 1.
+
 ---
 
 ## 1. The story, in one paragraph

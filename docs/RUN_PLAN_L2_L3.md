@@ -9,6 +9,13 @@ Background for every decision below is in the 6 October literature pass
 (`projects/reports/CALIPER persona and self levels.md`) and the citation ledger
 (`docs/CITATIONS.md` §21-22).
 
+
+> **Addendum, 9 October 2026.** Paper 3's calendar now follows `docs/flagship-plan.md` §7 (runs
+> June to September 2027, submission September 2027). T-2's exact readout bench also serves as
+> the flagship's substrate F-8. Paper 2's runs, gates and S-numbers below are unchanged, plus
+> P2-G (`preregistration-p2g-dead-geometry.md`) and the KL-calibrated grid (S-2 Amendment 3,
+> S-1 Amendment 2).
+
 ---
 
 ## 0. The one design that every level follows
