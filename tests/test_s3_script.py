@@ -138,6 +138,42 @@ def test_calibrate_kl_refuses_two_grids(s3, monkeypatch, tmp_path):
         run(s3, monkeypatch, tmp_path, "--calibrate-kl", "0.5", "--no-health")
 
 
+def test_macar_release_recipe(s3, monkeypatch, tmp_path):
+    import numpy as np
+    assert len(s3.MACAR_BASELINE) == 100
+    run(s3, monkeypatch, tmp_path, "--vector-recipe", "macar-release", "--alphas", "0", "4",
+        "--no-health")
+    cfg = json.load(open(path(tmp_path, "_macar-release", ".config.json")))
+    assert cfg["vector_read_position"] == "template-tail"
+    assert cfg["n_baseline"] == 100
+    vecs = np.load(path(tmp_path, "_macar-release", ".vectors.npz"), allow_pickle=True)["vectors"]
+    assert not np.allclose(np.linalg.norm(vecs, axis=1), 1.0)       # raw, as released
+    with pytest.raises(SystemExit):
+        run(s3, monkeypatch, tmp_path, "--vector-recipe", "macar-release",
+            "--alpha-frac", "0", "0.5")
+
+
+def test_inject_from_trial(s3, monkeypatch, tmp_path):
+    from transformers import AutoTokenizer
+    tok = AutoTokenizer.from_pretrained(SNAP[0])
+    prompt = s3.INTROSPECTIVE.format(n=3)
+    ids = tok(f"User: {prompt}\nAssistant:")["input_ids"]
+    monkeypatch.setattr(s3, "INJECT_FROM", "all")
+    assert s3.inject_start(tok, ids) == 0
+    monkeypatch.setattr(s3, "INJECT_FROM", "trial")
+    start = s3.inject_start(tok, ids)
+    assert 0 < start < len(ids) - 1
+    assert tok.decode(ids[start + 1:]).lstrip().startswith("Trial")
+    assert not tok.decode(ids[start:]).startswith("Trial")           # one token earlier
+    steer = tok(f"User: {s3.STEER}\nAssistant:")["input_ids"]
+    assert s3.inject_start(tok, steer) == 0                          # no "Trial": every position
+    run(s3, monkeypatch, tmp_path, "--stage", "forced", "--alphas", "0", "4",
+        "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_forced_fromtrial"))
+    assert len(r) == 2 * 2 * 3
+    assert all(x["kl"] == 0.0 for x in r if x["alpha"] == 0)
+
+
 def test_forced_resume_rebuilds_legacy_keys(s3, monkeypatch, tmp_path):
     legacy = path(tmp_path, "_forced")
     c = s3.CONCEPTS[0]

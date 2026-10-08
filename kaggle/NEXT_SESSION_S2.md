@@ -1,7 +1,7 @@
 # Kaggle sessions: S-2, the instrument audit on small models
 
 Prereg: `docs/preregistration-s2-instrument-audit.md`. Script: `kaggle_s3_positive_control.py`
-**v2026-10-09a**. Qwen2.5-3B and 7B are done (alpha-frac grid, as filed). **Gemma-3-4B is
+**v2026-10-09b**. Qwen2.5-3B and 7B are done (alpha-frac grid, as filed). **Gemma-3-4B is
 re-run on the KL-calibrated grid** (prereg Amendment 3); its alpha-frac session failed the
 manipulation check.
 

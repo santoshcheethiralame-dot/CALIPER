@@ -1,7 +1,7 @@
 # Kaggle session: S-1, dead vectors by read position × precision
 
 Prereg: `docs/preregistration-s1-dead-vectors.md`. Script: `kaggle_s3_positive_control.py`
-**v2026-10-09a** (prereg Amendment 2: KL-calibrated grid). About 2-3 GPU-hours per model.
+**v2026-10-09b** (Amendment 2: KL-calibrated grid; Amendment 3: the S-1M cell). About 2-3 GPU-hours per model.
 
 ## Before you start (once)
 
@@ -34,7 +34,7 @@ import glob, os, sys, gc, torch, logging, transformers
 logging.getLogger("bitsandbytes").setLevel(logging.ERROR)
 transformers.logging.set_verbosity_error()
 transformers.logging.disable_progress_bar()
-WANT, VER = "kaggle_s3_positive_control.py", "2026-10-09a"
+WANT, VER = "kaggle_s3_positive_control.py", "2026-10-09b"
 hits = [h for h in glob.glob("/kaggle/input/**/*.py", recursive=True)
         if os.path.basename(h) == WANT]
 assert len(hits) == 1, f"expected one {WANT}, found {hits}"
@@ -73,11 +73,32 @@ hardware" outcome. Do not switch them to fp32.
 
 ## Cell 3, session 2: Gemma-3-27B, 4-bit only
 
-**Not yet.** Amendment 3 adds cell S-1M (the published operating point), which needs two new
-script flags (`--inject-from trial`, `--vector-recipe macar-release`). This section is updated
-with the S-1M cell when they land. Run session 1 (12B) first.
+Run session 1 (12B) first. Then, in the 27B session, two cells.
 
-Same cell, with `PRECS = {"4bit": ...}` only, `--model gemma` and `s1_gemma27_...` names.
+**Cell 3a: the calibrated 4-bit arms.** The session-1 cell with `PRECS` cut to `"4bit"`,
+`--model gemma` and `s1_gemma27_...` names.
+
+**Cell 3b: S-1M, the published operating point (Amendment 3).** The released recipe (last
+token of the templated "Tell me about {concept}" against its 100 baseline words, raw vector)
+at the released strengths. The steer stage injects everywhere, as every S-1 cell does; the
+forced stage injects from the token before "Trial", as released.
+
+```python
+for stage, extra in (("steer", []), ("forced", ["--inject-from", "trial"])):
+    sys.argv = ["run", "--model", "gemma", "--stage", stage, "--quant", "4bit",
+                "--compute-dtype", "fp32", "--layer", "37",
+                "--vector-recipe", "macar-release", "--alphas", "0", "4", "8", *extra,
+                "--out", "/kaggle/working/s1_gemma27_s1m.jsonl"]
+    print("\n###### S-1M", stage, flush=True)
+    try:
+        main()
+    except SystemExit as e:
+        print("CELL STOPPED:", e, flush=True)
+    gc.collect(); torch.cuda.empty_cache()
+```
+
+Healthy output for 3b: `n_baseline` 100 in the sidecar, raw vector norms well above 1, and
+files ending `_steer_macar-release_...` and `_forced_macar-release_fromtrial_...`.
 
 ## Cell 4: package the outputs
 

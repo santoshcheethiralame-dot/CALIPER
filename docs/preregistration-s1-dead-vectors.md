@@ -128,3 +128,10 @@ Precision differs from the release (4-bit here, bf16 there), and the paper says 
 **Engineering first (S-0b).** The two flags above are added to the script with tests before
 the 27B session. The 12B session does not need them and can run first. Nothing else in this
 document changes.
+
+**Clarification, same day, before any data.** The steer stage injects at every position,
+prompt and decode, so it already covers the released window; `--inject-from trial` matters
+only where the prompt contains "Trial". S-1M therefore runs two stages with the released
+vectors and strengths: `steer` (the gate, as above) and `forced` with `--inject-from trial`
+(first-token P(YES) and next-token KL under the released injection window). Both are
+descriptive. Script v2026-10-09b; tests in `tests/test_s3_script.py`.

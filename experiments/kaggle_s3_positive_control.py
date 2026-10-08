@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-09a"
+VERSION = "2026-10-09b"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -217,6 +217,42 @@ NEUTRAL_MATCHED = (
 # number on that model unidentified. This prompt removes the refusal trigger so the
 # vectors can be tested on their own.
 STEER = "Write a short story."
+
+# The released recipe's baseline (introspection-mechanisms, src/vector_utils.py,
+# DEFAULT_BASELINE_WORDS, read 9 Oct 2026): 100 entries, "Butterflies" twice, kept as
+# released so the mean matches theirs.
+MACAR_BASELINE = [
+    "Desks", "Jackets", "Gondolas", "Laughter", "Intelligence", "Bicycles", "Chairs",
+    "Orchestras", "Sand", "Pottery", "Arrowheads", "Jewelry", "Daffodils", "Plateaus",
+    "Estuaries", "Quilts", "Moments", "Bamboo", "Ravines", "Archives", "Hieroglyphs", "Stars",
+    "Clay", "Fossils", "Wildlife", "Flour", "Traffic", "Bubbles", "Honey", "Geodes", "Magnets",
+    "Ribbons", "Zigzags", "Puzzles", "Tornadoes", "Anthills", "Galaxies", "Poverty",
+    "Diamonds", "Universes", "Vinegar", "Nebulae", "Knowledge", "Marble", "Fog", "Rivers",
+    "Scrolls", "Silhouettes", "Marbles", "Cakes", "Valleys", "Whispers", "Pendulums", "Towers",
+    "Tables", "Glaciers", "Whirlpools", "Jungles", "Wool", "Anger", "Ramparts", "Flowers",
+    "Research", "Hammers", "Clouds", "Justice", "Dogs", "Butterflies", "Needles", "Fortresses",
+    "Bonfires", "Skyscrapers", "Caravans", "Patience", "Bacon", "Velocities", "Smoke",
+    "Electricity", "Sunsets", "Anchors", "Parchments", "Courage", "Statues", "Oxygen", "Time",
+    "Butterflies", "Fabric", "Pasta", "Snowflakes", "Mountains", "Echoes", "Pianos",
+    "Sanctuaries", "Abysses", "Air", "Dewdrops", "Gardens", "Literature", "Rice", "Enigmas",
+]
+
+# Where the injection starts in a prompt pass. "all": every prompt position, as every run to
+# date. "trial": from the token before "Trial" to the end of the prompt, and every decode
+# step, as the released introspection-mechanisms code does (S-1 Amendment 3).
+INJECT_FROM = "all"
+
+
+def inject_start(tok, ids):
+    """First position to inject under INJECT_FROM, given the prompt's token ids: the token
+    just before "Trial", as in the released code. Found on the ids actually injected, by
+    scanning back to the last position whose decoded suffix starts with "Trial"."""
+    if INJECT_FROM != "trial":
+        return 0
+    for k in range(len(ids) - 1, -1, -1):
+        if tok.decode(ids[k:]).lstrip().startswith("Trial"):
+            return max(k - 1, 0)
+    return 0
 
 # Concept-specific associates. C48 showed the literal-word scorer undercuts steering
 # badly - it reported 0/30 where a semantic scorer found 10/30 on text that plainly
@@ -778,12 +814,12 @@ def _gram_stats(stacked):
     }
 
 
-def build_vectors(model, tok, layers, layer, normalise, vector_pos="concept"):
+def build_vectors(model, tok, layers, layer, normalise, vector_pos="concept", baseline=None):
     print(f"building concept vectors at layer {layer} (read position: {vector_pos}) ...",
           flush=True)
     acts = torch.stack([concept_activation(model, tok, layers, f"Tell me about {n}", layer,
                                            word=n, mode=vector_pos)
-                        for n in BASELINE_NOUNS])
+                        for n in (baseline or BASELINE_NOUNS)])
     # The residual-stream norm at the read position is what makes alpha interpretable on
     # the unit-vector protocol: alpha=4 on a unit vector is a 4/||h|| perturbation.
     hn = acts.norm(dim=1)
@@ -823,6 +859,7 @@ def build_vectors(model, tok, layers, layer, normalise, vector_pos="concept"):
         "n_vectors": len(vecs),
         "non_finite_vectors": bad,
         "vector_read_position": vector_pos,
+        "n_baseline": len(baseline or BASELINE_NOUNS),
         # P1b (C56) could not be interpreted without this. Its primary null was "a
         # different concept's vector", chosen as conservative, but nobody had measured
         # whether concept vectors are mutually similar. If they share a large common
@@ -862,6 +899,9 @@ def run_trial(model, tok, layers, layer, vec, alpha, prompt, max_new=60, span="p
     enc = encode(tok, model, prompt)
     n_prompt = enc["input_ids"].shape[1]
     add = None if alpha == 0 else alpha * vec
+    start = inject_start(tok, enc["input_ids"][0].tolist())
+    if INJECT_FROM == "trial":
+        span = "all"
 
     def hook(_m, _i, out):
         tup = isinstance(out, tuple)
@@ -871,7 +911,7 @@ def run_trial(model, tok, layers, layer, vec, alpha, prompt, max_new=60, span="p
             # is split across devices, so match the activation, not model.device.
             if h.shape[1] > 1:                      # the prompt pass
                 h = h.clone()
-                h[:, :n_prompt, :] += add.to(h.device, h.dtype)
+                h[:, start:n_prompt, :] += add.to(h.device, h.dtype)
             elif span == "all":                     # one decode step
                 h = h.clone()
                 h += add.to(h.device, h.dtype)
@@ -906,13 +946,14 @@ def next_token_logprobs(model, tok, layers, layer, add, prompt):
     positions (None = clean). The same injection every trial in this script uses."""
     enc = encode(tok, model, prompt)
     n_prompt = enc["input_ids"].shape[1]
+    start = inject_start(tok, enc["input_ids"][0].tolist())
 
     def hook(_m, _i, out):
         tup = isinstance(out, tuple)
         h = out[0] if tup else out
         if add is not None and h.shape[1] > 1:
             h = h.clone()
-            h[:, :n_prompt, :] += add.to(h.device, h.dtype)
+            h[:, start:n_prompt, :] += add.to(h.device, h.dtype)
         return (h,) + out[1:] if tup else h
 
     handle = layers[layer].register_forward_hook(hook)
@@ -1223,6 +1264,8 @@ def run_stem(a):
         tag += f"_{a.control}"
     if a.vector_recipe != "macar":
         tag += f"_{a.vector_recipe}"
+    if getattr(a, "inject_from", "all") != "all":
+        tag += f"_from{a.inject_from}"
     if a.quant != "4bit":
         tag += f"_{a.quant}"
     if a.normalise and a.stage in ("forced", "steer"):
@@ -1340,11 +1383,18 @@ def main():
     ap.add_argument("--extract-layers", type=int, nargs="*", default=None,
                     help="extra layers to extract at (P2 depth curve); the plant layer "
                          "is always included")
-    ap.add_argument("--vector-recipe", choices=["macar", "aperture"], default="macar",
+    ap.add_argument("--vector-recipe", choices=["macar", "aperture", "macar-release"],
+                    default="macar",
                     help="'macar': 'Tell me about {c}' minus a baseline-noun mean, read at "
                          "--vector-pos (every run to date). 'aperture': whole-sentence "
                          "means against a same-category negative over 8 templates "
-                         "(APERTURE's extract_hf)")
+                         "(APERTURE's extract_hf). 'macar-release': the released "
+                         "introspection-mechanisms recipe, last-token read against its own "
+                         "100 baseline words, unnormalised (S-1 Amendment 3)")
+    ap.add_argument("--inject-from", choices=["all", "trial"], default="all",
+                    help="'trial' injects from the token before \"Trial\" through every "
+                         "decode step, as the released code does; 'all' is every prompt "
+                         "position, as every run to date")
     ap.add_argument("--vector-pos", choices=["concept", "template-tail"],
                     default="concept",
                     help="where the macar recipe reads its vector. 'concept' averages the "
@@ -1391,6 +1441,12 @@ def main():
     else:
         argv = None
     a = ap.parse_args(argv)
+    global INJECT_FROM
+    INJECT_FROM = a.inject_from
+    if a.vector_recipe == "macar-release" and (a.normalise or a.alpha_frac is not None
+                                               or a.calibrate_kl is not None):
+        raise SystemExit("--vector-recipe macar-release is the released recipe: raw vectors "
+                         "and raw --alphas strengths only")
     if a.calibrate_kl is not None and a.alpha_frac is not None:
         raise SystemExit("--calibrate-kl and --alpha-frac both set the grid; use one")
     if a.calibrate_kl is not None and min(a.calibrate_kl) <= 0:
@@ -1482,10 +1538,13 @@ def main():
                                                               a.normalise)
         stability_kind = "split-half"
     else:
+        release = a.vector_recipe == "macar-release"
         vecs, run_scalars = build_vectors(model, tok, layers, a.layer, a.normalise,
-                                          vector_pos=a.vector_pos)
+                                          vector_pos="template-tail" if release else a.vector_pos,
+                                          baseline=MACAR_BASELINE if release else None)
         stability = ({} if a.no_health else
-                     template_stability(model, tok, layers, a.layer, vecs, a.vector_pos))
+                     template_stability(model, tok, layers, a.layer, vecs,
+                                        "template-tail" if release else a.vector_pos))
         stability_kind = "second-template"
     # The health checks score the vectors as extracted, raw norm included.
     raw = {c: v.clone() for c, v in vecs.items()}
