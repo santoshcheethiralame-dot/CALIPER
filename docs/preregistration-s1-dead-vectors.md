@@ -104,3 +104,27 @@ its grid, as filed, would label vectors in a broken model.
   arms and the precisions are unchanged.
 - "No alpha is chosen from the data" still holds: the targets were fixed before any S-1 session,
   from another study's control rows.
+
+## Amendment 3 (9 October 2026, before any S-1 data): the published operating point as a reference cell
+
+**Why.** The released code of the introspection-mechanisms study (read 9 Oct) builds each
+concept vector at the last token of the chat-templated "Tell me about {concept}" prompt minus
+the mean over 100 baseline words, unnormalised, and injects strength x vector from the token
+before "Trial" through every generated token. That read position is this study's template-tail
+arm. The 27B session therefore gains one cell run exactly as released, so the paper can place
+the published operating point on its own scale.
+
+**Cell S-1M** (Gemma-3-27B-it, 4-bit NF4 with fp32 compute, layer 37):
+- vectors by the released recipe (`--vector-recipe macar-release`: last-token read, 100
+  baseline words, no normalisation);
+- strengths 0, 4 and 8 (`--alphas 0 4 8`, raw multipliers, as released);
+- injection from the token before "Trial" through generation (`--inject-from trial`);
+- stage `steer`, the same 30 concepts.
+
+**Outcome, descriptive (no prediction):** the steering-gate pass rate at strength 4 and 8, and
+the median next-token KL of each strength, placed on the KL scale of the calibrated cells.
+Precision differs from the release (4-bit here, bf16 there), and the paper says so.
+
+**Engineering first (S-0b).** The two flags above are added to the script with tests before
+the 27B session. The 12B session does not need them and can run first. Nothing else in this
+document changes.

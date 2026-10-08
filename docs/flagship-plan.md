@@ -121,6 +121,16 @@ Each gets a pre-registration before it runs. Compute: CPU = the laptop queue; Ka
   that reproduces findings 4-6 and predicts which failures remain invisible (bias-type).
 - It also defines the identifiable target, the projection of w onto C's well-sampled
   subspace, which the repair of finding 6 recovers.
+- **A prediction already visible in Paper 2 data.** Dead steering vectors are a bias-type
+  failure: the read position makes them consistently wrong, not noisy. F-0 therefore predicts
+  that resampling-based checks are weak on them, and S-2's second-template stability check
+  was (AUC 0.53-0.61 pooled over arms on three models; 0.36-0.41 within the concept and
+  sentence arms on the two Qwen models), while a geometric check does better (P2-G). The theory note
+  states this split explicitly: resampling sees variance, geometry sees where the answer lives,
+  nothing ground-truth-free sees a pure bias that lives where the data are rich.
+- Grounding: linear causal representation learning proves observational data insufficient and
+  one intervention per latent sufficient for identifiability (Seigal, Squires & Uhler, ICML
+  2022); F-1 is the measurement of that result on a real trained unit.
 
 ### Remedies
 
@@ -149,10 +159,10 @@ Each gets a pre-registration before it runs. Compute: CPU = the laptop queue; Ka
 |---|---|---|---|---|---|
 | (done) | GELU MLP neurons | W_in column | GELU | GPT-2, GPT-Neo, Pythia | — |
 | **F-3** | ReLU MLP neurons | W_in column | ReLU | OPT-125m/350m/1.3b; 6.7b, 13b | CPU; Kaggle |
-| **F-4** | SwiGLU / GeGLU neurons | span(gate, up) | product | Qwen2.5-0.5B, Llama-3.2-1B; Qwen2.5-7B, Gemma-3 | CPU; Kaggle |
+| **F-4** | SwiGLU / GeGLU neurons | span(gate, up) | product | **Gemma-3 ladder** 270M, 1B (CPU); 4B, 12B (Kaggle); Qwen2.5-0.5B as a second family | CPU; Kaggle |
 | **F-5** | MoE routers | router row per expert | softmax / top-k | OLMoE-1B-7B | Kaggle |
 | **F-6** | Unembedding rows | W_U column | linear | any model | CPU |
-| **F-7** | SAE / transcoder encoders | encoder row | JumpReLU | Gemma Scope on Gemma-2-2B | CPU + Kaggle |
+| **F-7** | SAE / transcoder encoders | encoder row | JumpReLU | **Gemma Scope 2** (every layer of every Gemma-3 size, residual SAEs and MLP transcoders, 16k and 262k widths): 270M and 1B on CPU | CPU + Kaggle |
 | **F-8** | Exact L2 trait readout | w = g * (mean U_A - mean U_B) | linear | GPT-2 (`caliper/traits.py`) | CPU |
 
 - F-4 needs a two-direction alignment (principal angles between the fitted plane and
@@ -181,8 +191,16 @@ seed agreement, DeLong, pooled by random effects.
 ### Application
 
 **F-12. Audit of vectors in use (no ground truth).** Apply the checks F-10 validated to
-directions people publish: the refusal direction, persona vectors, our own concept vectors
-(S-1, S-2). Which pass the checks that work? Bridges the flagship to Papers 2 and 3.
+directions people publish: the refusal direction, persona vectors (Chen et al., released
+pipeline), the concept vectors of the introspection-mechanisms release (Macar et al.), and our
+own (S-1, S-2). Which pass the checks that work? Bridges the flagship to Papers 2 and 3.
+
+**F-13. Which checks see which failure: the bias-variance split, across papers (offline).**
+Classify every failure type found so far (under-fitted, converged-wrong, standardisation
+artifact, dead vector, saturated dose) as variance-type or bias-type by F-0's test (does it
+move when the data are resampled?), and report each check's AUC by type. Prediction:
+resampling checks catch variance-type only; geometric checks catch both where the answer lives
+in poorly sampled or shared directions. Uses existing data plus F-1 and P2-G.
 
 ---
 
@@ -263,3 +281,95 @@ directions people publish: the refusal direction, persona vectors, our own conce
 - L2/L3 runs: `docs/RUN_PLAN_L2_L3.md` (Paper 3 dates now follow §7 here).
 - Results and decisions: `docs/LAB_NOTEBOOK.md` (§7.10 points here).
 - Citations: `docs/CITATIONS.md` §26-27.
+
+---
+
+## 12. Experiment register for the three remaining papers (second pass, 9 Oct 2026)
+
+A second research pass (sources in `CITATIONS.md` §28) changed several designs. This section
+is the register: every experiment still to run for Paper 2, the flagship and Paper 3, with what
+changed and why. Where it disagrees with `RUN_PLAN_L2_L3.md`, this section wins.
+
+### 12.1 What the second pass found
+
+1. **The published concept-vector recipe reads the template tail.** The released code for
+   Macar et al. (introspection-mechanisms, read 9 Oct) builds each vector as the activation at
+   the last token of the chat-templated "Tell me about {concept}" prompt minus the mean over 100
+   baseline words, at layer fraction 0.7 by default (the core 27B run uses layer 37 of 62), unnormalised,
+   scaled by strength 1-8 (default 8, core run 4), and injected from the token before "Trial"
+   through every generated token, in bf16. That read position is our template-tail arm, the
+   arm C31 and S-2 found dead-prone. S-1's 27B tail cell therefore tests the published recipe.
+2. **"A Reality Check" (Singh, Linzen & Ravfogel 2026)** already shows that models cannot tell
+   an injected state from an edited input, and that an input-only classifier matches
+   hidden-state self-report. Paper 3's planned S-8 (source discrimination) duplicates the first
+   result; the second sets the outside-observer baseline every self-report task must beat.
+3. **Gemma Scope 2** ships SAEs and transcoders for every layer of every Gemma-3 size
+   (270M-27B). One model family can carry the flagship's GeGLU (F-4) and encoder (F-7)
+   substrates on CPU, and its scale axis links to Paper 2's Gemma models.
+4. **Introspection adapters** (Anthropic, Apr 2026) and a follow-up train models to report
+   fine-tuned behaviours; report rates swing from 1.0 to 0.0 by behaviour and configuration.
+   Self-reports of implanted behaviours are a planted-truth task Paper 3 can calibrate.
+5. **Persona vectors' own caveat**: monitoring correlations (r 0.75-0.83) shrink when prompt
+   type is controlled. "Persona Non Grata" (2604.11120): the imbuing method changes the trait.
+6. **MoE routing statistics do not predict causal importance** (ICML 2026 causal audit). The
+   router row is still an exact readout; F-5's question is recovery, not importance.
+7. **Paper 2's weak stability result fits a bias-type failure.** See F-0 above.
+
+### 12.2 Paper 2 (L3 instrument audit)
+
+| ID | experiment | status | change on 9 Oct |
+|---|---|---|---|
+| S-1 | Dead vectors: read position x precision, Gemma-3-12B (4-bit, 8-bit, fp16) and 27B (4-bit) | filed; Amendment 2 (KL grid) | **adds S-1M**, below |
+| **S-1M** | **The published operating point.** Gemma-3-27B 4-bit, layer 37, template-tail vectors exactly as released (100 baseline words, unnormalised), strength 4 and 8, injected from the token before "Trial" through generation. Outcome: steering-gate pass rate and next-token KL, beside our KL-calibrated cells | **new; prereg addendum to S-1 before the 27B session** | needs `--inject-from trial` and `--vector-recipe macar-release` in the script (S-0b) |
+| S-2 | Instrument audit, three small models | Qwen done; Gemma-kl pending | none |
+| P2-G | Dead-vector geometry (shared share) | **filed 9 Oct** | none |
+| **P2-M** | **The mechanism of the inverted P(YES) check.** Logit-lens projection of each saved vector onto (YES - NO) unembedding through the final norm, against its measured P(YES) shift and its live label | **new; filed before analysis** (`preregistration-p2m-output-steering.md`) | offline: needs only the unembedding and final-norm weights |
+| P2-D | Dose transfer: fraction-of-norm vs KL-calibrated, across Qwen-3B/7B, Gemma-4B and S-1's Gemma cells, plus S-1M's published strengths on the same KL scale | planned | uses S-1M |
+| S-3 / S-4 / S-11 | A-F1 finish; Study 3 reanalysis; naturalistic re-run | S-3 and S-11 done; S-4 offline | none |
+| S-12 | Human grading, one labeller with a blind re-label | not started | none |
+
+Engineering S-0b (before S-1's 27B session): `--inject-from trial` (inject from the token
+before "Trial" through generation, as released) and `--vector-recipe macar-release`
+(last-token read, 100 baseline words, no normalisation). Tests on the tiny Llama.
+
+**Paper 2's framing after the pass.** Three replications and one critique exist on open
+models. None audits the instrument: whether the vectors are live, whether the health checks
+can tell, whether the dose transfers. Paper 2's contribution is that audit, with the published
+recipe as one of its arms.
+
+### 12.3 Flagship
+
+As §5, with the changes above: Gemma-3 ladder for F-4 and F-7, F-0's bias/variance prediction
+and its grounding, F-12's targets, and F-13. **F-1 is filed** (`preregistration-f1-interventional.md`).
+Order on the CPU after queue 6: F-1, then F-6 (unembedding, cheapest substrate), then F-3 small
+(OPT-125m/350m), then F-4 and F-7 on Gemma-3-270M.
+
+### 12.4 Paper 3 (L2 traits and L3 planted self-report)
+
+| ID | experiment | change on 9 Oct |
+|---|---|---|
+| T-0 / T-1 | Trait harness; exact-estimand precision control | none |
+| **T-2** | Exact readout bench (w = g * (mean U_A - mean U_B)) | **shared with the flagship as F-8**; run once, reported in both (flagship: one substrate row; Paper 3: the L2 result in full) |
+| T-3 | Whitened P1b rescore | optional, unchanged |
+| **T-4** | Trained-in trait directions (LoRA) | **two imbuing arms**: the LoRA implant and a system-prompt induction of the same trait, since the method changes the trait (Persona Non Grata). Adds the persona-vector monitoring check **within prompt type**, the paper's own caveat |
+| T-5 / T-6 | Toy persona transformers; model organisms | unchanged, optional |
+| S-5 | Self-prediction of its own answer | **outside observers fixed now**: an input-only classifier (Reality Check), the same-size sibling model, and a model trained on the object-level behaviour (Binder et al.). The privileged-access index is self minus the best of the three |
+| S-6 | Grammaticality judgement against its own string probabilities | unchanged |
+| S-7 | Which input was perturbed, which injection stronger | live vectors only, from S-2/S-1 (KL-calibrated doses) |
+| **S-8** | Source discrimination | **narrowed**: Reality Check showed models cannot tell injection from input edits. S-8 keeps only the calibration question (do agreement checks predict a wrong source report?) with a KL-matched input-edit arm, and cites them for the capability |
+| S-9 | Own sampling temperature (negative control) | unchanged |
+| S-10 | PLANTED verbalizer calibration | **runs on Gemma-3 with Gemma Scope 2 transcoders** (the features Macar et al. analyse), 1B on CPU first |
+| **S-14** | **Self-report of implanted behaviours** | **new**: the T-4 organisms are asked what they were trained to do (direct question, and an introspection-adapter-style probe). Truth = the implant. Calibrates agreement checks (sample mode, paraphrase consistency) against the forced-choice check. Reuses T-4's models, so no extra training |
+| S-12 | Human grading | shared with Paper 2 |
+
+**Paper 3's primary endpoint is unchanged**: per task, DeLong of the best agreement check minus
+the forced-choice / logit check at predicting a wrong self-report, pooled with random effects.
+
+### 12.5 Compute, revised
+
+| paper | CPU | Kaggle GPU-hours |
+|---|---|---|
+| Paper 2 (S-1 incl. S-1M, S-2 Gemma-kl, P2-D) | P2-G, P2-M offline | ~30 |
+| Flagship (F-1..F-13) | F-0, F-1, F-3 small, F-4/F-7 at 270M-1B, F-6, F-8, F-13 | ~90 |
+| Paper 3 (T-2..T-4, S-5..S-10, S-14) | T-0..T-2, S-10 at 1B | ~50 |
+| **total** | | **~170 of ~1,200 available** |

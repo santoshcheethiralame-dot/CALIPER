@@ -402,3 +402,24 @@ handed off (decided 8 Oct 2026).
   S-12.
 - No new L1 science after the transfer run. L1 is in its writing phase.
 - APERTURE's F2, F3 and F5 are cut, because the merged programme does not need them.
+
+---
+
+## 8. Second-pass updates (9 October 2026)
+
+The register of every remaining experiment for Papers 2 and 3 and the flagship is now
+`docs/flagship-plan.md` §12; where the two disagree, §12 wins. In short:
+
+- **Paper 2:** S-1 gains cell S-1M, the published operating point run exactly as released
+  (S-1 Amendment 3; needs engineering S-0b: `--inject-from trial`, `--vector-recipe
+  macar-release`). New: P2-G (dead-vector geometry, filed), P2-M (is the inverted P(YES) check
+  output steering? filed before analysis), P2-D (dose transfer).
+- **Paper 3, L2:** T-2 is shared with the flagship as substrate F-8. T-4 gains a
+  system-prompt imbuing arm beside the LoRA implant, and the persona-vector monitoring check
+  within prompt type.
+- **Paper 3, L3 Part B:** S-5's outside observers are fixed (input-only classifier, sibling
+  model, behaviour-trained model). S-8 is narrowed to the calibration question, since "A
+  Reality Check" (2605.26242) already shows models cannot tell injection from input edits.
+  S-10 moves to Gemma-3 with Gemma Scope 2 transcoders. New S-14: self-report of the T-4
+  implants, truth = the implant.
+- The calendar in §4 is superseded by `flagship-plan.md` §7.

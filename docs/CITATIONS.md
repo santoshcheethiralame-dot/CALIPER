@@ -923,3 +923,26 @@ it carries a claim. Rows in §26 are not repeated.
 against weight-derived truth in pretrained models, or tests an interventional repair for an
 identifiability failure. The closest neighbours are Chanin 2605.18229 (calls for ground truth,
 uses synthetic SAEs) and Venkatesh & Kurapath 2602.06801 (theory, no truth, no repair).
+
+## 28. Leads from the 9 Oct 2026 second pass (none cited yet)
+
+ABS unless stated. Verify before any of these carries a claim.
+
+| id | title | level | why it matters |
+|---|---|---|---|
+| github safety-research/introspection-mechanisms | Released code of Macar et al. | **CODE READ 9 Oct** | Vector = last-token (chat-template tail) activation of "Tell me about {c}" minus the mean of 100 baseline words; unnormalised; strength x vector, default 8, core run 4; injected from the token before "Trial" through generation; bf16; layer 37 of Gemma-3-27B-IT; GPT-4o judge; Gemma Scope 2 transcoders. Basis of S-1M |
+| [2605.26242](https://arxiv.org/abs/2605.26242) | Can LLMs introspect? A reality check (Singh, Linzen & Ravfogel 2026) | ABS | Input-only classifier matches hidden-state self-report; models cannot tell injected states from input edits. Narrows S-8; sets S-5's outside observer |
+| [2503.07513](https://arxiv.org/abs/2503.07513) | Language models fail to introspect (Song, Hu & Mahowald) | ABS | Self-report vs own string probabilities; S-6's source |
+| [2603.20276](https://arxiv.org/abs/2603.20276) | Me, myself and pi: evaluating and explaining LLM introspection (Introspect-Bench) | ABS | Self-prediction tasks with privileged-access framing; Paper 3 related work |
+| [2604.12373](https://arxiv.org/abs/2604.12373) | Masked by consensus: privileged knowledge in LLM correctness | ABS | Self-probe vs random, embedding-only and cross-model baselines; the premium of privileged access |
+| alignment.anthropic.com/2026/introspection-adapters | Introspection adapters (Shenoy et al., Apr 2026) | ABS | Trained self-report of fine-tuned behaviours; basis of S-14's probe |
+| [2607.03640](https://arxiv.org/abs/2607.03640) | Revealing hidden model behaviors with task-specific self-reports | ABS | Introspection-adapter report rates swing 1.0 to 0.0 by behaviour and configuration |
+| [2507.21509](https://arxiv.org/abs/2507.21509) | Persona vectors (Chen et al., Anthropic 2025) | ABS | Monitoring r = 0.75-0.83, smaller within prompt type (their caveat); LLM-judge truth. T-4's instrument and F-12's audit target |
+| [2604.11120](https://arxiv.org/abs/2604.11120) | Persona non grata: single-method safety evaluation is incomplete | ABS | Imbuing method changes the persona; trait vectors weakly correlated. T-4's second arm |
+| huggingface google/gemma-scope-2-* | Gemma Scope 2 (Google DeepMind) | ABS | SAEs and transcoders, every layer of every Gemma-3 size 270M-27B. F-4 / F-7 / S-10 substrate |
+| [2410.08417](https://arxiv.org/abs/2410.08417) | Bilinear MLPs enable weight-based interpretability (Pearce et al., ICLR 2025) | ABS | Weight-based analysis of gated MLPs; F-4 related work |
+| GLUScope (2026, LMU) | Gate and up activations as separate signed signals | ABS | Four sign regimes per SwiGLU neuron: F-4's difficulty structure |
+| ICML 2026 (icml.cc/virtual/2026/77464) | From observation to intervention: a causal audit of expert importance in MoE (Engmann et al.) | ABS | Routing statistics do not predict causal importance; F-5 positioning |
+| [2505.24593](https://arxiv.org/abs/2505.24593) | Decoding knowledge attribution in MoE (Li et al., ACL 2025) | ABS | OLMoE / Qwen-MoE / Mixtral routing analysis |
+| ICML 2022 | Linear causal disentanglement via interventions (Seigal, Squires & Uhler) | ABS | Observational data insufficient, one intervention per latent sufficient: F-1's theory |
+| [2311.12267](https://arxiv.org/abs/2311.12267) | Learning causal representations from general environments (Jin & Syrgkanis) | ABS | Identifiability up to effect-domination without hard interventions |
