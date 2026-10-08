@@ -241,6 +241,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-3 / A-F1** | 2026-10-07 | **APERTURE F1 finished: framing confound, gemma-2-2b-it 8-bit, 12 configs x 2 framings** | 24 files x 96 trials | frozen prereg (mirror `9267351`), frozen scorer at `b5bb2fb`, 2,000 draws; c05 neutral re-run on the new stack | `results/s3_f1/`, `results/s3_f1_score.json` | **P1, P2, P3, P4 all hold**: no config reverses (BH, 0 rejections); pooled D = -0.564 [-0.754, -0.375]; neutral hit rate above introspective in 12/12; reference cell reproduces R11. 4 configs flagged >25% unparseable, kept in the pool as filed |
 | **B-15a/b/c** | 2026-10-07 | **Error budget on B-14's first 100 GPT-2 L6 units, fixed estimator** | 3 x 100 | fit seed 1 (5 restarts) / corpus seed 1 / sequence-level split, `--independent-units` | `results/b15{a,b,c}_*.jsonl`, `results/b15_analysis.json` | verdict flips vs B-14 at 0.95: 19% / 25% / 23%; R2 ahead in all three (gap -0.169 / -0.084 / -0.162); sequence split leaves R2 ahead (the prereg's one directional claim); restart curve k=2..5 AUC 0.74/0.70/0.69/0.73 vs R2 0.90 |
 | **B-17** | 2026-10-07 | **GPT-Neo-125m L6, n=20, per-unit diagnostics** | 20 | fixed estimator, 2 restarts, saved directions | `results/b17_gptneo125m_l6.jsonl`, `results/b17_diagnostics.json` | 0/20 pass, median Euclidean align 0.01; r2_exact = 1 (no pipeline fault); **geometry 17, optimisation 1, other 2**: verdict **geometry**; median sigma-align 0.9998, restart agreement 1.0, R2 0.998 |
+| **S-2 Qwen2.5-3B** | 2026-10-08 | **Instrument audit: do health checks detect dead vectors?** | 90 vectors (3 real arms x 30) | script v2026-10-07b, fp16, alpha-frac 0/0.25/0.5/1.0 | `results/s2_qwen3b/`, `results/s2_qwen3b_analysis.json` | 34 live / 56 dead (concept 16, tail **4**, sentence 14 of 30). **1 of 4 predictions holds**: norm 0.56 (near 0.5, holds); distinctness 0.78, P(YES) shift **0.37 (inverted)**, logit steering 0.70 (< 0.8) fail. Pooled AUCs largely track arm identity |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
 
@@ -339,6 +340,53 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-2 Qwen2.5-3B on v2026-10-07b (2026-10-08, Kaggle; scored once) - **ONE OF FOUR PREDICTIONS HOLDS; THE P(YES)-SHIFT CHECK IS INVERTED, AND DEAD TAIL VECTORS MOVE P(YES) MOST**
+
+**Run.**
+- Prereg `docs/preregistration-s2-instrument-audit.md`, with Amendment 1.
+- Script v2026-10-07b, fp16, Qwen2.5-3B, layer 21 of 36.
+- 21 conditions, all clean: no duplicate keys, KL = 0 at alpha 0, unit-norm injections.
+
+**Manipulation check passed.** Median next-token KL is graded:
+- 0.4-0.8 nats at alpha-frac 0.25;
+- 1.5-2.1 at 0.5;
+- 4.2-9.5 at 1.0.
+
+07a sat at 26 nats everywhere. The impact-matched control tracks the concept arm (0.599 vs
+0.596).
+
+**Analysis.**
+- Script `experiments/analyse_s2.py`, written from the prereg text and committed (d65fa09)
+  before it touched these data. It was developed on the failed 07a files.
+- Run once: `results/s2_qwen3b_analysis.json`.
+
+**Reference label.** 34 live and 56 dead of 90:
+- concept token 16/30;
+- template tail **4/30**;
+- sentence mean 14/30.
+
+The C31 dead-tail finding replicates in a second model family, unquantised.
+
+| check, oriented so higher = healthier | AUC live vs dead [95% CI] | filed prediction | holds |
+|---|---|---|---|
+| norm | 0.560 [0.436, 0.679] | near 0.5 | **yes** |
+| distinctness (minus max cos) | 0.782 [0.682, 0.877] | near 0.5 | no |
+| P(YES) shift (paired t, 2 framings) | **0.367 [0.250, 0.487]** | near 0.5 | no: below 0.5 |
+| logit steering | 0.703 [0.595, 0.804] | >= 0.8 | no |
+| stability | 0.608 [0.496, 0.725] | none | |
+| probe | 0.607 [0.554, 0.661] | none | |
+
+**Reading (the per-arm split below is descriptive, not pre-registered).**
+- **Arm identity drives most of the pooled AUCs.** Tail vectors are mostly dead and much
+  less distinct (median max cos 0.77, against 0.35-0.40). They also give by far the largest
+  P(YES) shifts (median t 6.7, against about 1.5).
+- **The headline for Paper 2.** The "significant P(YES) shift" check, the one the
+  introspection literature leans on, is highest for the vectors that do nothing steerable.
+  That is C31's pattern, now in a second family at full precision.
+- **Within-arm AUCs.** These would separate a check's value from arm identity. They are
+  exploratory and not yet run.
+- **Next.** Qwen2.5-7B and Gemma-3-4B, the other two S-2 models, on the same cells.
 
 ### B-17 - GPT-Neo layer 6 read with the filed rules (2026-10-07, local CPU) - **GEOMETRY: THE FITS ARE NEARLY ORTHOGONAL TO w YET REPRODUCE ITS PROJECTION**
 
