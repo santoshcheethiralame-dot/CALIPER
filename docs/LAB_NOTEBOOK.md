@@ -245,6 +245,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-2 Qwen2.5-7B** | 2026-10-08 | **Instrument audit, second model (4-bit NF4, fp32 compute)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_qwen7b/`, `results/s2_qwen7b_analysis.json` | 32 live / 58 dead: concept 12, tail **3**, sentence 17 of 30. Same pattern as 3B: norm 0.38 (holds, just), distinctness 0.82, **P(YES) shift 0.35 (inverted)**, logit steering 0.63 |
 | **S-2 Gemma-3-4B** | 2026-10-09 | **Instrument audit, third model (fp32, unquantised)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_gemma4b/`, `results/s2_gemma4b_analysis.json` | 41 live / 49 dead. Norm 0.29 (inverted), distinctness 0.64, P(YES) shift 0.57 (holds), logit steering 0.61. **Manipulation check fails: the alpha-frac grid saturates Gemma** (KL 42-75 nats at every non-zero alpha, random controls included; coherence 50% at 0.25). Not comparable with Qwen |
 | **P2-M** | 2026-10-09 | **Is the inverted P(YES) check output steering? (logit-lens answer score)** | 180 vectors (S-2 Qwen-3B, Qwen-7B) | `docs/preregistration-p2m-output-steering.md` (filed before analysis) | `results/p2m_qwen3b.json`, `results/p2m_qwen7b.json` | **Primary holds** (rho 0.26 [0.04, 0.44], 0.29 [0.10, 0.49]); secondary fails: the score does not separate live from dead (AUC 0.39, 0.42, CIs include 0.5) and removing it leaves the inversion (0.367 -> 0.388, 0.353 -> 0.369). Direct path real, not the mechanism of the inversion |
+| **S-2 Gemma-3-4B-kl** | 2026-10-09 | **Instrument audit on the KL-calibrated grid (Amendment 3); P2-G primary** | 90 vectors | script v2026-10-09a, `--calibrate-kl 0.05 0.5 5` | `results/s2_gemma4b_kl/`, `results/s2_gemma4b_kl_analysis.json`, `results/p2g_gemma4b_kl.json` | Manipulation check passes (30/30 random steer generations coherent at the gate). Only **9 live / 81 dead** at the 0.5-nat gate. S-2: norm 0.41, distinctness 0.61, P(YES) 0.54 (all 'near 0.5', low power), logit steering 0.43 (fails). **P2-G fails** (0.461 [0.278, 0.632]) |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -344,6 +345,73 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-2 Gemma-3-4B on the KL-calibrated grid (2026-10-09, Kaggle; scored once) - **MANIPULATION CHECK PASSES, BUT THE GATE DOSE IS GENTLE FOR REAL VECTORS: 9 LIVE; P2-G NOT CONFIRMED**
+
+**Run.** Script v2026-10-09a (the S-2 code path is unchanged in 09b), fp32, layer 20 of 34,
+`--calibrate-kl 0.05 0.5 5`. 64 files, 4,200 rows, no duplicate keys, 0 non-finite values,
+no "!!!". Calibration (40 s, reused by every cell): alphas 857 / 1,112 / 3,430 for targets
+0.05 / 0.5 / 5 nats, achieved 0.051 / 0.479 / 4.878, all matched.
+
+**Manipulation check (Amendment 3), passes.** At the gate, 30 of 30 random-control steer
+generations are coherent (2 of 30 on the alpha-frac grid). Every arm is coherent at every dose
+except impact-matched at 5 nats (28/30).
+
+**But the dose lands unevenly.** Median next-token KL on the framing prompts:
+
+| arm | 0.05-nat dose | 0.5-nat gate | 5-nat dose |
+|---|---|---|---|
+| concept | 0.020 | 0.030 | 0.595 |
+| tail | 0.051 | 0.062 | 0.418 |
+| sentence | 0.017 | 0.062 | 0.920 |
+| random | 0.052 | 0.107 | 12.1 |
+| shuffle | 0.095 | 0.179 | 10.2 |
+| span (on-manifold) | 0.034 | 0.044 | 1.29 |
+
+- The calibration's median includes the short steer prompt; on the two framing prompts the
+  random direction sits below target at the gate (0.11).
+- **Real and on-manifold directions are far gentler than off-manifold ones at the same norm**:
+  at 5 nats-calibrated, concept vectors move KL 0.6 and random ones 12. Equal random-direction
+  KL is therefore not equal real-vector effect. This is the Paper 1 geometry again: off-manifold
+  directions hit what the model's computation is sensitive to; directions the data occupy do not.
+- Steering at the gate: concept 4/30, tail 3/30, sentence 5/30 (baseline 2/30). At 5 nats:
+  12, 10 and 20 of 30.
+
+**Primary (S-2), as filed, at the 0.5-nat gate:** 9 live, 81 dead (concept 3, tail 2, sentence
+4), so scored (>= 5 each side) but with little power.
+
+| check | AUC [95% CI] | prediction |
+|---|---|---|
+| norm | 0.407 [0.214, 0.594] | near 0.5: holds |
+| distinctness | 0.608 [0.459, 0.753] | near 0.5: holds |
+| P(YES) shift | 0.542 [0.331, 0.756] | near 0.5: holds |
+| logit steering | 0.433 [0.246, 0.643] | >= 0.8: fails |
+| stability / probe | 0.524 / 0.454 | none |
+
+Three of four predictions hold, but the intervals are about 0.4 wide: with 9 live vectors
+"near 0.5" is nearly guaranteed. This session is reported as scored and underpowered.
+
+**P2-G primary, as filed: fails.** Shared share AUC 0.461 [0.278, 0.632]; the prediction was
+<= 0.40 with the upper bound below 0.5. Within arms: concept 0.26, tail 0.36, sentence 0.68.
+Secondary 2: AUC(low shared share) 0.539 vs distinctness 0.608, difference -0.069
+[-0.203, 0.064]. Per the filed failure branch, the shared-direction account is reported as
+found on three sessions and not confirmed; Paper 2 does not use it as an explanation. The S-1
+cells remain as P2-G's secondary.
+
+**Exploratory, not filed: live at the 5-nat dose** (`results/s2_gemma4b_kl_exploratory_5nat.json`).
+36 live of 90. AUCs: norm **0.329**, distinctness 0.682, stability 0.463, probe 0.535, logit
+steering 0.583, P(YES) shift **0.325** (the gate-dose statistic against 5-nat labels), shared
+share 0.539. Where the vectors do steer, Gemma shows the Qwen pattern: larger raw vectors and
+larger P(YES) shifts go with dead vectors. Not citable as confirmation; it says the gate-dose
+result is a power problem, not a contradiction.
+
+**P2-M on Gemma (secondary)** needs the gated Gemma-3 weights: pending (HF token or a Kaggle
+cell).
+
+**Consequence for S-1.** S-1 runs Gemma-3-12B and 27B on the same grid with the same 0.5-nat
+gate. If the gate is as gentle there, S-1's McNemar has little power. A pre-data amendment is
+proposed (not filed): report the steering pass at all three doses with the 5-nat dose as a
+co-primary, decided from this session's dose finding and before any S-1 data.
 
 ### P2-M, logit-lens answer score vs P(YES) shift (2026-10-09, offline; scored once) - **PRIMARY HOLDS, BUT THE DIRECT PATH DOES NOT EXPLAIN THE INVERSION**
 

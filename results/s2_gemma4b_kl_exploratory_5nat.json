@@ -1,0 +1,13 @@
+{
+ "note": "exploratory, not filed: live label at the 5-nat dose instead of the 0.5-nat gate",
+ "live": 36,
+ "auc": {
+  "norm": 0.3292181069958848,
+  "distinctness": 0.6823559670781894,
+  "stability": 0.46296296296296297,
+  "probe": 0.5354938271604939,
+  "logit steering": 0.5828189300411523,
+  "P(YES) shift": 0.32510288065843623,
+  "shared share (live>dead)": 0.5385802469135802
+ }
+}

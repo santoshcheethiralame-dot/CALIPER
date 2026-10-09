@@ -1,0 +1,62 @@
+{
+ "gemma4b_kl": {
+  "vectors": 90,
+  "live": 9,
+  "scored": true,
+  "shared share": {
+   "auc": 0.4609053497942387,
+   "ci95": [
+    0.2784293552812071,
+    0.6324074074074073
+   ],
+   "median live": 0.20558890393121512,
+   "median dead": 0.17443723115961804,
+   "within-arm auc": {
+    "concept token": 0.25925925925925924,
+    "template tail": 0.35714285714285715,
+    "sentence mean": 0.6826923076923077
+   }
+  },
+  "top-8 share": {
+   "auc": 0.5679012345679012,
+   "ci95": [
+    0.33463648834019205,
+    0.7887517146776406
+   ],
+   "median live": 0.48633428627808545,
+   "median dead": 0.29945014931946073,
+   "within-arm auc": {
+    "concept token": 0.5802469135802469,
+    "template tail": 0.32142857142857145,
+    "sentence mean": 0.7307692307692307
+   }
+  },
+  "participation": {
+   "auc": 0.44170096021947874,
+   "ci95": [
+    0.21392318244170097,
+    0.68179012345679
+   ],
+   "median live": 0.0016818076105232338,
+   "median dead": 0.004723258246224675,
+   "within-arm auc": {
+    "concept token": 0.41975308641975306,
+    "template tail": 0.7321428571428571,
+    "sentence mean": 0.28846153846153844
+   }
+  },
+  "secondary_2_vs_distinctness": {
+   "auc_low_shared_share": 0.5390946502057613,
+   "auc_distinctness": 0.6083676268861454,
+   "diff": -0.06927297668038412,
+   "ci95": [
+    -0.20301783264746226,
+    0.06448902606310011
+   ]
+  },
+  "primary_prediction": {
+   "rule": "auc <= 0.40 and ci95 upper < 0.5",
+   "holds": false
+  }
+ }
+}

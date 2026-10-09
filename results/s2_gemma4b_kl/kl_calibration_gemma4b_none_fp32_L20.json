@@ -1,0 +1,33 @@
+{
+ "key": {
+  "model_id": "/kaggle/input/models/google/gemma-3/transformers/gemma-3-4b-it/1",
+  "layer": 20,
+  "targets": [
+   0.05,
+   0.5,
+   5.0
+  ],
+  "seed": 7919
+ },
+ "grid": [
+  {
+   "kl_target": 0.05,
+   "kl_achieved": 0.05104,
+   "alpha": 857.4048,
+   "matched": true
+  },
+  {
+   "kl_target": 0.5,
+   "kl_achieved": 0.47868,
+   "alpha": 1111.9165,
+   "matched": true
+  },
+  {
+   "kl_target": 5.0,
+   "kl_achieved": 4.87834,
+   "alpha": 3429.6193,
+   "matched": true
+  }
+ ],
+ "seconds": 40.0
+}
