@@ -251,6 +251,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-1 Gemma-3-12B** | 2026-10-09 | **Dead vectors by read position x precision (12B session)** | 3 arms x 30 concepts, 4-bit only | prereg + Amendments 1-4 | `results/s1_gemma12/`, `results/s1_gemma12_analysis.json` | **8-bit and fp16 not runnable on free hardware** (non-finite logits / activations). 4-bit: live tail / concept / sentence 6 / 8 / 15 at the gate, 10 / 11 / 17 at 5 nats; tail vs concept in the predicted direction but weak (p 0.36, 0.50). Criterion not scorable (needs all three cells) |
 | **S-1 Gemma-3-27B + S-1M** | 2026-10-09 | **27B 4-bit calibrated cells, and the published operating point** | 3 arms x 30 + S-1M (steer 90, forced 180) | prereg + Amendments 1-4 | `results/s1_gemma27/`, `results/s1_gemma27_analysis.json` | Calibrated cells: real-vector KL 0.000-0.003 nats at every dose; live tail / concept / sentence 2 / 0 / 1 at the gate, 7 / 2 / 5 at 5 nats (tail MORE live, opposite of the prediction). **S-1M: released tail-read vectors steer, 24/30 live at strength 4 (KL 7.3), 19/30 at 8 (KL 34, 7/30 coherent)** |
 | **P2-F Gemma-3-27B** | 2026-10-09 | **Factual-NO control at the released operating point** | 30 questions x strengths 0/4/8, released vectors + random | `docs/preregistration-p2f-factual-no.md` | `results/p2f_gemma27/` | Manipulation check passes (median P(YES) at 0 = 1e-13; one model error: 'Is a kilogram lighter than a gram?' answered YES at 1.0, kept as filed). **Primary: +0.015 at strength 4 (Wilcoxon p 4e-6), 8% of the introspective rise (0.179).** Strength 8: +0.175 (KL 45). Random: +0.047 / +0.313 |
+| **P2-F Qwen2.5-7B** | 2026-10-10 | **Factual-NO control, S-2 settings** | 30 questions x alpha-frac 0/0.25/0.5/1.0, concept / tail / random | `docs/preregistration-p2f-factual-no.md` | `results/p2f_qwen7b/` | Manipulation check passes (median P(YES) at 0 = 1e-11). **Secondary holds**: tail +0.046 at 0.5 (one-sided p 9e-9). Factual-NO / introspective rise at 0.5: concept 0.0005, tail 0.054, random 0.008; at 1.0: 0.67, 0.56, 0.41 |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -350,6 +351,33 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### P2-F, factual-NO control on Qwen2.5-7B (2026-10-10, Kaggle; scored once) - **THE YES-BIAS IS DOSE-DEPENDENT: UNDER 6% OF THE INTROSPECTIVE RISE AT MODERATE DOSE, ABOUT HALF AT THE HIGHEST; THE INVERTED P(YES) CHECK IS FRAMING-SPECIFIC**
+
+**Run.** Script v2026-10-09c, 4-bit with fp32 compute, layer 17, S-2's grid and arms. 120 rows per
+arm, no duplicates, 0 non-finite. Manipulation check passes: median P(YES) at 0 = 1e-11.
+
+| arm | alpha-frac | factual-NO mean change | one-sided p | median KL | S-2 introspective rise (same arm, dose) | ratio |
+|---|---|---|---|---|---|---|
+| concept | 0.5 | +0.0002 | 2e-9 | 0.018 | 0.418 | 0.0005 |
+| concept | 1.0 | +0.538 | 9e-10 | 30.2 | 0.797 | 0.67 |
+| **tail** | **0.5** | **+0.046** | **9e-9** | 0.012 | 0.866 | 0.054 |
+| tail | 1.0 | +0.477 | 9e-10 | 11.5 | 0.847 | 0.56 |
+| random | 0.5 | +0.001 | 9e-10 | 0.000 | 0.150 | 0.008 |
+| random | 1.0 | +0.180 | 9e-10 | 0.50 | 0.440 | 0.41 |
+
+**Secondary, as filed: holds** (tail arm positive at 0.5, one-sided p < 0.05).
+
+**Reading (with P2-F Gemma-27B).**
+- At moderate doses the introspective P(YES) rise is not a global yes-bias on either model (ratio
+  <= 0.054 on Qwen-7B at 0.5; 0.083 on Gemma-27B at the released strength 4).
+- At the highest doses the yes-bias carries 41-67% of it (Qwen-7B at 1.0; Gemma-27B at strength 8).
+  Hahami et al.'s confound is a high-dose regime, and dose has no transferable unit (P2-D), so a
+  paper must show where its operating point sits.
+- **The inverted P(YES) check is framing-specific.** Dead tail vectors raise introspective P(YES) by
+  0.87 at 0.5 but factual-NO P(YES) by only 0.05: they make the model answer YES to "do you detect
+  an injected thought", not YES in general. Consistent with P2-M (the direct output path does not
+  explain the inversion).
 
 ### P2-F, factual-NO control on Gemma-3-27B (2026-10-09, Kaggle; scored once) - **AT THE RELEASED STRENGTH THE YES-BIAS IS REAL BUT ONLY 8% OF THE INTROSPECTIVE RISE; AT STRENGTH 8 IT IS MOST OF IT**
 

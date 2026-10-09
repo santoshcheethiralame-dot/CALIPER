@@ -1,0 +1,162 @@
+{
+  "version": "2026-10-09c",
+  "argv": [
+    "--model",
+    "qwen7b",
+    "--stage",
+    "forced",
+    "--quant",
+    "4bit",
+    "--compute-dtype",
+    "fp32",
+    "--alpha-frac",
+    "0",
+    "0.25",
+    "0.5",
+    "1.0",
+    "--control",
+    "random",
+    "--framing-set",
+    "factual-no",
+    "--no-health",
+    "--out",
+    "/kaggle/working/p2f_qwen7b_random.jsonl"
+  ],
+  "stage": "forced",
+  "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/7b-instruct/1",
+  "layer": 17,
+  "n_layers": 28,
+  "normalise": false,
+  "control": "random",
+  "vector_recipe": "macar",
+  "alpha_frac": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "alphas": [
+    0.0,
+    20.882,
+    41.764,
+    83.528
+  ],
+  "trial_seed": 0,
+  "concepts": [
+    "elephant",
+    "spider",
+    "eagle",
+    "dolphin",
+    "volcano",
+    "desert",
+    "library",
+    "harbor",
+    "violin",
+    "umbrella",
+    "telescope",
+    "candle",
+    "bread",
+    "mountain",
+    "river",
+    "clock",
+    "mirror",
+    "bridge",
+    "garden",
+    "engine",
+    "joy",
+    "fear",
+    "jealousy",
+    "serenity",
+    "grief",
+    "curiosity",
+    "betrayal",
+    "nostalgia",
+    "justice",
+    "freedom"
+  ],
+  "max_new": 60,
+  "load": {
+    "quant": "4bit",
+    "compute_dtype": "float32",
+    "storage_dtype": "float32",
+    "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/7b-instruct/1"
+  },
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "health": {},
+  "health_pass_counts": {},
+  "impact_match": {},
+  "residual_norm_at_read_median": 83.52782440185547,
+  "residual_norm_at_read_min": 69.44517517089844,
+  "residual_norm_at_read_max": 95.39195251464844,
+  "vector_norm_median": 55.55868911743164,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "concept",
+  "n_baseline": 30,
+  "gram_offdiag_median_abs": 0.11213050037622452,
+  "gram_offdiag_mean": 0.1422007977962494,
+  "gram_offdiag_max": 0.6148781776428223,
+  "gram_offdiag_min": -0.13690677285194397,
+  "gram_offdiag_p90_abs": 0.34881845116615295,
+  "gram_top_pairs": [
+    [
+      0.6149,
+      22,
+      26
+    ],
+    [
+      0.5863,
+      22,
+      24
+    ],
+    [
+      0.5804,
+      22,
+      25
+    ],
+    [
+      0.5713,
+      22,
+      27
+    ],
+    [
+      0.5629,
+      21,
+      24
+    ],
+    [
+      0.5566,
+      21,
+      22
+    ],
+    [
+      0.5466,
+      28,
+      29
+    ],
+    [
+      0.5412,
+      24,
+      27
+    ],
+    [
+      0.5325,
+      24,
+      26
+    ],
+    [
+      0.5267,
+      25,
+      27
+    ]
+  ]
+}
