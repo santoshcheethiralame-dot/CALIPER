@@ -1,0 +1,714 @@
+[
+ {
+  "key": "song2025position",
+  "bib_title": "Position: Mechanistic Interpretability Should Prioritize Feature Consistency in {SAEs",
+  "bib_year": "2025",
+  "bib_first": "song",
+  "source": "arxiv",
+  "found_title": "Position: Mechanistic Interpretability Should Prioritize Feature Consistency in SAEs",
+  "found_year": 2025,
+  "found_first": "song",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "paulo2025sparse",
+  "bib_title": "Sparse Autoencoders Trained on the Same Data Learn Different Features",
+  "bib_year": "2025",
+  "bib_first": "",
+  "source": "arxiv",
+  "found_title": "Sparse Autoencoders Trained on the Same Data Learn Different Features",
+  "found_year": 2025,
+  "found_first": "paulo",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "gerasimov2026unstable",
+  "bib_title": "Unstable Features, Reproducible Subspaces: Understanding Seed Dependence in Sparse Autoencoders",
+  "bib_year": "2026",
+  "bib_first": "gerasimov",
+  "source": "arxiv",
+  "found_title": "Unstable Features, Reproducible Subspaces: Understanding Seed Dependence in Sparse Autoencoders",
+  "found_year": 2026,
+  "found_first": "gerasimov",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "kim2018tcav",
+  "bib_title": "Interpretability Beyond Feature Attribution: Quantitative Testing with Concept Activation Vectors ({TCAV})",
+  "bib_year": "2018",
+  "bib_first": "kim",
+  "source": "arxiv title search",
+  "found_title": "Interpretability Beyond Feature Attribution: Quantitative Testing with Concept Activation Vectors (TCAV)",
+  "found_year": 2017,
+  "found_first": "kim",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "himberg2004icasso",
+  "bib_title": "Validating the Independent Components of Neuroimaging Time Series via Clustering and Visualization",
+  "bib_year": "2004",
+  "bib_first": "himberg",
+  "source": "crossref",
+  "found_title": "Validating the independent components of neuroimaging time series via clustering and visualization",
+  "found_year": 2004,
+  "found_first": "himberg",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "brunet2004metagenes",
+  "bib_title": "Metagenes and Molecular Pattern Discovery Using Matrix Factorization",
+  "bib_year": "2004",
+  "bib_first": "brunet",
+  "source": "crossref",
+  "found_title": "Metagenes and molecular pattern discovery using matrix factorization",
+  "found_year": 2004,
+  "found_first": "brunet",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "gurnee2024universal",
+  "bib_title": "Universal Neurons in {GPT2} Language Models",
+  "bib_year": "2024",
+  "bib_first": "gurnee",
+  "source": "arxiv",
+  "found_title": "Universal Neurons in GPT2 Language Models",
+  "found_year": 2024,
+  "found_first": "gurnee",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "vim2012",
+  "bib_title": "International Vocabulary of Metrology -- Basic and General Concepts and Associated Terms ({VIM}), 3rd edition",
+  "bib_year": "2012",
+  "bib_first": "metrology",
+  "source": "arxiv title search",
+  "flags": [
+   "not checked automatically"
+  ]
+ },
+ {
+  "key": "shah2020calibration",
+  "bib_title": "A Unified Access Control Model for Calibration Traceability in Safety-Critical {IoT",
+  "bib_year": "2020",
+  "bib_first": "shah",
+  "source": "crossref",
+  "found_title": "A Unified Access Control Model for Calibration Traceability in Safety-Critical IoT",
+  "found_year": 2020,
+  "found_first": "shah",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "sharpee2004mid",
+  "bib_title": "Analyzing Neural Responses to Natural Signals: Maximally Informative Dimensions",
+  "bib_year": "2004",
+  "bib_first": "sharpee",
+  "source": "arxiv title search",
+  "found_title": "Analyzing neural responses to natural signals: Maximally informative dimensions",
+  "found_year": 2002,
+  "found_first": "sharpee",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "williamson2015equivalence",
+  "bib_title": "The Equivalence of Information-Theoretic and Likelihood-Based Methods for Neural Dimensionality Reduction",
+  "bib_year": "2015",
+  "bib_first": "williamson",
+  "source": "crossref",
+  "found_title": "The Equivalence of Information-Theoretic and Likelihood-Based Methods for Neural Dimensionality Reduction",
+  "found_year": 2015,
+  "found_first": "williamson",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "bendavid2006sober",
+  "bib_title": "A Sober Look at Clustering Stability",
+  "bib_year": "2006",
+  "bib_first": "bendavid",
+  "source": "crossref",
+  "found_title": "A Sober Look at Clustering Stability",
+  "found_year": 2006,
+  "found_first": "bendavid",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "knight1986nversion",
+  "bib_title": "An Experimental Evaluation of the Assumption of Independence in Multiversion Programming",
+  "bib_year": "1986",
+  "bib_first": "knight",
+  "source": "crossref",
+  "found_title": "An experimental evaluation of the assumption of independence in multiversion programming",
+  "found_year": 1986,
+  "found_first": "knight",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "yu2020veridical",
+  "bib_title": "Veridical Data Science",
+  "bib_year": "2020",
+  "bib_first": "yu",
+  "source": "crossref",
+  "found_title": "Veridical data science",
+  "found_year": 2020,
+  "found_first": "yu",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "nehzati2026restarts",
+  "bib_title": "Inference From Random Restarts",
+  "bib_year": "2026",
+  "bib_first": "nehzati",
+  "source": "arxiv",
+  "found_title": "Inference From Random Restarts",
+  "found_year": 2026,
+  "found_first": "nehzati",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "gupta2024interpbench",
+  "bib_title": "InterpBench}: Semi-Synthetic Transformers for Evaluating Mechanistic Interpretability Techniques",
+  "bib_year": "2024",
+  "bib_first": "gupta",
+  "source": "arxiv",
+  "found_title": "InterpBench: Semi-Synthetic Transformers for Evaluating Mechanistic Interpretability Techniques",
+  "found_year": 2024,
+  "found_first": "gupta",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "adebayo2018sanity",
+  "bib_title": "Sanity Checks for Saliency Maps",
+  "bib_year": "2018",
+  "bib_first": "adebayo",
+  "source": "arxiv title search",
+  "found_title": "Sanity Checks for Saliency Maps",
+  "found_year": 2018,
+  "found_first": "adebayo",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "athalye2018obfuscated",
+  "bib_title": "Obfuscated Gradients Give a False Sense of Security: Circumventing Defenses to Adversarial Examples",
+  "bib_year": "2018",
+  "bib_first": "athalye",
+  "source": "arxiv title search",
+  "found_title": "Obfuscated Gradients Give a False Sense of Security: Circumventing Defenses to Adversarial Examples",
+  "found_year": 2018,
+  "found_first": "athalye",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "gardiner2016security",
+  "bib_title": "On the Security of Machine Learning in Malware {C\\&C} Detection: A Survey",
+  "bib_year": "2016",
+  "bib_first": "gardiner",
+  "source": "crossref",
+  "found_title": "On the Security of Machine Learning in Malware C&amp;C Detection",
+  "found_year": 2016,
+  "found_first": "gardiner",
+  "title_ratio": 0.908,
+  "flags": []
+ },
+ {
+  "key": "arp2022dos",
+  "bib_title": "Dos and Don'ts of Machine Learning in Computer Security",
+  "bib_year": "2022",
+  "bib_first": "arp",
+  "source": "arxiv",
+  "found_title": "Dos and Don'ts of Machine Learning in Computer Security",
+  "found_year": 2020,
+  "found_first": "arp",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "jacobs2021measurement",
+  "bib_title": "Measurement and Fairness",
+  "bib_year": "2021",
+  "bib_first": "jacobs",
+  "source": "crossref",
+  "found_title": "Measurement and Fairness",
+  "found_year": 2021,
+  "found_first": "jacobs",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "wallach2025position",
+  "bib_title": "Position: Evaluating Generative {AI} Systems Is a Social Science Measurement Challenge",
+  "bib_year": "2025",
+  "bib_first": "wallach",
+  "source": "arxiv",
+  "found_title": "Position: Evaluating Generative AI Systems Is a Social Science Measurement Challenge",
+  "found_year": 2025,
+  "found_first": "wallach",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "delong1988comparing",
+  "bib_title": "Comparing the Areas under Two or More Correlated Receiver Operating Characteristic Curves: A Nonparametric Approach",
+  "bib_year": "1988",
+  "bib_first": "delong",
+  "source": "crossref",
+  "found_title": "Comparing the Areas under Two or More Correlated Receiver Operating Characteristic Curves: A Nonparametric Approach",
+  "found_year": 1988,
+  "found_first": "delong",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "vardi2021learning",
+  "bib_title": "Learning a Single Neuron with Bias Using Gradient Descent",
+  "bib_year": "2021",
+  "bib_first": "vardi",
+  "source": "arxiv",
+  "found_title": "Learning a Single Neuron with Bias Using Gradient Descent",
+  "found_year": 2021,
+  "found_first": "vardi",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "garg2022leveraging",
+  "bib_title": "Leveraging Unlabeled Data to Predict Out-of-Distribution Performance",
+  "bib_year": "2022",
+  "bib_first": "garg",
+  "source": "arxiv",
+  "found_title": "Leveraging Unlabeled Data to Predict Out-of-Distribution Performance",
+  "found_year": 2022,
+  "found_first": "garg",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "dholakia2025agentic",
+  "bib_title": "Benchmarking Considerations for Agentic {AI} Systems",
+  "bib_year": "2026",
+  "bib_first": "dholakia",
+  "source": "crossref",
+  "found_title": "Benchmarking Considerations for Agentic AI Systems",
+  "found_year": 2026,
+  "found_first": "dholakia",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "vaidya2022acoustic",
+  "bib_title": "Sensor Identification via Acoustic Physically Unclonable Function",
+  "bib_year": "2023",
+  "bib_first": "vaidya",
+  "source": "crossref",
+  "found_title": "Sensor Identification via Acoustic Physically Unclonable Function",
+  "found_year": 2022,
+  "found_first": "vaidya",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "nagaraja2019clicktok",
+  "bib_title": "Clicktok: Click Fraud Detection using Traffic Analysis",
+  "bib_year": "2019",
+  "bib_first": "nagaraja",
+  "source": "crossref",
+  "found_title": "Clicktok",
+  "found_year": 2019,
+  "found_first": "nagaraja",
+  "title_ratio": 0.262,
+  "flags": [
+   "title"
+  ]
+ },
+ {
+  "key": "wu2016stanmf",
+  "bib_title": "Stability-driven nonnegative matrix factorization to interpret spatial gene expression and build local gene networks",
+  "bib_year": "2016",
+  "bib_first": "wu",
+  "source": "crossref",
+  "found_title": "Stability-driven nonnegative matrix factorization to interpret spatial gene expression and build local gene networks",
+  "found_year": 2016,
+  "found_first": "wu",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "kotliar2019cnmf",
+  "bib_title": "Identifying gene expression programs of cell-type identity and cellular activity with single-cell {RNA-Seq",
+  "bib_year": "2019",
+  "bib_first": "kotliar",
+  "source": "crossref",
+  "found_title": "Identifying gene expression programs of cell-type identity and cellular activity with single-cell RNA-Seq",
+  "found_year": 2019,
+  "found_first": "kotliar",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "senbabaoglu2014critical",
+  "bib_title": "Critical limitations of consensus clustering in class discovery",
+  "bib_year": "2014",
+  "bib_first": "",
+  "source": "crossref",
+  "found_title": "Critical limitations of consensus clustering in class discovery",
+  "found_year": 2014,
+  "found_first": "senbabaoglu",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "monti2003consensus",
+  "bib_title": "Consensus clustering: a resampling-based method for class discovery and visualization of gene expression microarray data",
+  "bib_year": "2003",
+  "bib_first": "monti",
+  "source": "crossref",
+  "found_title": "Consensus Clustering: A Resampling-Based Method for Class Discovery and Visualization of Gene Expression Microarray Data",
+  "found_year": 2003,
+  "found_first": "monti",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "greene2014topics",
+  "bib_title": "How many topics? {S}tability analysis for topic models",
+  "bib_year": "2014",
+  "bib_first": "greene",
+  "source": "crossref",
+  "found_title": "How Many Topics? Stability Analysis for Topic Models",
+  "found_year": 2014,
+  "found_first": "greene",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "antoniak2018stability",
+  "bib_title": "Evaluating the stability of embedding-based word similarities",
+  "bib_year": "2018",
+  "bib_first": "antoniak",
+  "source": "crossref",
+  "found_title": "Evaluating the Stability of Embedding-based Word Similarities",
+  "found_year": 2018,
+  "found_first": "antoniak",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "duan2020udr",
+  "bib_title": "Unsupervised model selection for variational disentangled representation learning",
+  "bib_year": "2020",
+  "bib_first": "duan",
+  "source": "arxiv title search",
+  "found_title": "Unsupervised Model Selection for Variational Disentangled Representation Learning",
+  "found_year": 2019,
+  "found_first": "duan",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "locatello2019challenging",
+  "bib_title": "Challenging common assumptions in the unsupervised learning of disentangled representations",
+  "bib_year": "2019",
+  "bib_first": "locatello",
+  "source": "arxiv title search",
+  "found_title": "Challenging Common Assumptions in the Unsupervised Learning of Disentangled Representations",
+  "found_year": 2018,
+  "found_first": "locatello",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "li2016convergent",
+  "bib_title": "Convergent learning: Do different neural networks learn the same representations?",
+  "bib_year": "2016",
+  "bib_first": "li",
+  "source": "arxiv title search",
+  "found_title": "Convergent Learning: Do different neural networks learn the same representations?",
+  "found_year": 2015,
+  "found_first": "li",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "raghu2017svcca",
+  "bib_title": "SVCCA}: Singular vector canonical correlation analysis for deep learning dynamics and interpretability",
+  "bib_year": "2017",
+  "bib_first": "raghu",
+  "source": "arxiv title search",
+  "found_title": "SVCCA: Singular Vector Canonical Correlation Analysis for Deep Learning Dynamics and Interpretability",
+  "found_year": 2017,
+  "found_first": "raghu",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "kornblith2019cka",
+  "bib_title": "Similarity of neural network representations revisited",
+  "bib_year": "2019",
+  "bib_first": "kornblith",
+  "source": "arxiv title search",
+  "found_title": "Similarity of Neural Network Representations Revisited",
+  "found_year": 2019,
+  "found_first": "kornblith",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "madhyastha2019stability",
+  "bib_title": "On model stability as a function of random seed",
+  "bib_year": "2019",
+  "bib_first": "madhyastha",
+  "source": "crossref",
+  "found_title": "On Model Stability as a Function of Random Seed",
+  "found_year": 2019,
+  "found_first": "madhyastha",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "sharkey2022interim",
+  "bib_title": "[Interim research report] Taking features out of superposition with sparse autoencoders",
+  "bib_year": "2022",
+  "bib_first": "sharkey",
+  "source": "arxiv title search",
+  "flags": [
+   "not checked automatically"
+  ]
+ },
+ {
+  "key": "bricken2023monosemanticity",
+  "bib_title": "Towards monosemanticity: Decomposing language models with dictionary learning",
+  "bib_year": "2023",
+  "bib_first": "bricken",
+  "source": "arxiv title search",
+  "flags": [
+   "not checked automatically"
+  ]
+ },
+ {
+  "key": "fel2025archetypal",
+  "bib_title": "Archetypal {SAE}: Adaptive and stable dictionary learning for concept extraction in large vision models",
+  "bib_year": "2025",
+  "bib_first": "fel",
+  "source": "arxiv title search",
+  "found_title": "Archetypal SAE: Adaptive and Stable Dictionary Learning for Concept Extraction in Large Vision Models",
+  "found_year": 2025,
+  "found_first": "fel",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "anani2026certified",
+  "bib_title": "Certified Circuits: Stability guarantees for mechanistic circuits",
+  "bib_year": "2026",
+  "bib_first": "anani",
+  "source": "arxiv",
+  "found_title": "Certified Circuits: Stability Guarantees for Mechanistic Circuits",
+  "found_year": 2026,
+  "found_first": "anani",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "chanin2026benchmarks",
+  "bib_title": "Are Sparse Autoencoder Benchmarks Reliable?",
+  "bib_year": "2026",
+  "bib_first": "chanin",
+  "source": "arxiv",
+  "found_title": "Are Sparse Autoencoder Benchmarks Reliable?",
+  "found_year": 2026,
+  "found_first": "chanin",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "chanin2026synthsaebench",
+  "bib_title": "SynthSAEBench}: Evaluating Sparse Autoencoders on Scalable Realistic Synthetic Data",
+  "bib_year": "2026",
+  "bib_first": "chanin",
+  "source": "arxiv",
+  "found_title": "SynthSAEBench: Evaluating Sparse Autoencoders on Scalable Realistic Synthetic Data",
+  "found_year": 2026,
+  "found_first": "chanin",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "karvonen2025saebench",
+  "bib_title": "SAEBench}: A Comprehensive Benchmark for Sparse Autoencoders in Language Model Interpretability",
+  "bib_year": "2025",
+  "bib_first": "karvonen",
+  "source": "arxiv",
+  "found_title": "SAEBench: A Comprehensive Benchmark for Sparse Autoencoders in Language Model Interpretability",
+  "found_year": 2025,
+  "found_first": "karvonen",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "makelov2024principled",
+  "bib_title": "Towards Principled Evaluations of Sparse Autoencoders for Interpretability and Control",
+  "bib_year": "2024",
+  "bib_first": "makelov",
+  "source": "arxiv",
+  "found_title": "Towards Principled Evaluations of Sparse Autoencoders for Interpretability and Control",
+  "found_year": 2024,
+  "found_first": "makelov",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "makelov2024subspace",
+  "bib_title": "Is This the Subspace You Are Looking for? {An} Interpretability Illusion for Subspace Activation Patching",
+  "bib_year": "2024",
+  "bib_first": "makelov",
+  "source": "arxiv",
+  "found_title": "Is This the Subspace You Are Looking for? An Interpretability Illusion for Subspace Activation Patching",
+  "found_year": 2023,
+  "found_first": "makelov",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "timkey2021rogue",
+  "bib_title": "All Bark and No Bite: Rogue Dimensions in Transformer Language Models Obscure Representational Quality",
+  "bib_year": "2021",
+  "bib_first": "timkey",
+  "source": "arxiv",
+  "found_title": "All Bark and No Bite: Rogue Dimensions in Transformer Language Models Obscure Representational Quality",
+  "found_year": 2021,
+  "found_first": "timkey",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "geva2021keyvalue",
+  "bib_title": "Transformer Feed-Forward Layers Are Key-Value Memories",
+  "bib_year": "2021",
+  "bib_first": "geva",
+  "source": "arxiv",
+  "found_title": "Transformer Feed-Forward Layers Are Key-Value Memories",
+  "found_year": 2020,
+  "found_first": "geva",
+  "title_ratio": 1.0,
+  "flags": [
+   "year"
+  ]
+ },
+ {
+  "key": "hewitt2019control",
+  "bib_title": "Designing and Interpreting Probes with Control Tasks",
+  "bib_year": "2019",
+  "bib_first": "hewitt",
+  "source": "arxiv",
+  "found_title": "Designing and Interpreting Probes with Control Tasks",
+  "found_year": 2019,
+  "found_first": "hewitt",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "heap2025random",
+  "bib_title": "Automated Interpretability Metrics Do Not Distinguish Trained and Random Transformers",
+  "bib_year": "2025",
+  "bib_first": "heap",
+  "source": "arxiv",
+  "found_title": "Automated Interpretability Metrics Do Not Distinguish Trained and Random Transformers",
+  "found_year": 2025,
+  "found_first": "heap",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "theunissen2001strf",
+  "bib_title": "Estimating Spatio-Temporal Receptive Fields of Auditory and Visual Neurons from Their Responses to Natural Stimuli",
+  "bib_year": "2001",
+  "bib_first": "theunissen",
+  "source": "crossref",
+  "found_title": "Estimating spatio-temporal receptive fields of auditory and visual neurons from their responses to natural stimuli",
+  "found_year": 2001,
+  "found_first": "theunissen",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "paninski2003convergence",
+  "bib_title": "Convergence Properties of Three Spike-Triggered Analysis Techniques",
+  "bib_year": "2003",
+  "bib_first": "paninski",
+  "source": "crossref",
+  "found_title": "Convergence properties of three spike-triggered analysis techniques",
+  "found_year": 2003,
+  "found_first": "paninski12",
+  "title_ratio": 1.0,
+  "flags": [
+   "first author"
+  ]
+ },
+ {
+  "key": "wu2006sysid",
+  "bib_title": "Complete Functional Characterization of Sensory Neurons by System Identification",
+  "bib_year": "2006",
+  "bib_first": "wu",
+  "source": "crossref",
+  "found_title": "COMPLETE FUNCTIONAL CHARACTERIZATION OF SENSORY NEURONS BY SYSTEM IDENTIFICATION",
+  "found_year": 2006,
+  "found_first": "wu",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "park2011localized",
+  "bib_title": "Receptive Field Inference with Localized Priors",
+  "bib_year": "2011",
+  "bib_first": "park",
+  "source": "crossref",
+  "found_title": "Receptive Field Inference with Localized Priors",
+  "found_year": 2011,
+  "found_first": "park",
+  "title_ratio": 1.0,
+  "flags": []
+ },
+ {
+  "key": "jonas2017microprocessor",
+  "bib_title": "Could a Neuroscientist Understand a Microprocessor?",
+  "bib_year": "2017",
+  "bib_first": "jonas",
+  "source": "crossref",
+  "found_title": "Could a Neuroscientist Understand a Microprocessor?",
+  "found_year": 2017,
+  "found_first": "jonas",
+  "title_ratio": 1.0,
+  "flags": []
+ }
+]
