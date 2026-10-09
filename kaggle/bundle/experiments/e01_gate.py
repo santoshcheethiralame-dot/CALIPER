@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import transformers
 from pathlib import Path
-from caliper.activations import _blocks, _mlp_in, collect, load_model, sample_corpus
+from caliper.activations import _blocks, _mlp_act, _mlp_in, collect, load_model, sample_corpus
 from caliper.batched import fit_batch
 from caliper.estimator import fit_cascade, subspace_alignment
 from caliper.runtime import Checkpoint, pick_device
@@ -74,7 +74,7 @@ ap.add_argument("--sequence-split", action="store_true",
                 help="shuffle whole sequences, not tokens, before fit_batch takes its first "
                      "20%% as the held-out set, so held-out tokens never share a sequence "
                      "with training tokens. Opt-in: it changes every held-out R2.")
-ap.add_argument("--target", choices=("mlp", "sae"), default="mlp",
+ap.add_argument("--target", choices=("mlp", "sae", "unembed", "glu"), default="mlp",
                 help="mlp: units are MLP neurons, reference = input weight column (every run "
                      "before 6 Oct). sae: units are latents of the jbloom GPT-2 small residual "
                      "SAE at --layer, reference = the mean-removed encoder column "
@@ -155,13 +155,18 @@ if a.target == "sae":
         neurons = rng.permutation(pool)[:a.neurons]
 elif a.units:
     neurons = np.array([int(u) for u in a.units.split(",")])
+elif a.target == "unembed":
+    vocab = model.get_output_embeddings().weight.shape[0]
+    neurons = rng.choice(vocab, size=a.neuron_pool or a.neurons, replace=False)[:a.neurons]
 elif a.neuron_pool:
     neurons = rng.choice(a.d_mlp, size=a.neuron_pool, replace=False)[:a.neurons]
 else:
     neurons = rng.choice(a.d_mlp, size=a.neurons, replace=False)
 p = collect(model, tok, corpus(), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=a.split_seed,
-            shuffle="sequence" if a.sequence_split else "token", sae=sae)
+            shuffle="sequence" if a.sequence_split else "token", sae=sae,
+            target=a.target if a.target in ("unembed", "glu") else "mlp")
+glu = a.target == "glu"
 snr = {}
 if a.snr is not None or a.snr_range is not None:
     # Seeded by unit id, so a unit's noise and SNR do not depend on its batch-mates or on
@@ -175,7 +180,7 @@ if a.snr is not None or a.snr_range is not None:
                                      len(p.response)).astype(p.response.dtype)
 test_frac = 0.2
 if a.augment is not None:
-    if snr or a.target != "mlp":
+    if snr or a.target != "mlp" or glu:
         raise SystemExit("--augment is defined for noiseless MLP units only")
     n_test = int(len(p.stimulus) * 0.2)
     fit_rows = p.stimulus[n_test:]
@@ -202,7 +207,7 @@ if a.augment is not None:
         block = _blocks(model)[a.layer]
         with torch.no_grad():
             pre = _mlp_in(block)(torch.as_tensor(extra_s, dtype=next(model.parameters()).dtype))
-            extra_r = torch.nn.functional.gelu(pre.float())[:, neurons].numpy().astype(
+            extra_r = _mlp_act(model)(pre.float())[:, neurons].numpy().astype(
                 p.response.dtype)
         print(f"  augment {a.augment}: {a.augment_n} rows"
               + (f", {int(low.sum())} low-variance directions" if a.augment == "targeted" else ""),
@@ -248,49 +253,55 @@ for start in range(0, len(todo), a.batch):
         res.restarts = [pad(q) for q in res.restarts]
     for j, i in enumerate(idx):
         n = int(p.neurons[i])
-        wu = p.weights[:, i] / np.linalg.norm(p.weights[:, i])
-        c = fit_cascade(S_fit, p.response[:, i], k=1, test_frac=test_frac,
+        # A gated unit's reference is a plane, so it is scored on the k=2 fits against an
+        # orthonormal basis of span(gate, up); every other unit on the k=1 fits.
+        prim = d2 if glu else d1
+        ref = (np.linalg.qr(p.weights[:, :, i])[0] if glu
+               else (p.weights[:, i] / np.linalg.norm(p.weights[:, i]))[:, None])
+        c = fit_cascade(S_fit, p.response[:, i], k=2 if glu else 1, test_frac=test_frac,
                         n_restarts=a.restarts, steps=a.steps, seed=a.fit_seed)
         c.subspace = pad(c.subspace)
-        ad = abs(subspace_alignment(d1[j].subspace, wu[:, None]))
-        ac = abs(subspace_alignment(c.subspace, wu[:, None]))
-        use_cascade = c.test_r2 > d1[j].test_r2
+        ad = abs(subspace_alignment(prim[j].subspace, ref))
+        ac = abs(subspace_alignment(c.subspace, ref))
+        use_cascade = c.test_r2 > prim[j].test_r2
         sel = ac if use_cascade else ad
         if dirs is not None:
             # Written before the row, so a recorded row always has its directions.
             np.savez_compressed(
                 dirs / f"n{n}.npz", w=p.weights[:, i].astype(np.float32),
-                direct=d1[j].subspace.astype(np.float32),
+                direct=prim[j].subspace.astype(np.float32),
                 cascade=c.subspace.astype(np.float32),
                 k2=d2[j].subspace.astype(np.float32),
                 direct_restarts=np.stack([np.asarray(q, dtype=np.float32)
-                                          for q in d1[j].restarts]),
-                direct_r2_restarts=np.asarray(d1[j].r2_restarts, dtype=np.float32))
+                                          for q in prim[j].restarts]),
+                direct_r2_restarts=np.asarray(prim[j].r2_restarts, dtype=np.float32))
         ck.record(n, {
             "align_direct": round(ad, 4), "align_cascade": round(ac, 4),
             "align_selected": round(sel, 4), "best_available": round(max(ad, ac), 4),
             "picked": "cascade" if use_cascade else "direct",
-            "r2_k1": round(float(max(d1[j].test_r2, c.test_r2)), 6),
+            "r2_k1": round(float(max(prim[j].test_r2, c.test_r2)), 6),
+            **({"k": 2} if glu else {}),
             **({"snr": round(snr[int(n)], 4)} if snr else {}),
             **({"augment": a.augment, "augment_n": a.augment_n} if a.augment else {}),
-            "k2_gain": round(float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
+            "k2_gain": round(float(d2[j].test_r2 - d1[j].test_r2) if glu else
+                             float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
             # NOT ground-truth-free: both terms are alignments to w. Kept so every
             # earlier run stays comparable, but it must not be reported as a check a
             # practitioner could compute. route_agreement is the ground-truth-free
             # version: how far the two routes' own directions agree with each other.
             "disagreement": round(abs(ad - ac), 4),
-            "route_agreement": round(abs(subspace_alignment(d1[j].subspace, c.subspace)), 4),
+            "route_agreement": round(abs(subspace_alignment(prim[j].subspace, c.subspace)), 4),
             # B-1: the field's default reliability check. The fit has always
             # computed it; nothing wrote it down. Only the direct route has a
             # restart lottery to agree about - fit_cascade runs a grid search and
             # one polish, so its stability is undefined by construction, and that
             # asymmetry is itself part of why the cascade is the better route.
-            "stability": round(float(d1[j].stability), 4),
-            "r2_spread": round(float(d1[j].r2_spread), 6),
+            "stability": round(float(prim[j].stability), 4),
+            "r2_spread": round(float(prim[j].r2_spread), 6),
             # Secondary 4 of the B-1 filing: does a cheap 2-restart stability
             # estimate agree with the 5-restart one? Only answerable offline if
             # the pairs survive the run, so keep them, not just their median.
-            "stability_pairs": d1[j].stability_pairs,
+            "stability_pairs": prim[j].stability_pairs,
             "n_restarts": a.restarts,
             **({"log_density": round(float(sae["log_density"][n]), 4),
                 "firing_events": int(counts[n])} if sae is not None else {}),

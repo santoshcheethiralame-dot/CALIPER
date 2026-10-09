@@ -42,7 +42,7 @@ def load_model(name="gpt2", device="cpu", dtype=torch.float32):
 
 
 def _blocks(model):
-    for attr in ("transformer.h", "model.layers", "gpt_neox.layers"):
+    for attr in ("transformer.h", "model.layers", "gpt_neox.layers", "model.decoder.layers"):
         obj = model
         try:
             for part in attr.split("."):
@@ -55,10 +55,13 @@ def _blocks(model):
 
 def _mlp_in(block):
     """The MLP's input projection, whatever the architecture calls it."""
+    mlp = getattr(block, "mlp", None)
     for name in ("c_fc", "up_proj", "dense_h_to_4h"):
-        if hasattr(block.mlp, name):
-            return getattr(block.mlp, name)
-    raise ValueError(f"no MLP input projection on {type(block.mlp).__name__}")
+        if mlp is not None and hasattr(mlp, name):
+            return getattr(mlp, name)
+    if hasattr(block, "fc1"):                       # OPT keeps its MLP on the block
+        return block.fc1
+    raise ValueError(f"no MLP input projection on {type(block).__name__}")
 
 
 def _mlp_ln(block):
@@ -71,7 +74,7 @@ def _mlp_ln(block):
     for name in ("ln_2", "post_attention_layernorm", "post_attention_norm"):
         if hasattr(block, name):
             return getattr(block, name)
-    raise ValueError(f"no MLP layernorm on {type(block).__name__}")
+    return None
 
 
 def _mlp_in_weight(block):
@@ -84,9 +87,16 @@ def _mlp_in_weight(block):
     """
     fc = _mlp_in(block)
     w = fc.weight.detach().cpu().numpy()
-    d_model = _mlp_ln(block).weight.shape[0]
     # HF GPT-2 uses Conv1D with weight (d_model, d_mlp); Linear stores (out, in).
-    return w if w.shape[0] == d_model else w.T
+    return w.T if isinstance(fc, torch.nn.Linear) else w
+
+
+def _mlp_act(model):
+    """The MLP nonlinearity the pipeline records. GELU (erf) for every model used before
+    F-3, as before; ReLU where the config says so (OPT)."""
+    if getattr(model.config, "activation_function", None) == "relu":
+        return torch.relu
+    return torch.nn.functional.gelu
 
 
 def collect(
@@ -102,6 +112,7 @@ def collect(
     seed=0,
     shuffle="token",
     sae=None,
+    target="mlp",
 ):
     """Stream text through the model, capturing stimulus/response pairs.
 
@@ -120,21 +131,64 @@ def collect(
     neurons = np.asarray(neurons)
     captured = {}
 
-    if sae is None:
+    if target == "glu":
+        # F-4: a gated unit (SwiGLU / GeGLU) computes act(g . s) * (u . s), g and u its rows of
+        # gate_proj and up_proj, neither with a bias. Its exact reference is the plane span(g, u).
+        # The stimulus is taken at gate_proj's input, which is exact on every gated
+        # architecture (Gemma-3's post_attention_layernorm does not feed its MLP).
+        mlp = block.mlp
+
+        def hook_in(_module, args):
+            captured["stim"] = args[0].detach()
+
+        handles = [mlp.gate_proj.register_forward_pre_hook(hook_in)]
+        g_w = mlp.gate_proj.weight.detach().float()[neurons]       # (n_units, d_model)
+        u_w = mlp.up_proj.weight.detach().float()[neurons]
+        weights = np.stack([g_w.T.numpy(), u_w.T.numpy()], axis=1)  # (d_model, 2, n_units)
+        act = mlp.act_fn
+
+        def respond(stim, pre):
+            x = stim.float()
+            return act(x @ g_w.T) * (x @ u_w.T)
+    elif target == "unembed":
+        # F-6: the stimulus is what the unembedding reads (the final norm's output) and a
+        # unit's response is one token's logit, exactly W_U[t] . s: a linear link, so every
+        # recovery failure here is geometric.
+        head = model.get_output_embeddings()
+
+        def hook_head(_module, args):
+            captured["stim"] = args[0].detach()
+
+        handles = [head.register_forward_pre_hook(hook_head)]
+        w_u = head.weight.detach().float()[neurons]               # (n_units, d_model)
+        weights = w_u.T.numpy()
+
+        def respond(stim, pre):
+            return stim.float() @ w_u.T
+    elif sae is None:
         def hook_stim(_module, _inp, out):
             captured["stim"] = out.detach()
+
+        def hook_stim_in(_module, args):
+            captured["stim"] = args[0].detach()
 
         def hook_resp(_module, _inp, out):
             captured["pre"] = out.detach()
 
+        ln = _mlp_ln(block)
+        # Where the model has a pre-MLP layernorm its output is the stimulus, as in every run
+        # before F-3. OPT has none on the MLP path (OPT-350m is post-LN), so the stimulus is
+        # taken at the input projection itself, which is what the pre-activation reads.
         handles = [
-            _mlp_ln(block).register_forward_hook(hook_stim),
+            ln.register_forward_hook(hook_stim) if ln is not None
+            else _mlp_in(block).register_forward_pre_hook(hook_stim_in),
             _mlp_in(block).register_forward_hook(hook_resp),
         ]
         weights = _mlp_in_weight(block)[:, neurons]
+        act = _mlp_act(model)
 
         def respond(stim, pre):
-            return torch.nn.functional.gelu(pre)[:, :, neurons]
+            return act(pre)[:, :, neurons]
     else:
         def hook_pre(_module, args):
             x = args[0].detach()
@@ -209,8 +263,10 @@ def _run_batch(model, batch, captured, respond, stim_out, resp_out, skip_first):
     ids = torch.tensor(batch)
     with torch.no_grad():
         model(ids)
-        stim = captured["stim"][:, skip_first:, :]
-        pre = captured.get("pre")
+        # OPT flattens (batch, seq) before its MLP; every other model keeps them apart.
+        shape = lambda x: x.view(*ids.shape, -1) if x is not None and x.dim() == 2 else x
+        stim = shape(captured["stim"])[:, skip_first:, :]
+        pre = shape(captured.get("pre"))
         resp = respond(stim, None if pre is None else pre[:, skip_first:, :])
     d_model = stim.shape[-1]
     stim_out.append(stim.reshape(-1, d_model).float().numpy())
