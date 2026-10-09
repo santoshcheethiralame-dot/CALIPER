@@ -317,6 +317,8 @@ changed and why. Where it disagrees with `RUN_PLAN_L2_L3.md`, this section wins.
 
 ### 12.2 Paper 2 (L3 instrument audit)
 
+> **Superseded 9 Oct (after S-1):** Paper 2's claims, evidence map and remaining experiments now live in `docs/paper2-outline.md`. The dead-vector story is model-specific; the paper becomes an audit of liveness, dose and readout.
+
 | ID | experiment | status | change on 9 Oct |
 |---|---|---|---|
 | S-1 | Dead vectors: read position x precision, Gemma-3-12B (4-bit, 8-bit, fp16) and 27B (4-bit) | filed; Amendment 2 (KL grid) | **adds S-1M**, below |

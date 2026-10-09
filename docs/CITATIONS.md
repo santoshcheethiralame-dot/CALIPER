@@ -946,3 +946,20 @@ ABS unless stated. Verify before any of these carries a claim.
 | [2505.24593](https://arxiv.org/abs/2505.24593) | Decoding knowledge attribution in MoE (Li et al., ACL 2025) | ABS | OLMoE / Qwen-MoE / Mixtral routing analysis |
 | ICML 2022 | Linear causal disentanglement via interventions (Seigal, Squires & Uhler) | ABS | Observational data insufficient, one intervention per latent sufficient: F-1's theory |
 | [2311.12267](https://arxiv.org/abs/2311.12267) | Learning causal representations from general environments (Jin & Syrgkanis) | ABS | Identifiability up to effect-domination without hard interventions |
+
+## 29. Leads from the 9 Oct 2026 Paper 2 re-plan (none cited yet)
+
+ABS unless stated. Verify before citing.
+
+| id | title | level | why it matters |
+|---|---|---|---|
+| [2512.12411](https://arxiv.org/abs/2512.12411) | Detecting the disturbance: a nuanced view of introspective abilities in LLMs (Hahami et al.) | ABS | Llama-3.1-8B: binary detection explained by global affirmative logit shifts; factual-NO control; localisation 88%, strength discrimination 83%, early layers only. Closest Paper 2 neighbour; basis of P2-F |
+| [2608.08159](https://arxiv.org/abs/2608.08159) | When is a steerable concept representation real? (Wu, Zhao & Chen) | ABS | 17 models, 5 families: raw-unit steerability trends are calibration artefacts; recommends residual-norm-comparable interventions. Paper 2's P2-D shows that convention does not transfer to Gemma |
+| [2604.15557](https://arxiv.org/abs/2604.15557) | Predicting where steering vectors succeed (Billa) | ABS | Logit-lens accessibility predicts steering effectiveness (rho 0.86-0.91); basis of P2-L |
+| [2511.18284](https://arxiv.org/abs/2511.18284) | What can we actually steer? A multi-behaviour study of activation control | ABS | Vector separation does not predict steering quality (r = -0.045) |
+| [2604.17698](https://arxiv.org/abs/2604.17698) | The geometric canary: predicting steerability via representational stability | ABS | Supervised stability predicts steerability; unsupervised fails on real NLP data |
+| [2606.06735](https://arxiv.org/abs/2606.06735) | A geometric account of activation steering through angle-norm decomposition | ABS | Gemma's post-norm design gives large norm variation across layers: why fraction-of-norm doses misbehave there |
+| [2511.21399](https://arxiv.org/abs/2511.21399) | Steering awareness: models can be trained to detect activation steering | ABS | Trained detectors reject magnitude-matched Gaussian noise 94%; a different object from the untrained paradigm |
+| [2607.14111](https://arxiv.org/abs/2607.14111) | Introspection fine-tuning (IFT) | ABS | Trained small models reach 95.5% detection; contrast with untrained audit |
+| arXiv 2603.21396 (paper text, read 9 Oct) | Mechanisms of introspective awareness | ABS + CODE | Paper states L37, alpha 4 best for Gemma-3-27B; does not state vector normalisation; released code injects raw vectors x strength (no normalise argument passed). Judge GPT-4.1-mini |
+
