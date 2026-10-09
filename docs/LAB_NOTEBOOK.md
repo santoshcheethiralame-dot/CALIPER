@@ -250,6 +250,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **B-17b/c/d** | 2026-10-09 | **The standardisation artifact: rescue at GPT-Neo L6, predicted failure and fix at GPT-2 L3** | 20 + 20 + 20 units | `docs/preregistration-b17b-scale-artifact.md` | `results/b17b_*`, `results/b17c_*`, `results/b17d_*`, `results/b17b_analysis.json` | **P1, P2, P3 all hold**: GPT-Neo L6 0/20 -> 13/20 passes (median 0.010 -> 0.976); GPT-2 L3 fails as the layer map predicted (0/20, median 0.053, 18/20 fits >50% on the coordinate); dropping it fixes it (9/20, 0.911) |
 | **S-1 Gemma-3-12B** | 2026-10-09 | **Dead vectors by read position x precision (12B session)** | 3 arms x 30 concepts, 4-bit only | prereg + Amendments 1-4 | `results/s1_gemma12/`, `results/s1_gemma12_analysis.json` | **8-bit and fp16 not runnable on free hardware** (non-finite logits / activations). 4-bit: live tail / concept / sentence 6 / 8 / 15 at the gate, 10 / 11 / 17 at 5 nats; tail vs concept in the predicted direction but weak (p 0.36, 0.50). Criterion not scorable (needs all three cells) |
 | **S-1 Gemma-3-27B + S-1M** | 2026-10-09 | **27B 4-bit calibrated cells, and the published operating point** | 3 arms x 30 + S-1M (steer 90, forced 180) | prereg + Amendments 1-4 | `results/s1_gemma27/`, `results/s1_gemma27_analysis.json` | Calibrated cells: real-vector KL 0.000-0.003 nats at every dose; live tail / concept / sentence 2 / 0 / 1 at the gate, 7 / 2 / 5 at 5 nats (tail MORE live, opposite of the prediction). **S-1M: released tail-read vectors steer, 24/30 live at strength 4 (KL 7.3), 19/30 at 8 (KL 34, 7/30 coherent)** |
+| **P2-F Gemma-3-27B** | 2026-10-09 | **Factual-NO control at the released operating point** | 30 questions x strengths 0/4/8, released vectors + random | `docs/preregistration-p2f-factual-no.md` | `results/p2f_gemma27/` | Manipulation check passes (median P(YES) at 0 = 1e-13; one model error: 'Is a kilogram lighter than a gram?' answered YES at 1.0, kept as filed). **Primary: +0.015 at strength 4 (Wilcoxon p 4e-6), 8% of the introspective rise (0.179).** Strength 8: +0.175 (KL 45). Random: +0.047 / +0.313 |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -349,6 +350,39 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### P2-F, factual-NO control on Gemma-3-27B (2026-10-09, Kaggle; scored once) - **AT THE RELEASED STRENGTH THE YES-BIAS IS REAL BUT ONLY 8% OF THE INTROSPECTIVE RISE; AT STRENGTH 8 IT IS MOST OF IT**
+
+**Run.** Script v2026-10-09c, released recipe, layer 37, 4-bit with fp32 compute, injection from
+the token before "Trial", 30 factual-NO questions paired with the 30 concepts. 90 rows per control,
+no duplicates, 0 non-finite.
+
+**Manipulation check passes**: median P(YES) at strength 0 is 1e-13. One question is a model error
+(Gemma-3-27B answers YES to "Is a kilogram lighter than a gram?" with P = 1.0); kept, as filed.
+
+| vectors | strength | mean P(YES) | mean change vs 0 | Wilcoxon p (two-sided) | median next-token KL |
+|---|---|---|---|---|---|
+| released | 0 | 0.033 | - | - | 0 |
+| released | **4** | 0.048 | **+0.015** | 4e-6 | 0.0006 |
+| released | 8 | 0.209 | +0.175 | 3e-6 | 45.0 |
+| random (norm-matched) | 4 | 0.080 | +0.047 | 1e-6 | 50.9 |
+| random | 8 | 0.347 | +0.314 | 3e-7 | 67.9 |
+
+**Primary, as filed.** At strength 4 the factual-NO P(YES) rises by 0.015, significantly (two-sided
+p 4e-6, no direction predicted for 27B). The ratio to the introspective rise S-1M measured at the
+same strength (0.179) is **0.083**.
+
+**Reading.**
+- At the published operating point most of the introspective P(YES) rise is not a global yes-bias
+  on Gemma-3-27B. Hahami et al.'s confound (Llama-3.1-8B) is small here at strength 4.
+- At strength 8 the model is broken (median KL 45) and the yes-bias (+0.175) is as large as the
+  introspective rise at strength 4: the dose decides which story is true.
+- Random directions of the same raw norm push YES three times harder at strength 4, with KL 51
+  against the real vectors' 0.0006: P2-D's real-vs-random gap again.
+- Paper 2, C5: the framing confound (neutral prompt at 0.19 uninjected) and the yes-bias are
+  separate; the first persists at the published point, the second is small there.
+
+**Next.** P2-F Qwen-7B (secondary; prediction: positive shift in the tail arm).
 
 ### Internal review of Paper 1, round 2 (2026-10-09) - **MAJOR REVISION: THE CORE HOLDS AND STRENGTHENS; MOST CONVERGED-WRONG FITS ARE THE LAYER-NORM NULL DIRECTION, AND THE "REPAIR" CHANGED THE REFERENCE**
 
