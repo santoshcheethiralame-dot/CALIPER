@@ -1,0 +1,131 @@
+{
+ "model": "gemma27",
+ "cells": {
+  "4bit": {
+   "pass_rate": {
+    "0.05 nat": {
+     "tail": [
+      2,
+      30
+     ],
+     "concept": [
+      0,
+      30
+     ],
+     "sentence": [
+      0,
+      30
+     ]
+    },
+    "0.5 nat (gate)": {
+     "tail": [
+      2,
+      30
+     ],
+     "concept": [
+      0,
+      30
+     ],
+     "sentence": [
+      1,
+      30
+     ]
+    },
+    "5 nat": {
+     "tail": [
+      7,
+      30
+     ],
+     "concept": [
+      2,
+      30
+     ],
+     "sentence": [
+      5,
+      30
+     ]
+    }
+   },
+   "mcnemar": {
+    "0.05 nat": {
+     "concepts": 30,
+     "tail_fail_concept_pass": 0,
+     "tail_pass_concept_fail": 2,
+     "p_one_sided": 1.0,
+     "predicted_direction": false
+    },
+    "0.5 nat (gate)": {
+     "concepts": 30,
+     "tail_fail_concept_pass": 0,
+     "tail_pass_concept_fail": 2,
+     "p_one_sided": 1.0,
+     "predicted_direction": false
+    },
+    "5 nat": {
+     "concepts": 30,
+     "tail_fail_concept_pass": 1,
+     "tail_pass_concept_fail": 6,
+     "p_one_sided": 0.9921875,
+     "predicted_direction": false
+    }
+   },
+   "manipulation_check": {
+    "0.05 nat": {
+     "coherent": 90,
+     "of": 90,
+     "passes": true
+    },
+    "0.5 nat (gate)": {
+     "coherent": 90,
+     "of": 90,
+     "passes": true
+    },
+    "5 nat": {
+     "coherent": 90,
+     "of": 90,
+     "passes": true
+    }
+   },
+   "health_auc_at_gate": {
+    "stability": 0.12643678160919541,
+    "probe": 0.3103448275862069,
+    "logit steering": 0.3371647509578544,
+    "norm": 0.30268199233716475
+   },
+   "p2g_shared_share_auc": {
+    "0.05 nat": 0.4943181818181818,
+    "0.5 nat (gate)": 0.32950191570881227,
+    "5 nat": 0.4548872180451128
+   }
+  }
+ },
+ "criterion": {
+  "0.05 nat": {
+   "cells": [
+    "4bit"
+   ],
+   "fisher_p": 1.0,
+   "alpha": 0.025,
+   "all_in_predicted_direction": false,
+   "holds": false
+  },
+  "0.5 nat (gate)": {
+   "cells": [
+    "4bit"
+   ],
+   "fisher_p": 1.0,
+   "alpha": 0.025,
+   "all_in_predicted_direction": false,
+   "holds": false
+  },
+  "5 nat": {
+   "cells": [
+    "4bit"
+   ],
+   "fisher_p": 0.9921875,
+   "alpha": 0.025,
+   "all_in_predicted_direction": false,
+   "holds": false
+  }
+ }
+}

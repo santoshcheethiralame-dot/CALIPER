@@ -248,6 +248,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-2 Gemma-3-4B-kl** | 2026-10-09 | **Instrument audit on the KL-calibrated grid (Amendment 3); P2-G primary** | 90 vectors | script v2026-10-09a, `--calibrate-kl 0.05 0.5 5` | `results/s2_gemma4b_kl/`, `results/s2_gemma4b_kl_analysis.json`, `results/p2g_gemma4b_kl.json` | Manipulation check passes (30/30 random steer generations coherent at the gate). Only **9 live / 81 dead** at the 0.5-nat gate. S-2: norm 0.41, distinctness 0.61, P(YES) 0.54 (all 'near 0.5', low power), logit steering 0.43 (fails). **P2-G fails** (0.461 [0.278, 0.632]) |
 | **X-1a/b** | 2026-10-09 | **Cross-sample agreement and the identifiability replication, new GPT-Neo L10 units** | 100 units x 2 document-disjoint fits | `docs/preregistration-x1-cross-sample.md` + Addendum 1 | `results/x1a_gptneo_l10.jsonl`, `results/x1b_gptneo_l10.jsonl`, `results/x1_analysis.json` | **P1 (primary) fails**: cross-sample 0.775 vs held-out R2 0.711 on 19 converged-wrong, +0.065 [-0.052, 0.183]. **P2, P3, P4 hold**: 18/19 equivalent on fresh text; error share 0.93 vs 0.48; **low-variance share 0.929 vs 0.711, +0.218 [0.099, 0.340]** |
 | **S-1 Gemma-3-12B** | 2026-10-09 | **Dead vectors by read position x precision (12B session)** | 3 arms x 30 concepts, 4-bit only | prereg + Amendments 1-4 | `results/s1_gemma12/`, `results/s1_gemma12_analysis.json` | **8-bit and fp16 not runnable on free hardware** (non-finite logits / activations). 4-bit: live tail / concept / sentence 6 / 8 / 15 at the gate, 10 / 11 / 17 at 5 nats; tail vs concept in the predicted direction but weak (p 0.36, 0.50). Criterion not scorable (needs all three cells) |
+| **S-1 Gemma-3-27B + S-1M** | 2026-10-09 | **27B 4-bit calibrated cells, and the published operating point** | 3 arms x 30 + S-1M (steer 90, forced 180) | prereg + Amendments 1-4 | `results/s1_gemma27/`, `results/s1_gemma27_analysis.json` | Calibrated cells: real-vector KL 0.000-0.003 nats at every dose; live tail / concept / sentence 2 / 0 / 1 at the gate, 7 / 2 / 5 at 5 nats (tail MORE live, opposite of the prediction). **S-1M: released tail-read vectors steer, 24/30 live at strength 4 (KL 7.3), 19/30 at 8 (KL 34, 7/30 coherent)** |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -347,6 +348,60 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-1 Gemma-3-27B and S-1M, the published operating point (2026-10-09, Kaggle; scored once) - **THE RELEASED TAIL-READ VECTORS ARE LIVE AT THE RELEASED STRENGTH; THE DEAD-VECTOR WARNING DOES NOT TRANSFER TO GEMMA-27B**
+
+**Run.** Script v2026-10-09b, Gemma-3-27B-it, 4-bit NF4 with fp32 compute, layer 37 of 62.
+All files clean: no duplicate keys, 0 non-finite, no "!!!". KL calibration 676 s: alphas
+1,995 / 3,077 / 7,008 for 0.05 / 0.5 / 5 nats (achieved 0.049 / 0.485 / 4.98).
+
+**Calibrated cells (cell 3a).** Every generation coherent at every dose (90/90). But the real
+vectors barely move the model: median next-token KL 0.000 at the two lower doses and
+0.002-0.003 at 5 nats-calibrated, in all three arms. Random-direction calibration is far off for
+real vectors on 27B (it was 3-20x on Gemma-4B; here it is about 1,000x).
+
+| dose | live tail / concept / sentence (of 30) | McNemar (tail-dead-concept-live vs reverse) | p (one-sided, predicted direction) |
+|---|---|---|---|
+| 0.05 nat | 2 / 0 / 0 | 0 vs 2 | 1.0 |
+| 0.5 nat (gate) | 2 / 0 / 1 | 0 vs 2 | 1.0 |
+| 5 nat | 7 / 2 / 5 | 1 vs 6 | 0.99 |
+
+Tail vectors are more often live than concept-token vectors, the opposite of the prediction.
+Health-check AUCs and P2-G at the gate rest on 3 live vectors and are not interpretable.
+
+**S-1M, the released recipe at the released strengths (cell 3b, descriptive as filed).**
+Raw vectors (median norm 4,353, residual norm 58,889; 100 baseline words as released):
+
+| strength | live of 30 (steered, not at 0) | median KL steer / forced | coherent (steer) |
+|---|---|---|---|
+| 0 | baseline 3 steered | 0 / 0 | 30/30 |
+| 4 | **24** | 7.3 / 8.9 | 25/30 |
+| 8 | 19 | 34.3 / 23.7 | 7/30 |
+
+Forced choice, injected from the token before "Trial" as released (mean P(YES)):
+introspective 0.000 / 0.179 / 0.280 at strength 0 / 4 / 8; neutral-matched 0.188 / 0.181 /
+0.253. The introspective rise brings it to about the neutral prompt's own level, which already
+answers YES 19% of the time uninjected: the framing confound of C20, at the released window.
+
+**Reading.**
+- **The dead-vector warning is model-specific.** On Qwen (C31, S-2) template-tail vectors were
+  inert; on Gemma-3-12B they were slightly worse than concept-token vectors; on Gemma-3-27B,
+  the published model, they are live at the published strength (24/30) and no deader than
+  concept-token vectors in the calibrated cells. Paper 2 must not claim the published Gemma
+  result rests on dead vectors.
+- **The live finding is about dose, not deadness.** The published strength 4 sits at about 7 nats
+  of next-token KL, three orders of magnitude above where our calibrated real-vector cells sit,
+  and strength 8 breaks 23 of 30 generations. Dose conventions do not transfer across models
+  or between random and real directions (P2-D, Gemma-4B-kl, here).
+- **The framing confound persists** under the released injection window.
+- S-1's criterion was not scorable at 12B (precision cells unrunnable) and is reversed in sign
+  at 27B. As filed, it does not hold.
+
+**Consequence for Paper 2's story.** The headline moves from "the published recipe makes dead
+vectors" to: the standard health checks cannot tell live from dead vectors (S-2), the
+significant-P(YES) check is inverted where dead vectors exist (Qwen), steering dose has no
+transferable unit (P2-D, S-1), and the framing confound persists at the published operating
+point (S-1M, C20, A-F1). To be planned before writing.
 
 ### S-1 Gemma-3-12B (2026-10-09, Kaggle; scored once) - **ONLY 4-BIT RUNS ON FREE HARDWARE; ON GEMMA THE TEMPLATE TAIL IS NOT CLEARLY DEADER THAN THE CONCEPT TOKEN**
 
