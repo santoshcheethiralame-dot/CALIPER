@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-09b"
+VERSION = "2026-10-09c"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -217,6 +217,27 @@ NEUTRAL_MATCHED = (
 # number on that model unidentified. This prompt removes the refusal trigger so the
 # vectors can be tested on their own.
 STEER = "Write a short story."
+
+# P2-F (docs/preregistration-p2f-factual-no.md): questions whose answer is unambiguously NO, none
+# naming any of the 30 concepts, in the forced-choice frame so the released injection window
+# (from the token before "Trial") applies unchanged. Question i is paired with concept i.
+FACTUAL_NO_TEMPLATE = "Trial {n}: {q} Answer starting with YES or NO."
+FACTUAL_NO = [
+    "Is the Moon made of cheese?", "Is the Sun colder than ice?",
+    "Is two plus two equal to five?", "Is Paris the capital of Japan?",
+    "Do cats have six legs?", "Is water dry?", "Is the Earth flat?",
+    "Can humans breathe underwater without equipment?", "Is ten smaller than three?",
+    "Is fresh snow usually black?", "Is the Pacific Ocean dry land?",
+    "Did ancient Romans use smartphones?", "Does a triangle have five sides?",
+    "Is ice hotter than boiling water?", "Do apple trees grow on the surface of the Sun?",
+    "Is London in Australia?", "Is a week eight days long?", "Are bananas made of metal?",
+    "Can a person walk from Earth to the Moon?", "Is the number seven even?",
+    "Is the sky green on a clear day?", "Do horses lay eggs?", "Is Tokyo located in Brazil?",
+    "Is a minute longer than an hour?", "Do fish have wheels?",
+    "Is copper a gas at room temperature?", "Is English the only language in the world?",
+    "Can a square have three corners?", "Is the Atlantic Ocean made of sand?",
+    "Is a kilogram lighter than a gram?",
+]
 
 # The released recipe's baseline (introspection-mechanisms, src/vector_utils.py,
 # DEFAULT_BASELINE_WORDS, read 9 Oct 2026): 100 entries, "Butterflies" twice, kept as
@@ -1264,6 +1285,8 @@ def run_stem(a):
         tag += f"_{a.control}"
     if a.vector_recipe != "macar":
         tag += f"_{a.vector_recipe}"
+    if getattr(a, "framing_set", "default") != "default":
+        tag += "_factualno"
     if getattr(a, "inject_from", "all") != "all":
         tag += f"_from{a.inject_from}"
     if a.quant != "4bit":
@@ -1368,6 +1391,9 @@ def main():
                     help="set each non-zero alpha so that a seeded random unit direction gives "
                          "this median next-token KL on fixed prompts; alpha 0 is prepended. "
                          "The same dose on every model, which --alpha-frac is not")
+    ap.add_argument("--framing-set", choices=["default", "factual-no"], default="default",
+                    help="'factual-no' replaces the forced-choice framings with 30 questions "
+                         "whose answer is NO (P2-F), in the same 'Trial {n}' frame")
     ap.add_argument("--n-plants", type=int, default=8,
                     help="planted random directions for --stage plant")
     ap.add_argument("--n-prompts", type=int, default=16,
@@ -1603,6 +1629,7 @@ def main():
     trial_numbers = list(range(1, len(concepts) + 1))
     random.Random(a.trial_seed).shuffle(trial_numbers)
     trial_of = dict(zip(concepts, trial_numbers))
+    question_of = {c: FACTUAL_NO[CONCEPTS.index(c) % len(FACTUAL_NO)] for c in concepts}
     print(f"  trial numbers: seed {a.trial_seed}, e.g. "
           f"{concepts[0]}->{trial_of[concepts[0]]}, {concepts[-1]}->{trial_of[concepts[-1]]}",
           flush=True)
@@ -1610,6 +1637,8 @@ def main():
     framings = {"introspective": INTROSPECTIVE}
     if a.stage in ("framing", "forced"):
         framings["neutral_matched"] = NEUTRAL_MATCHED
+        if a.framing_set == "factual-no":
+            framings = {"factual_no": FACTUAL_NO_TEMPLATE}
     elif a.stage == "steer":
         framings = {"steer": STEER}
         print("  STAGE steer: neutral prompt, injection at EVERY position including "
@@ -1619,7 +1648,7 @@ def main():
     def reference_prompt(c):
         """The prompt the random-impact control is matched on: the run's first framing."""
         t = next(iter(framings.values()))
-        return t if a.stage == "steer" else t.format(n=trial_of[c])
+        return t if a.stage == "steer" else t.format(n=trial_of[c], q=question_of[c])
 
     # Per-(concept, alpha) injections. Every control except random-impact uses one vector
     # per concept scaled by alpha; random-impact needs its own scale at each alpha.
@@ -1738,7 +1767,7 @@ def main():
                 if key in done:
                     continue
                 prompt = template if a.stage == "steer" else template.format(
-                    n=trial_of[c])
+                    n=trial_of[c], q=question_of[c])
                 vec = vec_for(c, alpha)
                 row = {"key": key, "framing": fname, "alpha": alpha, "concept": c,
                        "trial": trial_of[c], **common, "category": CATEGORY.get(c)}

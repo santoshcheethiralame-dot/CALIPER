@@ -174,6 +174,17 @@ def test_inject_from_trial(s3, monkeypatch, tmp_path):
     assert all(x["kl"] == 0.0 for x in r if x["alpha"] == 0)
 
 
+def test_factual_no_framing(s3, monkeypatch, tmp_path):
+    assert len(s3.FACTUAL_NO) == 30
+    assert not [q for q in s3.FACTUAL_NO for c in s3.CONCEPTS if c in q.lower()]
+    run(s3, monkeypatch, tmp_path, "--stage", "forced", "--alphas", "0", "2",
+        "--framing-set", "factual-no", "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_forced_factualno_fromtrial"))
+    assert len(r) == 2 * 3 and {x["framing"] for x in r} == {"factual_no"}
+    assert all(x["kl"] == 0.0 for x in r if x["alpha"] == 0)
+    assert all(0.0 <= x["p_yes"] <= 1.0 for x in r)
+
+
 def test_forced_resume_rebuilds_legacy_keys(s3, monkeypatch, tmp_path):
     legacy = path(tmp_path, "_forced")
     c = s3.CONCEPTS[0]
