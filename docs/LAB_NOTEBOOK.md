@@ -347,6 +347,35 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### P2-D dose transfer across the S-2 sessions (2026-10-09, offline, descriptive) - **A FRACTION OF THE RESIDUAL NORM IS NOT A DOSE; RANDOM-DIRECTION KL UNDERSHOOTS REAL VECTORS 3-20x**
+
+**Run.** `experiments/analyse_p2d.py` -> `results/p2d_dose_transfer.json`. Not pre-registered;
+descriptive, as planned in `flagship-plan.md` §6.
+
+**Transfer at the same fraction of the residual norm** (concept arm, median next-token KL on
+the framing prompts at 0.25 / 0.5 / 1.0): Qwen2.5-3B: 0.00, 1.07, 20.78 / Qwen2.5-7B: 0.09, 2.56, 17.44 / Gemma-3-4B: 42.91, 60.41, 71.32. Coherence on Gemma falls to 67% / 10% / 3%.
+Concept-vector norm over residual norm: 0.67 (both Qwen) vs 0.12 (Gemma).
+
+**Real vs random on the KL-calibrated grid** (Gemma-3-4B, targets 0.05 / 0.5 / 5 nats):
+
+| arm | 0.05 | 0.5 | 5 |
+|---|---|---|---|
+| concept | 0.020 | 0.030 | 0.595 |
+| tail | 0.051 | 0.062 | 0.418 |
+| sentence | 0.017 | 0.062 | 0.920 |
+| span (on-manifold) | 0.034 | 0.044 | 1.29 |
+| impact-matched | 0.022 | 0.034 | 0.577 |
+| random | 0.052 | 0.107 | 12.1 |
+| shuffle | 0.095 | 0.179 | 10.2 |
+| concept / random | 0.38 | 0.28 | 0.05 |
+
+**Reading.** On-manifold directions (concept, tail, sentence, span) are 3-20x gentler than
+off-manifold ones (random, shuffle) at the same norm, and the gap widens with dose. Neither
+convention transfers: fraction-of-norm because of Gemma's shared component, random-direction
+KL because real vectors are not random. A dose calibrated on the vectors themselves (or on
+on-manifold span vectors) is the remaining option; it is not filed. Paper 2's dose table and
+figure come from this file.
+
 ### X-1 cross-sample replication (2026-10-09, local; scored once) - **THE LOW-VARIANCE DIAGNOSTIC AND THE MECHANISM REPLICATE; CROSS-SAMPLE AGREEMENT DOES NOT BEAT HELD-OUT FIT**
 
 **Run.** Queue 5. 100 new GPT-Neo-125M layer-10 units (`results/x1_units.txt`), each fitted
