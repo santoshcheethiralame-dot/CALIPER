@@ -1,0 +1,150 @@
+{
+ "units": 100,
+ "labels from fit A": {
+  "failures": 40,
+  "converged_wrong": 19,
+  "under_fitted": 21,
+  "all failures": {
+   "n_positive": 40,
+   "auc cross-sample agreement": 0.8716666666666667,
+   "auc held-out R2": 0.83875,
+   "auc restart agreement": 0.80375,
+   "cross minus R2": 0.032916666666666705,
+   "cross minus R2 ci95": [
+    -0.033333333333333326,
+    0.10333333333333328
+   ],
+   "cross minus restart": 0.06791666666666674,
+   "cross minus restart ci95": [
+    -0.018354166666666644,
+    0.1538020833333331
+   ],
+   "delong cross vs R2": {
+    "diff": 0.032916666666666705,
+    "p": 0.3396743901219583
+   }
+  },
+  "converged-wrong vs pass": {
+   "n_positive": 19,
+   "auc cross-sample agreement": 0.775438596491228,
+   "auc held-out R2": 0.7105263157894737,
+   "auc restart agreement": 0.7552631578947369,
+   "cross minus R2": 0.06491228070175437,
+   "cross minus R2 ci95": [
+    -0.05175438596491233,
+    0.18337719298245592
+   ],
+   "cross minus restart": 0.02017543859649118,
+   "cross minus restart ci95": [
+    -0.11405701754385966,
+    0.15004385964912248
+   ]
+  },
+  "under-fitted vs pass": {
+   "n_positive": 21,
+   "auc cross-sample agreement": 0.9587301587301588,
+   "auc held-out R2": 0.9547619047619048,
+   "auc restart agreement": 0.8476190476190476,
+   "cross minus R2": 0.003968253968253954,
+   "cross minus R2 ci95": [
+    -0.0420833333333334,
+    0.053968253968254
+   ],
+   "cross minus restart": 0.11111111111111116,
+   "cross minus restart ci95": [
+    0.030158730158730163,
+    0.19525793650793638
+   ]
+  }
+ },
+ "labels from fit B": {
+  "failures": 38,
+  "converged_wrong": 16,
+  "under_fitted": 22,
+  "all failures": {
+   "n_positive": 38,
+   "auc cross-sample agreement": 0.8213073005093379,
+   "auc held-out R2": 0.8234295415959253,
+   "auc restart agreement": 0.7266553480475382,
+   "cross minus R2": -0.0021222410865874286,
+   "cross minus R2 ci95": [
+    -0.07089346349745335,
+    0.07682512733446512
+   ],
+   "cross minus restart": 0.0946519524617997,
+   "cross minus restart ci95": [
+    0.009337860780984752,
+    0.18718166383701185
+   ],
+   "delong cross vs R2": {
+    "diff": -0.0021222410865874286,
+    "p": 0.9545689995405262
+   }
+  },
+  "converged-wrong vs pass": {
+   "n_positive": 16,
+   "auc cross-sample agreement": 0.7076612903225806,
+   "auc held-out R2": 0.5987903225806451,
+   "auc restart agreement": 0.6118951612903226,
+   "cross minus R2": 0.1088709677419355,
+   "cross minus R2 ci95": [
+    -0.014112903225806384,
+    0.24193548387096775
+   ],
+   "cross minus restart": 0.09576612903225801,
+   "cross minus restart ci95": [
+    -0.03931451612903225,
+    0.23185483870967738
+   ]
+  },
+  "under-fitted vs pass": {
+   "n_positive": 22,
+   "auc cross-sample agreement": 0.9039589442815249,
+   "auc held-out R2": 0.9868035190615836,
+   "auc restart agreement": 0.8101173020527859,
+   "cross minus R2": -0.08284457478005869,
+   "cross minus R2 ci95": [
+    -0.1510263929618768,
+    -0.027126099706744844
+   ],
+   "cross minus restart": 0.09384164222873903,
+   "cross minus restart ci95": [
+    0.001447947214076246,
+    0.2052785923753666
+   ]
+  }
+ },
+ "P1": {
+  "diff": 0.06491228070175437,
+  "ci95": [
+   -0.05175438596491233,
+   0.18337719298245592
+  ],
+  "holds": false
+ },
+ "P2": {
+  "converged_wrong": 19,
+  "equivalent_on_fresh_text": 18,
+  "share": 0.9473684210526315,
+  "holds": true
+ },
+ "P3": {
+  "median_error_share_low_variance": {
+   "converged-wrong": 0.9312619375550353,
+   "under-fitted": 0.48425070310853463
+  },
+  "low_variance_dims": 102,
+  "holds": true
+ },
+ "P4": {
+  "auc_vhat_low_share": 0.9289473684210526,
+  "auc_held_out_r2": 0.7105263157894737,
+  "diff": 0.21842105263157896,
+  "diff_ci95": [
+   0.09910087719298243,
+   0.3403508771929824
+  ],
+  "holds": true
+ },
+ "P4_all_failures_auc_vhat_low_share": 0.8795833333333334
+}

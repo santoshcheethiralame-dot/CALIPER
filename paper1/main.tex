@@ -49,10 +49,11 @@ that fit as well as the reference but point elsewhere, neither check is reliable
 exploratory analysis traces these fits to a known identifiability limit: they differ from the
 reference almost entirely in directions the stimulus barely occupies, and on held-out text
 from the same distribution they predict the unit as well as the reference does.
-\draft{Two signals that need no ground truth do flag them: the share of the fitted direction
-that lies in the stimulus's lowest-variance directions (AUC 0.94 to 0.97 in five arms), and
-agreement between fits on disjoint token samples (AUC 0.91 on 6 fits). Removing that share
-repairs 40 of 43 such fits.} Restart
+\draft{A signal that needs no ground truth does flag them: the share of the fitted direction
+that lies in the stimulus's lowest-variance directions (AUC 0.94 to 0.97 in five arms, and
+0.93 against 0.71 for held-out fit in a pre-registered replication on 100 new units).
+Removing that share repairs 40 of 43 such fits. Agreement between fits on disjoint token
+samples does not do better than held-out fit.} Restart
 agreement does not improve with more restarts or when measured in the stimulus metric, and
 single-unit verdicts are fragile: one in five flips when one source of randomness changes.
 \draft{With response noise added so that the attainable fit varies between units, held-out
@@ -120,9 +121,8 @@ contributions are:
   differ from the reference in directions the stimulus barely occupies, and they are
   equivalent to it on held-out text from the same distribution
   (Section~\ref{sec:identifiability}). \draft{They can still be flagged without ground truth,
-  by the fitted direction's share in the lowest-variance stimulus directions and by agreement
-  across token samples rather than across restarts (exploratory; a filed test on new units is
-  pending \tbd{X-1}).}
+  by the fitted direction's share in the lowest-variance stimulus directions, a result
+  replicated on new units under a pre-registered test.}
   \item \textbf{More restarts are not a remedy.} Restart agreement does not improve as
   restarts are added, and about a quarter of units are not recovered by the direct route
   within four random restarts (Section~\ref{sec:restarts}).
@@ -473,15 +473,18 @@ $\mathbf{w}_j$ does not separate them (AUC 0.17 to 0.50), so it describes the fi
 unit. Projecting each fitted direction onto the remaining 99\% of variance repairs 40 of the
 43 converged-wrong fits (all 20 GPT-Neo layer-6 fits as well). Over all failures the share is
 weaker than held-out $R^2$ (0.73 to 0.88 against 0.76 to 0.95), so it complements held-out fit
-rather than replacing it. A second signal agrees. For the 100 re-fitted GPT-2 units, the
-absolute cosine between a unit's directions fitted on two different token samples predicts
-failure with AUC 0.922 (0.911 on the 6 converged-wrong fits), against 0.726 for restart
-agreement and 0.896 for held-out $R^2$. Converged-wrong fits differ from $\mathbf{w}_j$ in
-directions the data barely determine, so those components move when the tokens change but not
-when only the initialisation does. Both results were found after the data were seen, rest on
-few converged-wrong fits, and the two token-sample fits also differ in restart count (five
-against two). A filed test on new units, each fitted twice on document-disjoint samples with
-identical settings, is pending \tbd{X-1}.}
+rather than replacing it. These results were found after the data were seen. A
+pre-registered replication on 100 new GPT-Neo layer-10 units, each fitted twice with identical
+settings on document-disjoint samples, confirms the share: on the 19 converged-wrong fits it
+scores 0.929 against 0.711 for held-out $R^2$, a difference of 0.218 (bootstrap 95\% CI
+$[0.099, 0.340]$). The same replication confirms the mechanism: 18 of the 19 fits are
+equivalent to $\mathbf{w}_j$ on fresh text, and a median 0.93 of their error energy lies in
+the bottom-1\% directions, against 0.48 for under-fitted fits. It does not confirm a second
+signal we had seen earlier. Agreement between the two document-disjoint fits scores 0.775 on
+the converged-wrong fits, a difference from held-out $R^2$ of 0.065 ($[-0.052, 0.183]$), and
+restart agreement scores 0.755; over all 40 failures the three score 0.872, 0.839 and 0.804.
+The earlier exploratory figure (0.911 on 6 fits) came from fits that also differed in restart
+count.}
 
 Two limits apply. First, the equivalence is predictive and in-distribution. Steering or
 patching along $\hat{\mathbf{v}}$ pushes activations into exactly the low-variance directions
@@ -693,8 +696,7 @@ they differ from the reference only where the stimulus has almost no variance. T
 advice is short: report held-out fit for every estimate, do not read agreement across
 restarts as evidence of correctness, and treat a recovered direction as determined only
 within the subspace its stimulus explores. \draft{Where a check beyond held-out fit is wanted,
-perturb the data rather than the initialisation, and measure how much of the recovered
-direction lies where the stimulus has almost no variance.} A reliability check is itself a measuring
+measure how much of the recovered direction lies where the stimulus has almost no variance.} A reliability check is itself a measuring
 instrument, and like any instrument it should be calibrated against a known answer before its
 readings are trusted.
 
@@ -890,16 +892,17 @@ and error spectrum; the response-only difficulty baseline; the pass@$k$ model co
 function-space and random-only restart agreement; $\kappa$ and angle ICCs; the paired
 permutation test. The plan for the last group was filed before it ran. \\
 Pre-registered, reported & The transfer attempt on sparse-autoencoder latents (failed at the
-estimator, 3 of 100 recovered), the float32 Pythia re-fit (no material effect) and the
+estimator, 3 of 100 recovered), the float32 Pythia re-fit (no material effect), the
 response-noise experiment (primary holds; the fixed-noise arms keep the sign with intervals
-that include zero). \\
+that include zero) and \draft{the cross-sample replication (the low-variance diagnostic and
+the identifiability mechanism hold on new units; cross-sample agreement does not beat held-out
+fit, so its primary fails)}. \\
 Exploratory, found after the data & \draft{The low-variance-share diagnostic and its projection
 repair; agreement across token samples; the standardisation diagnosis of the GPT-Neo layer-6
 run and the layer map of near-constant coordinates; failure-class unit properties; the
 verdict history across four fits; restart-agreement saturation.} \\
-Pending, filed & \draft{Agreement across document-disjoint token samples and the low-variance
-diagnostic on new GPT-Neo layer-10 units \tbd{X-1}; the re-fit without the near-constant
-coordinate at GPT-Neo layer 6 and the predicted case at GPT-2 layer 3 \tbd{B-17b/c/d}.} \\
+Pending, filed & \draft{The re-fit without the near-constant coordinate at GPT-Neo layer 6
+and the predicted case at GPT-2 layer 3 \tbd{B-17b/c/d}.} \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -246,6 +246,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-2 Gemma-3-4B** | 2026-10-09 | **Instrument audit, third model (fp32, unquantised)** | 90 vectors | script v2026-10-08a, Amendment 2 | `results/s2_gemma4b/`, `results/s2_gemma4b_analysis.json` | 41 live / 49 dead. Norm 0.29 (inverted), distinctness 0.64, P(YES) shift 0.57 (holds), logit steering 0.61. **Manipulation check fails: the alpha-frac grid saturates Gemma** (KL 42-75 nats at every non-zero alpha, random controls included; coherence 50% at 0.25). Not comparable with Qwen |
 | **P2-M** | 2026-10-09 | **Is the inverted P(YES) check output steering? (logit-lens answer score)** | 180 vectors (S-2 Qwen-3B, Qwen-7B) | `docs/preregistration-p2m-output-steering.md` (filed before analysis) | `results/p2m_qwen3b.json`, `results/p2m_qwen7b.json` | **Primary holds** (rho 0.26 [0.04, 0.44], 0.29 [0.10, 0.49]); secondary fails: the score does not separate live from dead (AUC 0.39, 0.42, CIs include 0.5) and removing it leaves the inversion (0.367 -> 0.388, 0.353 -> 0.369). Direct path real, not the mechanism of the inversion |
 | **S-2 Gemma-3-4B-kl** | 2026-10-09 | **Instrument audit on the KL-calibrated grid (Amendment 3); P2-G primary** | 90 vectors | script v2026-10-09a, `--calibrate-kl 0.05 0.5 5` | `results/s2_gemma4b_kl/`, `results/s2_gemma4b_kl_analysis.json`, `results/p2g_gemma4b_kl.json` | Manipulation check passes (30/30 random steer generations coherent at the gate). Only **9 live / 81 dead** at the 0.5-nat gate. S-2: norm 0.41, distinctness 0.61, P(YES) 0.54 (all 'near 0.5', low power), logit steering 0.43 (fails). **P2-G fails** (0.461 [0.278, 0.632]) |
+| **X-1a/b** | 2026-10-09 | **Cross-sample agreement and the identifiability replication, new GPT-Neo L10 units** | 100 units x 2 document-disjoint fits | `docs/preregistration-x1-cross-sample.md` + Addendum 1 | `results/x1a_gptneo_l10.jsonl`, `results/x1b_gptneo_l10.jsonl`, `results/x1_analysis.json` | **P1 (primary) fails**: cross-sample 0.775 vs held-out R2 0.711 on 19 converged-wrong, +0.065 [-0.052, 0.183]. **P2, P3, P4 hold**: 18/19 equivalent on fresh text; error share 0.93 vs 0.48; **low-variance share 0.929 vs 0.711, +0.218 [0.099, 0.340]** |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -345,6 +346,70 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### X-1 cross-sample replication (2026-10-09, local; scored once) - **THE LOW-VARIANCE DIAGNOSTIC AND THE MECHANISM REPLICATE; CROSS-SAMPLE AGREEMENT DOES NOT BEAT HELD-OUT FIT**
+
+**Run.** Queue 5. 100 new GPT-Neo-125M layer-10 units (`results/x1_units.txt`), each fitted
+twice with identical settings (`--restarts 2 --independent-units`) on document-disjoint
+samples (X-1b: corpus seed 1, seed-0 documents excluded). X-1a 22:23-04:11, X-1b 04:11-09:56,
+fresh diagnostics 09:58. `analyse_x1.py` run once.
+
+**Labels from fit A:** 40 failures, 19 converged-wrong, 21 under-fitted.
+
+| prediction | result | verdict |
+|---|---|---|
+| **P1 (primary)**: AUC(cross-sample) - AUC(held-out R2), converged-wrong vs pass, CI above 0 | 0.775 vs 0.711, **+0.065 [-0.052, 0.183]** | **fails** |
+| P2: >= 80% of converged-wrong equivalent on fresh text (stimulus-weighted >= 0.99) | 18 of 19 (95%) | holds |
+| P3: error share in bottom-1% directions >= 0.70 (converged-wrong), < 0.50 (under-fitted) | 0.931 vs 0.484 | holds |
+| **P4** (Addendum 1): AUC(fitted-direction low-variance share) - AUC(held-out R2) | **0.929 vs 0.711, +0.218 [0.099, 0.340]** | **holds** |
+
+**Secondaries.**
+- All 40 failures: cross-sample 0.872, held-out R2 0.839, restart 0.804; DeLong cross vs R2
+  p = 0.34. Low-variance share over all failures 0.880.
+- Converged-wrong vs pass, restart agreement 0.755: about as good as cross-sample.
+- Labels from fit B (38 failures, 16 converged-wrong): cross-sample beats restart over all
+  failures (+0.095 [0.009, 0.187]) but not held-out R2 (-0.002).
+
+**Reading.**
+- **The geometric diagnostic is now confirmatory.** On new units, the share of the fitted
+  direction in the lowest-variance directions flags converged-wrong fits far better than
+  held-out fit (and restart agreement). P2 and P3 make the identifiability mechanism
+  confirmatory as well.
+- **The cross-sample result of 8 Oct does not replicate at its size.** 0.911 on 6 fits fell to
+  0.775 on 19 with identical settings. The earlier pair also differed in restart count (5 vs 2),
+  which the notebook flagged as a caveat; it was most of the effect.
+- **For the flagship**: "perturb the data, not the seed" is weaker than planned. Resampling
+  agreement is a modest improvement over restart agreement, not a solution; the geometric check
+  is the strong ground-truth-free signal. F-0's simulation is the place to say why (does
+  resampling move only part of the error at this sample size?).
+- Paper 1 updated: abstract, contribution 3, the diagnostic paragraph, conclusion advice and the
+  status table (X-1 to pre-registered, reported). No X-1 placeholders remain.
+
+### Substrate pilots for F-3, F-4, F-6 (2026-10-09, local; smoke runs, discarded) - **ALL THREE RUN END TO END; EACH NEEDS ITS DIAL SET**
+
+Code: `caliper/activations.py` (`target="unembed"`, `target="glu"`, OPT support), `e01_gate.py
+--target {unembed,glu}`; identity tests in `tests/test_substrates.py` (OPT ReLU, GPT-2
+unembedding, Gemma-3-270M GLU against its own down_proj input, GPT-2 MLP unchanged; 6 tests
+green with the SAE tests).
+
+| substrate | units | alignment | held-out R2 | restart | reading |
+|---|---|---|---|---|---|
+| F-6 GPT-2 unembedding | tokens 262, 30000 | 0.40, 0.15 | 0.9994, 0.9995 | 0.98, 0.99 | converged-wrong, confidently |
+| F-3 OPT-125m L6 ReLU | 3, 41 | 0.35, 0.55 | 0.51, 0.81 | 0.02, 0.22 | under-fitted (sparse units) |
+| F-4 Gemma-3-270M L6 GeGLU (k=2) | 5, 77 | 0.16, 0.37 | 0.66, 0.60 | 0.58, 0.59 | under-fitted |
+
+**F-6 diagnosis.** GPT-2's final-norm output has a coordinate with 118x the median SD
+(massive activations) and the layer-norm null direction (condition number ~1e33). The
+"bottom 1% of variance" covers 675 of 768 directions, so the low-variance share as defined
+degenerates. Coordinate 87 sits at 1.1% of the median SD, just above B-17b's 1% cutoff, and
+carries ~48% of both fitted directions' norm: the standardisation artifact again. Projecting
+out the weak directions gives cosine 0.95 and 0.99. **Before F-6's prereg:** handle massive
+dimensions and define "low variance" scale-free (e.g. on the correlation matrix, or after
+removing the top directions).
+
+**F-3 / F-4.** OPT ReLU units and Gemma-3 gated units are under-fitted at 8,000 tokens. The
+dials are token budget (GPU fits at 32-64k) and unit selection by firing fraction. Gate F-B
+risk confirmed for F-4.
 
 ### S-2 Gemma-3-4B on the KL-calibrated grid (2026-10-09, Kaggle; scored once) - **MANIPULATION CHECK PASSES, BUT THE GATE DOSE IS GENTLE FOR REAL VECTORS: 9 LIVE; P2-G NOT CONFIRMED**
 
