@@ -1,0 +1,191 @@
+{
+ "note": "min and median |gamma| of the layer norm feeding each MLP; round-2 roadmap A2",
+ "models": {
+  "gpt2": [
+   {
+    "layer": 0,
+    "min_abs_gamma": 0.045285746455192566,
+    "median_abs_gamma": 1.160179615020752
+   },
+   {
+    "layer": 1,
+    "min_abs_gamma": 0.056036315858364105,
+    "median_abs_gamma": 0.24208946526050568
+   },
+   {
+    "layer": 2,
+    "min_abs_gamma": 0.04211447015404701,
+    "median_abs_gamma": 0.29590529203414917
+   },
+   {
+    "layer": 3,
+    "min_abs_gamma": 0.00025572447339072824,
+    "median_abs_gamma": 0.31152260303497314
+   },
+   {
+    "layer": 4,
+    "min_abs_gamma": 0.07006779313087463,
+    "median_abs_gamma": 0.27636462450027466
+   },
+   {
+    "layer": 5,
+    "min_abs_gamma": 0.04284697026014328,
+    "median_abs_gamma": 0.28177565336227417
+   },
+   {
+    "layer": 6,
+    "min_abs_gamma": 0.04236043989658356,
+    "median_abs_gamma": 0.2606422007083893
+   },
+   {
+    "layer": 7,
+    "min_abs_gamma": 0.014922600239515305,
+    "median_abs_gamma": 0.2567872405052185
+   },
+   {
+    "layer": 8,
+    "min_abs_gamma": 0.018047964200377464,
+    "median_abs_gamma": 0.2566194236278534
+   },
+   {
+    "layer": 9,
+    "min_abs_gamma": 0.017738385125994682,
+    "median_abs_gamma": 0.26279520988464355
+   },
+   {
+    "layer": 10,
+    "min_abs_gamma": 0.020089950412511826,
+    "median_abs_gamma": 0.28419414162635803
+   },
+   {
+    "layer": 11,
+    "min_abs_gamma": 0.02784746140241623,
+    "median_abs_gamma": 0.495078444480896
+   }
+  ],
+  "EleutherAI/gpt-neo-125M": [
+   {
+    "layer": 0,
+    "min_abs_gamma": 0.0003833770751953125,
+    "median_abs_gamma": 0.4990234375
+   },
+   {
+    "layer": 1,
+    "min_abs_gamma": 0.00010395050048828125,
+    "median_abs_gamma": 1.3515625
+   },
+   {
+    "layer": 2,
+    "min_abs_gamma": 0.00010251998901367188,
+    "median_abs_gamma": 1.3359375
+   },
+   {
+    "layer": 3,
+    "min_abs_gamma": 0.00011539459228515625,
+    "median_abs_gamma": 1.5859375
+   },
+   {
+    "layer": 4,
+    "min_abs_gamma": 0.0001678466796875,
+    "median_abs_gamma": 1.484375
+   },
+   {
+    "layer": 5,
+    "min_abs_gamma": 0.0002956390380859375,
+    "median_abs_gamma": 1.0234375
+   },
+   {
+    "layer": 6,
+    "min_abs_gamma": 2.372264862060547e-05,
+    "median_abs_gamma": 1.1171875
+   },
+   {
+    "layer": 7,
+    "min_abs_gamma": 9.918212890625e-05,
+    "median_abs_gamma": 0.8828125
+   },
+   {
+    "layer": 8,
+    "min_abs_gamma": 0.0003910064697265625,
+    "median_abs_gamma": 0.828125
+   },
+   {
+    "layer": 9,
+    "min_abs_gamma": 0.00013446807861328125,
+    "median_abs_gamma": 0.67578125
+   },
+   {
+    "layer": 10,
+    "min_abs_gamma": 0.00994873046875,
+    "median_abs_gamma": 0.59375
+   },
+   {
+    "layer": 11,
+    "min_abs_gamma": 0.2236328125,
+    "median_abs_gamma": 0.53125
+   }
+  ],
+  "EleutherAI/pythia-160m": [
+   {
+    "layer": 0,
+    "min_abs_gamma": 0.374267578125,
+    "median_abs_gamma": 0.4246826171875
+   },
+   {
+    "layer": 1,
+    "min_abs_gamma": 0.623046875,
+    "median_abs_gamma": 1.1982421875
+   },
+   {
+    "layer": 2,
+    "min_abs_gamma": 0.666015625,
+    "median_abs_gamma": 1.154296875
+   },
+   {
+    "layer": 3,
+    "min_abs_gamma": 0.732421875,
+    "median_abs_gamma": 1.06884765625
+   },
+   {
+    "layer": 4,
+    "min_abs_gamma": 0.476806640625,
+    "median_abs_gamma": 0.921630859375
+   },
+   {
+    "layer": 5,
+    "min_abs_gamma": 0.37109375,
+    "median_abs_gamma": 0.93896484375
+   },
+   {
+    "layer": 6,
+    "min_abs_gamma": 0.2861328125,
+    "median_abs_gamma": 1.0234375
+   },
+   {
+    "layer": 7,
+    "min_abs_gamma": 0.335205078125,
+    "median_abs_gamma": 1.10693359375
+   },
+   {
+    "layer": 8,
+    "min_abs_gamma": 0.3974609375,
+    "median_abs_gamma": 1.29833984375
+   },
+   {
+    "layer": 9,
+    "min_abs_gamma": 0.44287109375,
+    "median_abs_gamma": 1.26611328125
+   },
+   {
+    "layer": 10,
+    "min_abs_gamma": 0.505859375,
+    "median_abs_gamma": 1.216796875
+   },
+   {
+    "layer": 11,
+    "min_abs_gamma": 0.83935546875,
+    "median_abs_gamma": 1.27587890625
+   }
+  ]
+ }
+}

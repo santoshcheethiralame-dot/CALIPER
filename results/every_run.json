@@ -1,0 +1,740 @@
+{
+ "arms": {
+  "GPT-2 L6 (B-14)": {
+   "n": 300,
+   "failures": 46,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.7915097569325573,
+   "auc_r2": 0.9187350222526532,
+   "diff": -0.12722526532009593,
+   "delong_p": 0.00017740901029657542,
+   "delong_se": 0.03393409745935983,
+   "boot_ci95": [
+    -0.19676694625128377,
+    -0.06256419034577199
+   ],
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 160,
+     "failures": 9,
+     "auc_restart": 0.8005886681383371,
+     "auc_r2": 0.9131714495952906,
+     "diff": -0.11258278145695355
+    },
+    "all units, direct-route label": {
+     "n": 300,
+     "failures": 107,
+     "auc_restart": 0.833494746017142,
+     "auc_r2": 0.894968766645683,
+     "diff": -0.061474020628541015
+    }
+   }
+  },
+  "Pythia-160m L6 (B-2c)": {
+   "n": 300,
+   "failures": 13,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": true,
+   "auc_restart": 0.8275261324041812,
+   "auc_r2": 0.9509514875368534,
+   "diff": -0.12342535513267228,
+   "delong_p": 0.08714404368756261,
+   "delong_se": 0.07215075636436843,
+   "boot_ci95": [
+    -0.26405119270972927,
+    0.004720584293754772
+   ],
+   "auc_route_agreement": 0.9354060573572769,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 208,
+     "failures": 4,
+     "auc_restart": 0.8774509803921569,
+     "auc_r2": 0.8872549019607843,
+     "diff": -0.009803921568627416
+    },
+    "all units, direct-route label": {
+     "n": 300,
+     "failures": 36,
+     "auc_restart": 0.8218644781144782,
+     "auc_r2": 0.8930976430976431,
+     "diff": -0.0712331649831649
+    }
+   }
+  },
+  "GPT-2 L2 (B-7)": {
+   "n": 50,
+   "failures": 25,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.7888,
+   "auc_r2": 0.9504,
+   "diff": -0.16160000000000008,
+   "delong_p": 0.008871041704157215,
+   "delong_se": 0.06175046558528931,
+   "boot_ci95": [
+    -0.2944,
+    -0.04959999999999998
+   ],
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 28,
+     "failures": 12,
+     "auc_restart": 0.984375,
+     "auc_r2": 0.9947916666666666,
+     "diff": -0.01041666666666663
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 31,
+     "auc_restart": 0.9202037351443124,
+     "auc_r2": 0.9728353140916808,
+     "diff": -0.05263157894736836
+    }
+   }
+  },
+  "GPT-2 L10 (B-7)": {
+   "n": 50,
+   "failures": 5,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.7288888888888889,
+   "auc_r2": 0.8177777777777778,
+   "diff": -0.0888888888888889,
+   "delong_p": 0.21624679906770053,
+   "delong_se": 0.071883432262897,
+   "boot_ci95": [
+    -0.22222222222222232,
+    0.04444444444444451
+   ],
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 43,
+     "failures": 3,
+     "auc_restart": 0.7416666666666667,
+     "auc_r2": 0.75,
+     "diff": -0.008333333333333304
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 7,
+     "auc_restart": 0.7308970099667774,
+     "auc_r2": 0.8504983388704319,
+     "diff": -0.11960132890365449
+    }
+   }
+  },
+  "GPT-Neo-125m L10 (B-8b)": {
+   "n": 100,
+   "failures": 38,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": true,
+   "auc_restart": 0.5878607809847198,
+   "auc_r2": 0.7553056027164686,
+   "diff": -0.1674448217317488,
+   "delong_p": 0.002232947809257552,
+   "delong_se": 0.05476775318335797,
+   "boot_ci95": [
+    -0.27548811544991514,
+    -0.06153438030560277
+   ],
+   "auc_route_agreement": 0.6799660441426146,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 47,
+     "failures": 14,
+     "auc_restart": 0.6103896103896104,
+     "auc_r2": 0.7716450216450217,
+     "diff": -0.16125541125541132
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 55,
+     "auc_restart": 0.656969696969697,
+     "auc_r2": 0.8141414141414142,
+     "diff": -0.15717171717171718
+    }
+   }
+  },
+  "Pythia-1.4B L12, 3200 steps (B-11c)": {
+   "n": 50,
+   "failures": 19,
+   "estimator": "corrected",
+   "device": "Kaggle T4",
+   "precision": "unrecorded",
+   "pooled": true,
+   "auc_restart": 0.8471986417657046,
+   "auc_r2": 0.9728353140916808,
+   "diff": -0.1256366723259762,
+   "delong_p": 0.03196944970401489,
+   "delong_se": 0.058577544727600205,
+   "boot_ci95": [
+    -0.2512733446519525,
+    -0.02376910016977929
+   ],
+   "auc_route_agreement": 0.9100169779286927,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 22,
+     "failures": 2,
+     "auc_restart": 1.0,
+     "auc_r2": 1.0,
+     "diff": 0.0
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 27,
+     "auc_restart": 0.8309178743961353,
+     "auc_r2": 0.9565217391304348,
+     "diff": -0.12560386473429952
+    }
+   }
+  },
+  "Pythia-70m (B-11)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": false,
+   "auc_restart": 0.8645833333333334,
+   "auc_r2": 0.6145833333333334,
+   "diff": 0.25,
+   "delong_p": 0.4283881662987118,
+   "delong_se": 0.3156753567370501,
+   "boot_ci95": [
+    -0.10416666666666663,
+    0.6666666666666666
+   ],
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 40,
+     "failures": 1,
+     "auc_restart": 0.8717948717948718,
+     "auc_r2": 0.2564102564102564,
+     "diff": 0.6153846153846154
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 6,
+     "auc_restart": 0.8049242424242424,
+     "auc_r2": 0.7840909090909091,
+     "diff": 0.02083333333333337
+    }
+   }
+  },
+  "Pythia-410m (B-11)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": false,
+   "auc_restart": 0.7708333333333334,
+   "auc_r2": 1.0,
+   "diff": -0.22916666666666663,
+   "delong_p": 0.2797134483547931,
+   "delong_se": 0.2120022678744837,
+   "boot_ci95": [
+    -0.5416666666666667,
+    0.0
+   ],
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 37,
+     "failures": 0,
+     "auc_restart": NaN,
+     "auc_r2": NaN,
+     "diff": null
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 5,
+     "auc_restart": 0.8977777777777778,
+     "auc_r2": 0.9466666666666667,
+     "diff": -0.04888888888888887
+    }
+   }
+  },
+  "Pythia-410m, 3200 steps (B-11)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "coupled",
+   "device": "CPU",
+   "precision": "fp16",
+   "pooled": false,
+   "auc_restart": 0.7604166666666666,
+   "auc_r2": 1.0,
+   "diff": -0.23958333333333337,
+   "delong_p": 0.1895516067476513,
+   "delong_se": 0.18262223067610314,
+   "boot_ci95": [
+    -0.5,
+    -0.02083333333333337
+   ],
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 43,
+     "failures": 0,
+     "auc_restart": NaN,
+     "auc_r2": NaN,
+     "diff": null
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 5,
+     "auc_restart": 0.9022222222222223,
+     "auc_r2": 0.9688888888888889,
+     "diff": -0.06666666666666665
+    }
+   }
+  },
+  "GPT-2 L6 re-fit, fit seed 1 (B-15a)": {
+   "n": 100,
+   "failures": 18,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7262872628726287,
+   "auc_r2": 0.8956639566395664,
+   "diff": -0.16937669376693776,
+   "delong_p": 0.010533114125442602,
+   "delong_se": 0.06621920722571482,
+   "boot_ci95": [
+    -0.3082655826558265,
+    -0.05348915989159909
+   ],
+   "auc_route_agreement": 0.8905826558265583,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 68,
+     "failures": 8,
+     "auc_restart": 0.7416666666666667,
+     "auc_r2": 0.8875,
+     "diff": -0.14583333333333326
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 29,
+     "auc_restart": 0.8052452646915979,
+     "auc_r2": 0.9208353569694027,
+     "diff": -0.11559009227780481
+    }
+   }
+  },
+  "GPT-2 L6 re-fit, corpus seed 1 (B-15b)": {
+   "n": 100,
+   "failures": 20,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7609375,
+   "auc_r2": 0.845,
+   "diff": -0.08406249999999993,
+   "delong_p": 0.14333140053105298,
+   "delong_se": 0.057439470655484035,
+   "boot_ci95": [
+    -0.19782812499999994,
+    0.022499999999999968
+   ],
+   "auc_route_agreement": 0.819375,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 44,
+     "failures": 6,
+     "auc_restart": 0.793859649122807,
+     "auc_r2": 0.8333333333333334,
+     "diff": -0.03947368421052633
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 43,
+     "auc_restart": 0.8035495716034272,
+     "auc_r2": 0.9375764993880049,
+     "diff": -0.1340269277845777
+    }
+   }
+  },
+  "GPT-2 L6 re-fit, sequence split (B-15c)": {
+   "n": 100,
+   "failures": 22,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7231934731934732,
+   "auc_r2": 0.8851981351981352,
+   "diff": -0.16200466200466201,
+   "delong_p": 0.016546397101809177,
+   "delong_se": 0.06759671880983198,
+   "boot_ci95": [
+    -0.2954691142191143,
+    -0.029122960372960516
+   ],
+   "auc_route_agreement": 0.7992424242424242,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 52,
+     "failures": 9,
+     "auc_restart": 0.7829457364341085,
+     "auc_r2": 0.9922480620155039,
+     "diff": -0.2093023255813954
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 43,
+     "auc_restart": 0.8331293349653203,
+     "auc_r2": 0.9130966952264382,
+     "diff": -0.07996736026111795
+    }
+   }
+  },
+  "GPT-Neo-125m L6 (B-17)": {
+   "n": 20,
+   "failures": 20,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 6,
+     "failures": 6,
+     "auc_restart": NaN,
+     "auc_r2": NaN,
+     "diff": null
+    },
+    "all units, direct-route label": {
+     "n": 20,
+     "failures": 20,
+     "auc_restart": NaN,
+     "auc_r2": NaN,
+     "diff": null
+    }
+   }
+  },
+  "GPT-Neo-125m L10, new units (X-1a)": {
+   "n": 100,
+   "failures": 40,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.80375,
+   "auc_r2": 0.83875,
+   "diff": -0.03500000000000003,
+   "delong_p": 0.4262866937246036,
+   "delong_se": 0.04399406015245316,
+   "boot_ci95": [
+    -0.11626041666666663,
+    0.04874999999999996
+   ],
+   "auc_route_agreement": 0.82125,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 41,
+     "failures": 10,
+     "auc_restart": 0.8,
+     "auc_r2": 0.8419354838709677,
+     "diff": -0.04193548387096768
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 55,
+     "auc_restart": 0.8303030303030303,
+     "auc_r2": 0.9228282828282828,
+     "diff": -0.09252525252525245
+    }
+   }
+  },
+  "GPT-Neo-125m L10, new units, corpus seed 1 (X-1b)": {
+   "n": 100,
+   "failures": 38,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7266553480475382,
+   "auc_r2": 0.8234295415959253,
+   "diff": -0.09677419354838712,
+   "delong_p": 0.02628057008301785,
+   "delong_se": 0.0435519489565958,
+   "boot_ci95": [
+    -0.18590831918505946,
+    -0.008478353140916836
+   ],
+   "auc_route_agreement": 0.7865025466893039,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 43,
+     "failures": 14,
+     "auc_restart": 0.7266009852216748,
+     "auc_r2": 0.7438423645320197,
+     "diff": -0.017241379310344862
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 57,
+     "auc_restart": 0.8070175438596491,
+     "auc_r2": 0.8496532027743778,
+     "diff": -0.04263565891472876
+    }
+   }
+  },
+  "GPT-Neo-125m L6, coordinate dropped (B-17b)": {
+   "n": 20,
+   "failures": 7,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7692307692307693,
+   "auc_r2": 0.7032967032967034,
+   "diff": 0.06593406593406592,
+   "delong_p": 0.6178874586644905,
+   "delong_se": 0.1321730296898807,
+   "boot_ci95": [
+    -0.17582417582417587,
+    0.3079670329670315
+   ],
+   "auc_route_agreement": 0.8461538461538461,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 8,
+     "failures": 1,
+     "auc_restart": 0.8571428571428571,
+     "auc_r2": 1.0,
+     "diff": -0.1428571428571429
+    },
+    "all units, direct-route label": {
+     "n": 20,
+     "failures": 11,
+     "auc_restart": 0.8585858585858586,
+     "auc_r2": 0.9292929292929293,
+     "diff": -0.07070707070707072
+    }
+   }
+  },
+  "GPT-2 L3 (B-17c)": {
+   "n": 20,
+   "failures": 20,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 6,
+     "failures": 6,
+     "auc_restart": NaN,
+     "auc_r2": NaN,
+     "diff": null
+    },
+    "all units, direct-route label": {
+     "n": 20,
+     "failures": 20,
+     "auc_restart": NaN,
+     "auc_r2": NaN,
+     "diff": null
+    }
+   }
+  },
+  "GPT-2 L3, coordinate dropped (B-17d)": {
+   "n": 20,
+   "failures": 11,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.7272727272727273,
+   "auc_r2": 0.9292929292929293,
+   "diff": -0.202020202020202,
+   "delong_p": 0.15677999851213134,
+   "delong_se": 0.14267118072551044,
+   "boot_ci95": [
+    -0.505050505050505,
+    0.07070707070707072
+   ],
+   "auc_route_agreement": 0.7171717171717171,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 5,
+     "failures": 2,
+     "auc_restart": 1.0,
+     "auc_r2": 1.0,
+     "diff": 0.0
+    },
+    "all units, direct-route label": {
+     "n": 20,
+     "failures": 17,
+     "auc_restart": 1.0,
+     "auc_r2": 0.9019607843137255,
+     "diff": 0.0980392156862745
+    }
+   }
+  },
+  "Pythia-160m L6, float32 (B-2d)": {
+   "n": 50,
+   "failures": 2,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.96875,
+   "auc_r2": 0.9791666666666666,
+   "diff": -0.01041666666666663,
+   "delong_p": 0.6851957442567649,
+   "delong_se": 0.02569584208070261,
+   "boot_ci95": [
+    -0.0625,
+    0.04166666666666663
+   ],
+   "auc_route_agreement": 0.8645833333333334,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 32,
+     "failures": 1,
+     "auc_restart": 1.0,
+     "auc_r2": 1.0,
+     "diff": 0.0
+    },
+    "all units, direct-route label": {
+     "n": 50,
+     "failures": 8,
+     "auc_restart": 0.7797619047619048,
+     "auc_r2": 0.9107142857142857,
+     "diff": -0.13095238095238093
+    }
+   }
+  },
+  "GPT-2 L6, SAE latents (T-SAE)": {
+   "n": 100,
+   "failures": 97,
+   "estimator": "corrected",
+   "device": "CPU",
+   "precision": "fp32",
+   "pooled": false,
+   "auc_restart": 0.9450171821305842,
+   "auc_r2": 0.979381443298969,
+   "diff": -0.03436426116838487,
+   "delong_p": 0.429465517197549,
+   "delong_se": 0.0434931960785125,
+   "boot_ci95": [
+    -0.11683848797250862,
+    0.02405498281786944
+   ],
+   "auc_route_agreement": 0.7285223367697594,
+   "route_matched": {
+    "direct-picked, selected label": {
+     "n": 32,
+     "failures": 29,
+     "auc_restart": 0.9310344827586207,
+     "auc_r2": 0.9310344827586207,
+     "diff": 0.0
+    },
+    "all units, direct-route label": {
+     "n": 100,
+     "failures": 97,
+     "auc_restart": 0.9450171821305842,
+     "auc_r2": 0.979381443298969,
+     "diff": -0.03436426116838487
+    }
+   }
+  }
+ },
+ "pool_filed": {
+  "arms": [
+   "GPT-2 L6 (B-14)",
+   "Pythia-160m L6 (B-2c)",
+   "GPT-2 L2 (B-7)",
+   "GPT-2 L10 (B-7)",
+   "GPT-Neo-125m L10 (B-8b)",
+   "Pythia-1.4B L12, 3200 steps (B-11c)"
+  ],
+  "k": 6,
+  "pooled": -0.1336759005903733,
+  "tau2": 0.0,
+  "Q": 1.0480151836144835,
+  "I2": 0.0,
+  "dl_ci95": [
+   -0.17603399798609393,
+   -0.09131780319465264
+  ],
+  "hksj_ci95": [
+   -0.18922944944626788,
+   -0.0781223517344787
+  ],
+  "prediction_interval95": [
+   -0.19367841700865912,
+   -0.07367338417208746
+  ]
+ },
+ "pool_x1a_for_b8b": {
+  "arms": [
+   "GPT-2 L6 (B-14)",
+   "Pythia-160m L6 (B-2c)",
+   "GPT-2 L2 (B-7)",
+   "GPT-2 L10 (B-7)",
+   "GPT-Neo-125m L10, new units (X-1a)",
+   "Pythia-1.4B L12, 3200 steps (B-11c)"
+  ],
+  "k": 6,
+  "pooled": -0.10689862330163488,
+  "tau2": 0.0,
+  "Q": 4.031963969423119,
+  "I2": 0.0,
+  "dl_ci95": [
+   -0.14755244901441955,
+   -0.06624479758885021
+  ],
+  "hksj_ci95": [
+   -0.16021698346816998,
+   -0.053580263135099775
+  ],
+  "prediction_interval95": [
+   -0.1644869474893009,
+   -0.04931029911396886
+  ]
+ },
+ "pool_x1a_added": {
+  "arms": [
+   "GPT-2 L6 (B-14)",
+   "Pythia-160m L6 (B-2c)",
+   "GPT-2 L2 (B-7)",
+   "GPT-2 L10 (B-7)",
+   "GPT-Neo-125m L10 (B-8b)",
+   "Pythia-1.4B L12, 3200 steps (B-11c)",
+   "GPT-Neo-125m L10, new units (X-1a)"
+  ],
+  "k": 7,
+  "pooled": -0.11449345300999057,
+  "tau2": 0.0,
+  "Q": 5.10080771726685,
+  "I2": 0.0,
+  "dl_ci95": [
+   -0.1525120929248991,
+   -0.07647481309508207
+  ],
+  "hksj_ci95": [
+   -0.16195685126111445,
+   -0.0670300547588667
+  ],
+  "prediction_interval95": [
+   -0.1643557107553281,
+   -0.06463119526465305
+  ]
+ }
+}
