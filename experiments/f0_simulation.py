@@ -1,41 +1,35 @@
 """F-0: why seed-only checks are blind to sampling error (docs/flagship-plan.md §5).
 
-    python experiments/f0_simulation.py            # writes results/f0_simulation.json
+    python experiments/f0_simulation.py --part a     # analytic, seconds
+    python experiments/f0_simulation.py --part b     # Paper 1's estimator, about an hour on CPU
 
-A synthetic single-index unit, y = GELU(g * w.s / sd(w.s) + b), noiseless as in Paper 1, with
-Gaussian stimulus of known covariance C, fitted by the same batched estimator Paper 1 uses.
-Three regimes:
-  well     C's spectrum spans 2 decades
-  ill      6 decades, the order of the real residual streams (condition numbers 1e4-1e9)
-  bias     ill, and every sample is read through the same fixed distortion A = I + 0.8 u v^T,
-           so the estimand is consistently wrong: error that does not move when data are redrawn
-Per unit: Euclidean alignment to w (truth); and four ground-truth-free signals:
-  restart agreement   the estimator's own two-restart agreement (Paper 1's check)
-  seed replicate      |cos| to a re-fit of the same data with another fit seed
-  data replicate      |cos| to a fit of an independent sample, same settings (X-1's check)
-  low-variance share  share of the fitted direction in C-hat's bottom-1%-variance directions
-  held-out R2         the estimator's validation fit
-Predictions (F-0): seed checks ~ uninformative where data replicates are informative; mean
-data-replicate disagreement ~ 2x mean error when error is variance (well, ill) and ~ 0x when
-it is bias; every signal blind in the bias regime.
+Part A, the theory in its cleanest form. A linear unit y = w.s + noise, fitted by least squares.
+The fit is a deterministic function of the data, so restarts and seeds agree exactly (agreement
+1) whatever the error. Two independent samples give E|v1 - v2|^2 = 2 tr(Sigma) while
+E|v - w|^2 = tr(Sigma) + bias^2, with Sigma = sigma^2 (X'X)^-1, about sigma^2 C^-1 / n: the
+error lives in C's low-eigenvalue directions, which is what the low-variance share measures.
+Regimes: well (C spans 2 decades), ill (4), ill with a ridge penalty (regularisation shrinks the
+poorly sampled directions, turning their variance into a consistent bias), and bias (well
+conditioned, low noise, every sample read through the same strong fixed distortion, so the
+estimand itself is wrong). Per-unit noise
+varies, so units differ in difficulty.
+
+Part B, the same three signals for Paper 1's estimator on noiseless GELU units: whether a
+nonlinear fit with restarts behaves like Part A's prediction.
 """
+import argparse
 import json
 import sys
 from pathlib import Path
 
 import numpy as np
-import torch
+from scipy.stats import rankdata, spearmanr
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from caliper.batched import fit_batch  # noqa: E402
-
-D, N, UNITS, STEPS = 128, 8000, 120, 1600
-torch.set_num_threads(4)
 
 
 def auc(score, fail):
-    from scipy.stats import rankdata
     score, fail = np.asarray(score, float), np.asarray(fail, bool)
     m, n = fail.sum(), (~fail).sum()
     if not m or not n:
@@ -44,81 +38,137 @@ def auc(score, fail):
     return float((r[fail].sum() - m * (m + 1) / 2) / (m * n))
 
 
-def sample(rng, evals, Q, A=None):
-    s = (rng.standard_normal((N, D)) * np.sqrt(evals)) @ Q.T
-    return s if A is None else s @ A.T, s
+def covariance(rng, d, decades):
+    evals = np.logspace(0, -decades, d)
+    Q = np.linalg.qr(rng.standard_normal((d, d)))[0]
+    return evals, Q
 
 
-def responses(s_true, W, g, b):
-    pre = s_true @ W
-    pre = g * pre / pre.std(0) + b
-    return torch.nn.functional.gelu(torch.as_tensor(pre)).numpy()
-
-
-def fit(S, Y, seed):
-    out = fit_batch(S.astype(np.float32), Y.astype(np.float32), k=1, n_restarts=2, steps=STEPS,
-                    seed=seed, per_neuron_stop=True, unit_ids=np.arange(Y.shape[1]))
-    V = np.stack([f.subspace[:, 0] / np.linalg.norm(f.subspace[:, 0]) for f in out], 1)
-    return V, np.array([f.stability for f in out]), np.array([f.test_r2 for f in out])
+def draw(rng, n, evals, Q, A=None):
+    s = (rng.standard_normal((n, len(evals))) * np.sqrt(evals)) @ Q.T
+    return (s if A is None else s @ A.T), s
 
 
 def low_share(V, S):
     lam, vec = np.linalg.eigh(np.cov(S, rowvar=False))
     low = vec[:, np.cumsum(lam) / lam.sum() <= 0.01]
-    return ((low.T @ V) ** 2).sum(0)
+    return ((low.T @ V) ** 2).sum(0), low
 
 
-def regime(name, decades, bias, rng):
-    evals = np.logspace(0, -decades, D)
-    Q = np.linalg.qr(rng.standard_normal((D, D)))[0]
-    W = rng.standard_normal((D, UNITS))
-    W /= np.linalg.norm(W, axis=0)
-    g = rng.uniform(1.0, 2.0, UNITS)
-    b = rng.uniform(-2.5, 0.5, UNITS)
-    A = None
-    if bias:
-        u, v = rng.standard_normal(D), rng.standard_normal(D)
-        A = np.eye(D) + 0.8 * np.outer(u / np.linalg.norm(u), v / np.linalg.norm(v))
-    Sa, Sa_true = sample(rng, evals, Q, A)
-    Sb, Sb_true = sample(rng, evals, Q, A)
-    Ya, Yb = responses(Sa_true, W, g, b), responses(Sb_true, W, g, b)
-    Va, restart, r2 = fit(Sa, Ya, seed=0)
-    Va2, _, _ = fit(Sa, Ya, seed=1)
-    Vb, _, _ = fit(Sb, Yb, seed=0)
+def unit(V):
+    return V / np.linalg.norm(V, axis=0, keepdims=True)
+
+
+def summarise(name, W, Va, Va_seed, Vb, r2, share, err_low, extra=None):
     align = np.abs((Va * W).sum(0))
-    seed_rep = np.abs((Va * Va2).sum(0))
     data_rep = np.abs((Va * Vb).sum(0))
-    share = low_share(Va, Sa)
+    seed_rep = np.round(np.abs((Va * Va_seed).sum(0)), 9)   # exact ties read as ties, not as float noise
     fail = align < 0.95
-    cw = fail & (r2 > 0.99)
-    signals = {"restart agreement": restart, "seed replicate": seed_rep,
-               "data replicate": data_rep, "held-out R2": r2, "low-variance share": -share}
-    rep = {"decades": decades, "bias": bias, "units": UNITS, "failures": int(fail.sum()),
-           "converged_wrong": int(cw.sum()), "median_alignment": float(np.median(align)),
-           # AUC at predicting failure; every signal oriented so that low means "worry".
+    good_fit = r2 > np.quantile(r2, 0.5)
+    hard = fail & good_fit                       # wrong although it fits well: the hard case
+    signals = {"seed / restart agreement": seed_rep, "data replicate": data_rep,
+               "held-out R2": r2, "low-variance share": -share}
+    rep = {"units": len(align), "failures": int(fail.sum()),
+           "fail_with_above_median_R2": int(hard.sum()),
+           "median_alignment": float(np.median(align)),
+           "seed_agreement_range": [float(seed_rep.min()), float(seed_rep.max())],
            "auc_predicting_failure": {k: auc(-x, fail) for k, x in signals.items()},
-           "auc_converged_wrong_vs_pass": {k: auc(-x[cw | ~fail], cw[cw | ~fail])
-                                           for k, x in signals.items()} if cw.sum() else None,
-           "mean_error_1_minus_cos": float(np.mean(1 - align)),
-           "mean_data_disagreement_1_minus_cos": float(np.mean(1 - data_rep)),
-           "mean_seed_disagreement_1_minus_cos": float(np.mean(1 - seed_rep)),
-           "spearman_data_disagreement_vs_error": float(
-               __import__("scipy.stats", fromlist=["spearmanr"]).spearmanr(1 - data_rep, 1 - align)[0]),
-           "spearman_seed_disagreement_vs_error": float(
-               __import__("scipy.stats", fromlist=["spearmanr"]).spearmanr(1 - seed_rep, 1 - align)[0])}
-    rep["ratio_data_disagreement_to_error"] = (rep["mean_data_disagreement_1_minus_cos"]
-                                               / rep["mean_error_1_minus_cos"])
+           "auc_hard_failures_vs_pass": ({k: auc(-x[hard | ~fail], hard[hard | ~fail])
+                                         for k, x in signals.items()} if hard.sum() else None),
+           "mean_error": float(np.mean(1 - align)),
+           "mean_data_disagreement": float(np.mean(1 - data_rep)),
+           "ratio_disagreement_to_error": float(np.mean(1 - data_rep) / np.mean(1 - align)),
+           "spearman_disagreement_vs_error": float(spearmanr(1 - data_rep, 1 - align)[0]),
+           "median_error_energy_in_low_variance": float(np.median(err_low)),
+           **(extra or {})}
     print(name, json.dumps(rep, indent=1), flush=True)
     return rep
 
 
+def part_a(seed=20261009, d=128, n=4000, units=500):
+    out = {}
+    regimes = (("well", 2, 0.0, 0.0, (2, 2000)), ("ill", 4, 0.0, 0.0, (2, 2000)),
+               ("ill, ridge", 4, 0.0, 3e-3, (2, 2000)), ("bias", 2, 5.0, 0.0, (500, 5000)))
+    for name, decades, strength, ridge, snr_range in regimes:
+        bias = strength > 0
+        rng = np.random.default_rng(seed)
+        evals, Q = covariance(rng, d, decades)
+        W = unit(rng.standard_normal((d, units)))
+        A = None
+        if bias:
+            u, v = unit(rng.standard_normal((d, 1)))[:, 0], unit(rng.standard_normal((d, 1)))[:, 0]
+            A = np.eye(d) + strength * np.outer(u, v)
+        snr = np.exp(rng.uniform(*np.log(snr_range), units))     # per-unit difficulty
+
+        def fit(Sobs, Strue):
+            z = Strue @ W
+            Y = z + rng.standard_normal(z.shape) * z.std(0) / np.sqrt(snr)
+            k = n // 5
+            X = Sobs[k:]
+            C = X.T @ X / len(X)
+            beta = np.linalg.solve(C + ridge * np.trace(C) / d * np.eye(d), X.T @ Y[k:] / len(X))
+            pred = Sobs[:k] @ beta
+            r2 = 1 - ((Y[:k] - pred) ** 2).sum(0) / ((Y[:k] - Y[:k].mean(0)) ** 2).sum(0)
+            return unit(beta), r2
+
+        Sa, Sa_t = draw(rng, n, evals, Q, A)
+        Sb, Sb_t = draw(rng, n, evals, Q, A)
+        Va, r2 = fit(Sa, Sa_t)
+        Vb, _ = fit(Sb, Sb_t)
+        share, low = low_share(Va, Sa)
+        E = Va * np.sign((Va * W).sum(0)) - W
+        err_low = ((low.T @ E) ** 2).sum(0) / (E ** 2).sum(0)
+        out[name] = summarise(f"A/{name}", W, Va, Va.copy(), Vb, r2, share, err_low,
+                              {"decades": decades, "distortion": strength, "ridge": ridge,
+                               "snr_range": list(snr_range), "n": n, "d": d})
+    return out
+
+
+def part_b(seed=20261009, d=64, n=8000, units=24, steps=800):
+    import torch
+    from caliper.batched import fit_batch
+    torch.set_num_threads(2)
+    out = {}
+    for name, decades in (("well", 2), ("ill", 6)):
+        rng = np.random.default_rng(seed)
+        evals, Q = covariance(rng, d, decades)
+        W = unit(rng.standard_normal((d, units)))
+        g, b = rng.uniform(1.0, 2.0, units), rng.uniform(-2.5, 0.5, units)
+
+        def resp(S):
+            z = S @ W
+            return torch.nn.functional.gelu(torch.as_tensor(g * z / z.std(0) + b)).numpy()
+
+        def fit(S, Y, s):
+            f = fit_batch(S.astype(np.float32), Y.astype(np.float32), k=1, n_restarts=2,
+                          steps=steps, seed=s, per_neuron_stop=True, unit_ids=np.arange(units))
+            V = unit(np.stack([x.subspace[:, 0] for x in f], 1))
+            return V, np.array([x.stability for x in f]), np.array([x.test_r2 for x in f])
+
+        Sa, _ = draw(rng, n, evals, Q)
+        Sb, _ = draw(rng, n, evals, Q)
+        Va, restart, r2 = fit(Sa, resp(Sa), 0)
+        Va2, _, _ = fit(Sa, resp(Sa), 1)
+        Vb, _, _ = fit(Sb, resp(Sb), 0)
+        share, low = low_share(Va, Sa)
+        E = Va * np.sign((Va * W).sum(0)) - W
+        err_low = ((low.T @ E) ** 2).sum(0) / np.maximum((E ** 2).sum(0), 1e-12)
+        rep = summarise(f"B/{name}", W, Va, Va2, Vb, r2, share, err_low,
+                        {"decades": decades, "n": n, "d": d, "steps": steps})
+        rep["auc_predicting_failure"]["restart agreement (estimator's own)"] = auc(
+            -restart, np.abs((Va * W).sum(0)) < 0.95)
+        out[name] = rep
+    return out
+
+
 def main():
-    rng = np.random.default_rng(20261009)
-    out = {"settings": {"d": D, "n": N, "units": UNITS, "steps": STEPS, "restarts": 2},
-           "well": regime("well", 2, False, rng),
-           "ill": regime("ill", 6, False, rng),
-           "bias": regime("bias", 6, True, rng)}
-    json.dump(out, open(ROOT / "results/f0_simulation.json", "w"), indent=1)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--part", choices=("a", "b"), required=True)
+    a = ap.parse_args()
+    path = ROOT / "results/f0_simulation.json"
+    rep = json.load(open(path)) if path.exists() else {}
+    rep[f"part_{a.part}"] = part_a() if a.part == "a" else part_b()
+    json.dump(rep, open(path, "w"), indent=1)
 
 
 if __name__ == "__main__":
