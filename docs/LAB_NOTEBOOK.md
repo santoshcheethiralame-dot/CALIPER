@@ -247,6 +247,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **P2-M** | 2026-10-09 | **Is the inverted P(YES) check output steering? (logit-lens answer score)** | 180 vectors (S-2 Qwen-3B, Qwen-7B) | `docs/preregistration-p2m-output-steering.md` (filed before analysis) | `results/p2m_qwen3b.json`, `results/p2m_qwen7b.json` | **Primary holds** (rho 0.26 [0.04, 0.44], 0.29 [0.10, 0.49]); secondary fails: the score does not separate live from dead (AUC 0.39, 0.42, CIs include 0.5) and removing it leaves the inversion (0.367 -> 0.388, 0.353 -> 0.369). Direct path real, not the mechanism of the inversion |
 | **S-2 Gemma-3-4B-kl** | 2026-10-09 | **Instrument audit on the KL-calibrated grid (Amendment 3); P2-G primary** | 90 vectors | script v2026-10-09a, `--calibrate-kl 0.05 0.5 5` | `results/s2_gemma4b_kl/`, `results/s2_gemma4b_kl_analysis.json`, `results/p2g_gemma4b_kl.json` | Manipulation check passes (30/30 random steer generations coherent at the gate). Only **9 live / 81 dead** at the 0.5-nat gate. S-2: norm 0.41, distinctness 0.61, P(YES) 0.54 (all 'near 0.5', low power), logit steering 0.43 (fails). **P2-G fails** (0.461 [0.278, 0.632]) |
 | **X-1a/b** | 2026-10-09 | **Cross-sample agreement and the identifiability replication, new GPT-Neo L10 units** | 100 units x 2 document-disjoint fits | `docs/preregistration-x1-cross-sample.md` + Addendum 1 | `results/x1a_gptneo_l10.jsonl`, `results/x1b_gptneo_l10.jsonl`, `results/x1_analysis.json` | **P1 (primary) fails**: cross-sample 0.775 vs held-out R2 0.711 on 19 converged-wrong, +0.065 [-0.052, 0.183]. **P2, P3, P4 hold**: 18/19 equivalent on fresh text; error share 0.93 vs 0.48; **low-variance share 0.929 vs 0.711, +0.218 [0.099, 0.340]** |
+| **S-1 Gemma-3-12B** | 2026-10-09 | **Dead vectors by read position x precision (12B session)** | 3 arms x 30 concepts, 4-bit only | prereg + Amendments 1-4 | `results/s1_gemma12/`, `results/s1_gemma12_analysis.json` | **8-bit and fp16 not runnable on free hardware** (non-finite logits / activations). 4-bit: live tail / concept / sentence 6 / 8 / 15 at the gate, 10 / 11 / 17 at 5 nats; tail vs concept in the predicted direction but weak (p 0.36, 0.50). Criterion not scorable (needs all three cells) |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -346,6 +347,47 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### S-1 Gemma-3-12B (2026-10-09, Kaggle; scored once) - **ONLY 4-BIT RUNS ON FREE HARDWARE; ON GEMMA THE TEMPLATE TAIL IS NOT CLEARLY DEADER THAN THE CONCEPT TOKEN**
+
+**Run.** Script v2026-10-09b, Gemma-3-12B-it, layer 29 of 48, `--calibrate-kl 0.05 0.5 5`,
+stage steer. KL calibration (4-bit): alphas 3,981 / 7,501 / 9,366, achieved 0.049 / 0.490 /
+4.94 nats, 332 s. Wall time about 97 minutes.
+
+**Precision cells.**
+- **4-bit NF4, fp32 compute: ran.** 3 x 120 rows, no duplicates, 0 non-finite, no "!!!".
+- **8-bit (LLM.int8): not runnable.** The probe found non-finite generation logits in fp16
+  compute; the fp32 retry had to keep unquantised modules at fp16 storage (they do not fit at
+  fp32) and the logits stayed non-finite. All three arms stopped.
+- **fp16 unquantised: not runnable.** Activations overflow (max |h| = inf). This is the
+  prereg's named outcome ("recorded as not runnable on free hardware; not replaced with fp32").
+
+**Consequence for the filed test.** The criterion pools the three 12B cells, so it is not
+scorable (`analyse_s1.py` reports holds = false for every dose, with only the 4-bit cell). The
+quantisation-artefact branch (tail live in fp16, dead in 4-bit) cannot be tested on T4s.
+Answering the precision question needs bf16 (an L4 or A100), which is a paid session.
+
+**The 4-bit cell, as scored.**
+
+| dose | live tail / concept / sentence (of 30) | McNemar tail-dead-concept-live vs reverse | one-sided p | coherent |
+|---|---|---|---|---|
+| 0.05 nat | 2 / 6 / 7 | 4 vs 0 | 0.063 | 90/90 |
+| 0.5 nat (gate) | 6 / 8 / 15 | 5 vs 3 | 0.363 | 89/90 |
+| 5 nat | 10 / 11 / 17 | 5 vs 4 | 0.500 | 89/90 |
+
+- On Gemma-3-12B the template-tail read is only slightly worse than the concept-token read.
+  This matches C31's own note that on Gemma enough concept signal survives at the tail to
+  steer, where on Qwen none did. The dead-vector warning is a Qwen-scale effect, not a general one.
+- The sentence-mean (APERTURE) recipe is the most often live at every dose.
+- Health checks at the gate (pooled arms): stability 0.49, probe 0.59, logit steering 0.59,
+  **norm 0.335**: larger raw vectors are again more often dead (fourth model: Qwen-3B, Qwen-7B,
+  Gemma-4B, Gemma-12B).
+- P2-G secondary: shared share 0.49 at the gate (0.41 at 0.05 nats, 0.50 at 5 nats). Not
+  supported, consistent with the Gemma-kl primary.
+
+**Next.** The 27B session (cells 3a and 3b) runs 4-bit only by design, so it is unaffected.
+Paper 2 states the precision limit; whether to buy one bf16 session for the 12B precision
+cells is an open decision.
 
 ### P2-D dose transfer across the S-2 sessions (2026-10-09, offline, descriptive) - **A FRACTION OF THE RESIDUAL NORM IS NOT A DOSE; RANDOM-DIRECTION KL UNDERSHOOTS REAL VECTORS 3-20x**
 
