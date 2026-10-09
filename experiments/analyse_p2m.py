@@ -62,7 +62,8 @@ class Hub:
         import os
         import requests
         self.repo, self.s = repo, requests.Session()
-        tok = os.environ.get("HF_TOKEN")
+        from huggingface_hub import get_token
+        tok = os.environ.get("HF_TOKEN") or get_token()
         if tok:
             self.s.headers["Authorization"] = f"Bearer {tok}"
 

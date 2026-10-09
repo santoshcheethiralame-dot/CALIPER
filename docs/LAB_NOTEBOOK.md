@@ -350,6 +350,52 @@ artifact risk.
 
 ## 4. Runs in detail
 
+### Internal review of Paper 1, round 2 (2026-10-09) - **MAJOR REVISION: THE CORE HOLDS AND STRENGTHENS; MOST CONVERGED-WRONG FITS ARE THE LAYER-NORM NULL DIRECTION, AND THE "REPAIR" CHANGED THE REFERENCE**
+
+**Scope.** Five seats (journal fit, diagnostic-accuracy statistics, interpretability domain,
+system identification, devil's advocate), content only, on `paper1/main.tex` at 813095b. Full
+decision and roadmap kept outside the repository with round 1's.
+
+**Decision: Major Revision, 5 of 5.** Round 1's critical issue is resolved. The pre-registered
+headline holds. Everything required is offline.
+
+**Verified by recomputation** (`experiments/review_round2_checks.py` -> `results/review_round2_checks.json`):
+
+| arm | failures as filed -> 1/gamma removed | converged-wrong as filed -> removed | restart - R2 gap as filed -> removed |
+|---|---|---|---|
+| B-15a GPT-2 L6 | 18 -> 12 | 6 -> 1 | -0.169 -> -0.175 |
+| B-15b | 20 -> 14 | 7 -> 2 | -0.084 -> -0.159 |
+| B-15c | 22 -> 13 | 8 -> 2 | -0.162 -> -0.303 |
+| B-8b GPT-Neo L10 | 38 -> 21 | 20 -> 6 | -0.167 -> -0.259 |
+| X-1a GPT-Neo L10 | 40 -> 23 | 19 -> 4 | -0.035 -> -0.096 |
+| B-17 GPT-Neo L6 | 20 -> 6 | 13 -> 1 | - |
+
+- **The layer-norm null direction.** ln_2's output is gamma * z + beta with z zero-mean, so
+  s . (1/gamma) is constant: a fit's component along 1/gamma is exactly unidentifiable. The
+  pipeline removed it from w (`ln_null_ceiling`) but never from the fit. Projecting it out of the
+  fit alone gives the counts above; gamma is a public weight, so this is a repair a practitioner
+  can apply. The fit's share on 1/gamma flags the as-filed converged-wrong fits at AUC 0.84-0.996.
+- **B-17's near-constant coordinate is a near-zero layer-norm gain** (min |gamma| 2.4e-5 at
+  GPT-Neo L6). The B-17b/c/d predictions hold; their mechanism is the 1/gamma direction magnified
+  by per-coordinate standardisation.
+- **"Repairs 40 of 43" scored a changed reference**: `explore_patterns.py` projects both the fit
+  and w. Against the filed label it repairs almost nothing. Withdrawn.
+- **N-1a's -0.219 is mostly R2 tracking the assigned noise**: SNR alone predicts failure at AUC
+  0.958; Spearman(R2, SNR) 0.88; R2 over its ceiling 0.829 vs restart 0.752.
+- **X-1a's gap is -0.035** (X-1b -0.097), same settings as the pooled GPT-Neo L10 arm (-0.167);
+  both belong in the every-run table.
+
+**Roadmap (summary).** A1 recompute every arm with 1/gamma removed and report it beside the filed
+label; A2 restate B-17's cause; A3 withdraw the repair claim; A4 re-evaluate the low-variance
+diagnostic after A1 and over all failures; A5 reword N-1; A6 complete the every-run table; A7
+small corrections (CI consistency, STC row, "one source of randomness", pass@k likelihood); B
+literature, scope, double-blind release of the notebook. Optional: a known-link baseline, a
+whitened re-fit, an interventional check.
+
+**Knock-on.** F-1 Addendum 1 filed before any F-1 row: every verdict also scored with 1/gamma
+removed. The flagship's identifiability framing narrows to an exact structural part
+(normalisation null directions, readable from the weights) and a practical part (conditioning).
+
 ### B-17b/c/d, the standardisation artifact (2026-10-09, local; scored once) - **ALL THREE PREDICTIONS HOLD: THE DIAGNOSIS IS CONFIRMED, AND THE LAYER MAP PREDICTED A FAILURE AT A LAYER NEVER FITTED**
 
 **Run.** Queue 6, `--restarts 2 --independent-units`, `--drop-constant-coords 0.01` for b and d

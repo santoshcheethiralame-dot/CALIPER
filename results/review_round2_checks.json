@@ -1,0 +1,99 @@
+{
+ "B-15a GPT-2 L6": {
+  "units": 100,
+  "min_gamma_abs": 0.04236043989658356,
+  "fail_raw": 18,
+  "fail_null_removed_both": 12,
+  "fail_null_removed_fit_only": 12,
+  "cw_raw": 6,
+  "cw_null_removed": 1,
+  "median_fit_share_on_null": 0.0028216278320471406,
+  "auc_null_share_cw_vs_pass_raw": 0.9959349593495935,
+  "dAUC_restart_minus_R2_raw": -0.16937669376693776,
+  "dAUC_restart_minus_R2_null": -0.17518939393939392
+ },
+ "B-15b GPT-2 L6": {
+  "units": 100,
+  "min_gamma_abs": 0.04236043989658356,
+  "fail_raw": 20,
+  "fail_null_removed_both": 14,
+  "fail_null_removed_fit_only": 14,
+  "cw_raw": 7,
+  "cw_null_removed": 2,
+  "median_fit_share_on_null": 0.002587396255505431,
+  "auc_null_share_cw_vs_pass_raw": 0.9178571428571428,
+  "dAUC_restart_minus_R2_raw": -0.08406249999999993,
+  "dAUC_restart_minus_R2_null": -0.15905315614617943
+ },
+ "B-15c GPT-2 L6": {
+  "units": 100,
+  "min_gamma_abs": 0.04236043989658356,
+  "fail_raw": 22,
+  "fail_null_removed_both": 13,
+  "fail_null_removed_fit_only": 13,
+  "cw_raw": 8,
+  "cw_null_removed": 2,
+  "median_fit_share_on_null": 0.0030331429185423585,
+  "auc_null_share_cw_vs_pass_raw": 0.8413461538461539,
+  "dAUC_restart_minus_R2_raw": -0.16200466200466201,
+  "dAUC_restart_minus_R2_null": -0.3032714412024756
+ },
+ "B-8b GPT-Neo L10": {
+  "units": 100,
+  "min_gamma_abs": 0.00994873046875,
+  "fail_raw": 38,
+  "fail_null_removed_both": 21,
+  "fail_null_removed_fit_only": 21,
+  "cw_raw": 20,
+  "cw_null_removed": 6,
+  "median_fit_share_on_null": 0.020128634626590664,
+  "auc_null_share_cw_vs_pass_raw": 0.975,
+  "dAUC_restart_minus_R2_raw": -0.1674448217317488,
+  "dAUC_restart_minus_R2_null": -0.25858951175406875
+ },
+ "X-1a GPT-Neo L10": {
+  "units": 100,
+  "min_gamma_abs": 0.00994873046875,
+  "fail_raw": 40,
+  "fail_null_removed_both": 23,
+  "fail_null_removed_fit_only": 23,
+  "cw_raw": 19,
+  "cw_null_removed": 4,
+  "median_fit_share_on_null": 0.02272535863816668,
+  "auc_null_share_cw_vs_pass_raw": 0.9526315789473684,
+  "dAUC_restart_minus_R2_raw": -0.03500000000000003,
+  "dAUC_restart_minus_R2_null": -0.09599096555618292
+ },
+ "B-17 GPT-Neo L6": {
+  "units": 20,
+  "min_gamma_abs": 2.372264862060547e-05,
+  "fail_raw": 20,
+  "fail_null_removed_both": 6,
+  "fail_null_removed_fit_only": 6,
+  "cw_raw": 13,
+  "cw_null_removed": 1,
+  "median_fit_share_on_null": 0.9998542384212843,
+  "auc_null_share_cw_vs_pass_raw": null,
+  "dAUC_restart_minus_R2_raw": 0,
+  "dAUC_restart_minus_R2_null": -0.32738095238095244
+ },
+ "N-1a": {
+  "auc_snr_alone": 0.9579002079002079,
+  "auc_R2": 0.9708939708939709,
+  "auc_restart": 0.752079002079002,
+  "spearman_R2_snr": 0.8758955895589557,
+  "auc_R2_over_ceiling": 0.829002079002079
+ },
+ "X-1a": {
+  "failures": 40,
+  "auc_restart": 0.80375,
+  "auc_R2": 0.83875,
+  "dAUC": -0.03500000000000003
+ },
+ "X-1b": {
+  "failures": 38,
+  "auc_restart": 0.7266553480475382,
+  "auc_R2": 0.8234295415959253,
+  "dAUC": -0.09677419354838712
+ }
+}

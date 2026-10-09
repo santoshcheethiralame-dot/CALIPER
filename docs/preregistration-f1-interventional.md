@@ -91,3 +91,16 @@ Both must hold for the primary to hold.
 - Order: queue 7 (`experiments/rerun_queue7.sh`), after queue 6. GPT-2 arms first.
 - The residual-intervention arm (secondary 5) needs the pre-norm residual, which the pipeline
   does not capture; it is built after the primary arms run, before its own data exist.
+
+## Addendum 1 (9 October 2026, before any F-1 row exists): the layer-norm null direction
+
+The internal review (round 2) found that most converged-wrong fits differ from w along one exactly
+unidentifiable direction: 1/gamma of the layer norm feeding the MLP, along which s . (1/gamma) is
+constant on every real token. The targeted arm perturbs inside the bottom-1% subspace, which
+contains 1/gamma, so its synthetic samples can carry information the natural distribution never
+can. To keep F-1 from crediting that as a repair:
+
+- **Added secondary (no prediction):** every verdict is also scored with 1/gamma projected out of
+  the fit and of w (the identifiable target), for every arm, beside the filed primary.
+- **Added descriptive:** the share of each fit on 1/gamma before and after augmentation, per arm.
+- The primary endpoint, prediction and arms are unchanged.
