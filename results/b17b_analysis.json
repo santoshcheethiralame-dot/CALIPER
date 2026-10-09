@@ -1,0 +1,43 @@
+{
+ "B-17 GPT-Neo L6, as run": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "passes": 0,
+  "median_alignment": 0.01005,
+  "median_share_on_near_constant": 0.9998526573181152,
+  "fits_with_share_gt_0.5": 20
+ },
+ "B-17b GPT-Neo L6, coordinate dropped": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "passes": 13,
+  "median_alignment": 0.9764999999999999,
+  "median_share_on_near_constant": 0.0,
+  "fits_with_share_gt_0.5": 0
+ },
+ "B-17c GPT-2 L3, as usual": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "passes": 0,
+  "median_alignment": 0.05255,
+  "median_share_on_near_constant": 0.9951443672180176,
+  "fits_with_share_gt_0.5": 18
+ },
+ "B-17d GPT-2 L3, coordinate dropped": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "passes": 9,
+  "median_alignment": 0.9112,
+  "median_share_on_near_constant": 0.0,
+  "fits_with_share_gt_0.5": 0
+ },
+ "P1 rescue": {
+  "holds": true
+ },
+ "P2 map prediction": {
+  "holds": true
+ },
+ "P3 fix at GPT-2 L3": {
+  "holds": true
+ }
+}

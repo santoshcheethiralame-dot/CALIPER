@@ -247,6 +247,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **P2-M** | 2026-10-09 | **Is the inverted P(YES) check output steering? (logit-lens answer score)** | 180 vectors (S-2 Qwen-3B, Qwen-7B) | `docs/preregistration-p2m-output-steering.md` (filed before analysis) | `results/p2m_qwen3b.json`, `results/p2m_qwen7b.json` | **Primary holds** (rho 0.26 [0.04, 0.44], 0.29 [0.10, 0.49]); secondary fails: the score does not separate live from dead (AUC 0.39, 0.42, CIs include 0.5) and removing it leaves the inversion (0.367 -> 0.388, 0.353 -> 0.369). Direct path real, not the mechanism of the inversion |
 | **S-2 Gemma-3-4B-kl** | 2026-10-09 | **Instrument audit on the KL-calibrated grid (Amendment 3); P2-G primary** | 90 vectors | script v2026-10-09a, `--calibrate-kl 0.05 0.5 5` | `results/s2_gemma4b_kl/`, `results/s2_gemma4b_kl_analysis.json`, `results/p2g_gemma4b_kl.json` | Manipulation check passes (30/30 random steer generations coherent at the gate). Only **9 live / 81 dead** at the 0.5-nat gate. S-2: norm 0.41, distinctness 0.61, P(YES) 0.54 (all 'near 0.5', low power), logit steering 0.43 (fails). **P2-G fails** (0.461 [0.278, 0.632]) |
 | **X-1a/b** | 2026-10-09 | **Cross-sample agreement and the identifiability replication, new GPT-Neo L10 units** | 100 units x 2 document-disjoint fits | `docs/preregistration-x1-cross-sample.md` + Addendum 1 | `results/x1a_gptneo_l10.jsonl`, `results/x1b_gptneo_l10.jsonl`, `results/x1_analysis.json` | **P1 (primary) fails**: cross-sample 0.775 vs held-out R2 0.711 on 19 converged-wrong, +0.065 [-0.052, 0.183]. **P2, P3, P4 hold**: 18/19 equivalent on fresh text; error share 0.93 vs 0.48; **low-variance share 0.929 vs 0.711, +0.218 [0.099, 0.340]** |
+| **B-17b/c/d** | 2026-10-09 | **The standardisation artifact: rescue at GPT-Neo L6, predicted failure and fix at GPT-2 L3** | 20 + 20 + 20 units | `docs/preregistration-b17b-scale-artifact.md` | `results/b17b_*`, `results/b17c_*`, `results/b17d_*`, `results/b17b_analysis.json` | **P1, P2, P3 all hold**: GPT-Neo L6 0/20 -> 13/20 passes (median 0.010 -> 0.976); GPT-2 L3 fails as the layer map predicted (0/20, median 0.053, 18/20 fits >50% on the coordinate); dropping it fixes it (9/20, 0.911) |
 | **S-1 Gemma-3-12B** | 2026-10-09 | **Dead vectors by read position x precision (12B session)** | 3 arms x 30 concepts, 4-bit only | prereg + Amendments 1-4 | `results/s1_gemma12/`, `results/s1_gemma12_analysis.json` | **8-bit and fp16 not runnable on free hardware** (non-finite logits / activations). 4-bit: live tail / concept / sentence 6 / 8 / 15 at the gate, 10 / 11 / 17 at 5 nats; tail vs concept in the predicted direction but weak (p 0.36, 0.50). Criterion not scorable (needs all three cells) |
 | **S-1 Gemma-3-27B + S-1M** | 2026-10-09 | **27B 4-bit calibrated cells, and the published operating point** | 3 arms x 30 + S-1M (steer 90, forced 180) | prereg + Amendments 1-4 | `results/s1_gemma27/`, `results/s1_gemma27_analysis.json` | Calibrated cells: real-vector KL 0.000-0.003 nats at every dose; live tail / concept / sentence 2 / 0 / 1 at the gate, 7 / 2 / 5 at 5 nats (tail MORE live, opposite of the prediction). **S-1M: released tail-read vectors steer, 24/30 live at strength 4 (KL 7.3), 19/30 at 8 (KL 34, 7/30 coherent)** |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
@@ -348,6 +349,31 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### B-17b/c/d, the standardisation artifact (2026-10-09, local; scored once) - **ALL THREE PREDICTIONS HOLD: THE DIAGNOSIS IS CONFIRMED, AND THE LAYER MAP PREDICTED A FAILURE AT A LAYER NEVER FITTED**
+
+**Run.** Queue 6, `--restarts 2 --independent-units`, `--drop-constant-coords 0.01` for b and d
+(fit without coordinates whose SD is below 1% of the median, zeros restored). B-17b 10:02-11:19,
+B-17c 11:19-12:12, B-17d 12:12-16:48 (the laptop slept 12:29-16:03). `analyse_b17b.py` run once.
+
+| run | passes / 20 | median alignment | median share on the near-constant coordinate | fits > 0.5 on it |
+|---|---|---|---|---|
+| B-17, GPT-Neo L6, as run (7 Oct) | 0 | 0.010 | 0.9999 | 20 |
+| **B-17b**, coordinate dropped | **13** | **0.976** | 0 | 0 |
+| **B-17c**, GPT-2 L3, as usual | **0** | **0.053** | 0.995 | **18** |
+| **B-17d**, GPT-2 L3, coordinate dropped | **9** | **0.911** | 0 | 0 |
+
+- **P1 (rescue) holds**: >= 10 passes at median >= 0.90.
+- **P2 (the layer map's prediction) holds**: GPT-2 layer 3, never fitted before, has the one
+  near-constant GPT-2 coordinate, and its fits put most of their norm on it.
+- **P3 (the fix transfers) holds.**
+
+**Reading.** The 8 Oct correction becomes a confirmed result with a mechanism, a prediction and a
+fix: per-coordinate standardisation turns a nearly constant layer-norm output coordinate into a
+failure mode that restart agreement certifies (0.99+ on 19 of 20 at GPT-Neo L6). Not every unit
+recovers once the coordinate is dropped (13/20, 9/20): the remaining failures are the ordinary
+classes. Paper 1 updated (identifiability section, deviations table, status table); its last data
+placeholders are gone; only the bench name and the licence remain.
 
 ### S-1 Gemma-3-27B and S-1M, the published operating point (2026-10-09, Kaggle; scored once) - **THE RELEASED TAIL-READ VECTORS ARE LIVE AT THE RELEASED STRENGTH; THE DEAD-VECTOR WARNING DOES NOT TRANSFER TO GEMMA-27B**
 

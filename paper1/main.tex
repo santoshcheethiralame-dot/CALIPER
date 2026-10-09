@@ -460,8 +460,12 @@ why the projections agree while the Euclidean cosine is near 0.01. Restart agree
 higher on 19 of the 20 failures, so here agreement is confidently wrong. Across layers,
 GPT-Neo-125m has such coordinates at layers 0 to 9 and GPT-2 only at layer 3; every other layer
 fitted in this paper has none. This is an artifact of the estimator's scaling, not of the
-units. \tbd{B-17b/c/d: re-fit with the coordinate dropped at GPT-Neo layer 6, and the predicted
-case at GPT-2 layer 3.}}
+units, and a pre-registered test confirms it. Re-fitting the same 20 units with the
+near-constant coordinate dropped from the fit, and zeros restored in its place, raises passes
+from 0 to 13 and the median alignment from 0.010 to 0.976. The layer map then predicts the
+artifact at GPT-2 layer 3, a layer not fitted before: 20 new units there pass 0 of 20 at a median
+alignment of 0.053, with 18 fits carrying over half their norm on the near-constant coordinate,
+and dropping it raises passes to 9 and the median alignment to 0.911.}
 
 \paragraph{\draft{A ground-truth-free diagnostic.}} \draft{The analysis above suggests a check a
 practitioner can compute: the share of the fitted direction's squared norm that lies in the
@@ -754,7 +758,7 @@ All reported as exploratory (Appendix~\ref{app:status}) \\
 \draft{Reading of the GPT-Neo layer-6 run} & \draft{An earlier draft said the reference columns
 there lie mostly in low-variance directions. Withdrawn: the columns are ordinary, and the
 failures come from one near-constant coordinate magnified by per-coordinate standardisation} &
-yes & \draft{No pre-registered number changes; a filed re-fit tests the diagnosis \tbd{B-17b/c/d}} \\
+yes & \draft{No pre-registered number changes; a filed re-fit confirms the diagnosis (passes 0 to 13 of 20) and its predicted case at GPT-2 layer 3} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -894,15 +898,14 @@ permutation test. The plan for the last group was filed before it ran. \\
 Pre-registered, reported & The transfer attempt on sparse-autoencoder latents (failed at the
 estimator, 3 of 100 recovered), the float32 Pythia re-fit (no material effect), the
 response-noise experiment (primary holds; the fixed-noise arms keep the sign with intervals
-that include zero) and \draft{the cross-sample replication (the low-variance diagnostic and
+that include zero), \draft{the cross-sample replication (the low-variance diagnostic and
 the identifiability mechanism hold on new units; cross-sample agreement does not beat held-out
-fit, so its primary fails)}. \\
+fit, so its primary fails), and the standardisation-artifact test (all three predictions hold:
+the rescue at GPT-Neo layer 6, the predicted failure at GPT-2 layer 3, and its fix)}. \\
 Exploratory, found after the data & \draft{The low-variance-share diagnostic and its projection
 repair; agreement across token samples; the standardisation diagnosis of the GPT-Neo layer-6
 run and the layer map of near-constant coordinates; failure-class unit properties; the
 verdict history across four fits; restart-agreement saturation.} \\
-Pending, filed & \draft{The re-fit without the near-constant coordinate at GPT-Neo layer 6
-and the predicted case at GPT-2 layer 3 \tbd{B-17b/c/d}.} \\
 \bottomrule
 \end{tabular}
 \end{table}
