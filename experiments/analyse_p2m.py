@@ -78,11 +78,26 @@ class Hub:
     def exists(self, name):
         return self.s.head(self.url(name), allow_redirects=True, timeout=60).status_code == 200
 
-    def read(self, name, lo, hi):
-        r = self.s.get(self.url(name), headers={"Range": f"bytes={lo}-{hi - 1}"}, timeout=600)
-        r.raise_for_status()
-        assert len(r.content) == hi - lo, "range request returned the wrong length"
-        return r.content
+    def read(self, name, lo, hi, chunk=64 << 20, tries=5):
+        """Range-read [lo, hi) in chunks, retrying each, so one dropped connection does not
+        lose a multi-gigabyte tensor."""
+        import time
+        parts = []
+        for a in range(lo, hi, chunk):
+            b = min(a + chunk, hi)
+            for t in range(tries):
+                try:
+                    r = self.s.get(self.url(name), headers={"Range": f"bytes={a}-{b - 1}"},
+                                   timeout=300)
+                    r.raise_for_status()
+                    assert len(r.content) == b - a, "range request returned the wrong length"
+                    parts.append(r.content)
+                    break
+                except Exception:
+                    if t == tries - 1:
+                        raise
+                    time.sleep(5 * (t + 1))
+        return b"".join(parts)
 
     def tokenizer_dir(self):
         from huggingface_hub import snapshot_download

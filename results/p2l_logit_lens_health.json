@@ -1,0 +1,142 @@
+{
+ "S-2 Qwen2.5-3B": {
+  "vectors": 90,
+  "live": 34,
+  "scored": true,
+  "auc": 0.6890756302521008,
+  "ci95": [
+   0.5813944327731093,
+   0.7972689075630253
+  ],
+  "auc_logit_steering": 0.7027310924369747,
+  "diff_vs_logit_steering_ci95": [
+   -0.13182773109243695,
+   0.1034795168067227
+  ],
+  "within_arm_auc": {
+   "concept token": 0.5803571428571429,
+   "sentence mean": 0.6071428571428571,
+   "template tail": 0.3942307692307692
+  },
+  "median_z_live_dead": [
+   4.132209062576294,
+   2.548843026161194
+  ],
+  "counts_for_primary": true
+ },
+ "S-2 Qwen2.5-7B": {
+  "vectors": 90,
+  "live": 32,
+  "scored": true,
+  "auc": 0.7667025862068966,
+  "ci95": [
+   0.6584051724137931,
+   0.8642241379310345
+  ],
+  "auc_logit_steering": 0.625,
+  "diff_vs_logit_steering_ci95": [
+   0.01724137931034486,
+   0.2764008620689655
+  ],
+  "within_arm_auc": {
+   "concept token": 0.5324074074074074,
+   "sentence mean": 0.7918552036199095,
+   "template tail": 0.4444444444444444
+  },
+  "median_z_live_dead": [
+   2.3246638774871826,
+   0.6937239170074463
+  ],
+  "counts_for_primary": true
+ },
+ "S-2 Gemma-3-4B, KL grid": {
+  "vectors": 90,
+  "live": 9,
+  "scored": true,
+  "auc": 0.49794238683127573,
+  "ci95": [
+   0.2756858710562414,
+   0.7283950617283951
+  ],
+  "auc_logit_steering": 0.4334705075445816,
+  "diff_vs_logit_steering_ci95": [
+   -0.07818930041152261,
+   0.21947873799725653
+  ],
+  "within_arm_auc": {
+   "concept token": 0.654320987654321,
+   "sentence mean": 0.27884615384615385,
+   "template tail": 0.5535714285714286
+  },
+  "median_z_live_dead": [
+   5.7063446044921875,
+   5.7490105628967285
+  ],
+  "counts_for_primary": true
+ },
+ "S-1 Gemma-3-12B, 4-bit": {
+  "vectors": 90,
+  "live": 29,
+  "scored": true,
+  "auc": 0.6189937817976258,
+  "ci95": [
+   0.5019785189372526,
+   0.7320520067834935
+  ],
+  "auc_logit_steering": 0.5924250989259469,
+  "diff_vs_logit_steering_ci95": [
+   -0.05426794799321644,
+   0.10063595251554543
+  ],
+  "within_arm_auc": {
+   "concept": 0.3693181818181818,
+   "sentence": 0.43555555555555553,
+   "tail": 0.7847222222222222
+  },
+  "median_z_live_dead": [
+   7.882937431335449,
+   6.68792724609375
+  ],
+  "counts_for_primary": true
+ },
+ "S-1 Gemma-3-27B, 4-bit": {
+  "vectors": 90,
+  "live": 3,
+  "scored": false,
+  "median_z_live_dead": [
+   8.5504150390625,
+   10.69554328918457
+  ],
+  "counts_for_primary": false
+ },
+ "S-2 Gemma-3-4B, alpha-frac (failed manipulation check)": {
+  "vectors": 90,
+  "live": 41,
+  "scored": true,
+  "auc": 0.6809357889497263,
+  "ci95": [
+   0.5619462419113987,
+   0.7889621702339472
+  ],
+  "auc_logit_steering": 0.6062717770034843,
+  "diff_vs_logit_steering_ci95": [
+   -0.010452961672473893,
+   0.15680686908909902
+  ],
+  "within_arm_auc": {
+   "concept token": 0.485,
+   "sentence mean": 0.5,
+   "template tail": 0.8201058201058201
+  },
+  "median_z_live_dead": [
+   6.3418779373168945,
+   5.033999443054199
+  ],
+  "counts_for_primary": false
+ },
+ "primary": {
+  "scored_sessions": 4,
+  "ci_above_half": 3,
+  "holds": true
+ }
+}

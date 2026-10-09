@@ -252,6 +252,7 @@ row below is the threshold CV. C56, C57 and C58 were used as IDs in code and in
 | **S-1 Gemma-3-27B + S-1M** | 2026-10-09 | **27B 4-bit calibrated cells, and the published operating point** | 3 arms x 30 + S-1M (steer 90, forced 180) | prereg + Amendments 1-4 | `results/s1_gemma27/`, `results/s1_gemma27_analysis.json` | Calibrated cells: real-vector KL 0.000-0.003 nats at every dose; live tail / concept / sentence 2 / 0 / 1 at the gate, 7 / 2 / 5 at 5 nats (tail MORE live, opposite of the prediction). **S-1M: released tail-read vectors steer, 24/30 live at strength 4 (KL 7.3), 19/30 at 8 (KL 34, 7/30 coherent)** |
 | **P2-F Gemma-3-27B** | 2026-10-09 | **Factual-NO control at the released operating point** | 30 questions x strengths 0/4/8, released vectors + random | `docs/preregistration-p2f-factual-no.md` | `results/p2f_gemma27/` | Manipulation check passes (median P(YES) at 0 = 1e-13; one model error: 'Is a kilogram lighter than a gram?' answered YES at 1.0, kept as filed). **Primary: +0.015 at strength 4 (Wilcoxon p 4e-6), 8% of the introspective rise (0.179).** Strength 8: +0.175 (KL 45). Random: +0.047 / +0.313 |
 | **P2-F Qwen2.5-7B** | 2026-10-10 | **Factual-NO control, S-2 settings** | 30 questions x alpha-frac 0/0.25/0.5/1.0, concept / tail / random | `docs/preregistration-p2f-factual-no.md` | `results/p2f_qwen7b/` | Manipulation check passes (median P(YES) at 0 = 1e-11). **Secondary holds**: tail +0.046 at 0.5 (one-sided p 9e-9). Factual-NO / introspective rise at 0.5: concept 0.0005, tail 0.054, random 0.008; at 1.0: 0.67, 0.56, 0.41 |
+| **P2-L** | 2026-10-10 | **Logit-lens accessibility as a per-vector health check** | 5 sessions x 90 vectors | `docs/preregistration-p2l-logit-lens-health.md` (filed before analysis) | `results/p2l_logit_lens_health.json` | **Primary holds (3 of 4)**: Qwen-3B 0.689 [0.58, 0.80], Qwen-7B 0.767 [0.66, 0.86], Gemma-12B 0.619 [0.50, 0.73]; Gemma-4B-kl 0.498 (9 live). Within-arm AUCs mixed (0.37-0.82) |
 | **N-1a/b/c** | 2026-10-08 | **Response-noise experiment: does held-out R2 keep its lead when the attainable fit varies by unit?** | 100 units x 3 arms (B-14's first 100, GPT-2 L6) | prereg `docs/preregistration-n1-response-noise.md` | `results/n1a_snr_mixed.jsonl`, `n1b_snr19`, `n1c_snr4`, `results/n1_analysis.json` | **Primary holds.** N-1a dAUC -0.219 [-0.348, -0.110], DeLong p 0.0004, perm p 0.0002. N-1b -0.087 [-0.200, 0.024]; N-1c -0.078 [-0.419, 0.181] (95/100 fail) |
 
 ### Inherited from APERTURE — runs CALIPER leans on but did not run
@@ -351,6 +352,33 @@ artifact risk.
 ---
 
 ## 4. Runs in detail
+
+### P2-L, logit-lens accessibility as a health check (2026-10-10, offline; scored once) - **PRIMARY HOLDS: THE FIRST CHECK THAT TELLS LIVE FROM DEAD VECTORS, BUT PARTLY BY TELLING RECIPES APART**
+
+**Run.** `experiments/analyse_p2l.py`, filed before analysis. z(v) = concept token's logit-lens
+z-score for the unit vector through the final norm; unembedding and final norm read from the
+released checkpoints by range requests (chunked and retried after a read timeout on Gemma-12B; the
+Qwen results were recomputed from cache and are identical). Live labels as filed per study.
+
+| session | live / 90 | AUC [95% CI] | vs logit-steering check (CI of difference) | within-arm: concept / sentence / tail |
+|---|---|---|---|---|
+| S-2 Qwen2.5-3B | 34 | **0.689 [0.581, 0.797]** | 0.703 ([-0.13, +0.10]) | 0.58 / 0.61 / 0.39 |
+| S-2 Qwen2.5-7B | 32 | **0.767 [0.658, 0.864]** | 0.625 (**[+0.02, +0.28]**) | 0.53 / 0.79 / 0.44 |
+| S-2 Gemma-3-4B, KL grid | 9 | 0.498 [0.276, 0.728] | 0.433 | 0.65 / 0.28 / 0.55 |
+| S-1 Gemma-3-12B, 4-bit | 29 | **0.619 [0.502, 0.732]** | 0.592 ([-0.05, +0.10]) | 0.37 / 0.44 / 0.78 |
+| S-1 Gemma-3-27B, 4-bit | 3 | not scored | - | - |
+| S-2 Gemma-3-4B, alpha-frac (descriptive) | 41 | 0.681 [0.562, 0.789] | 0.606 | 0.48 / 0.50 / 0.82 |
+
+**Primary, as filed: holds** (CI lower bound above 0.5 in 3 of 4 scored sessions).
+
+**Reading.**
+- Unlike norm, distinctness, stability, the probe and the P(YES) shift (S-2), concept accessibility
+  separates live from dead vectors in pooled comparisons on three models. It beats the logit-steering
+  check on Qwen-7B and ties it elsewhere.
+- **Caveat for Paper 2:** within a single recipe it is inconsistent (0.37 to 0.82, and below 0.5 in
+  three arm-model cells). Part of the pooled signal is that recipes differ in both accessibility and
+  liveness. Paper 2 recommends it as a cheap screen, not a certificate, and keeps the steering gate
+  as the reference.
 
 ### P2-F, factual-NO control on Qwen2.5-7B (2026-10-10, Kaggle; scored once) - **THE YES-BIAS IS DOSE-DEPENDENT: UNDER 6% OF THE INTROSPECTIVE RISE AT MODERATE DOSE, ABOUT HALF AT THE HIGHEST; THE INVERTED P(YES) CHECK IS FRAMING-SPECIFIC**
 
