@@ -135,3 +135,31 @@ only where the prompt contains "Trial". S-1M therefore runs two stages with the 
 vectors and strengths: `steer` (the gate, as above) and `forced` with `--inject-from trial`
 (first-token P(YES) and next-token KL under the released injection window). Both are
 descriptive. Script v2026-10-09b; tests in `tests/test_s3_script.py`.
+
+## Amendment 4 (9 October 2026, before any S-1 data): the 5-nat dose as a co-primary
+
+**Why.** S-2's Gemma-3-4B session on the KL-calibrated grid (notebook, 9 Oct) passed its
+manipulation check but left the gate dose gentle for real vectors: concept vectors moved
+next-token KL by 0.03 nats at the 0.5-nat-calibrated dose (random directions 0.11), and only 9
+of 90 vectors steered there. At the 5-nat dose 36 of 90 did, with every generation of the real
+arms still coherent. Random directions are far more disruptive than real ones at the same norm,
+so the calibration's gate is a gentle dose for the vectors S-1 tests. S-1 runs the same family
+on the same grid, and its McNemar test would have little power at the gate alone. Nothing from
+S-1 has been seen.
+
+**Change.**
+- The criterion (tail vectors fail the steering pass more often than concept-token vectors in
+  every 12B precision cell; each cell an exact one-sided McNemar on the 30 concepts; the cells
+  Fisher-combined) is evaluated **at two doses**: the 0.5-nat gate, as filed, and the 5-nat
+  dose. A vector passes at a dose if it is steered there and not at alpha 0.
+- Two co-primaries split alpha: the Fisher-combined p must be below **0.025** at a dose for the
+  criterion to hold at that dose. Both doses are reported whatever happens.
+- The manipulation check applies at each dose separately: at least half of each cell's
+  generations coherent.
+- The failure branch is read at each dose: tail vectors passing in fp16 but not in 4-bit is a
+  quantisation artefact.
+- P2-G's secondary on S-1 keeps the 0.5-nat labels its own filing names; the 5-nat labels are
+  reported beside them, descriptively.
+
+**Analysis code.** `experiments/analyse_s1.py`, written and tested on synthetic files before any
+S-1 zip is opened.
