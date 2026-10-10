@@ -53,3 +53,20 @@ def test_planted_flattening(tmp_path):
     assert not p2["framing_specific"] and abs(p2["excess_median"]) < 1.0
     p3 = rep["P3"]["strength 4"]["impact-matched"]
     assert p3["wilcoxon_p_real_minus_random"] < 0.05 and 0.4 < p3["content_free_share"] < 0.6
+
+
+def test_qwen_preset_maps_raw_strengths(tmp_path):
+    shrink = lambda s: min(0.08 * s, 0.9)
+    rng = np.random.default_rng(2)
+    real = rows(1.0, rng, shrink)
+    raw = {0.0: 0.0, 1.0: 20.9, 2.0: 41.8, 4.0: 83.5}   # three doses, raw as Qwen rows store them
+    real = [{**r, "alpha": raw[r["alpha"]]} for r in real if r["alpha"] in raw]
+    with open(tmp_path / "p2q_qwen7b_concept_forced_p2r_fromtrial.jsonl", "w") as f:
+        for r in real:
+            f.write(json.dumps(r) + "\n")
+    out = tmp_path / "rep.json"
+    subprocess.run([sys.executable, SCRIPT, "--preset", "qwen7b-concept", "--dir", str(tmp_path),
+                    "--out", str(out)], check=True, capture_output=True)
+    rep = json.load(open(out))
+    assert set(rep["P1"]) == {"strength 0.25", "strength 0.5", "strength 1"}
+    assert rep["P1"]["strength 0.5"]["reading"] == "flattening"

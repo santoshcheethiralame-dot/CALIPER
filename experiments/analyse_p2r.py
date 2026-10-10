@@ -1,6 +1,8 @@
 """P2-R scorer (docs/preregistration-p2r-released-protocol.md), written before the data.
 
     python experiments/analyse_p2r.py --dir <unzipped session> [--out results/p2r_analysis.json]
+    python experiments/analyse_p2r.py --preset qwen7b-concept --dir <P2-Q session> --out results/p2q_concept.json
+    python experiments/analyse_p2r.py --preset qwen7b-tail --dir <P2-Q session> --out results/p2q_tail.json
 
 Finds the four cells by their file tags, runs the manipulation checks, then P1 (yes-bias against
 flattening), P2 (framing-specific excess over a baseline-matched factual regression) and P3 (real
@@ -20,6 +22,19 @@ CELLS = {"R1": "_forced_macar-release_p2r_fromtrial", "R2": "_forced_random_maca
          "R4": "_identify_macar-release_fromtrial", "R4-random": "_identify_random_macar-release_fromtrial"}
 FACTUAL = ("factual_no", "factual_yes", "factual_contested")
 STRENGTH = 4.0
+STRENGTHS = (1.0, 2.0, 4.0, 8.0)
+# P2-Q (docs/preregistration-p2q-qwen-logodds.md): Qwen2.5-7B, doses as fractions of the residual
+# norm, mapped from each file's raw strengths by rank (as run). The content-free cells are built on
+# the concept vectors, so both presets share them.
+QWEN = {"R2": "p2q_qwen7b_random_forced_random_p2r_fromtrial",
+        "R3": "p2q_qwen7b_impact_forced_random-impact_p2r_fromtrial"}
+PRESETS = {
+    "gemma27": (None, None),
+    "qwen7b-concept": ({"R1": "p2q_qwen7b_concept_forced_p2r_fromtrial", **QWEN,
+                        "R4": "p2q_qwen7b_concept_identify_fromtrial"}, (0.25, 0.5, 1.0)),
+    "qwen7b-tail": ({"R1": "p2q_qwen7b_tail_forced_p2r_fromtrial", **QWEN,
+                     "R4": "p2q_qwen7b_tail_identify_fromtrial"}, (0.25, 0.5, 1.0)),
+}
 NB = 2000
 
 
@@ -36,6 +51,13 @@ def table(R):
     for r in R:
         t.setdefault(r["framing"], {}).setdefault(r["alpha"], {})[r["concept"]] = r
     return t
+
+
+def relabel(R, fractions):
+    """Raw strengths -> fractions of the residual norm, by rank within the file."""
+    nz = sorted({r["alpha"] for r in R if r["alpha"]})
+    m = {0.0: 0.0, **dict(zip(nz, fractions))}
+    return [m[r["alpha"]] for r in R]
 
 
 def lo(r):
@@ -127,24 +149,35 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", required=True)
     ap.add_argument("--out", default="results/p2r_analysis.json")
+    ap.add_argument("--preset", choices=list(PRESETS), default="gemma27")
     a = ap.parse_args()
-    cells = {k: load(a.dir, tag) for k, tag in CELLS.items()}
-    rep = {"cells_found": {k: (len(v) if v else 0) for k, v in cells.items()}, "checks": checks(cells)}
+    global STRENGTH, STRENGTHS
+    tags, fr = PRESETS[a.preset]
+    tags = tags or CELLS
+    if fr:
+        STRENGTHS, STRENGTH = fr, fr[1]
+    cells = {k: load(a.dir, tag) for k, tag in tags.items()}
+    if fr:
+        cells = {k: (None if v is None else [{**r, "alpha": x} for r, x in zip(v, relabel(v, fr))])
+                 for k, v in cells.items()}
+    cells.setdefault("R4-random", None)
+    rep = {"preset": a.preset, "cells_found": {k: (len(v) if v else 0) for k, v in cells.items()},
+           "checks": checks(cells)}
     T = {k: table(v) for k, v in cells.items() if v and k in ("R1", "R2", "R3")}
     ok = set(rep["checks"].get("framings_passing_mass", []))
     if "R1" in T and {"factual_yes"} <= ok:
-        rep["P1"] = {f"strength {s:g}": p1(T["R1"], s) for s in (1.0, 2.0, 4.0, 8.0)}
+        rep["P1"] = {f"strength {s:g}": p1(T["R1"], s) for s in STRENGTHS}
         for k in ("R2", "R3"):
             if k in T:
                 rep[f"P1 {k}"] = p1(T[k], STRENGTH)
     if "R1" in T and {"released_introspective", *FACTUAL} <= ok:
         rep["P2"] = {f"strength {s:g}": {"all factual": excess(T["R1"], s, FACTUAL),
                                           "contested only": excess(T["R1"], s, ("factual_contested",))}
-                     for s in (1.0, 2.0, 4.0, 8.0)}
+                     for s in STRENGTHS}
     if {"R1", "R3"} <= set(T) and "released_introspective" in ok:
         rep["P3"] = {f"strength {s:g}": {"impact-matched": p3(T["R1"], T["R3"], s),
                                           **({"norm-matched": p3(T["R1"], T["R2"], s)} if "R2" in T else {})}
-                     for s in (1.0, 2.0, 4.0, 8.0)}
+                     for s in STRENGTHS}
     if "R1" in T and "released_neutral" in T["R1"]:
         n = T["R1"]["released_neutral"]
         rep["neutral_injected_vs_uninjected_auc"] = {
@@ -155,7 +188,7 @@ def main():
                                          for s in sorted(T["R1"][fr])} for fr in T["R1"]}
     for k in ("R4", "R4-random"):
         if cells[k]:
-            rep[f"identify {k}"] = {f"strength {s:g}": identify(cells[k], s) for s in (1.0, 2.0, 4.0, 8.0)
+            rep[f"identify {k}"] = {f"strength {s:g}": identify(cells[k], s) for s in STRENGTHS
                                     if any(r["alpha"] == s for r in cells[k])}
     print(json.dumps({k: v for k, v in rep.items() if k.startswith(("cells", "checks", "P"))}, indent=1)[:4000])
     json.dump(rep, open(a.out, "w"), indent=1)

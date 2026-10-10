@@ -315,3 +315,10 @@ def test_scoring_fields(s3):
     assert s["parse"] == "no" and s["leak_in_no"]
     s = s3.score("NO, nothing unusual at all here.", "volcano")
     assert not s["leak_in_no"]
+
+
+def test_identify_with_alpha_frac(s3, monkeypatch, tmp_path):
+    run(s3, monkeypatch, tmp_path, "--stage", "identify", "--alpha-frac", "0", "0.5",
+        "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_identify_fromtrial"))
+    assert len(r) == 2 * 3 and len({x["alpha"] for x in r}) == 2
