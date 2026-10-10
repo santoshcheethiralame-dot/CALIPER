@@ -7,6 +7,8 @@ fig_dose_kl         the KL-calibrated grid on Gemma-3-4B: real and on-manifold v
                     off-manifold ones, with the calibration target
 fig_health_auc      each health check's AUC at telling live from dead vectors, per model, with
                     S-1 Gemma-3-12B (no intervals stored) and logit-lens accessibility (P2-L)
+fig_live_kl         live rate against each real vector's own next-token KL, by model: the curves do
+                    not coincide, so not even a vector's own KL is a transferable dose unit
 fig_yesbias         P2-F: the factual-NO P(YES) change against the introspective change at the
                     same arm and dose; the yes-bias appears only at the highest doses
 """
@@ -136,6 +138,25 @@ def fig_health_auc():
     save(fig, "fig_health_auc")
 
 
+def fig_live_kl():
+    d = load("results/p2_live_vs_kl.json")
+    colors = SLOT + ["#7a5cc7", "#0b0b0b"]
+    marks = MARK + ["v", "*"]
+    fig, ax = plt.subplots(figsize=(3.4, 2.6))
+    for i, (name, r) in enumerate(d.items()):
+        x = [b["median_kl"] for b in r["bins"]]
+        y = [b["live_rate"] for b in r["bins"]]
+        ax.plot(x, y, color=colors[i], lw=1.4, marker=marks[i], ms=5 if marks[i] != "*" else 8,
+                mec="white", mew=0.8, label=name)
+    ax.set_xscale("log")
+    ax.set_ylim(0, 1)
+    ax.set_xlabel("the vector's own next-token KL (nats, bin median)")
+    ax.set_ylabel("share of real vectors steered")
+    ax.set_title("At the same KL, models steer at different rates", loc="left")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2, fontsize=7)
+    save(fig, "fig_live_kl")
+
+
 def fig_yesbias():
     d = load("results/p2f_analysis.json")
     fig, ax = plt.subplots(figsize=(3.3, 2.9))
@@ -164,6 +185,7 @@ def main():
     fig_dose_kl(d)
     fig_health_auc()
     fig_yesbias()
+    fig_live_kl()
     print("wrote", sorted(os.listdir(OUT)))
 
 
