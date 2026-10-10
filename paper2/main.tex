@@ -121,8 +121,9 @@ read as direction, not as tests). Exploratory, from the internal review.}}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\linewidth]{fig_health_auc}
-\caption{\note{Health-check AUCs by model; 0.5 is chance.}}
+\includegraphics[width=\linewidth]{fig_health_auc}
+\caption{\note{Health-check AUCs by model, pooled across recipes, with 95\% intervals; 0.5 is
+chance. Table~\ref{tab:cells} shows what is left within one recipe and concept type.}}
 \label{fig:health}
 \end{figure}
 
@@ -155,19 +156,20 @@ KL at each target.}}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.48\linewidth]{fig_dose_fraction}\hfill
-\includegraphics[width=0.48\linewidth]{fig_dose_kl}
-\caption{\note{Left: one fraction of the norm, three models. Right: the KL-calibrated grid on
-Gemma-3-4B, real and on-manifold vectors against off-manifold ones.}}
+\includegraphics[width=\linewidth]{fig_dose}
+\caption{\note{(a) One fraction of the residual norm, three models. (b) The KL-calibrated grid
+on Gemma-3-4B: real and on-manifold (span) vectors against off-manifold ones (random,
+shuffled); the dashed line is the calibration target.}}
 \label{fig:dosefrac}
 \label{fig:dosekl}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\linewidth]{fig_live_kl}
-\caption{\note{Share of real vectors steered against each vector's own next-token KL, by
-model (bins of at least 10 vector-doses; intervals resample vectors). Exploratory.}}
+\includegraphics[width=\linewidth]{fig_live_kl}
+\caption{\note{Share of real vectors steered against each vector's own next-token KL, one panel
+per model with the other models in grey (bins of at least 10 vector-doses; bands resample
+vectors). Exploratory.}}
 \label{fig:livekl}
 \end{figure}
 
