@@ -38,6 +38,64 @@ def mcnemar_one_sided(a_pass, b_pass):
     return {"a_only": a_only, "b_only": b_only, "p_one_sided": p}
 
 
+# Addendum 1 (filed 9 Oct, before any F-1 row): every verdict also scored with 1/gamma of the layer
+# norm feeding the MLP projected out of the fit and of w, and each fit's share on 1/gamma, per arm.
+BASE = {"b15a": ("gpt2", 6, "results/b15a_fitseed1"),
+        "b8b": ("EleutherAI/gpt-neo-125M", 10, "results/b8b_gptneo125m_indep")}
+
+
+def identifiable(npz, picked, u):
+    z = np.load(npz)
+    w = z["w"].astype(np.float64)
+    v = z[picked][:, 0].astype(np.float64)
+    v /= np.linalg.norm(v)
+    P = lambda x: x - u * (u @ x)
+    pv, pw = P(v), P(w)
+    return float(abs(pv @ pw) / (np.linalg.norm(pv) * np.linalg.norm(pw))), float((u @ v) ** 2)
+
+
+def addendum_1(a, groups, fits):
+    import sys
+    sys.path.insert(0, str(ROOT / "experiments"))
+    from analyse_ln_null import null_direction
+    base_rows = {tag: load(f"{stem}.jsonl") for tag, (_, _, stem) in BASE.items()}
+    score = {}
+    for (tag, unit) in [k for g in groups.values() for k in g]:
+        model, layer, stem = BASE[tag]
+        u, _ = null_direction(model, layer)
+        b = base_rows[tag].get(unit)
+        if b is None:
+            continue
+        rec = {"base": identifiable(ROOT / f"{stem}_dirs/n{unit}.npz", b["picked"], u)}
+        for arm in ARMS:
+            r = fits[arm].get((tag, unit))
+            if r is not None:
+                rec[arm] = identifiable(ROOT / f"results/f1_{tag}_{arm}_dirs/n{unit}.npz", r["picked"], u)
+        score[(tag, unit)] = rec
+    out = {}
+    for g, ks in groups.items():
+        ks = [k for k in ks if k in score and all(arm in score[k] for arm in ARMS)]
+        if not ks:
+            continue
+        res = {"scored": len(ks),
+               "base_pass_identifiable": int(sum(score[k]["base"][0] >= PASS for k in ks)),
+               **{f"{arm}_pass_identifiable": int(sum(score[k][arm][0] >= PASS for k in ks)) for arm in ARMS},
+               "median_null_share": {s: float(np.median([score[k][s][1] for k in ks]))
+                                     for s in ("base", *ARMS)}}
+        if g == "converged_wrong":
+            still = [k for k in ks if score[k]["base"][0] < PASS]
+            res["still_wrong_on_identifiable_label"] = len(still)
+            res["of_those_repaired"] = {arm: int(sum(score[k][arm][0] >= PASS for k in still)) for arm in ARMS}
+            if still:
+                t = np.array([score[k]["targeted"][0] >= PASS for k in still])
+                n_ = np.array([score[k]["natural"][0] >= PASS for k in still])
+                res["targeted_vs_natural_on_those"] = mcnemar_one_sided(t, n_)
+        out[g] = res
+    out["per_unit"] = {f"{t}:{u}": {s: [round(x, 4) for x in v] for s, v in rec.items()}
+                       for (t, u), rec in score.items()}
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pattern", default="results/f1_{tag}_{arm}.jsonl")
@@ -81,6 +139,7 @@ def main():
         keys = [k for k in groups["passing_draw"] if all(k in fits[arm] for arm in ARMS)]
         rep["harm_targeted"] = {"failed": int((~passed("targeted", keys)).sum()),
                                 "of": len(keys), "prediction": "at most 2 of 40"}
+    rep["addendum_1_identifiable"] = addendum_1(a, groups, fits)
     rep["per_unit"] = {f"{t}:{u}": {"group": g, **{arm: fits[arm].get((t, u), {}).get(
         "align_selected") for arm in ARMS}} for g, ks in groups.items() for t, u in ks}
     print(json.dumps({k: v for k, v in rep.items() if k != "per_unit"}, indent=1))
