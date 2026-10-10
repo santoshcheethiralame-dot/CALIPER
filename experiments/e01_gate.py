@@ -125,7 +125,11 @@ t0 = time.time()
 
 
 def corpus():
-    texts = sample_corpus(n_docs=300, seed=a.corpus_seed)
+    # 300 documents give about 33-35k tokens, which covers every run up to 32k and keeps
+    # their sample unchanged. Larger budgets take the whole pool (about 1,080 documents,
+    # 125-135k tokens); before 10 Oct they silently capped at about 34k.
+    n_docs = 300 if a.tokens <= 32000 else 2000
+    texts = sample_corpus(n_docs=n_docs, seed=a.corpus_seed)
     if a.exclude_corpus_seed is not None:
         seen = set(sample_corpus(n_docs=300, seed=a.exclude_corpus_seed))
         texts = [t for t in texts if t not in seen]
@@ -166,6 +170,8 @@ p = collect(model, tok, corpus(), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=a.split_seed,
             shuffle="sequence" if a.sequence_split else "token", sae=sae,
             target=a.target if a.target in ("unembed", "glu") else "mlp")
+if len(p.stimulus) < a.tokens:
+    raise SystemExit(f"corpus gave {len(p.stimulus)} tokens, fewer than --tokens {a.tokens}")
 glu = a.target == "glu"
 snr = {}
 if a.snr is not None or a.snr_range is not None:
