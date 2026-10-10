@@ -9,7 +9,7 @@ their old sample, so no earlier run changes. About 2-3 GPU-hours.
 ## Before you start
 
 1. **Upload the rebuilt bundle**: Datasets -> **caliper-bundle** -> **New Version** ->
-   `kaggle/caliper-bundle.zip` (rebuilt 10 Oct, evening). The cell refuses older versions.
+   `kaggle/caliper-bundle.zip` (rebuilt 10 Oct, night; the same upload serves the F-4/F-6 session). The cell refuses older versions.
 2. Notebook -> **Input:** attach **caliper-bundle**, refreshed to the new version.
 3. Session options: **GPU T4 x2** (one is used), **Internet On**.
 
@@ -23,7 +23,7 @@ assert hits, "bundle not found under /kaggle/input - is caliper-bundle attached?
 root = os.path.dirname(os.path.dirname(hits[0]))
 sys.path.insert(0, root); os.chdir(root); os.environ["PYTHONPATH"] = root
 src = open("experiments/e01_gate.py").read()
-assert "n_docs = 300 if a.tokens <= 32000 else 2000" in src, \
+assert "(300 if a.tokens <= 32000 else 2000)" in src, \
     "STALE BUNDLE: upload the 10 Oct (evening) caliper-bundle.zip as a new version and re-attach"
 print("root:", root, "| bundle OK (corpus fix)")
 

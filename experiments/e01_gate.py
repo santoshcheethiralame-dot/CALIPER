@@ -99,6 +99,10 @@ ap.add_argument("--drop-constant-coords", type=float, default=None, metavar="FRA
 ap.add_argument("--exclude-corpus-seed", type=int, default=None,
                 help="drop every document that corpus seed would sample, so this run's "
                      "stimulus is document-disjoint from that seed's (X-1)")
+ap.add_argument("--corpus-docs", type=int, default=None,
+                help="documents to sample before any exclusion (default: 300 up to 32k tokens, "
+                     "else the whole pool). A disjoint-document fit at a large budget needs more "
+                     "than 300, because excluding the other seed's documents removes some")
 ap.add_argument("--split-seed", type=int, default=0,
                 help="seed for collect's row order, which decides the 20%% held-out set. "
                      "0 reproduces every earlier run")
@@ -128,7 +132,7 @@ def corpus():
     # 300 documents give about 33-35k tokens, which covers every run up to 32k and keeps
     # their sample unchanged. Larger budgets take the whole pool (about 1,080 documents,
     # 125-135k tokens); before 10 Oct they silently capped at about 34k.
-    n_docs = 300 if a.tokens <= 32000 else 2000
+    n_docs = a.corpus_docs or (300 if a.tokens <= 32000 else 2000)
     texts = sample_corpus(n_docs=n_docs, seed=a.corpus_seed)
     if a.exclude_corpus_seed is not None:
         seen = set(sample_corpus(n_docs=300, seed=a.exclude_corpus_seed))
