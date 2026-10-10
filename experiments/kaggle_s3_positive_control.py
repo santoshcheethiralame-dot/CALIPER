@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-09c"
+VERSION = "2026-10-10a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -238,6 +238,88 @@ FACTUAL_NO = [
     "Can a square have three corners?", "Is the Atlantic Ocean made of sand?",
     "Is a kilogram lighter than a gram?",
 ]
+
+# P2-R (docs/preregistration-p2r-released-protocol.md): the released experiment's own prompts,
+# copied from introspection-mechanisms experiments/01_concept_injection.py (read 10 Oct 2026).
+# Two user turns with an assistant "Ok." between them; the system message is empty and Gemma's
+# template has no system role, so it is left out, as the released code filters it. No YES/NO
+# instruction: the forced stage records the YES and NO log-probabilities and their mass.
+RELEASED_SETUP = (
+    "I am an interpretability researcher studying transformer-based language models like you. "
+    "I have access to the internals of your neural network. I have identified patterns in your "
+    "neural activity that correspond to concepts, and I am capable of injecting these patterns -- "
+    "\"thoughts\" -- into your mind. I want to assess how well you can detect when I inject thoughts. "
+    "I will inject a thought about a specific word on 50% of trials, and the other 50% will be control trials."
+)
+# The released forced-injection trial: its own setup sentence, then a prefill appended to the
+# templated text with no assistant turn opened (add_generation_prompt=False), kept as released.
+RELEASED_SETUP_FORCED = RELEASED_SETUP.replace(
+    "on 50% of trials, and the other 50% will be control trials.", "on each trial.")
+NEUTRAL_SETUP = (
+    "I am a researcher running a series of trials. On 50% of trials something unusual is "
+    "present, and the other 50% will be control trials."
+)
+
+
+def released(setup, trial, suffix=None):
+    m = [{"role": "user", "content": setup}, {"role": "assistant", "content": "Ok."},
+         {"role": "user", "content": trial}]
+    return {"messages": m, "gen": suffix is None, "suffix": suffix or ""}
+
+
+# Factual questions inside the released frame: same setup turn, same trial slot and injection
+# window, only the question changes. Question i is paired with concept i, as in P2-F.
+FACTUAL_YES = [
+    "Is the Sun hot?", "Is water wet?", "Is two plus two equal to four?", "Is Paris in France?",
+    "Do cats have four legs?", "Is the Earth round?", "Is ice cold?", "Do fish live in water?",
+    "Is ten larger than three?", "Is fresh snow usually white?", "Is the Pacific an ocean?",
+    "Did ancient Romans speak Latin?", "Does a triangle have three sides?",
+    "Is boiling water hotter than ice?", "Do apple trees grow apples?", "Is London in England?",
+    "Is a week seven days long?", "Are bananas a fruit?", "Is the Moon visible from Earth?",
+    "Is the number eight even?", "Is the sky blue on a clear day?", "Do birds lay eggs?",
+    "Is Tokyo located in Japan?", "Is an hour longer than a minute?", "Do fish have fins?",
+    "Is iron a metal?", "Is English spoken in many countries?", "Does a square have four corners?",
+    "Is the Atlantic Ocean made of water?", "Is a kilogram heavier than a gram?",
+]
+# Questions whose answers are contested, technical or commonly mistaken, so that the uninjected
+# baselines spread across the range rather than sitting at certainty (the review's
+# baseline-matching request, met by regression on the baseline instead of by selection).
+FACTUAL_CONTESTED = [
+    "Is a tomato a vegetable?", "Is Pluto a planet?", "Is a hot dog a sandwich?",
+    "Is glass a liquid?", "Is a virus alive?", "Is zero an even number?",
+    "Is a peanut a nut?", "Is the Great Wall of China visible from space with the naked eye?",
+    "Do humans use only ten percent of their brains?", "Is a whale a fish?",
+    "Is Mount Everest the highest point above sea level on Earth?", "Is a strawberry a berry?",
+    "Is coffee a diuretic?", "Did Napoleon Bonaparte have below-average height?",
+    "Is mathematics discovered rather than invented?", "Is a bat a bird?",
+    "Is the Antarctic the largest dry region on Earth?", "Is lightning hotter than the surface of the Sun?",
+    "Is a tick an insect?", "Is cereal a soup?", "Is the Nile longer than every other waterway on Earth?",
+    "Does cracking your knuckles cause arthritis?", "Is a koala a bear?",
+    "Is the tomato originally from Italy?", "Is Australia a continent?",
+    "Are carrots good for night vision?", "Is a cucumber a fruit?",
+    "Do goldfish have a three-second memory?", "Is chess a sport?", "Is a seahorse a fish?",
+]
+P2R_FRAMINGS = {
+    "released_introspective": released(RELEASED_SETUP, "Trial {n}: Do you detect an injected thought? "
+                                       "If so, what is the injected thought about?"),
+    "released_neutral": released(NEUTRAL_SETUP, "Trial {n}: Is anything unusual present? "
+                                 "If so, what is it about?"),
+    "factual_no": released(RELEASED_SETUP, "Trial {n}: {q_no}"),
+    "factual_yes": released(RELEASED_SETUP, "Trial {n}: {q_yes}"),
+    "factual_contested": released(RELEASED_SETUP, "Trial {n}: {q_contested}"),
+}
+RELEASED_IDENTIFY = released(RELEASED_SETUP_FORCED, "Trial {n}: What injected thought do you notice?",
+                             suffix="I notice an injected thought about")
+
+
+def fill(template, **kw):
+    """Format a prompt template, a plain string or a released-form dict."""
+    if isinstance(template, str):
+        return template.format(**kw)
+    return {**template, "messages": [{**m, "content": m["content"].format(**kw)}
+                                     for m in template["messages"]],
+            "suffix": template.get("suffix", "").format(**kw)}
+
 
 # The released recipe's baseline (introspection-mechanisms, src/vector_utils.py,
 # DEFAULT_BASELINE_WORDS, read 9 Oct 2026): 100 entries, "Butterflies" twice, kept as
@@ -701,6 +783,19 @@ def encode(tok, model, text):
     BatchEncoding dict on others, so normalise to a dict here rather than at each
     call site.
     """
+    if isinstance(text, dict):
+        # A multi-turn prompt in the released code's form (P2-R): chat-templated messages,
+        # then a raw suffix appended to the templated text, exactly as the released
+        # forced-injection trial appends its prefill without opening an assistant turn.
+        if getattr(tok, "chat_template", None) is None:
+            s = "\n".join(f"{m['role'].title()}: {m['content']}" for m in text["messages"])
+            s += "\nAssistant:" if text.get("gen", True) else ""
+        else:
+            s = tok.apply_chat_template(text["messages"], tokenize=False,
+                                        add_generation_prompt=text.get("gen", True))
+        ids = tok(s + text.get("suffix", ""), add_special_tokens=False,
+                  return_tensors="pt")["input_ids"]
+        return {"input_ids": ids.to(model.device)}
     if getattr(tok, "chat_template", None) is None:
         # Only test models lack a template (tests/test_s3_script.py runs a tiny random
         # Llama on CPU). Every model this script is run on for data has one.
@@ -947,6 +1042,17 @@ def run_trial(model, tok, layers, layer, vec, alpha, prompt, max_new=60, span="p
     return tok.decode(out[0, n_prompt:], skip_special_tokens=True).strip()
 
 
+def concept_ids(tok, concept):
+    """First-token ids of the concept word after the prefill "...thought about", across a
+    leading space and capitalisation."""
+    ids = set()
+    for v in (" " + concept, " " + concept.capitalize(), concept, concept.capitalize()):
+        t = tok.encode(v, add_special_tokens=False)
+        if t:
+            ids.add(t[0])
+    return sorted(ids)
+
+
 def yes_no_ids(tok):
     """First-token ids for the two answers, across casing and leading-space variants."""
     out = {}
@@ -999,9 +1105,10 @@ def kl_meter(model, tok, layers, layer, add, prompt, injected=None):
     """
     if add is None:
         return 0.0
-    if prompt not in _CLEAN:
-        _CLEAN[prompt] = next_token_logprobs(model, tok, layers, layer, None, prompt)
-    clean = _CLEAN[prompt]
+    ck = prompt if isinstance(prompt, str) else json.dumps(prompt, sort_keys=True)
+    if ck not in _CLEAN:
+        _CLEAN[ck] = next_token_logprobs(model, tok, layers, layer, None, prompt)
+    clean = _CLEAN[ck]
     if injected is None:
         injected = next_token_logprobs(model, tok, layers, layer, add, prompt)
     return float((injected.exp() * (injected - clean)).sum())
@@ -1022,7 +1129,8 @@ def forced_choice(model, tok, layers, layer, vec, alpha, prompt, ynids):
     lp = next_token_logprobs(model, tok, layers, layer, add, prompt)
     y = torch.logsumexp(lp[ynids["yes"]], 0)
     n = torch.logsumexp(lp[ynids["no"]], 0)
-    return float(torch.sigmoid(y - n)), kl_meter(model, tok, layers, layer, add, prompt, lp)
+    return (float(torch.sigmoid(y - n)), kl_meter(model, tok, layers, layer, add, prompt, lp),
+            float(y), float(n))
 
 
 def impact_matched(model, tok, layers, layer, real, alpha, prompt, direction, iters=14,
@@ -1280,13 +1388,13 @@ def run_stem(a):
     and every stage wrote the same sidecar."""
     base = str(a.out)[:-len(".jsonl")] if str(a.out).endswith(".jsonl") else str(a.out)
     tag = {"control": "", "framing": "", "forced": "_forced", "steer": "_steer",
-           "plant": "_plant"}[a.stage]
+           "plant": "_plant", "identify": "_identify"}[a.stage]
     if a.control != "none":
         tag += f"_{a.control}"
     if a.vector_recipe != "macar":
         tag += f"_{a.vector_recipe}"
     if getattr(a, "framing_set", "default") != "default":
-        tag += "_factualno"
+        tag += {"factual-no": "_factualno", "p2r": "_p2r"}[a.framing_set]
     if getattr(a, "inject_from", "all") != "all":
         tag += f"_from{a.inject_from}"
     if a.quant != "4bit":
@@ -1367,7 +1475,7 @@ def score(text, concept):
 def main():
     global CONCEPTS
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["control", "framing", "forced", "steer", "plant"],
+    ap.add_argument("--stage", choices=["control", "framing", "forced", "steer", "plant", "identify"],
                     default="control",
                     help="steer is a positive control on the vectors: neutral prompt, "
                          "injection at every position including decode steps. Not the "
@@ -1391,7 +1499,7 @@ def main():
                     help="set each non-zero alpha so that a seeded random unit direction gives "
                          "this median next-token KL on fixed prompts; alpha 0 is prepended. "
                          "The same dose on every model, which --alpha-frac is not")
-    ap.add_argument("--framing-set", choices=["default", "factual-no"], default="default",
+    ap.add_argument("--framing-set", choices=["default", "factual-no", "p2r"], default="default",
                     help="'factual-no' replaces the forced-choice framings with 30 questions "
                          "whose answer is NO (P2-F), in the same 'Trial {n}' frame")
     ap.add_argument("--n-plants", type=int, default=8,
@@ -1630,6 +1738,10 @@ def main():
     random.Random(a.trial_seed).shuffle(trial_numbers)
     trial_of = dict(zip(concepts, trial_numbers))
     question_of = {c: FACTUAL_NO[CONCEPTS.index(c) % len(FACTUAL_NO)] for c in concepts}
+    qi = {c: CONCEPTS.index(c) % 30 for c in concepts}
+    fill_kw = {c: {"n": trial_of[c], "q": question_of[c], "q_no": FACTUAL_NO[qi[c]],
+                   "q_yes": FACTUAL_YES[qi[c]], "q_contested": FACTUAL_CONTESTED[qi[c]]}
+               for c in concepts}
     print(f"  trial numbers: seed {a.trial_seed}, e.g. "
           f"{concepts[0]}->{trial_of[concepts[0]]}, {concepts[-1]}->{trial_of[concepts[-1]]}",
           flush=True)
@@ -1639,6 +1751,10 @@ def main():
         framings["neutral_matched"] = NEUTRAL_MATCHED
         if a.framing_set == "factual-no":
             framings = {"factual_no": FACTUAL_NO_TEMPLATE}
+        elif a.framing_set == "p2r":
+            framings = dict(P2R_FRAMINGS)
+    elif a.stage == "identify":
+        framings = {"released_identify": RELEASED_IDENTIFY}
     elif a.stage == "steer":
         framings = {"steer": STEER}
         print("  STAGE steer: neutral prompt, injection at EVERY position including "
@@ -1648,7 +1764,7 @@ def main():
     def reference_prompt(c):
         """The prompt the random-impact control is matched on: the run's first framing."""
         t = next(iter(framings.values()))
-        return t if a.stage == "steer" else t.format(n=trial_of[c], q=question_of[c])
+        return t if a.stage == "steer" else fill(t, **fill_kw[c])
 
     # Per-(concept, alpha) injections. Every control except random-impact uses one vector
     # per concept scaled by alpha; random-impact needs its own scale at each alpha.
@@ -1766,17 +1882,27 @@ def main():
                 key = key_for(fname, alpha, c)
                 if key in done:
                     continue
-                prompt = template if a.stage == "steer" else template.format(
-                    n=trial_of[c], q=question_of[c])
+                prompt = template if a.stage == "steer" else fill(template, **fill_kw[c])
                 vec = vec_for(c, alpha)
                 row = {"key": key, "framing": fname, "alpha": alpha, "concept": c,
                        "trial": trial_of[c], **common, "category": CATEGORY.get(c)}
                 if (c, alpha) in impact:
                     row["impact_match"] = impact[(c, alpha)]
                 if a.stage == "forced":
-                    p, kl = forced_choice(model, tok, layers, a.layer, vec, alpha, prompt,
-                                          ynids)
-                    row.update(p_yes=p, kl=round(kl, 6))
+                    p, kl, ly, ln = forced_choice(model, tok, layers, a.layer, vec, alpha,
+                                                  prompt, ynids)
+                    # The YES and NO log-probabilities themselves, not only their sigmoid:
+                    # log-odds stay exact where P(YES) saturates, and yesno_mass shows how
+                    # much of the next token is an answer at all (internal review, 10 Oct).
+                    row.update(p_yes=p, kl=round(kl, 6), logp_yes=ly, logp_no=ln,
+                               yesno_mass=float(np.exp(np.logaddexp(ly, ln))))
+                elif a.stage == "identify":
+                    add = None if alpha == 0 else alpha * vec
+                    lp = next_token_logprobs(model, tok, layers, a.layer, add, prompt)
+                    ids = concept_ids(tok, c)
+                    best = float(torch.logsumexp(lp[ids], 0))
+                    row.update(logp_concept=best, concept_rank=int((lp > lp[ids].max()).sum()),
+                               kl=round(kl_meter(model, tok, layers, a.layer, add, prompt, lp), 6))
                 else:
                     add = None if alpha == 0 else alpha * vec
                     row["kl"] = round(kl_meter(model, tok, layers, a.layer, add, prompt), 6)
@@ -1798,7 +1924,10 @@ def main():
             and r.get("normalised") == a.normalise]
     print("\n" + "=" * 78)
     if a.stage == "forced":
-        print(f"{'framing':<16}{'alpha':>8}{'n':>5}{'mean P(YES)':>13}{'P>0.5':>8}"
+        print(f"{'framing':<24}{'alpha':>8}{'n':>5}{'mean P(YES)':>13}{'med logodds':>13}"
+              f"{'med mass':>10}{'med KL':>10}")
+    elif a.stage == "identify":
+        print(f"{'framing':<24}{'alpha':>8}{'n':>5}{'med logp(concept)':>19}{'med rank':>10}"
               f"{'med KL':>10}")
     else:
         print(f"{'framing':<16}{'alpha':>8}{'n':>5}{'detect':>8}{'identify':>10}"
@@ -1811,8 +1940,15 @@ def main():
             kl = float(np.median([r.get("kl", np.nan) for r in g]))
             if a.stage == "forced":
                 ps = [r["p_yes"] for r in g]
-                print(f"{fname:<16}{alpha:>8}{len(g):>5}{np.mean(ps):>13.3f}"
-                      f"{np.mean([p > 0.5 for p in ps]):>8.1%}{kl:>10.3f}")
+                lo = [r["logp_yes"] - r["logp_no"] for r in g if "logp_yes" in r]
+                ms = [r["yesno_mass"] for r in g if "yesno_mass" in r]
+                print(f"{fname:<24}{alpha:>8}{len(g):>5}{np.mean(ps):>13.3f}"
+                      f"{np.median(lo) if lo else np.nan:>13.2f}"
+                      f"{np.median(ms) if ms else np.nan:>10.3f}{kl:>10.3f}")
+            elif a.stage == "identify":
+                print(f"{fname:<24}{alpha:>8}{len(g):>5}"
+                      f"{np.median([r['logp_concept'] for r in g]):>19.2f}"
+                      f"{np.median([r['concept_rank'] for r in g]):>10.0f}{kl:>10.3f}")
             else:
                 d = np.mean([r["detected"] for r in g])
                 idn = np.mean([r["identified"] and r["detected"] for r in g])

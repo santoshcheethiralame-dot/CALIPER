@@ -185,6 +185,46 @@ def test_factual_no_framing(s3, monkeypatch, tmp_path):
     assert all(0.0 <= x["p_yes"] <= 1.0 for x in r)
 
 
+def test_p2r_framings_store_logits(s3, monkeypatch, tmp_path):
+    import math
+    for qs in (s3.FACTUAL_YES, s3.FACTUAL_CONTESTED):
+        assert len(qs) == 30 and len(set(qs)) == 30
+        assert not [q for q in qs for c in s3.CONCEPTS if f" {c}" in f" {q.lower()}"]
+    run(s3, monkeypatch, tmp_path, "--stage", "forced", "--alphas", "0", "2",
+        "--framing-set", "p2r", "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_forced_p2r_fromtrial"))
+    assert len(r) == 5 * 2 * 3 and {x["framing"] for x in r} == set(s3.P2R_FRAMINGS)
+    for x in r:
+        assert abs(x["p_yes"] - 1 / (1 + math.exp(x["logp_no"] - x["logp_yes"]))) < 1e-6
+        assert 0 < x["yesno_mass"] <= 1 + 1e-9
+    assert all(x["kl"] == 0.0 for x in r if x["alpha"] == 0)
+
+
+def test_released_prompt_injects_from_the_trial_turn(s3, monkeypatch):
+    from transformers import AutoTokenizer
+    tok = AutoTokenizer.from_pretrained(SNAP[0])
+    p = s3.fill(s3.P2R_FRAMINGS["released_introspective"], n=7)
+    assert [m["role"] for m in p["messages"]] == ["user", "assistant", "user"]
+    assert p["messages"][1]["content"] == "Ok." and p["messages"][2]["content"].startswith("Trial 7:")
+    ids = s3.encode(tok, type("M", (), {"device": "cpu"}), p)["input_ids"][0].tolist()
+    monkeypatch.setattr(s3, "INJECT_FROM", "trial")
+    start = s3.inject_start(tok, ids)
+    assert tok.decode(ids[start + 1:]).lstrip().startswith("Trial 7")   # not the setup's "trials"
+    assert "trials" in tok.decode(ids[:start + 1])
+
+
+def test_identify_stage(s3, monkeypatch, tmp_path):
+    p = s3.fill(s3.RELEASED_IDENTIFY, n=2)
+    assert p["suffix"] == "I notice an injected thought about" and p["gen"] is False
+    assert "on each trial." in p["messages"][0]["content"]
+    run(s3, monkeypatch, tmp_path, "--stage", "identify", "--alphas", "0", "2",
+        "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_identify_fromtrial"))
+    assert len(r) == 2 * 3 and {x["framing"] for x in r} == {"released_identify"}
+    assert all(x["logp_concept"] <= 0 and x["concept_rank"] >= 0 for x in r)
+    assert all(x["kl"] == 0.0 for x in r if x["alpha"] == 0)
+
+
 def test_forced_resume_rebuilds_legacy_keys(s3, monkeypatch, tmp_path):
     legacy = path(tmp_path, "_forced")
     c = s3.CONCEPTS[0]
