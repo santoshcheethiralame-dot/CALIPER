@@ -1,0 +1,98 @@
+{
+ "Gemma-3-27B (released recipe) / released": [
+  {
+   "dose": "strength 4",
+   "factual_no_change": 0.014808854134869081,
+   "introspective_change": 0.17843706201700016,
+   "ratio": 0.08299203073326887,
+   "median_kl": 0.0005660000000000001,
+   "concepts": 30
+  },
+  {
+   "dose": "strength 8",
+   "factual_no_change": 0.1754036479965274,
+   "introspective_change": 0.2794976179316071,
+   "ratio": 0.6275675953683748,
+   "median_kl": 45.013313499999995,
+   "concepts": 30
+  }
+ ],
+ "Qwen2.5-7B / concept": [
+  {
+   "dose": "0.25",
+   "factual_no_change": -2.28861789884475e-09,
+   "introspective_change": 0.058852570158584666,
+   "ratio": -3.8887305901472434e-08,
+   "median_kl": 2.45e-05,
+   "concepts": 30
+  },
+  {
+   "dose": "0.5",
+   "factual_no_change": 0.00016146200768072695,
+   "introspective_change": 0.41840399908978726,
+   "ratio": 0.0003858997715891288,
+   "median_kl": 0.017593499999999998,
+   "concepts": 30
+  },
+  {
+   "dose": "1.0",
+   "factual_no_change": 0.5375992255701547,
+   "introspective_change": 0.7966981330673055,
+   "ratio": 0.674784091058913,
+   "median_kl": 30.234201499999998,
+   "concepts": 30
+  }
+ ],
+ "Qwen2.5-7B / tail": [
+  {
+   "dose": "0.25",
+   "factual_no_change": 4.631377314651293e-05,
+   "introspective_change": 0.6797222566186693,
+   "ratio": 6.813631993882967e-05,
+   "median_kl": 1.9999999999999998e-05,
+   "concepts": 30
+  },
+  {
+   "dose": "0.5",
+   "factual_no_change": 0.04644234256129815,
+   "introspective_change": 0.8663528728464613,
+   "ratio": 0.053606727716742804,
+   "median_kl": 0.0119285,
+   "concepts": 30
+  },
+  {
+   "dose": "1.0",
+   "factual_no_change": 0.47675847017351636,
+   "introspective_change": 0.8466640185778185,
+   "ratio": 0.5631023165178911,
+   "median_kl": 11.490744,
+   "concepts": 30
+  }
+ ],
+ "Qwen2.5-7B / random": [
+  {
+   "dose": "0.25",
+   "factual_no_change": 4.743619199024317e-08,
+   "introspective_change": 0.020522797957573856,
+   "ratio": 2.3113900983826152e-06,
+   "median_kl": 2.7499999999999998e-05,
+   "concepts": 30
+  },
+  {
+   "dose": "0.5",
+   "factual_no_change": 0.0011779518551058204,
+   "introspective_change": 0.14946681041380241,
+   "ratio": 0.007881026241508953,
+   "median_kl": 8.5e-05,
+   "concepts": 30
+  },
+  {
+   "dose": "1.0",
+   "factual_no_change": 0.1798441618364672,
+   "introspective_change": 0.43990676069515755,
+   "ratio": 0.40882336418806237,
+   "median_kl": 0.5039575000000001,
+   "concepts": 30
+  }
+ ]
+}
