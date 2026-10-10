@@ -145,7 +145,9 @@ proposed as a routine report \citep{song2025position}. Song et al.
 validate run-to-run consistency against ground truth on synthetic dictionaries, where it
 tracks ground-truth recovery over training in aggregate \citep{song2025position}; we ask
 whether agreement identifies \emph{which individual} estimates are wrong, on real trained
-models. Gerasimov et al. find that seed-stable SAE features carry most of the reconstruction
+models. \draft{\citet{liu2026null} calibrates sparse-autoencoder seed agreement against a null
+and recommends pairing it with held-out activation agreement and ground truth, the nearest
+statement of our recommendation on the dictionary side.} Gerasimov et al. find that seed-stable SAE features carry most of the reconstruction
 signal while unstable ones reflect reproducible subspaces resolved differently per seed
 \citep{gerasimov2026unstable}; our results are compatible, since stability can track
 importance without tracking correctness. Warnings that stability is not correctness exist
@@ -423,7 +425,12 @@ GPT-Neo-125m, where converged-wrong fits are 20 of 38 failures, both checks are 
 them (held-out $R^2$ 0.55 $[0.42, 0.68]$, restart agreement 0.47 $[0.33, 0.61]$) and both work
 on the under-fitted class (0.98 and 0.72). At 1.4B every failure was under-fitted. In the words
 of the filed reading rule, neither check sees the hard case. Its size is 5\% of units on GPT-2
-small and 20\% on GPT-Neo layer 10.
+small and 20\% on GPT-Neo layer 10. \draft{These class comparisons handicap held-out $R^2$,
+because every converged-wrong fit has $R^2 > 0.99$ by definition while some passing units fall
+below that line, so held-out $R^2$ ranks those passes as more suspect by construction. Restricted to units with $R^2 > 0.99$, held-out
+$R^2$ leads on GPT-2 ($-0.046$, $[-0.169, +0.067]$) and on GPT-Neo layer 10 ($-0.155$,
+$[-0.295, -0.023]$); restart agreement does not lead in any arm with more than two
+converged-wrong fits.}
 \draft{The two classes have different causes. Under-fitted units are sparse: they fire on a
 median 2 to 4\% of tokens against 12 to 21\% for passing units, and their response standard
 deviation is a half to two-thirds as large, so the fit has few informative tokens. In four of five arms
