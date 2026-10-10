@@ -51,7 +51,8 @@ see at all: the layer norm feeding the unit holds its output constant along $1/\
 that direction, which is read from the model's own weights, from the fit cuts the
 converged-wrong class from 2 to 20 fits per arm to 0 to 6, widens held-out fit's lead in every
 arm with saved directions, and gives a check that needs no ground truth (the fit's share on
-$1/\gamma$, AUC 0.84 to 1.0). The remainder lie in poorly sampled directions.} Restart
+$1/\gamma$, AUC 0.84 to 1.0). The remainder lie in poorly sampled directions, and the fit's
+share there flags them (AUC 0.97 over 21 fits, exploratory).} Restart
 agreement does not improve with more restarts or when measured in the stimulus metric, and
 single-unit verdicts are fragile: \draft{one in five flips when the fit seed, the token sample
 or the held-out split changes. Our main responses are noiseless; with added noise that varies
@@ -119,7 +120,8 @@ contributions are:
   that converge to a direction other than the reference. \draft{Most of them differ from it
   along $1/\gamma$ of the layer norm feeding the unit, along which the stimulus never varies.
   Removing that direction from the fit, using public weights, recovers most of them and leaves a
-  small remainder in poorly sampled directions (Section~\ref{sec:identifiability},
+  small remainder in poorly sampled directions, which the fit's share in the stimulus's
+  lowest-variance directions flags without ground truth (Section~\ref{sec:identifiability},
   Table~\ref{tab:lnnull}).}
   \item \textbf{More restarts are not a remedy.} Restart agreement does not improve as
   restarts are added, and about a quarter of units are not recovered by the direct route
@@ -462,6 +464,10 @@ to 0.94. Decomposing each error $\hat{\mathbf{v}}-\mathbf{w}_j$ across the eigen
 $C$ shows where the difference lies. In the three arms we decomposed, 81 to 96\% of a
 converged-wrong fit's error energy sits in the directions carrying the bottom 1\% of stimulus
 variance. A random vector would put 12 to 13\% there, and under-fitted fits put 20 to 55\%.
+\draft{The pattern survives removing the layer-norm null direction described next: with
+$\mathbf{u}$ removed from fit and reference, and the subspace taken from the stimulus covariance
+without it, the 21 converged-wrong fits that remain across eight arms put a median 90\% of
+their error there, against 35\% for under-fitted fits.}
 A GPT-Neo layer-6 run is the extreme case. All 20 units fail the Euclidean bar, at a median
 alignment of 0.01, yet their stimulus-weighted alignment is 0.9998 and restarts agree at 1.0.
 \draft{Its cause is exact rather than statistical. The layer norm feeding the MLP outputs
@@ -496,16 +502,24 @@ ground-truth-free check: it separates the as-filed converged-wrong fits from pas
 AUC 0.84 to 1.0. What remains after the correction, 0 to 6 fits per arm, differs from
 $\mathbf{w}_j$ in poorly sampled directions: practically rather than structurally
 unidentifiable \citep{raue2009identifiability}, since noiseless responses could in principle
-resolve them. A regression that is given the nonlinearity recovers every converged-wrong
-unit that has more invertible tokens than unknowns, 18 of 18 (Appendix~\ref{app:baselines}).}
+resolve them. A regression that is given the nonlinearity recovers every as-filed
+converged-wrong unit that has more invertible tokens than unknowns, 18 of 18 (Appendix~\ref{app:baselines}).}
 
-\draft{The low-variance share we reported first, the fitted direction's share in the eigen-directions
-carrying the bottom 1\% of stimulus variance, largely measured the same thing, since
-$\mathbf{u}$ is the lowest-variance direction of all. A pre-registered replication on 100 new
-units confirmed it on the converged-wrong fits (0.929 against 0.711 for held-out $R^2$,
-difference 0.218, bootstrap 95\% CI $[0.099, 0.340]$), but that comparison handicaps held-out
-$R^2$, whose threshold defines the class; over all failures it scores 0.880 against 0.839. It
-is subsumed by the null-direction check, and a fixed 1\% cut-off is fragile in models with
+\draft{The low-variance share we reported first, the fitted direction's share in the
+eigen-directions carrying the bottom 1\% of stimulus variance, is not made redundant by the null
+direction. Since $\mathbf{u}$ is the lowest-variance direction of all, on the pre-registered
+label the two measure much the same thing: restricted to units with held-out $R^2 > 0.99$ and
+pooled over the eight arms with saved directions, the low-variance share separates
+converged-wrong fits from passes at AUC 0.957 and the null share at 0.966, against 0.687 for
+held-out $R^2$ and 0.686 for restart agreement. Once $\mathbf{u}$ is removed, 21 converged-wrong
+fits remain. The low-variance share recomputed without $\mathbf{u}$ separates them at 0.969,
+against 0.846 for the null share, 0.835 for held-out $R^2$ and 0.775 for restart agreement, and
+the share as first defined scores 0.953. The null share catches the structural part and the
+low-variance share the practical part; the plain share covers both (exploratory, 21 fits
+pooled across arms). A pre-registered replication on 100 new units confirmed the share on the
+converged-wrong fits (0.929 against 0.711 for held-out $R^2$, difference 0.218, bootstrap 95\%
+CI $[0.099, 0.340]$), although without the restriction that comparison handicaps held-out $R^2$;
+over all failures it scores 0.880 against 0.839. A fixed 1\% cut-off is fragile in models with
 massive activations \citep{sun2024massive}, where a few coordinates dominate the variance. The same replication did not confirm agreement between
 fits on document-disjoint samples as a better check: 0.775 on the converged-wrong fits against
 0.711 for held-out $R^2$ (difference 0.065, $[-0.052, 0.183]$); an earlier figure of 0.911 on
@@ -761,8 +775,9 @@ they differ from the reference only where the stimulus has almost no variance. T
 advice is short: report held-out fit for every estimate, do not read agreement across
 restarts as evidence of correctness, and treat a recovered direction as determined only
 within the subspace its stimulus explores. \draft{Before trusting a recovered direction, remove the null directions
-the architecture fixes, such as $1/\gamma$ of a layer norm, and report how much of the direction
-lay along them.} A reliability check is itself a measuring
+the architecture fixes, such as $1/\gamma$ of a layer norm, report how much of the direction
+lay along them, and report how much of what remains lies in the stimulus's lowest-variance
+directions.} A reliability check is itself a measuring
 instrument, and like any instrument it should be calibrated against a known answer before its
 readings are trusted.
 
@@ -830,7 +845,8 @@ computable for the primary run, which saved no fitted directions; a re-run that 
 in progress} \\
 \draft{Low-variance-share diagnostic and ``repairs 40 of 43''} & \draft{Withdrawn as stated:
 the repair projected both the fit and the reference, so it scored a changed reference} & yes &
-\draft{Replaced by the fit's share on $1/\boldsymbol{\gamma}$, which needs no reference} \\
+\draft{Replaced by two scores that need no reference: the fit's share on $1/\boldsymbol{\gamma}$,
+and its low-variance share with $1/\boldsymbol{\gamma}$ removed} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -991,8 +1007,8 @@ the identifiability mechanism hold on new units; cross-sample agreement does not
 fit, so its primary fails), and the standardisation-artifact test (all three predictions hold:
 the rescue at GPT-Neo layer 6, the predicted failure at GPT-2 layer 3, and its fix)}. \\
 Exploratory, found after the data & \draft{The layer-norm null direction, the identifiable
-label and the fit's share on $1/\boldsymbol{\gamma}$; the low-variance-share diagnostic, which
-the null direction subsumes; agreement across token samples; the null-direction diagnosis of
+label and the fit's share on $1/\boldsymbol{\gamma}$; the low-variance-share diagnostic, as first
+defined and with the null direction removed; agreement across token samples; the null-direction diagnosis of
 the GPT-Neo layer-6 run and the layer map of near-zero gains; the every-run sensitivity pools;
 the within-SNR noise analysis; failure-class unit properties; the
 verdict history across four fits; restart-agreement saturation.} \\
