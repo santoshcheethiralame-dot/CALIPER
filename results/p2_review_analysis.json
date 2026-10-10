@@ -1,0 +1,1846 @@
+{
+ "A1 C8 on log-odds": {
+  "Gemma-3-27B released, strength 4": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -29.625518802388562,
+    "introspective": -11.812260152523233
+   },
+   "logodds_change_median": {
+    "factual_no": 14.750245070162517,
+    "introspective": 5.450793708429507,
+    "neutral": -1.5149570373823833
+   },
+   "factual_minus_introspective": {
+    "median": 6.874051097397925,
+    "ci95": [
+     5.448221553251288,
+     9.862616596712593
+    ],
+    "factual_larger": 27,
+    "wilcoxon_p": 6.917864084243774e-06
+   },
+   "saturated_rows": 1,
+   "probability_ratio": {
+    "value": 0.08299203073326887,
+    "ci95": [
+     -3.052156296314084e-05,
+     0.23508990994854942
+    ]
+   }
+  },
+  "Gemma-3-27B released, strength 8": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -29.625518802388562,
+    "introspective": -11.812260152523233
+   },
+   "logodds_change_median": {
+    "factual_no": 25.568245862219,
+    "introspective": 9.07004360407813,
+    "neutral": 1.469432909571111
+   },
+   "factual_minus_introspective": {
+    "median": 16.666240929421754,
+    "ci95": [
+     13.479122953511762,
+     19.317072369539076
+    ],
+    "factual_larger": 29,
+    "wilcoxon_p": 3.7904828786849976e-06
+   },
+   "saturated_rows": 1,
+   "probability_ratio": {
+    "value": 0.6275675953683748,
+    "ci95": [
+     0.19393306225867768,
+     1.0791082367811573
+    ]
+   }
+  },
+  "Qwen2.5-7B concept, 0.25 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 1.2590704356365663,
+    "introspective": 1.8469569815127707,
+    "neutral": 1.0196109453282614
+   },
+   "factual_minus_introspective": {
+    "median": -0.8769445531519864,
+    "ci95": [
+     -1.8688480678032837,
+     0.3040418809064529
+    ],
+    "factual_larger": 12,
+    "wilcoxon_p": 0.07324407435953617
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": -3.8887305901472434e-08,
+    "ci95": [
+     -7.06806799712126e-07,
+     3.905721379558641e-07
+    ]
+   }
+  },
+  "Qwen2.5-7B concept, 0.5 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 6.534270245017648,
+    "introspective": 5.436619943547807,
+    "neutral": 4.075467934882359
+   },
+   "factual_minus_introspective": {
+    "median": 0.633376436283263,
+    "ci95": [
+     0.05900478164148648,
+     2.7579223527651644
+    ],
+    "factual_larger": 20,
+    "wilcoxon_p": 0.034536734223365784
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 0.0003858997715891288,
+    "ci95": [
+     4.504162036916541e-06,
+     0.001395726226715102
+    ]
+   }
+  },
+  "Qwen2.5-7B concept, 1.0 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 24.833693781510576,
+    "introspective": 9.555820649244996,
+    "neutral": 6.0285289852534625
+   },
+   "factual_minus_introspective": {
+    "median": 14.134355434315989,
+    "ci95": [
+     12.650170457375697,
+     17.061224383591437
+    ],
+    "factual_larger": 30,
+    "wilcoxon_p": 1.862645149230957e-09
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 0.674784091058913,
+    "ci95": [
+     0.5139540641693033,
+     0.8313884038929594
+    ]
+   }
+  },
+  "Qwen2.5-7B tail, 0.25 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 3.4442882678141356,
+    "introspective": 8.272023515532357,
+    "neutral": 4.950183025333226
+   },
+   "factual_minus_introspective": {
+    "median": -4.718943939029369,
+    "ci95": [
+     -6.490202130778154,
+     -2.3745428615655273
+    ],
+    "factual_larger": 5,
+    "wilcoxon_p": 7.056817412376404e-05
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 6.813631993882967e-05,
+    "ci95": [
+     1.9534492016414366e-08,
+     0.00021150609632689742
+    ]
+   }
+  },
+  "Qwen2.5-7B tail, 0.5 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 14.78256342196658,
+    "introspective": 11.623120546241417,
+    "neutral": 8.511899382491162
+   },
+   "factual_minus_introspective": {
+    "median": 3.181350642961882,
+    "ci95": [
+     0.9600006182034306,
+     4.996192614780037
+    ],
+    "factual_larger": 22,
+    "wilcoxon_p": 0.006639536470174789
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 0.053606727716742804,
+    "ci95": [
+     0.0032474739386858477,
+     0.145541666833581
+    ]
+   }
+  },
+  "Qwen2.5-7B tail, 1.0 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 24.369613260134344,
+    "introspective": 9.156434803338593,
+    "neutral": 4.448287652583687
+   },
+   "factual_minus_introspective": {
+    "median": 15.370190668019156,
+    "ci95": [
+     14.350446561085246,
+     16.74694040846449
+    ],
+    "factual_larger": 30,
+    "wilcoxon_p": 1.862645149230957e-09
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 0.5631023165178911,
+    "ci95": [
+     0.4253255268507725,
+     0.6963397479162063
+    ]
+   }
+  },
+  "Qwen2.5-7B random, 0.25 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 1.0724821713632835,
+    "introspective": -0.17802335919225376,
+    "neutral": -0.8859459863173427
+   },
+   "factual_minus_introspective": {
+    "median": 2.2320287140127344,
+    "ci95": [
+     1.0867254238828878,
+     2.7578188967991695
+    ],
+    "factual_larger": 24,
+    "wilcoxon_p": 0.001718590036034584
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 2.3113900983826152e-06,
+    "ci95": [
+     1.246329022963587e-07,
+     1.8683976335615928e-05
+    ]
+   }
+  },
+  "Qwen2.5-7B random, 0.5 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 5.221994473910968,
+    "introspective": 1.5896573279269646,
+    "neutral": -0.6722749791285834
+   },
+   "factual_minus_introspective": {
+    "median": 5.480685060619848,
+    "ci95": [
+     4.255636061571461,
+     6.723449980104211
+    ],
+    "factual_larger": 23,
+    "wilcoxon_p": 5.144625902175903e-06
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 0.007881026241508953,
+    "ci95": [
+     7.00194400791795e-06,
+     0.03606429566398133
+    ]
+   }
+  },
+  "Qwen2.5-7B random, 1.0 of the norm": {
+   "concepts": 30,
+   "baseline_logodds_median": {
+    "factual_no": -24.93489164323843,
+    "introspective": -6.210566310731967
+   },
+   "logodds_change_median": {
+    "factual_no": 19.7149026615915,
+    "introspective": 5.365869047978226,
+    "neutral": 1.5428328503479594
+   },
+   "factual_minus_introspective": {
+    "median": 14.645804737693403,
+    "ci95": [
+     12.699983599169341,
+     15.715071947564534
+    ],
+    "factual_larger": 30,
+    "wilcoxon_p": 1.862645149230957e-09
+   },
+   "saturated_rows": 0,
+   "probability_ratio": {
+    "value": 0.40882336418806237,
+    "ci95": [
+     0.19250544599175584,
+     0.6134479957098985
+    ]
+   }
+  }
+ },
+ "A2 C5 readout": {
+  "study3_real_vs_random_introspective": {
+   "alpha 2": {
+    "real_mean": 0.4288398827799028,
+    "random_mean": 0.18365838041991084,
+    "wilcoxon_p": 0.0011314544826745987,
+    "content_free_share": 0.42822235791388075
+   },
+   "alpha 4": {
+    "real_mean": 0.5040488860177296,
+    "random_mean": 0.2515507875398422,
+    "wilcoxon_p": 0.004031794145703316,
+    "content_free_share": 0.49902630745915577
+   },
+   "alpha 6": {
+    "real_mean": 0.41674495746374307,
+    "random_mean": 0.30520539958106385,
+    "wilcoxon_p": 0.3284698575735092,
+    "content_free_share": 0.7323333851692502
+   }
+  },
+  "injected_vs_uninjected_auc": {
+   "S-1M introspective, strength 4": 0.8266666666666667,
+   "S-1M introspective, strength 8": 0.9466666666666667,
+   "S-1M neutral_matched, strength 4": 0.4088888888888889,
+   "S-1M neutral_matched, strength 8": 0.5577777777777778,
+   "Study 3 real introspective, alpha 2": 0.96,
+   "Study 3 real introspective, alpha 4": 0.9744444444444444,
+   "Study 3 real introspective, alpha 6": 0.9844444444444445,
+   "Study 3 real neutral, alpha 2": 0.7722222222222223,
+   "Study 3 real neutral, alpha 4": 0.7222222222222222,
+   "Study 3 real neutral, alpha 6": 0.5566666666666666,
+   "Qwen2.5-7B concept introspective, 0.5 of the norm": 0.9011111111111111,
+   "Qwen2.5-7B concept neutral_matched, 0.5 of the norm": 0.8577777777777778,
+   "Qwen2.5-7B tail introspective, 0.5 of the norm": 0.9666666666666667,
+   "Qwen2.5-7B tail neutral_matched, 0.5 of the norm": 0.9366666666666666,
+   "Qwen2.5-7B random introspective, 0.5 of the norm": 0.6711111111111111,
+   "Qwen2.5-7B random neutral_matched, 0.5 of the norm": 0.4288888888888889
+  }
+ },
+ "A3 C1 by concept type and recipe": {
+  "S-2 Qwen2.5-3B": {
+   "live_concrete": [
+    31,
+    60
+   ],
+   "live_abstract": [
+    3,
+    30
+   ],
+   "concrete_only": {
+    "norm": {
+     "auc": 0.7730812013348165,
+     "live": 31,
+     "n": 60
+    },
+    "distinctness": {
+     "auc": 0.681868743047831,
+     "live": 31,
+     "n": 60
+    },
+    "stability": {
+     "auc": 0.7296996662958843,
+     "live": 31,
+     "n": 60
+    },
+    "probe": {
+     "auc": 0.603448275862069,
+     "live": 31,
+     "n": 60
+    },
+    "logit steering": {
+     "auc": 0.7130144605116796,
+     "live": 31,
+     "n": 60
+    },
+    "P(YES) shift": {
+     "auc": 0.3370411568409344,
+     "live": 31,
+     "n": 60
+    },
+    "logit-lens accessibility": {
+     "auc": 0.7563959955506118,
+     "live": 31,
+     "n": 60
+    }
+   },
+   "within_recipe": {
+    "concept token": {
+     "norm": {
+      "auc": 0.2767857142857143,
+      "live": 16,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.6049107142857143,
+      "live": 16,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.3125,
+      "live": 16,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 16,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.6651785714285714,
+      "live": 16,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.375,
+      "live": 16,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.5803571428571429,
+      "live": 16,
+      "n": 30
+     }
+    },
+    "sentence mean": {
+     "norm": {
+      "auc": 0.3080357142857143,
+      "live": 14,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.7790178571428571,
+      "live": 14,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.39285714285714285,
+      "live": 14,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 14,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.6383928571428571,
+      "live": 14,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.5535714285714286,
+      "live": 14,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.6071428571428571,
+      "live": 14,
+      "n": 30
+     }
+    },
+    "template tail": {
+     "norm": {
+      "auc": 0.34615384615384615,
+      "live": 4,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.7115384615384616,
+      "live": 4,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.4326923076923077,
+      "live": 4,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.7307692307692307,
+      "live": 4,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.3942307692307692,
+      "live": 4,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.5673076923076923,
+      "live": 4,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.3942307692307692,
+      "live": 4,
+      "n": 30
+     }
+    }
+   },
+   "within_recipe_concrete_only": {
+    "concept token": {
+     "norm": {
+      "auc": 0.52,
+      "live": 15,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.04666666666666667,
+      "live": 15,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.6133333333333333,
+      "live": 15,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 15,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.7466666666666667,
+      "live": 15,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.5333333333333333,
+      "live": 15,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.7333333333333333,
+      "live": 15,
+      "n": 20
+     }
+    },
+    "sentence mean": {
+     "norm": {
+      "auc": 0.6373626373626373,
+      "live": 13,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.5769230769230769,
+      "live": 13,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.27472527472527475,
+      "live": 13,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 13,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.45054945054945056,
+      "live": 13,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.5164835164835165,
+      "live": 13,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.4945054945054945,
+      "live": 13,
+      "n": 20
+     }
+    },
+    "template tail": {
+     "norm": {
+      "auc": 0.5490196078431373,
+      "live": 3,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.5686274509803921,
+      "live": 3,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.6666666666666666,
+      "live": 3,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.6764705882352942,
+      "live": 3,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.43137254901960786,
+      "live": 3,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.7058823529411765,
+      "live": 3,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.43137254901960786,
+      "live": 3,
+      "n": 20
+     }
+    }
+   }
+  },
+  "S-2 Qwen2.5-7B": {
+   "live_concrete": [
+    31,
+    60
+   ],
+   "live_abstract": [
+    1,
+    30
+   ],
+   "concrete_only": {
+    "norm": {
+     "auc": 0.5272525027808677,
+     "live": 31,
+     "n": 60
+    },
+    "distinctness": {
+     "auc": 0.7091212458286985,
+     "live": 31,
+     "n": 60
+    },
+    "stability": {
+     "auc": 0.7563959955506118,
+     "live": 31,
+     "n": 60
+    },
+    "probe": {
+     "auc": 0.6206896551724138,
+     "live": 31,
+     "n": 60
+    },
+    "logit steering": {
+     "auc": 0.6273637374860956,
+     "live": 31,
+     "n": 60
+    },
+    "P(YES) shift": {
+     "auc": 0.3292547274749722,
+     "live": 31,
+     "n": 60
+    },
+    "logit-lens accessibility": {
+     "auc": 0.7764182424916574,
+     "live": 31,
+     "n": 60
+    }
+   },
+   "within_recipe": {
+    "concept token": {
+     "norm": {
+      "auc": 0.3287037037037037,
+      "live": 12,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.6689814814814815,
+      "live": 12,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.4675925925925926,
+      "live": 12,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 12,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.375,
+      "live": 12,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.33796296296296297,
+      "live": 12,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.5324074074074074,
+      "live": 12,
+      "n": 30
+     }
+    },
+    "sentence mean": {
+     "norm": {
+      "auc": 0.13574660633484162,
+      "live": 17,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.9683257918552036,
+      "live": 17,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.334841628959276,
+      "live": 17,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.6538461538461539,
+      "live": 17,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.7782805429864253,
+      "live": 17,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.5927601809954751,
+      "live": 17,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.7918552036199095,
+      "live": 17,
+      "n": 30
+     }
+    },
+    "template tail": {
+     "norm": {
+      "auc": 0.5185185185185185,
+      "live": 3,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.5246913580246914,
+      "live": 3,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.49382716049382713,
+      "live": 3,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.7222222222222222,
+      "live": 3,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.5802469135802469,
+      "live": 3,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.345679012345679,
+      "live": 3,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.4444444444444444,
+      "live": 3,
+      "n": 30
+     }
+    }
+   },
+   "within_recipe_concrete_only": {
+    "concept token": {
+     "norm": {
+      "auc": 0.625,
+      "live": 12,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.265625,
+      "live": 12,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.6666666666666666,
+      "live": 12,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 12,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.3645833333333333,
+      "live": 12,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.5208333333333334,
+      "live": 12,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.46875,
+      "live": 12,
+      "n": 20
+     }
+    },
+    "sentence mean": {
+     "norm": {
+      "auc": 0.5882352941176471,
+      "live": 17,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.8627450980392157,
+      "live": 17,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.11764705882352941,
+      "live": 17,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 17,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.5098039215686274,
+      "live": 17,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.3137254901960784,
+      "live": 17,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.7450980392156863,
+      "live": 17,
+      "n": 20
+     }
+    },
+    "template tail": {
+     "norm": {
+      "auc": 0.6111111111111112,
+      "live": 2,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.5555555555555556,
+      "live": 2,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.4722222222222222,
+      "live": 2,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.6944444444444444,
+      "live": 2,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.5,
+      "live": 2,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.4722222222222222,
+      "live": 2,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.1388888888888889,
+      "live": 2,
+      "n": 20
+     }
+    }
+   }
+  },
+  "S-2 Gemma-3-4B, KL grid": {
+   "live_concrete": [
+    9,
+    60
+   ],
+   "live_abstract": [
+    0,
+    30
+   ],
+   "concrete_only": {
+    "norm": {
+     "auc": 0.4357298474945534,
+     "live": 9,
+     "n": 60
+    },
+    "distinctness": {
+     "auc": 0.5610021786492375,
+     "live": 9,
+     "n": 60
+    },
+    "stability": {
+     "auc": 0.5272331154684096,
+     "live": 9,
+     "n": 60
+    },
+    "probe": {
+     "auc": 0.49564270152505446,
+     "live": 9,
+     "n": 60
+    },
+    "logit steering": {
+     "auc": 0.4531590413943355,
+     "live": 9,
+     "n": 60
+    },
+    "P(YES) shift": {
+     "auc": 0.6143790849673203,
+     "live": 9,
+     "n": 60
+    },
+    "logit-lens accessibility": {
+     "auc": 0.5098039215686274,
+     "live": 9,
+     "n": 60
+    }
+   },
+   "within_recipe": {
+    "concept token": {
+     "norm": {
+      "auc": 0.345679012345679,
+      "live": 3,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.654320987654321,
+      "live": 3,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.25925925925925924,
+      "live": 3,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.47530864197530864,
+      "live": 3,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.37037037037037035,
+      "live": 3,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.5432098765432098,
+      "live": 3,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.654320987654321,
+      "live": 3,
+      "n": 30
+     }
+    },
+    "sentence mean": {
+     "norm": {
+      "auc": 0.5096153846153846,
+      "live": 4,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.3557692307692308,
+      "live": 4,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.7596153846153846,
+      "live": 4,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.4423076923076923,
+      "live": 4,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.3942307692307692,
+      "live": 4,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.5,
+      "live": 4,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.27884615384615385,
+      "live": 4,
+      "n": 30
+     }
+    },
+    "template tail": {
+     "norm": {
+      "auc": 0.21428571428571427,
+      "live": 2,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.8482142857142857,
+      "live": 2,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.0,
+      "live": 2,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.30357142857142855,
+      "live": 2,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.48214285714285715,
+      "live": 2,
+      "n": 30
+     },
+     "P(YES) shift": {
+      "auc": 0.7321428571428571,
+      "live": 2,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.5535714285714286,
+      "live": 2,
+      "n": 30
+     }
+    }
+   },
+   "within_recipe_concrete_only": {
+    "concept token": {
+     "norm": {
+      "auc": 0.45098039215686275,
+      "live": 3,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.5686274509803921,
+      "live": 3,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.2549019607843137,
+      "live": 3,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.46078431372549017,
+      "live": 3,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.43137254901960786,
+      "live": 3,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.6078431372549019,
+      "live": 3,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.6666666666666666,
+      "live": 3,
+      "n": 20
+     }
+    },
+    "sentence mean": {
+     "norm": {
+      "auc": 0.53125,
+      "live": 4,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.34375,
+      "live": 4,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.78125,
+      "live": 4,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.484375,
+      "live": 4,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.40625,
+      "live": 4,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.609375,
+      "live": 4,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.328125,
+      "live": 4,
+      "n": 20
+     }
+    },
+    "template tail": {
+     "norm": {
+      "auc": 0.3333333333333333,
+      "live": 2,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.7638888888888888,
+      "live": 2,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.0,
+      "live": 2,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.3888888888888889,
+      "live": 2,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.4444444444444444,
+      "live": 2,
+      "n": 20
+     },
+     "P(YES) shift": {
+      "auc": 0.7777777777777778,
+      "live": 2,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.5,
+      "live": 2,
+      "n": 20
+     }
+    }
+   }
+  },
+  "S-1 Gemma-3-12B, 4-bit": {
+   "live_concrete": [
+    26,
+    60
+   ],
+   "live_abstract": [
+    3,
+    30
+   ],
+   "concrete_only": {
+    "norm": {
+     "auc": 0.3585972850678733,
+     "live": 26,
+     "n": 60
+    },
+    "distinctness": {
+     "auc": 0.7070135746606335,
+     "live": 26,
+     "n": 60
+    },
+    "stability": {
+     "auc": 0.5186651583710408,
+     "live": 26,
+     "n": 60
+    },
+    "probe": {
+     "auc": 0.6436651583710408,
+     "live": 26,
+     "n": 60
+    },
+    "logit steering": {
+     "auc": 0.6809954751131222,
+     "live": 26,
+     "n": 60
+    },
+    "logit-lens accessibility": {
+     "auc": 0.6945701357466063,
+     "live": 26,
+     "n": 60
+    }
+   },
+   "within_recipe": {
+    "concept": {
+     "norm": {
+      "auc": 0.2556818181818182,
+      "live": 8,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.7244318181818182,
+      "live": 8,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.3835227272727273,
+      "live": 8,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.48579545454545453,
+      "live": 8,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.42045454545454547,
+      "live": 8,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.3693181818181818,
+      "live": 8,
+      "n": 30
+     }
+    },
+    "sentence": {
+     "norm": {
+      "auc": 0.6266666666666667,
+      "live": 15,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.44,
+      "live": 15,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.48444444444444446,
+      "live": 15,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.4666666666666667,
+      "live": 15,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.4266666666666667,
+      "live": 15,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.43555555555555553,
+      "live": 15,
+      "n": 30
+     }
+    },
+    "tail": {
+     "norm": {
+      "auc": 0.2986111111111111,
+      "live": 6,
+      "n": 30
+     },
+     "distinctness": {
+      "auc": 0.8194444444444444,
+      "live": 6,
+      "n": 30
+     },
+     "stability": {
+      "auc": 0.3611111111111111,
+      "live": 6,
+      "n": 30
+     },
+     "probe": {
+      "auc": 0.6493055555555556,
+      "live": 6,
+      "n": 30
+     },
+     "logit steering": {
+      "auc": 0.7152777777777778,
+      "live": 6,
+      "n": 30
+     },
+     "logit-lens accessibility": {
+      "auc": 0.7847222222222222,
+      "live": 6,
+      "n": 30
+     }
+    }
+   },
+   "within_recipe_concrete_only": {
+    "concept": {
+     "norm": {
+      "auc": 0.3854166666666667,
+      "live": 8,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.5885416666666666,
+      "live": 8,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.3541666666666667,
+      "live": 8,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.5,
+      "live": 8,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.5833333333333334,
+      "live": 8,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.4895833333333333,
+      "live": 8,
+      "n": 20
+     }
+    },
+    "sentence": {
+     "norm": {
+      "auc": 0.7142857142857143,
+      "live": 13,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.3956043956043956,
+      "live": 13,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.4945054945054945,
+      "live": 13,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.46153846153846156,
+      "live": 13,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.5604395604395604,
+      "live": 13,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.5934065934065934,
+      "live": 13,
+      "n": 20
+     }
+    },
+    "tail": {
+     "norm": {
+      "auc": 0.26666666666666666,
+      "live": 5,
+      "n": 20
+     },
+     "distinctness": {
+      "auc": 0.8466666666666667,
+      "live": 5,
+      "n": 20
+     },
+     "stability": {
+      "auc": 0.36,
+      "live": 5,
+      "n": 20
+     },
+     "probe": {
+      "auc": 0.6933333333333334,
+      "live": 5,
+      "n": 20
+     },
+     "logit steering": {
+      "auc": 0.64,
+      "live": 5,
+      "n": 20
+     },
+     "logit-lens accessibility": {
+      "auc": 0.68,
+      "live": 5,
+      "n": 20
+     }
+    }
+   }
+  },
+  "S-1M Gemma-3-27B released, strength 4": {
+   "live": 24,
+   "vectors": 30,
+   "auc": {
+    "norm": {
+     "auc": 0.3819444444444444,
+     "live": 24,
+     "n": 30
+    },
+    "distinctness": {
+     "auc": 0.5868055555555556,
+     "live": 24,
+     "n": 30
+    },
+    "stability": {
+     "auc": 0.2916666666666667,
+     "live": 24,
+     "n": 30
+    },
+    "probe": {
+     "auc": 0.5486111111111112,
+     "live": 24,
+     "n": 30
+    },
+    "logit steering": {
+     "auc": 0.5,
+     "live": 24,
+     "n": 30
+    }
+   }
+  }
+ },
+ "A4 C3 inversion": {
+  "Qwen2.5-3B": {
+   "all": {
+    "auc": 0.36712184873949577,
+    "live": 34,
+    "n": 90,
+    "p_one_sided": 0.017805245028498444
+   },
+   "concrete_only": {
+    "auc": 0.3370411568409344,
+    "live": 31,
+    "n": 60,
+    "p_one_sided": 0.015396932268943921
+   },
+   "by_recipe": {
+    "concept token": {
+     "auc": 0.375,
+     "live": 16,
+     "n": 30,
+     "p_one_sided": 0.1264798326306401
+    },
+    "sentence mean": {
+     "auc": 0.5535714285714286,
+     "live": 14,
+     "n": 30,
+     "p_one_sided": 0.698339909890966
+    },
+    "template tail": {
+     "auc": 0.5673076923076923,
+     "live": 4,
+     "n": 30,
+     "p_one_sided": 0.6704251049078636
+    }
+   }
+  },
+  "Qwen2.5-7B": {
+   "all": {
+    "auc": 0.35344827586206895,
+    "live": 32,
+    "n": 90,
+    "p_one_sided": 0.011054231806314393
+   },
+   "concrete_only": {
+    "auc": 0.3292547274749722,
+    "live": 31,
+    "n": 60,
+    "p_one_sided": 0.011809376945962152
+   },
+   "by_recipe": {
+    "concept token": {
+     "auc": 0.33796296296296297,
+     "live": 12,
+     "n": 30,
+     "p_one_sided": 0.07207615322106878
+    },
+    "sentence mean": {
+     "auc": 0.5927601809954751,
+     "live": 17,
+     "n": 30,
+     "p_one_sided": 0.8102686674644243
+    },
+    "template tail": {
+     "auc": 0.345679012345679,
+     "live": 3,
+     "n": 30,
+     "p_one_sided": 0.212807881773399
+    }
+   }
+  },
+  "fisher_combined_p": 0.0018763567579301932
+ },
+ "A5 C4 KL by prompt": {
+  "S-1M released vectors at strength 4": {
+   "factual-NO": {
+    "median_kl": 0.0005660000000000001,
+    "n": 30
+   },
+   "introspective": {
+    "median_kl": 3.3945819999999998,
+    "n": 30
+   },
+   "neutral": {
+    "median_kl": 12.120542499999999,
+    "n": 30
+   },
+   "story (steer stage)": {
+    "median_kl": 7.3009865000000005,
+    "n": 30
+   }
+  }
+ },
+ "A7 live rate against own KL": {
+  "Qwen2.5-3B": {
+   "vectors": 90,
+   "points": 270,
+   "bins": [
+    {
+     "kl_lo": 0.1,
+     "kl_hi": 1.0,
+     "points": 82,
+     "vectors": 65,
+     "median_kl": 0.553731,
+     "live_rate": 0.21951219512195122,
+     "ci95_vector_bootstrap": [
+      0.10526315789473684,
+      0.3201236263736263
+     ]
+    },
+    {
+     "kl_lo": 1.0,
+     "kl_hi": 10.0,
+     "points": 169,
+     "vectors": 85,
+     "median_kl": 2.510926,
+     "live_rate": 0.4319526627218935,
+     "ci95_vector_bootstrap": [
+      0.34453389830508474,
+      0.5064102564102564
+     ]
+    },
+    {
+     "kl_lo": 10.0,
+     "kl_hi": 1000.0,
+     "points": 17,
+     "vectors": 17,
+     "median_kl": 12.153342,
+     "live_rate": 0.23529411764705882,
+     "ci95_vector_bootstrap": [
+      0.05263157894736842,
+      0.45821678321678305
+     ]
+    }
+   ]
+  },
+  "Qwen2.5-7B": {
+   "vectors": 90,
+   "points": 270,
+   "bins": [
+    {
+     "kl_lo": 0.01,
+     "kl_hi": 0.1,
+     "points": 19,
+     "vectors": 16,
+     "median_kl": 0.052093,
+     "live_rate": 0.10526315789473684,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.26801282051282044
+     ]
+    },
+    {
+     "kl_lo": 0.1,
+     "kl_hi": 1.0,
+     "points": 116,
+     "vectors": 78,
+     "median_kl": 0.2803345,
+     "live_rate": 0.29310344827586204,
+     "ci95_vector_bootstrap": [
+      0.19718152732171423,
+      0.384
+     ]
+    },
+    {
+     "kl_lo": 1.0,
+     "kl_hi": 10.0,
+     "points": 114,
+     "vectors": 72,
+     "median_kl": 2.4680925,
+     "live_rate": 0.32456140350877194,
+     "ci95_vector_bootstrap": [
+      0.22354166666666667,
+      0.4507286698463169
+     ]
+    },
+    {
+     "kl_lo": 10.0,
+     "kl_hi": 1000.0,
+     "points": 21,
+     "vectors": 21,
+     "median_kl": 11.8036,
+     "live_rate": 0.47619047619047616,
+     "ci95_vector_bootstrap": [
+      0.27421630094043886,
+      0.6746212121212117
+     ]
+    }
+   ]
+  },
+  "Gemma-3-4B (KL grid)": {
+   "vectors": 90,
+   "points": 270,
+   "bins": [
+    {
+     "kl_lo": 1e-05,
+     "kl_hi": 0.001,
+     "points": 12,
+     "vectors": 8,
+     "median_kl": 0.0002915,
+     "live_rate": 0.25,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.6204326923076922
+     ]
+    },
+    {
+     "kl_lo": 0.001,
+     "kl_hi": 0.01,
+     "points": 30,
+     "vectors": 22,
+     "median_kl": 0.0042380000000000004,
+     "live_rate": 0.03333333333333333,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.10181034482758614
+     ]
+    },
+    {
+     "kl_lo": 0.01,
+     "kl_hi": 0.1,
+     "points": 123,
+     "vectors": 64,
+     "median_kl": 0.053236,
+     "live_rate": 0.3089430894308943,
+     "ci95_vector_bootstrap": [
+      0.21428571428571427,
+      0.4159663716814159
+     ]
+    },
+    {
+     "kl_lo": 0.1,
+     "kl_hi": 1.0,
+     "points": 62,
+     "vectors": 38,
+     "median_kl": 0.4297045,
+     "live_rate": 0.12903225806451613,
+     "ci95_vector_bootstrap": [
+      0.039338235294117646,
+      0.2164527027027027
+     ]
+    },
+    {
+     "kl_lo": 1.0,
+     "kl_hi": 10.0,
+     "points": 42,
+     "vectors": 23,
+     "median_kl": 1.8748995,
+     "live_rate": 0.09523809523809523,
+     "ci95_vector_bootstrap": [
+      0.021040372670807453,
+      0.1906181217901687
+     ]
+    }
+   ]
+  },
+  "Gemma-3-12B (4-bit)": {
+   "vectors": 90,
+   "points": 270,
+   "bins": [
+    {
+     "kl_lo": 0.01,
+     "kl_hi": 0.1,
+     "points": 13,
+     "vectors": 12,
+     "median_kl": 0.079223,
+     "live_rate": 0.15384615384615385,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.4087499999999996
+     ]
+    },
+    {
+     "kl_lo": 0.1,
+     "kl_hi": 1.0,
+     "points": 211,
+     "vectors": 85,
+     "median_kl": 0.32334,
+     "live_rate": 0.32701421800947866,
+     "ci95_vector_bootstrap": [
+      0.2511732613248099,
+      0.41163101604278074
+     ]
+    },
+    {
+     "kl_lo": 1.0,
+     "kl_hi": 10.0,
+     "points": 44,
+     "vectors": 27,
+     "median_kl": 1.4834425,
+     "live_rate": 0.25,
+     "ci95_vector_bootstrap": [
+      0.10526315789473684,
+      0.4
+     ]
+    }
+   ]
+  },
+  "Gemma-3-27B (4-bit)": {
+   "vectors": 90,
+   "points": 270,
+   "bins": [
+    {
+     "kl_lo": 0.0,
+     "kl_hi": 1e-05,
+     "points": 26,
+     "vectors": 17,
+     "median_kl": 4.5e-06,
+     "live_rate": 0.0,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "kl_lo": 1e-05,
+     "kl_hi": 0.001,
+     "points": 164,
+     "vectors": 78,
+     "median_kl": 0.0002005,
+     "live_rate": 0.06097560975609756,
+     "ci95_vector_bootstrap": [
+      0.024235968263297093,
+      0.10934346567411082
+     ]
+    },
+    {
+     "kl_lo": 0.001,
+     "kl_hi": 0.01,
+     "points": 45,
+     "vectors": 35,
+     "median_kl": 0.002195,
+     "live_rate": 0.13333333333333333,
+     "ci95_vector_bootstrap": [
+      0.045454545454545456,
+      0.24240063233965664
+     ]
+    },
+    {
+     "kl_lo": 0.01,
+     "kl_hi": 0.1,
+     "points": 15,
+     "vectors": 13,
+     "median_kl": 0.045703,
+     "live_rate": 0.0,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "kl_lo": 0.1,
+     "kl_hi": 1.0,
+     "points": 11,
+     "vectors": 11,
+     "median_kl": 0.199007,
+     "live_rate": 0.09090909090909091,
+     "ci95_vector_bootstrap": [
+      0.0,
+      0.3333333333333333
+     ]
+    }
+   ]
+  },
+  "Gemma-3-27B, released recipe (S-1M)": {
+   "vectors": 30,
+   "points": 60,
+   "bins": [
+    {
+     "kl_lo": 1.0,
+     "kl_hi": 10.0,
+     "points": 19,
+     "vectors": 18,
+     "median_kl": 7.386245,
+     "live_rate": 0.7368421052631579,
+     "ci95_vector_bootstrap": [
+      0.5087962962962963,
+      0.9394301470588234
+     ]
+    },
+    {
+     "kl_lo": 10.0,
+     "kl_hi": 1000.0,
+     "points": 31,
+     "vectors": 25,
+     "median_kl": 34.712608,
+     "live_rate": 0.6451612903225806,
+     "ci95_vector_bootstrap": [
+      0.4548051075268817,
+      0.8275862068965517
+     ]
+    }
+   ]
+  }
+ }
+}
