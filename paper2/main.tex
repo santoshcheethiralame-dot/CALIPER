@@ -80,13 +80,17 @@ Appendix~\ref{app:deviations}. Hardware: free T4s, 4-bit for 12B and 27B.}
 
 \subsection{Liveness, and the checks that should catch it}
 \label{sec:liveness}
-\note{C1 and C2. Whether a vector steers at all depends on model and read position: template-tail
-vectors are inert on Qwen and on the KL-calibrated grid, but the released recipe at its
-released strength is live on Gemma-3-27B (Table~\ref{tab:liveness}). No standard health check
-finds the live vectors on every model; raw norm runs below chance in four of five sessions;
-distinctness is a partial signal; logit-lens accessibility is the first check that works on
-three of four sessions, but within one recipe it ranges 0.37--0.82, so it is a screen, not a
-certificate (Table~\ref{tab:health}, Figure~\ref{fig:health}).}
+\note{C2. Whether a vector steers at all depends on model and read position: template-tail
+vectors are inert on Qwen, the KL-calibrated 27B grid stopped below the dose onset, and the
+released recipe at its released strength is live on Gemma-3-27B (Table~\ref{tab:liveness}).
+Present as the failed S-1 prediction, with its 12B reversal under a literal-word steering rule.}
+
+\note{C1. Pooled, some checks look useful: distinctness (0.78, 0.82, 0.73) and logit-lens
+accessibility (0.69, 0.77, 0.62) (Table~\ref{tab:health}, Figure~\ref{fig:health}). Holding recipe
+and concept type fixed, none is consistent (Table~\ref{tab:cells}); the pooled signal comes
+from recipes and concept types that differ in both the check and liveness. Raw norm sits at
+chance once concept type is fixed; the steering rule scores abstract concepts live almost never.
+At the published point no check finds the six dead released vectors (low power).}
 
 \begin{table}[t]
 \centering
@@ -106,6 +110,15 @@ pre-registered before analysis.}}
 \label{tab:health}
 \end{table}
 
+\begin{table}[t]
+\centering
+\small
+\input{tables/tab_checks_cells}
+\caption{\note{Health-check AUCs within one recipe, concrete concepts only (20 vectors per cell;
+read as direction, not as tests). Exploratory, from the internal review.}}
+\label{tab:cells}
+\end{table}
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.6\linewidth]{fig_health_auc}
@@ -115,19 +128,20 @@ pre-registered before analysis.}}
 
 \subsection{The inverted \pyes{} check}
 \label{sec:inverted}
-\note{C3. Where vectors are dead (Qwen), a significant \pyes{} shift predicts a dead vector, not
-a live one (AUC 0.367, 0.353). A direct output-steering path explains part of the shift (P2-M,
-$\rho$ 0.26, 0.29) but not the inversion (0.367 to 0.388 once removed). The inversion is
-framing-specific: dead tail vectors raise introspective \pyes{} by 0.87 at half the residual
-norm but factual-NO \pyes{} by only 0.05.}
+\note{C3. On Qwen a significant \pyes{} shift predicts a dead vector, not a live one (AUC
+0.367, 0.353; concrete concepts only 0.337, 0.329; Fisher-combined $p$ 0.0019, not significant
+per session after Holm). It sits in the concept arm on both models and in the tail arm only on
+Qwen-7B. A direct output-steering path explains part of the shift (P2-M, $\rho$ 0.26, 0.29) but
+not the inversion.}
 
 \subsection{Dose without a unit}
 \label{sec:dose}
-\note{C4. The same fraction of the residual norm gives next-token KL that differs by over 100x
-across families; at the same norm, real vectors move the next token 3--20x less than random
-directions on Gemma-3-4B and about 1{,}000x less on 27B; even a vector's own KL does not put models on one curve
-(Table~\ref{tab:dose}, Figures~\ref{fig:dosefrac}, \ref{fig:dosekl}, \ref{fig:livekl}). The
-released strength sits at about 7 nats, and strength 8 breaks 77\% of generations.}
+\note{C4. At the same norm, real vectors move the next token 3--20x less than random directions
+on Gemma-3-4B and about 1{,}000x less on 27B. The same fraction of the residual norm gives KL
+that differs about 480x across families at 0.25 and about 4x at 1.0. One vector at one strength
+gives 0.0006 to 12 nats depending on the prompt (S-1M at strength 4: factual-NO, introspective,
+story, neutral), so every KL must name its prompt. Even a vector's own KL does not put models on
+one curve (Table~\ref{tab:dose}, Figures~\ref{fig:dosefrac}, \ref{fig:dosekl}, \ref{fig:livekl}).}
 
 \begin{table}[t]
 \centering
@@ -153,35 +167,44 @@ Gemma-3-4B, real and on-manifold vectors against off-manifold ones.}}
 \centering
 \includegraphics[width=0.6\linewidth]{fig_live_kl}
 \caption{\note{Share of real vectors steered against each vector's own next-token KL, by
-model (bins of at least 10 vector-doses). Exploratory.}}
+model (bins of at least 10 vector-doses; intervals resample vectors). Exploratory.}}
 \label{fig:livekl}
 \end{figure}
 
 \subsection{What detection measures at the published operating point}
 \label{sec:operating}
-\note{C5 and C8. At the published operating point content-free vectors reproduce the
-first-token shift (random 0.305 against real 0.417, $p$ 0.33), and a neutral prompt says
-\yes{} 19\% of the time uninjected (S-1M: 0.188 to 0.253). The global yes-bias of
-\citet{hahami2025disturbance} is small there (8\% of the introspective rise on Gemma-3-27B at
-strength 4; at most 5\% on Qwen-7B at half the norm) and carries 41--67\% only at the highest
-doses (Table~\ref{tab:yesbias}, Figure~\ref{fig:yesbias}). Which account is true depends on the
-dose, and the dose has no unit (Section~\ref{sec:dose}).}
+\note{C5. What the first-token readout measures depends on strength and window. At alpha 6
+(Study 3, older window, the filed primary) content-free vectors produce the whole shift (random
+0.305 against real 0.417, $p$ 0.33); at the published alpha 4 real beats random (0.504 against
+0.252, $p$ 0.004), content-free share near half. At the released window the introspective answer
+responds to injection (AUC 0.83) and a matched neutral prompt does not (0.41); on Qwen-7B the
+neutral prompt responds about as much (0.86--0.94). P2-R adds content-free controls at the
+released window.}
+
+\note{C8. Read on log-odds, injection moves confident factual-NO answers more than the
+introspective answer (Gemma-3-27B at strength 4: +14.75 against +5.45, 27/30 concepts), while the
+neutral prompt barely moves (Table~\ref{tab:logodds}, Figure~\ref{fig:logodds}). The
+probability-scale reading in P2-F (``the yes-bias is small at moderate dose'') was an artefact of
+the factual baseline sitting near certainty, and is withdrawn. A global yes-bias and a
+flattening of the answer distribution are not yet separated: P2-R's factual-YES arm decides it.
+The one framing-specific signal so far is at the gentlest Qwen dose (tail vectors at 0.25 of the
+norm).}
 
 \begin{table}[t]
 \centering
-\small
-\input{tables/tab_yesbias}
-\caption{\note{P2-F. Mean \pyes{} change from dose 0, paired by concept: on factual questions
-whose answer is NO, and on the introspective question at the same arm and dose. Ratio is
-factual-NO over introspective.}}
-\label{tab:yesbias}
+\resizebox{\linewidth}{!}{\input{tables/tab_logodds}}
+\caption{\note{P2-F on the log-odds scale: median change from dose 0 per framing, and the paired
+factual-minus-introspective difference with a bootstrap interval of the median. Log-odds are
+recovered exactly from the stored \pyes{} except where it saturated (counted in the analysis).}}
+\label{tab:logodds}
 \end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.55\linewidth]{fig_yesbias}
-\caption{\note{Factual-NO against introspective \pyes{} change; the diagonal is a pure yes-bias.}}
-\label{fig:yesbias}
+\includegraphics[width=0.55\linewidth]{fig_logodds}
+\caption{\note{Factual-NO against introspective change in log-odds of \yes{}, per cell; above
+the diagonal, factual answers move more.}}
+\label{fig:logodds}
 \end{figure}
 
 \subsection{The detection rate is a property of the readout}

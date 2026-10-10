@@ -9,8 +9,9 @@ fig_health_auc      each health check's AUC at telling live from dead vectors, p
                     S-1 Gemma-3-12B (no intervals stored) and logit-lens accessibility (P2-L)
 fig_live_kl         live rate against each real vector's own next-token KL, by model: the curves do
                     not coincide, so not even a vector's own KL is a transferable dose unit
-fig_yesbias         P2-F: the factual-NO P(YES) change against the introspective change at the
-                    same arm and dose; the yes-bias appears only at the highest doses
+fig_logodds         P2-F on the log-odds scale (internal review, 10 Oct): the factual-NO change
+                    against the introspective change per cell; above the diagonal, factual moves more.
+                    Replaces fig_yesbias, whose probability scale hid the baseline difference
 """
 import json
 import os
@@ -139,15 +140,18 @@ def fig_health_auc():
 
 
 def fig_live_kl():
-    d = load("results/p2_live_vs_kl.json")
+    d = load("results/p2_review_analysis.json")["A7 live rate against own KL"]
     colors = SLOT + ["#7a5cc7", "#0b0b0b"]
     marks = MARK + ["v", "*"]
     fig, ax = plt.subplots(figsize=(3.4, 2.6))
     for i, (name, r) in enumerate(d.items()):
-        x = [b["median_kl"] for b in r["bins"]]
-        y = [b["live_rate"] for b in r["bins"]]
-        ax.plot(x, y, color=colors[i], lw=1.4, marker=marks[i], ms=5 if marks[i] != "*" else 8,
-                mec="white", mew=0.8, label=name)
+        bins = [b for b in r["bins"] if b["median_kl"] > 0]   # log axis; zero-KL bins in the table
+        x = np.array([b["median_kl"] for b in bins])
+        y = np.array([b["live_rate"] for b in bins])
+        lo = y - np.array([b["ci95_vector_bootstrap"][0] for b in bins])
+        hi = np.array([b["ci95_vector_bootstrap"][1] for b in bins]) - y
+        ax.errorbar(x, y, yerr=[lo, hi], color=colors[i], lw=1.2, elinewidth=0.8, capsize=0,
+                    marker=marks[i], ms=5 if marks[i] != "*" else 8, mec="white", mew=0.8, label=name)
     ax.set_xscale("log")
     ax.set_ylim(0, 1)
     ax.set_xlabel("the vector's own next-token KL (nats, bin median)")
@@ -157,26 +161,30 @@ def fig_live_kl():
     save(fig, "fig_live_kl")
 
 
-def fig_yesbias():
-    d = load("results/p2f_analysis.json")
-    fig, ax = plt.subplots(figsize=(3.3, 2.9))
-    ax.plot([0, 1], [0, 1], color=INK2, lw=1, ls="--")
-    label_at(ax, 1.0, 0.72, "all yes-bias", dx=0, ha="right")
-    for i, (name, rows) in enumerate(d.items()):
-        x = [r["introspective_change"] for r in rows]
-        y = [r["factual_no_change"] for r in rows]
-        model, arm = name.split(" / ")
+def fig_logodds():
+    d = load("results/p2_review_analysis.json")["A1 C8 on log-odds"]
+    series = {}
+    for k, v in d.items():
+        name = k.split(",")[0].replace(" released", ", released vectors")
+        series.setdefault(name, []).append((k.split(", ")[-1], v["logodds_change_median"]))
+    fig, ax = plt.subplots(figsize=(3.3, 3.0))
+    ax.plot([-6, 28], [-6, 28], color=INK2, lw=1, ls="--")
+    label_at(ax, 27, 21, "factual moves less", dx=0, ha="right")
+    label_at(ax, -5, 26.5, "factual moves more", dx=0)
+    for i, (name, pts) in enumerate(series.items()):
+        x = [c["introspective"] for _, c in pts]
+        y = [c["factual_no"] for _, c in pts]
         ax.plot(x, y, color=SLOT[i], lw=1.2, marker=MARK[i], ms=5, mec="white", mew=1,
-                label=f"{model.split(' (')[0]}, {arm} vectors")
-        left = x[-1] < 0.35  # keep the Gemma label clear of Qwen's random arm
-        label_at(ax, x[-1], y[-1], rows[-1]["dose"], dx=-5 if left else 5, ha="right" if left else "left")
-    ax.set_xlim(-0.02, 1)
-    ax.set_ylim(-0.02, 1)
-    ax.set_xlabel("introspective P(YES) change")
-    ax.set_ylabel("factual-NO P(YES) change")
-    ax.set_title("The yes-bias appears only at the highest doses", loc="left")
-    ax.legend(loc="upper left", fontsize=7)
-    save(fig, "fig_yesbias")
+                label=name.replace("Qwen2.5-7B ", "Qwen2.5-7B, ") + ("" if "released" in name else " vectors"))
+        if "tail" in name:  # the one cell below the diagonal: the gentlest dose
+            label_at(ax, x[0], y[0], pts[0][0], dx=5, dy=-4)
+    ax.set_xlim(-6, 28)
+    ax.set_ylim(-6, 28)
+    ax.set_xlabel("introspective change in log-odds of YES")
+    ax.set_ylabel("factual-NO change in log-odds of YES")
+    ax.set_title("Injection moves factual answers more", loc="left")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2, fontsize=7)
+    save(fig, "fig_logodds")
 
 
 def main():
@@ -184,7 +192,7 @@ def main():
     fig_dose_fraction(d)
     fig_dose_kl(d)
     fig_health_auc()
-    fig_yesbias()
+    fig_logodds()
     fig_live_kl()
     print("wrote", sorted(os.listdir(OUT)))
 

@@ -6,7 +6,8 @@ tab_liveness   live vectors per recipe at each session's gate, and the released 
 tab_health     each health check's AUC at telling live from dead vectors (S-2, S-1, P2-L)
 tab_dose       next-token KL at the same fraction of the residual norm, and real against random
                KL on the KL-calibrated grid (P2-D)
-tab_yesbias    P2-F: factual-NO against introspective P(YES) change at the same arm and dose
+tab_logodds    P2-F on log-odds: introspective, factual-NO and neutral changes per cell
+tab_checks_cells  health-check AUCs within recipe, concrete concepts only (20 vectors per cell)
 """
 import json
 import os
@@ -89,21 +90,38 @@ def tab_dose():
           " \\\\\n\\midrule\nconcept KL / random KL & " + ratio + " \\\\\n\\bottomrule\n\\end{tabular}\n")
 
 
-def tab_yesbias():
-    d = load("results/p2f_analysis.json")
+def tab_logodds():
+    d = load("results/p2_review_analysis.json")["A1 C8 on log-odds"]
     lines = []
-    for name, rs in d.items():
-        model, arm = name.split(" / ")
-        for r in rs:
-            lines.append(f"{model.split(' (')[0]} & {arm} & {r['dose']} & {r['median_kl']:.3g} & "
-                         f"{r['introspective_change']:+.3f} & {r['factual_no_change']:+.3f} & "
-                         f"{r['ratio']:.3f} \\\\")
-    write("tab_yesbias", "\\begin{tabular}{lllcccc}\n\\toprule\nmodel & vectors & dose & median KL & "
-          "introspective & factual-NO & ratio \\\\\n\\midrule\n" + "\n".join(lines) +
-          "\n\\bottomrule\n\\end{tabular}\n")
+    for name, v in d.items():
+        c, f = v["logodds_change_median"], v["factual_minus_introspective"]
+        cell = name.replace("Gemma-3-27B released, ", "Gemma-3-27B released & ").replace(
+            "Qwen2.5-7B ", "Qwen2.5-7B & ").replace(", ", " & ", 1) if "Qwen" in name else \
+            name.replace("Gemma-3-27B released, ", "Gemma-3-27B & released & ")
+        lines.append(f"{cell} & {c['introspective']:+.2f} & {c['factual_no']:+.2f} & "
+                     f"{c.get('neutral', float('nan')):+.2f} & {f['median']:+.2f} [{f['ci95'][0]:+.2f}, {f['ci95'][1]:+.2f}] & "
+                     f"{f['factual_larger']}/{v['concepts']} \\\\")
+    write("tab_logodds", "\\begin{tabular}{lllccccc}\n\\toprule\nmodel & vectors & dose & introspective & "
+          "factual-NO & neutral & factual minus introspective & factual larger \\\\\n\\midrule\n" +
+          "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
+
+
+def tab_checks_cells():
+    d = load("results/p2_review_analysis.json")["A3 C1 by concept type and recipe"]
+    checks = ["norm", "distinctness", "logit steering", "logit-lens accessibility"]
+    lines = []
+    for sess, v in d.items():
+        if "within_recipe_concrete_only" not in v:
+            continue
+        for arm, a in v["within_recipe_concrete_only"].items():
+            live = next(iter(a.values()), {}).get("live", "-") if a else "-"
+            cells = [f"{a[c]['auc']:.2f}" if c in a else "---" for c in checks]
+            lines.append(f"{sess.split(' ', 1)[1]} & {arm} & {live}/20 & " + " & ".join(cells) + " \\\\")
+    write("tab_checks_cells", "\\begin{tabular}{llc" + "c" * len(checks) + "}\n\\toprule\nmodel & recipe & live & " +
+          " & ".join(checks) + " \\\\\n\\midrule\n" + "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
 
 
 if __name__ == "__main__":
-    for f in (tab_liveness, tab_health, tab_dose, tab_yesbias):
+    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells):
         f()
     print("wrote", sorted(os.listdir(OUT)))
