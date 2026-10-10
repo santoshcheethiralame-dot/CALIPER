@@ -489,7 +489,8 @@ ground-truth-free check: it separates the as-filed converged-wrong fits from pas
 AUC 0.84 to 1.0. What remains after the correction, 0 to 6 fits per arm, differs from
 $\mathbf{w}_j$ in poorly sampled directions: practically rather than structurally
 unidentifiable \citep{raue2009identifiability}, since noiseless responses could in principle
-resolve them.}
+resolve them. A regression that is given the nonlinearity recovers every converged-wrong
+unit that has more invertible tokens than unknowns, 18 of 18 (Appendix~\ref{app:baselines}).}
 
 \draft{The low-variance share we reported first, the fitted direction's share in the eigen-directions
 carrying the bottom 1\% of stimulus variance, largely measured the same thing, since
@@ -1081,9 +1082,11 @@ spike-triggered average & 0.287 & 0.003 & 0/30 \\
 decorrelated spike-triggered average & 0.528 & 0.013 & 1/30 \\
 spike-triggered covariance (top eigenvector) & 0.043 & 0.001 & 0/30 \\
 fitted bottleneck (this paper) & 0.995 & 0.575 & 26/30 \\
+\draft{known-link regression (GELU inverted where $y>0$)} & \draft{1.000} & \draft{0.000} & \draft{24/30} \\
 \bottomrule
 \end{tabular}
-\caption{Closed-form baselines against the fitted estimator on the same units.}
+\caption{Closed-form baselines against the fitted estimator on the same units. \draft{The
+known-link row assumes the nonlinearity is known, which the other estimators do not.}}
 \label{tab:classical}
 \end{table}
 
@@ -1092,5 +1095,20 @@ Their median alignment with $\mathbf{w}_j$ is 0.024 (99th percentile 0.091; the 
 expectation in 768 dimensions is 0.036). Through a binned link, their $R^2$ reaches at most
 0.044 at the 99th percentile, against a median of 0.92 for the true direction under the same
 link. A fit with high held-out $R^2$ is therefore never a chance direction.
+
+\draft{\paragraph{A known-link baseline.} If the nonlinearity is known, the problem has a closed
+form. Where $y>0$, GELU is one-to-one, so inverting it gives $z = \mathbf{w}^\top\mathbf{s}+b$
+exactly, and least squares of $z$ on $[\mathbf{s}, 1]$ estimates $\mathbf{w}$ with no
+optimisation. The regression has 769 unknowns, so it needs more than 769 tokens with $y>0$. On
+the 30 units above it passes the 24 that have them, at a median alignment of 0.9999, and fails
+the 6 that do not. We repeated it on the fit split of four re-fit arms, re-collecting each arm's
+stimulus exactly. Every unit with enough tokens is recovered: 41, 44 and 41 of 100 on the three
+GPT-2 re-fits (minimum alignment 0.989) and 53 of 100 on GPT-Neo layer 10 (minimum 0.99999),
+where the fitted estimator passes 40, 41, 40 and 40 of the same units. Of the converged-wrong
+fits, 18 belong to units with enough tokens (1, 3, 1 and 13), and the known-link regression
+recovers all 18. For those units the reference is identifiable from the data and the fit
+failed to reach it: practical, not structural, non-identifiability. The comparison favours the
+regression, which is given the link; our estimator learns it, as a practitioner facing an
+unknown unit must.}
 
 \end{document}
