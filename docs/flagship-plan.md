@@ -375,3 +375,52 @@ the forced-choice / logit check at predicting a wrong self-report, pooled with r
 | Flagship (F-1..F-13) | F-0, F-1, F-3 small, F-4/F-7 at 270M-1B, F-6, F-8, F-13 | ~90 |
 | Paper 3 (T-2..T-4, S-5..S-10, S-14) | T-0..T-2, S-10 at 1B | ~50 |
 | **total** | | **~170 of ~1,200 available** |
+
+---
+
+## 13. Status after 10 October 2026
+
+**F-1 is scored, and Gate F-A cannot be read as written.** The filed criterion passes (targeted
+repairs 26/26 converged-wrong units; targeted beats natural, p 6e-5). But random augmentation
+repairs 25/26 as well, and Addendum 1 shows 19 of the 26 were wrong only along the layer-norm null
+direction 1/gamma. Real layer-norm outputs never move along it; synthetic samples do, so any of
+them pins it. On the 7 units wrong on the identifiable label, targeted repairs 7, random 6,
+natural 5 (p 0.25). Natural augmentation also flipped 6/40 passing units, which is re-fit variance
+(a re-fit alone flips about one verdict in five), so repair counts against the base fit carry
+noise. **Reading for F-A:** the structural part of the remedy (pin the null direction) works
+trivially and needs no targeting; the practical part is untested at this sample size. F-A is
+judged on F-1b, not F-1.
+
+**F-1b (to file).** Units wrong on the identifiable label, enough of them (aim >= 30; GPT-Neo
+layers 0-9, where gains are near zero, are not the place, because their failures are the null
+direction; use the identifiable label to select). Arms: targeted, random, natural matched in token
+count, and a **re-fit-only arm** with no augmentation as the noise baseline. Primary on the
+identifiable label.
+
+**Label policy for every flagship substrate.** Where a LayerNorm feeds the target (GPT-2 and
+GPT-Neo MLPs, GPT-2's ln_f before the unembedding, OPT), the primary failure label removes 1/gamma
+from fit and reference; the Euclidean label is reported beside it. RMSNorm substrates (Qwen, Gemma,
+Llama) have no such direction. The near-zero gains are read from the weights before any run.
+
+**Substrate budgets from the pilots** (`results/flagship_pilot1/`, `flagship_pilot2/`; discarded):
+
+| substrate | model | budget in the 20-80% band | note |
+|---|---|---|---|
+| F-4 gated units | Qwen2.5-0.5B, layer 12 | 8k (7/16 pass) or 16k (10/16) | the direction-saving bug fixed 10 Oct; restart agreement on k=2 planes is low (0.42-0.52) |
+| F-6 unembedding | GPT-2 | 32k on the identifiable label (5/16 pass) | on the Euclidean label every fit fails along ln_f's 1/gamma (min gain 0.0044) |
+| F-6 unembedding | Pythia-410m | none: 15-16/16 pass even at 2k | a linear link with more tokens than dimensions is exact; a positive control, not an arm |
+| F-3 ReLU neurons | OPT-1.3b, layer 12 | open: round 3 at true 64k / 120k | rounds 1-2 capped at ~34k tokens by the corpus sample (fixed 10 Oct) |
+
+**Gate F-B, as it stands:** two substrates in band (F-4 Qwen-0.5B, F-6 GPT-2 on the identifiable
+label), one control (F-6 Pythia), one pending (F-3). F-B needs three.
+
+**Framing.** The identifiability story now has two parts that the flagship should keep apart: a
+structural part (normalisation null directions, read from the weights, fixable by projection) and
+a practical part (poorly sampled directions; a regression told the link recovers every unit with
+enough invertible tokens, Paper 1 Appendix D). Checks that see each: the fit's share on 1/gamma for
+the first, the low-variance share with 1/gamma removed for the second.
+
+**Reproducibility notes that affect every pre-6 Oct arm.** The cascade route's head was unseeded
+before babd0f5 (6 Oct): those runs' cascade fits cannot be reproduced, and B-14r shows the
+cascade draw alone flips about one verdict in five. Budgets above 32k tokens were silently
+capped at ~34k before 10 Oct; no filed run used more than 32k.
