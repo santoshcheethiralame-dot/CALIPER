@@ -124,8 +124,8 @@ norm but factual-NO \pyes{} by only 0.05.}
 \subsection{Dose without a unit}
 \label{sec:dose}
 \note{C4. The same fraction of the residual norm gives next-token KL that differs by over 100x
-across families; random directions undershoot real vectors' KL 3--20x on Gemma-3-4B and about
-1{,}000x on 27B; even a vector's own KL does not put models on one curve
+across families; at the same norm, real vectors move the next token 3--20x less than random
+directions on Gemma-3-4B and about 1{,}000x less on 27B; even a vector's own KL does not put models on one curve
 (Table~\ref{tab:dose}, Figures~\ref{fig:dosefrac}, \ref{fig:dosekl}, \ref{fig:livekl}). The
 released strength sits at about 7 nats, and strength 8 breaks 77\% of generations.}
 
