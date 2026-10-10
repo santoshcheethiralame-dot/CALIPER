@@ -1,0 +1,106 @@
+{
+ "pilot_f3_opt13b_l12_32k": {
+  "units": 16,
+  "complete": true,
+  "pass": 2,
+  "converged_wrong": 0,
+  "median_alignment": 0.486,
+  "median_r2": 0.5787575,
+  "median_restart_agreement": 0.8222499999999999
+ },
+ "pilot_f3_opt13b_l12_8k": {
+  "units": 16,
+  "complete": true,
+  "pass": 0,
+  "converged_wrong": 0,
+  "median_alignment": 0.28415,
+  "median_r2": 0.46113499999999996,
+  "median_restart_agreement": 0.501
+ },
+ "pilot_f4_qwen05b_l12_32k": {
+  "units": 2,
+  "complete": false,
+  "pass": 2,
+  "converged_wrong": 0,
+  "median_alignment": 0.9988,
+  "median_r2": 0.99729,
+  "median_restart_agreement": 0.6283
+ },
+ "pilot_f4_qwen05b_l12_8k": {
+  "units": 2,
+  "complete": false,
+  "pass": 0,
+  "converged_wrong": 0,
+  "median_alignment": 0.50425,
+  "median_r2": 0.6849615,
+  "median_restart_agreement": 0.43884999999999996
+ },
+ "pilot_f6_gpt2_32k": {
+  "units": 16,
+  "complete": true,
+  "pass": 0,
+  "converged_wrong": 16,
+  "median_alignment": 0.15375,
+  "median_r2": 0.999997,
+  "median_restart_agreement": 0.988,
+  "null_removed": {
+   "min_abs_gamma": 0.004427497740834951,
+   "median_abs_gamma": 1.2505812644958496,
+   "pass": 5,
+   "median_alignment": 0.9415217966621777,
+   "median_fit_share_on_null": 0.9999455071382903,
+   "median_restart_agreement": 0.22295240823108384
+  }
+ },
+ "pilot_f6_gpt2_8k": {
+  "units": 16,
+  "complete": true,
+  "pass": 0,
+  "converged_wrong": 16,
+  "median_alignment": 0.15295,
+  "median_r2": 0.9997985,
+  "median_restart_agreement": 0.9897,
+  "null_removed": {
+   "min_abs_gamma": 0.004427497740834951,
+   "median_abs_gamma": 1.2505812644958496,
+   "pass": 0,
+   "median_alignment": 0.5623114618026294,
+   "median_fit_share_on_null": 0.9998385431351446,
+   "median_restart_agreement": 0.21430529856649444
+  }
+ },
+ "pilot_f6_pythia410m_32k": {
+  "units": 16,
+  "complete": true,
+  "pass": 16,
+  "converged_wrong": 0,
+  "median_alignment": 0.99315,
+  "median_r2": 0.999989,
+  "median_restart_agreement": 0.9968,
+  "null_removed": {
+   "min_abs_gamma": 0.73974609375,
+   "median_abs_gamma": 3.544921875,
+   "pass": 16,
+   "median_alignment": 0.9999969838332197,
+   "median_fit_share_on_null": 0.0055017984938368816,
+   "median_restart_agreement": 0.999981556502608
+  }
+ },
+ "pilot_f6_pythia410m_8k": {
+  "units": 16,
+  "complete": true,
+  "pass": 15,
+  "converged_wrong": 1,
+  "median_alignment": 0.98935,
+  "median_r2": 0.999986,
+  "median_restart_agreement": 0.9855,
+  "null_removed": {
+   "min_abs_gamma": 0.73974609375,
+   "median_abs_gamma": 3.544921875,
+   "pass": 16,
+   "median_alignment": 0.999983582747511,
+   "median_fit_share_on_null": 0.01012997191381142,
+   "median_restart_agreement": 0.9884338841812774
+  }
+ }
+}

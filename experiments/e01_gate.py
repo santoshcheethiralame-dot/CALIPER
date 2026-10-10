@@ -268,7 +268,7 @@ for start in range(0, len(todo), a.batch):
         if dirs is not None:
             # Written before the row, so a recorded row always has its directions.
             np.savez_compressed(
-                dirs / f"n{n}.npz", w=p.weights[:, i].astype(np.float32),
+                dirs / f"n{n}.npz", w=p.weights[..., i].astype(np.float32),
                 direct=prim[j].subspace.astype(np.float32),
                 cascade=c.subspace.astype(np.float32),
                 k2=d2[j].subspace.astype(np.float32),
