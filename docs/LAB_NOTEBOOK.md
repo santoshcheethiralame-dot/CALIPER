@@ -3851,6 +3851,11 @@ run**: there is no alpha\*, and the random arm was never collected. A-1 is not
 closed. See the revised plan in section 7.1.
 
 ### C21 — L2-normalised protocol, real vectors (2026-09-03) — **INCOMPLETE**
+> **Correction, 10 Oct 2026 (internal review of Paper 2).** The first sentence below came from a
+> reading of the paper. The released code, read on 9 Oct (§6b), applies no normalisation in the
+> core experiment, and the paper does not state that it does. So the released strengths are raw
+> strengths, which is what S-1M and P2-R use. The sentence is kept as written; this note governs.
+
 Macar et al. L2-normalise concept vectors before scaling by α; we did not. Our
 vectors have median norm 5002, so **our α is not their α** and the "10.0% vs
 10.8%" match in C16 was obtained by sweeping, not by matching protocol. This run
