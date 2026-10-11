@@ -49,3 +49,21 @@ above 0.**
 ## Not done
 
 Budget, units and label fixed now; no second budget if fit A falls outside the band.
+
+## Amendment 1 (11 October 2026, before any F-6 row has been read)
+
+**Why.** The run sheet budgeted 4-6 GPU-hours for the session, but the pilot had already measured
+425 s per GPT-2 unembedding row at 32k tokens (`results/flagship_pilot1/pilot_f6_gpt2_32k_summary.json`),
+so the two 100-row fits need about 24 GPU-hours, beyond Kaggle's 12-hour session. The first
+attempt (11 Oct) reached 32 of 100 rows of fit A after 3.7 hours and was stopped before any output
+was retrieved; no F-6 row has been read.
+
+**What changes.** 50 rows per fit instead of 100: the first 50 of the filed 100-row draw
+(`--neurons 50 --neuron-pool 100`, same seed), identical in fits A and B. Fits A and B run in
+parallel on the two T4s, with `--batch 10` so that rows are saved every 10, and a deadline that
+stops them cleanly before the session limit; rows finished by then are scored, and the count is
+reported. Budget, label, endpoints, prediction and the band are unchanged.
+
+**Power.** On the pilot's 32k cell about two thirds of rows fail on the identifiable label, so 50
+rows give roughly 30 failures and 15-20 passes for the primary AUC difference. If fewer than 10
+identifiable failures or 10 passes are in fit A, the primary is reported as underpowered.
