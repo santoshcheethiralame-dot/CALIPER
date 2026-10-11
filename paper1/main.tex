@@ -500,6 +500,25 @@ deviation is a half to two-thirds as large, so the fit has few informative token
 converged-wrong units fire about as often as passing units (7 to 17\%) and have the same
 response spread; what separates them is geometry, not data quantity (exploratory).}
 
+\draft{\paragraph{The hard case without either check.} The converged-wrong class is defined by
+held-out $R^2$, one of the two checks it is used to compare, and membership changes between fits
+of the same unit (Section~\ref{sec:budget}). We therefore also define the hard case from the
+ground truth and the stimulus alone: on the identifiable label, a failing fit is data-limited when
+at least half of its error lies in the directions carrying the bottom 1\% of stimulus variance.
+Pooled over the nine arms with saved directions (1{,}220 fits of 820 units), 59 of 147 failures
+are data-limited. They include 24 of the 25 converged-wrong fits, but 35 of them fit below
+$R^2 = 0.99$. Against passing fits, held-out $R^2$ ranks data-limited failures at AUC 0.884 and
+restart agreement at 0.740, a difference of $-0.144$ (95\% CI $[-0.227, -0.067]$, from a
+bootstrap that resamples units, so that every fit of one unit moves together); with cut-offs of
+0.3 and 0.7 it is $-0.147$ and $-0.138$, both intervals below zero. Per arm the difference is
+negative in all seven arms where it can be computed, with an interval below zero in two (the
+primary's replicate, $-0.174$, and GPT-Neo layer 10, $-0.119$). The definition is independent of
+the checks but not of the mechanism: a fit can predict almost perfectly only if its error lies
+where the stimulus barely varies, so held-out $R^2$ is expected to miss exactly the data-limited
+fits that also fit well. Membership is again a property of the fit: of the 100 GPT-2 units
+fitted four times, 10 are data-limited in at least one fit and none in all four (exploratory;
+\texttt{results/hard\_case.json}).}
+
 \subsection{Why converged-wrong fits escape: identifiability (exploratory)}
 \label{sec:identifiability}
 The reference standard of Section~\ref{sec:substrate} is exact in weight space, but a
@@ -580,12 +599,18 @@ direction. Since $\mathbf{u}$ is the lowest-variance direction of all, on the pr
 label the two measure much the same thing: restricted to units with held-out $R^2 > 0.99$ and
 pooled over the eight arms with saved directions, the low-variance share separates
 converged-wrong fits from passes at AUC 0.957 and the null share at 0.966, against 0.687 for
-held-out $R^2$ and 0.686 for restart agreement. Once $\mathbf{u}$ is removed, 21 converged-wrong
-fits remain. The low-variance share recomputed without $\mathbf{u}$ separates them at 0.969,
-against 0.846 for the null share, 0.835 for held-out $R^2$ and 0.775 for restart agreement, and
-the share as first defined scores 0.953. The null share catches the structural part and the
-low-variance share the practical part; the plain share covers both (exploratory, 21 fits
-pooled across arms). A pre-registered replication on 100 new units confirmed the share on the
+held-out $R^2$ and 0.686 for restart agreement. Once $\mathbf{u}$ is removed, 25 converged-wrong
+fits remain across the nine arms with saved directions. The low-variance share recomputed
+without $\mathbf{u}$ separates them from passes at 0.965 (95\% CI $[0.946, 0.985]$), against 0.793
+($[0.679, 0.906]$) for the null share, 0.848 ($[0.755, 0.922]$) for held-out $R^2$ and 0.776
+($[0.695, 0.846]$) for restart agreement; the intervals resample units, so that the three GPT-2
+re-fits and the two GPT-Neo replications, which share their units, do not count as independent
+evidence. The null share catches the structural part and the low-variance share the practical
+part. Both are partly coupled to the label: the null share is a factor of the Euclidean cosine,
+and a fit with held-out $R^2 > 0.99$ can differ from $\mathbf{w}_j$ only where the stimulus barely
+varies, which is what the low-variance share measures. The 0.965 is hypothesis-generating: 25
+fits, a cut-off chosen on these arms, and no prospective test of the form with $\mathbf{u}$
+removed. A pre-registered replication on 100 new units confirmed the share on the
 converged-wrong fits (0.929 against 0.711 for held-out $R^2$, difference 0.218, bootstrap 95\%
 CI $[0.099, 0.340]$), although without the restriction that comparison handicaps held-out $R^2$;
 over all failures it scores 0.880 against 0.839. A fixed 1\% cut-off is fragile in models with

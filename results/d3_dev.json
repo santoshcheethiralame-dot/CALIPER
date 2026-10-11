@@ -1,0 +1,66 @@
+{
+ "dev": true,
+ "units": 100,
+ "by_budget": {
+  "8000": {
+   "identifiable": {
+    "failures": 12,
+    "converged_wrong": 1,
+    "under_fitted": 11,
+    "delta": -0.17518939393939392,
+    "delta_ci95": [
+     -0.3220788043478261,
+     -0.0572860054347826
+    ]
+   },
+   "as filed": {
+    "failures": 18,
+    "converged_wrong": 6,
+    "under_fitted": 12,
+    "delta": -0.16937669376693776,
+    "delta_ci95": [
+     -0.3015599803772998,
+     -0.050792682926829355
+    ]
+   }
+  },
+  "16000": {
+   "identifiable": {
+    "failures": 14,
+    "converged_wrong": 2,
+    "under_fitted": 12,
+    "delta": -0.15905315614617943,
+    "delta_ci95": [
+     -0.28977840909090913,
+     -0.04235880398671099
+    ]
+   },
+   "as filed": {
+    "failures": 20,
+    "converged_wrong": 7,
+    "under_fitted": 13,
+    "delta": -0.08406249999999993,
+    "delta_ci95": [
+     -0.20392176789414948,
+     0.027981444494555766
+    ]
+   }
+  }
+ },
+ "change 8k to 16k, identifiable": {
+  "delta_16k_minus_8k": 0.016136237793214492,
+  "ci95_paired": [
+   -0.16947586752590682,
+   0.2205420011169526
+  ],
+  "reading": "no change detected"
+ },
+ "change 8k to 16k, as filed": {
+  "delta_16k_minus_8k": 0.08531419376693783,
+  "ci95_paired": [
+   -0.09226298948664755,
+   0.26515314109677246
+  ],
+  "reading": "no change detected"
+ }
+}
