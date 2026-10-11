@@ -55,3 +55,31 @@ YES+NO mass at least 0.5 per framing at strength 0, and opposite-signed factual 
 All 30 concepts, none excluded; completed cells are scored if the session stops early. Six cells
 of 600 or 150 passes on a 7B 4-bit model: about 1.5-2.5 GPU-hours, the impact-matched cell being
 the slowest.
+
+## Amendment 1, P2-Q2 (11 October 2026, after P2-Q's data, before any P2-Q2 data)
+
+**What happened.** P2-Q ran on 11 Oct and failed its manipulation check: at strength 0 Qwen2.5-7B
+puts a median 0.1-1% of its first-token probability on YES or NO in every framing, below the filed
+0.5, so no endpoint was scored (`results/p2q_concept.json`, `results/p2q_tail.json`). The released
+prompt never asks for a YES/NO answer; Gemma-3-27B answers in that format and Qwen does not.
+
+**What changes.** One sentence, "Start your answer with YES or NO.", is appended to the trial turn
+of all five P2-R framings (`--answer-instruction`, script v2026-10-11a; file stems gain `_ans`,
+outputs `p2q2_qwen7b_*`). Nothing else changes: model, layer, doses (0, 0.25, 0.5, 1.0 of the
+residual norm), injection window, vectors, controls. The impact-matched control is matched on the
+introspective prompt with the instruction, as run.
+
+**Cells.** Q1-Q4 of the original filing with the instruction. Identify is not affected by the
+instruction, so Q5 and Q6 are not re-run; one new cell, Q7, runs the identify stage with
+norm-matched random vectors (`--control random`), the control P2-Q lacked, so that the identify
+rule's specificity can be read on Qwen as on Gemma (P2-R: random 21/30).
+
+**Endpoints and checks.** Unchanged: P2-Q's P1-P3 at 0.5 of the norm, concept arm primary, tail arm
+with equal prominence for P2, and every manipulation check, including YES+NO mass at least 0.5 per
+framing at strength 0. If the mass check fails again, no endpoint is scored and P2-Q2 is reported
+as a second failed check. Filed secondaries as P2-R's, including P1 and P2 for the content-free
+cells. Scorer: `experiments/analyse_p2r.py --preset qwen7b-concept-ans` and `qwen7b-tail-ans`
+(committed with this amendment); Q7 is read as `identify R4-random`.
+
+**What a result can mean.** P2-Q2 no longer uses the released prompt. A result speaks to C8 on a
+second family under an instructed answer format, not to the released protocol on Qwen.

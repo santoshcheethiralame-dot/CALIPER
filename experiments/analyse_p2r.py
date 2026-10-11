@@ -35,6 +35,15 @@ PRESETS = {
     "qwen7b-tail": ({"R1": "p2q_qwen7b_tail_forced_p2r_fromtrial", **QWEN,
                      "R4": "p2q_qwen7b_tail_identify_fromtrial"}, (0.25, 0.5, 1.0)),
 }
+# P2-Q2 (P2-Q Amendment 1): the same cells with an answer instruction on every trial turn (_ans).
+# Identify is unchanged by the instruction, so only its random control is new.
+QWEN_ANS = {"R2": "p2q2_qwen7b_random_forced_random_p2r_ans_fromtrial",
+            "R3": "p2q2_qwen7b_impact_forced_random-impact_p2r_ans_fromtrial",
+            "R4-random": "p2q2_qwen7b_random_identify_random_fromtrial"}
+PRESETS.update({
+    "qwen7b-concept-ans": ({"R1": "p2q2_qwen7b_concept_forced_p2r_ans_fromtrial", **QWEN_ANS}, (0.25, 0.5, 1.0)),
+    "qwen7b-tail-ans": ({"R1": "p2q2_qwen7b_tail_forced_p2r_ans_fromtrial", **QWEN_ANS}, (0.25, 0.5, 1.0)),
+})
 NB = 2000
 
 
@@ -160,6 +169,7 @@ def main():
     if fr:
         cells = {k: (None if v is None else [{**r, "alpha": x} for r, x in zip(v, relabel(v, fr))])
                  for k, v in cells.items()}
+    cells.setdefault("R4", None)
     cells.setdefault("R4-random", None)
     rep = {"preset": a.preset, "cells_found": {k: (len(v) if v else 0) for k, v in cells.items()},
            "checks": checks(cells)}

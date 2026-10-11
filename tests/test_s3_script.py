@@ -200,6 +200,20 @@ def test_p2r_framings_store_logits(s3, monkeypatch, tmp_path):
     assert all(x["kl"] == 0.0 for x in r if x["alpha"] == 0)
 
 
+def test_answer_instruction_appends_to_every_trial_turn(s3, monkeypatch, tmp_path):
+    text = "Start your answer with YES or NO."
+    for k, t in s3.P2R_FRAMINGS.items():
+        p = s3.fill(s3.with_instruction(t, text), n=3, q_no="Q?", q_yes="Q?", q_contested="Q?")
+        assert p["messages"][-1]["content"].endswith(" " + text)
+        assert p["messages"][0] == t["messages"][0]
+        assert not t["messages"][-1]["content"].endswith(text)        # the released template is untouched
+    assert s3.with_instruction(s3.P2R_FRAMINGS["factual_no"], None) is s3.P2R_FRAMINGS["factual_no"]
+    run(s3, monkeypatch, tmp_path, "--stage", "forced", "--alphas", "0", "2", "--framing-set", "p2r",
+        "--answer-instruction", text, "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_forced_p2r_ans_fromtrial"))
+    assert len(r) == 5 * 2 * 3
+
+
 def test_released_prompt_injects_from_the_trial_turn(s3, monkeypatch):
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained(SNAP[0])
@@ -322,3 +336,10 @@ def test_identify_with_alpha_frac(s3, monkeypatch, tmp_path):
         "--inject-from", "trial", "--no-health")
     r = rows(path(tmp_path, "_identify_fromtrial"))
     assert len(r) == 2 * 3 and len({x["alpha"] for x in r}) == 2
+
+
+def test_identify_with_random_control(s3, monkeypatch, tmp_path):
+    run(s3, monkeypatch, tmp_path, "--stage", "identify", "--control", "random", "--alpha-frac", "0", "0.5",
+        "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_identify_random_fromtrial"))
+    assert len(r) == 2 * 3 and {x["control"] for x in r} == {"random"}

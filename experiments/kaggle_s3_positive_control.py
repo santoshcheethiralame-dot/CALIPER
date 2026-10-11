@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-10a"
+VERSION = "2026-10-11a"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -310,6 +310,15 @@ P2R_FRAMINGS = {
 }
 RELEASED_IDENTIFY = released(RELEASED_SETUP_FORCED, "Trial {n}: What injected thought do you notice?",
                              suffix="I notice an injected thought about")
+
+
+def with_instruction(template, text):
+    """A released-form prompt with `text` appended to its last (trial) turn; unchanged if None."""
+    if not text:
+        return template
+    m = [dict(x) for x in template["messages"]]
+    m[-1]["content"] = f"{m[-1]['content']} {text}"
+    return {**template, "messages": m}
 
 
 def fill(template, **kw):
@@ -1395,6 +1404,8 @@ def run_stem(a):
         tag += f"_{a.vector_recipe}"
     if getattr(a, "framing_set", "default") != "default":
         tag += {"factual-no": "_factualno", "p2r": "_p2r"}[a.framing_set]
+    if getattr(a, "answer_instruction", None):
+        tag += "_ans"
     if getattr(a, "inject_from", "all") != "all":
         tag += f"_from{a.inject_from}"
     if a.quant != "4bit":
@@ -1502,6 +1513,10 @@ def main():
     ap.add_argument("--framing-set", choices=["default", "factual-no", "p2r"], default="default",
                     help="'factual-no' replaces the forced-choice framings with 30 questions "
                          "whose answer is NO (P2-F), in the same 'Trial {n}' frame")
+    ap.add_argument("--answer-instruction", default=None,
+                    help="p2r framings only: append this sentence to every trial turn, so a model "
+                         "that does not answer the released prompt with YES or NO is told to (P2-Q2). "
+                         "Changes the prompt, so the file stem gains _ans")
     ap.add_argument("--n-plants", type=int, default=8,
                     help="planted random directions for --stage plant")
     ap.add_argument("--n-prompts", type=int, default=16,
@@ -1752,7 +1767,7 @@ def main():
         if a.framing_set == "factual-no":
             framings = {"factual_no": FACTUAL_NO_TEMPLATE}
         elif a.framing_set == "p2r":
-            framings = dict(P2R_FRAMINGS)
+            framings = {k: with_instruction(v, a.answer_instruction) for k, v in P2R_FRAMINGS.items()}
     elif a.stage == "identify":
         framings = {"released_identify": RELEASED_IDENTIFY}
     elif a.stage == "steer":

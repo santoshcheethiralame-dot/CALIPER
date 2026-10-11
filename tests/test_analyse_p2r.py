@@ -70,3 +70,19 @@ def test_qwen_preset_maps_raw_strengths(tmp_path):
     rep = json.load(open(out))
     assert set(rep["P1"]) == {"strength 0.25", "strength 0.5", "strength 1"}
     assert rep["P1"]["strength 0.5"]["reading"] == "flattening"
+
+
+def test_qwen_answer_instruction_preset(tmp_path):
+    shrink = lambda s: min(0.08 * s, 0.9)
+    rng = np.random.default_rng(3)
+    raw = {0.0: 0.0, 1.0: 20.9, 2.0: 41.8, 4.0: 83.5}
+    real = [{**r, "alpha": raw[r["alpha"]]} for r in rows(1.0, rng, shrink) if r["alpha"] in raw]
+    with open(tmp_path / "p2q2_qwen7b_concept_forced_p2r_ans_fromtrial.jsonl", "w") as f:
+        for r in real:
+            f.write(json.dumps(r) + "\n")
+    out = tmp_path / "rep.json"
+    subprocess.run([sys.executable, SCRIPT, "--preset", "qwen7b-concept-ans", "--dir", str(tmp_path),
+                    "--out", str(out)], check=True, capture_output=True)
+    rep = json.load(open(out))
+    assert rep["cells_found"]["R1"] == len(real) and rep["cells_found"]["R4"] == 0
+    assert rep["P1"]["strength 0.5"]["reading"] == "flattening"
