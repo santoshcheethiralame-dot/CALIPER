@@ -93,7 +93,9 @@ chance once concept type is fixed; the steering rule scores abstract concepts li
 At the published point no check finds the six dead released vectors (low power). A second
 liveness rule, the identify stage's rise of at least 2 nats in $\log P(\text{concept})$, is not
 specific: real vectors pass it 27/30 at strength 4 and random vectors 21/30 (26/30 at 8), and it
-agrees with the steering gate at Cohen's $\kappa$ 0.10 (P2-R, filed secondaries).}
+agrees with the steering gate at Cohen's $\kappa$ 0.10 (P2-R, filed secondaries). On Qwen2.5-7B
+random vectors pass it 20/30 at 0.5 of the norm and 27/30 at 1.0, against 29/30 and 30/30 for
+concept vectors (P2-Q2 random control beside P2-Q).}
 
 \begin{table}[t]
 \centering
@@ -193,7 +195,11 @@ strengths 1--4; Table~\ref{tab:p2r}). The same design on Qwen2.5-7B (P2-Q, filed
 manipulation check: the released prompt never asks for YES or NO, and at strength 0 Qwen puts at
 most 1\% of its first-token probability on either answer in any framing (median 0.1--1\%), so no
 endpoint was scored. A first-token readout of the released prompt is defined only for models that
-happen to answer in that format.}
+happen to answer in that format. With an answer instruction added (P2-Q2, an amendment filed before
+its data) Qwen answers YES or NO (mass near 1), but its factual controls fail: inside the injection
+frame it leans NO on half of thirty obvious-YES questions (median log-odds $-0.39$, 15/30 leaning
+YES; factual-NO $-17.7$), so the controls do not have opposite signs and, as filed, no endpoint
+was scored. In this frame Qwen answers the setup, not the question.}
 
 \note{C8. Injection flattens confident answers; it does not add a global yes-bias (P2-R P1,
 filed). At strength 4 factual-YES moves down by 4.93 log-odds ($p$ 0.011), after a small rise at
@@ -294,7 +300,9 @@ some regime and the standard checks do not notice.}
 \note{From the notebook and the preregistrations: S-2 (Amendments 1--3), S-1 (Amendments 1--4),
 P2-M, P2-F, P2-L, P2-D, P2-G, P2-R, P2-Q, A-F1, S-11, S-4; dates of filing against dates of data.
 P2-Q: filed 10 Oct, data 11 Oct; manipulation check failed (YES+NO mass at most 0.01), no
-endpoint scored, as filed. P2-R:
+endpoint scored, as filed. P2-Q2 (Amendment 1, filed 11 Oct before its data): mass check passed,
+check 4 (opposite-signed factual baselines) failed, no forced endpoint scored; the scorer enforced
+only the mass check until then and was corrected to the filed rule before anything was reported. P2-R:
 filed 10 Oct, data 11 Oct, scored once; secondaries missing from the scorer computed afterwards
 (\texttt{experiments/analyse\_p2r\_secondaries.py}).}
 

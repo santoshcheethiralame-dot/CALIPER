@@ -130,7 +130,7 @@ Appendices: every run and its prereg; amendments with dates; the released-code r
 | ~~P2-L~~ | Logit-lens accessibility as a health check. **Done 10 Oct** (C1) | | |
 | ~~P2-R~~ | The released protocol on Gemma-3-27B on log-odds. **Done 11 Oct** (C1, C4, C5, C8): flattening, a mostly content-free introspective excess, real > impact-matched random only at strength 4, answer mass collapses at the released strength | | |
 | ~~P2-Q~~ | The same design on Qwen2.5-7B. **Ran 11 Oct; manipulation check failed**: with the released prompt Qwen puts at most 1% of first-token mass on YES/NO in every framing, so no endpoint was scored (`results/p2q_concept.json`, `results/p2q_tail.json`). Evidence for C5/C7 (the readout is defined only for models that answer in the format), not for C8 | | |
-| P2-Q2 | P2-Q with an explicit answer instruction appended to every trial ("Answer YES or NO."), as an amendment filed before data | C8 on a second family; would no longer be the released prompt | one Kaggle session, ~2 h; user decision |
+| ~~P2-Q2~~ | P2-Q with "Start your answer with YES or NO." (Amendment 1). **Ran 11 Oct; mass check passed, check 4 failed**: factual-YES baseline median log-odds -0.39 (15/30 lean YES) against factual-NO -17.7, so the controls are unusable and no forced endpoint was scored. Identify random control: 20/30 at 0.5, 27/30 at 1.0 (concept vectors 29/30, 30/30 in P2-Q). C8 stays Gemma-only; Qwen's two failed checks are C5/C7 evidence (the frame, not the question, drives the answer) | | |
 | P2-H | A Llama-3.1-8B cell, Hahami et al.'s model | shows a published conclusion changing (review EIC F5) | one Kaggle session; optional |
 | P2-K | A known-YES positive control: a model trained to report injections | validates the readout against a reference that should say YES (review R3) | training on Kaggle; optional |
 | P2-B | bf16 precision cells for Gemma-3-12B on an L4 or A100 | the one S-1 question free hardware cannot answer | paid; user decision |
@@ -163,6 +163,11 @@ Status 11 Oct, later: P2-Q ran and failed its manipulation check (Qwen does not 
 the released prompt: mass at most 0.01). C8 therefore rests on Gemma-3-27B alone; P2-Q2 (an
 answer instruction, filed as an amendment) is the way to get a second family. Next: the second
 internal review of the claims.
+
+Status 11 Oct, evening: P2-Q2 also failed a manipulation check (factual baselines not opposite in
+sign), so C8 stays Gemma-only. No further Qwen session is planned for C8; the two failures go into
+C5 and the checklist as evidence that a forced-choice readout in this frame must be validated per
+model with factual controls. Next: the second internal review of the claims.
 
 ## 8. Risks
 

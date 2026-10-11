@@ -175,6 +175,11 @@ def main():
            "checks": checks(cells)}
     T = {k: table(v) for k, v in cells.items() if v and k in ("R1", "R2", "R3")}
     ok = set(rep["checks"].get("framings_passing_mass", []))
+    if rep["checks"].get("factual_baselines_opposite_sign") is False:
+        # Filed check 4 (P2-R prereg, "Manipulation checks"): a failed check means the forced cells
+        # are reported, not scored. Enforced from 11 Oct; before that only the mass check was.
+        rep["not_scored"] = "check 4 failed: factual-NO and factual-YES baselines do not have opposite signs"
+        ok = set()
     if "R1" in T and {"factual_yes"} <= ok:
         rep["P1"] = {f"strength {s:g}": p1(T["R1"], s) for s in STRENGTHS}
         for k in ("R2", "R3"):

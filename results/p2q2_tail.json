@@ -1,0 +1,184 @@
+{
+ "preset": "qwen7b-tail-ans",
+ "cells_found": {
+  "R1": 600,
+  "R2": 600,
+  "R3": 600,
+  "R4-random": 120,
+  "R4": 0
+ },
+ "checks": {
+  "strength0_identical_across_cells": true,
+  "kl_zero_at_strength0": true,
+  "median_mass_at_strength0": {
+   "released_introspective": 0.9999726741781652,
+   "released_neutral": 0.9980975322213874,
+   "factual_no": 0.999988886431859,
+   "factual_yes": 0.999969821281365,
+   "factual_contested": 0.9999749560115527
+  },
+  "framings_passing_mass": [
+   "released_introspective",
+   "released_neutral",
+   "factual_no",
+   "factual_yes",
+   "factual_contested"
+  ],
+  "factual_baselines_opposite_sign": false,
+  "factual_baseline_median_logodds": {
+   "factual_no": -17.724846073535446,
+   "factual_yes": -0.3897552341222763
+  }
+ },
+ "not_scored": "check 4 failed: factual-NO and factual-YES baselines do not have opposite signs",
+ "neutral_injected_vs_uninjected_auc": {
+  "strength 0.25": 0.9388888888888889,
+  "strength 0.5": 0.9577777777777777,
+  "strength 1": 0.9522222222222222
+ },
+ "yesno_mass_median": {
+  "released_introspective": {
+   "0": 0.9999726741781652,
+   "0.25": 0.9999226371717316,
+   "0.5": 0.9998923355755073,
+   "1": 0.9891887041682312
+  },
+  "released_neutral": {
+   "0": 0.9980975322213874,
+   "0.25": 0.9996606698555764,
+   "0.5": 0.9999254907995918,
+   "1": 0.9941073310346635
+  },
+  "factual_no": {
+   "0": 0.999988886431859,
+   "0.25": 0.999992904590854,
+   "0.5": 0.9999871870840652,
+   "1": 0.9910303070852226
+  },
+  "factual_yes": {
+   "0": 0.999969821281365,
+   "0.25": 0.9999935708811503,
+   "0.5": 0.9999948723008079,
+   "1": 0.9957087082279297
+  },
+  "factual_contested": {
+   "0": 0.9999749560115527,
+   "0.25": 0.9999824755830274,
+   "0.5": 0.9999893453884412,
+   "1": 0.9965902137313436
+  }
+ },
+ "identify R4-random": {
+  "strength 0.25": {
+   "median_change_logp_concept": 1.5105524063110352,
+   "identify_live": 9,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": false,
+    "bread": false,
+    "bridge": false,
+    "candle": true,
+    "clock": true,
+    "curiosity": false,
+    "desert": false,
+    "dolphin": true,
+    "eagle": false,
+    "elephant": true,
+    "engine": false,
+    "fear": true,
+    "freedom": false,
+    "garden": false,
+    "grief": false,
+    "harbor": true,
+    "jealousy": false,
+    "joy": true,
+    "justice": false,
+    "library": true,
+    "mirror": false,
+    "mountain": false,
+    "nostalgia": false,
+    "river": false,
+    "serenity": false,
+    "spider": false,
+    "telescope": false,
+    "umbrella": true,
+    "violin": false,
+    "volcano": false
+   }
+  },
+  "strength 0.5": {
+   "median_change_logp_concept": 3.214336395263672,
+   "identify_live": 20,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": false,
+    "bread": true,
+    "bridge": false,
+    "candle": true,
+    "clock": true,
+    "curiosity": true,
+    "desert": false,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": false,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": false,
+    "library": true,
+    "mirror": false,
+    "mountain": false,
+    "nostalgia": true,
+    "river": false,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": false,
+    "volcano": false
+   }
+  },
+  "strength 1": {
+   "median_change_logp_concept": 5.529315948486328,
+   "identify_live": 27,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": false,
+    "candle": true,
+    "clock": true,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": false,
+    "library": true,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": false,
+    "volcano": true
+   }
+  }
+ }
+}
