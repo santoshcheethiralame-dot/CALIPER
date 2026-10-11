@@ -9,4 +9,4 @@ python experiments/analyse_round3.py --items B1 B6
 python experiments/make_p1_lnnull_table.py
 python experiments/make_p1_numbers.py
 cd paper1 && pdflatex -interaction=nonstopmode main.tex > /dev/null; pdflatex -interaction=nonstopmode main.tex > /dev/null || true
-grep "^!" main.log || echo "build clean"; grep -c "TBD: bR" main.log || true
+grep "^!" main.log || echo "build clean"; grep -c "tbd{bR" tables/numbers.tex || echo "no B-14r TBD left"
