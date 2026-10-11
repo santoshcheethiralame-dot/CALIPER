@@ -343,3 +343,14 @@ def test_identify_with_random_control(s3, monkeypatch, tmp_path):
         "--inject-from", "trial", "--no-health")
     r = rows(path(tmp_path, "_identify_random_fromtrial"))
     assert len(r) == 2 * 3 and {x["control"] for x in r} == {"random"}
+
+
+def test_forced_stores_top_tokens_and_continuation(s3, monkeypatch, tmp_path):
+    run(s3, monkeypatch, tmp_path, "--stage", "forced", "--alphas", "0", "2", "--framing-set", "p2r",
+        "--store-top-k", "5", "--continuation", "4", "--inject-from", "trial", "--no-health")
+    r = rows(path(tmp_path, "_forced_p2r_tok_fromtrial"))
+    assert len(r) == 5 * 2 * 3
+    for x in r:
+        assert len(x["top_tokens"]) == 5 and len(x["top_logp"]) == 5
+        assert x["top_logp"] == sorted(x["top_logp"], reverse=True) and x["top_logp"][0] <= 0
+        assert isinstance(x["continuation"], str)

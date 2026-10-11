@@ -90,7 +90,7 @@ def ensure_bitsandbytes(minimum="0.46.1"):
 
 # Bumped whenever this file changes, so the log says which copy actually ran. A stale
 # paste is otherwise invisible until it fails on a line number that no longer exists.
-VERSION = "2026-10-11a"
+VERSION = "2026-10-11b"
 print(f"kaggle_s3_positive_control {VERSION}", flush=True)
 
 # Fragmentation is what turns a model that fits into an OOM partway through the load.
@@ -1139,7 +1139,7 @@ def forced_choice(model, tok, layers, layer, vec, alpha, prompt, ynids):
     y = torch.logsumexp(lp[ynids["yes"]], 0)
     n = torch.logsumexp(lp[ynids["no"]], 0)
     return (float(torch.sigmoid(y - n)), kl_meter(model, tok, layers, layer, add, prompt, lp),
-            float(y), float(n))
+            float(y), float(n), lp)
 
 
 def impact_matched(model, tok, layers, layer, real, alpha, prompt, direction, iters=14,
@@ -1406,6 +1406,8 @@ def run_stem(a):
         tag += {"factual-no": "_factualno", "p2r": "_p2r"}[a.framing_set]
     if getattr(a, "answer_instruction", None):
         tag += "_ans"
+    if getattr(a, "store_top_k", 0) or getattr(a, "continuation", 0):
+        tag += "_tok"
     if getattr(a, "inject_from", "all") != "all":
         tag += f"_from{a.inject_from}"
     if a.quant != "4bit":
@@ -1513,6 +1515,13 @@ def main():
     ap.add_argument("--framing-set", choices=["default", "factual-no", "p2r"], default="default",
                     help="'factual-no' replaces the forced-choice framings with 30 questions "
                          "whose answer is NO (P2-F), in the same 'Trial {n}' frame")
+    ap.add_argument("--store-top-k", type=int, default=0,
+                    help="forced stage: also store the top-K first tokens and their log-probabilities "
+                         "per row (B1, second internal review of Paper 2). File stem gains _tok")
+    ap.add_argument("--continuation", type=int, default=0,
+                    help="forced stage: also store a greedy continuation of this many tokens per row, "
+                         "injected as run_trial injects (from the trial token through generation "
+                         "with --inject-from trial). File stem gains _tok")
     ap.add_argument("--answer-instruction", default=None,
                     help="p2r framings only: append this sentence to every trial turn, so a model "
                          "that does not answer the released prompt with YES or NO is told to (P2-Q2). "
@@ -1904,13 +1913,21 @@ def main():
                 if (c, alpha) in impact:
                     row["impact_match"] = impact[(c, alpha)]
                 if a.stage == "forced":
-                    p, kl, ly, ln = forced_choice(model, tok, layers, a.layer, vec, alpha,
-                                                  prompt, ynids)
+                    p, kl, ly, ln, lp = forced_choice(model, tok, layers, a.layer, vec, alpha,
+                                                      prompt, ynids)
                     # The YES and NO log-probabilities themselves, not only their sigmoid:
                     # log-odds stay exact where P(YES) saturates, and yesno_mass shows how
                     # much of the next token is an answer at all (internal review, 10 Oct).
                     row.update(p_yes=p, kl=round(kl, 6), logp_yes=ly, logp_no=ln,
                                yesno_mass=float(np.exp(np.logaddexp(ly, ln))))
+                    if a.store_top_k:
+                        # What the model says instead when YES and NO lose their mass (B1).
+                        top = lp.topk(a.store_top_k)
+                        row.update(top_tokens=[tok.decode([int(i)]) for i in top.indices],
+                                   top_logp=[round(float(v), 4) for v in top.values])
+                    if a.continuation:
+                        row["continuation"] = run_trial(model, tok, layers, a.layer, vec, alpha, prompt,
+                                                        max_new=a.continuation)
                 elif a.stage == "identify":
                     add = None if alpha == 0 else alpha * vec
                     lp = next_token_logprobs(model, tok, layers, a.layer, add, prompt)

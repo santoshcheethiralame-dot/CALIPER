@@ -127,3 +127,25 @@ cells are scored and the rest reported as not run. Rows resume by key, as in eve
 Forced: 5 framings x 5 strengths x 30 concepts = 750 passes per cell, plus clean-pass caching. The
 impact-matched cell adds about 14 matching passes per concept and strength. Identify: 150 passes
 per control. One 2xT4 session (one GPU used), roughly 4-6 hours.
+
+## Amendment 1, B1 (11 October 2026, after P2-R's data, before any B1 data)
+
+**Why.** The second internal review of Paper 2 found that "the model stops answering YES or NO at
+strength 4" is inferred from YES+NO mass alone: no first tokens or continuations were stored. B1
+records them. It is descriptive and tests no hypothesis; it changes no P2-R endpoint.
+
+**What runs.** P2-R's R1 (released vectors) and R2 (norm-matched random) forced cells, unchanged
+(Gemma-3-27B 4-bit, layer 37, released recipe, P2-R's five framings, strengths 0, 1, 2, 4, 8,
+injection from the trial token), with two stored additions per row: the top-20 first tokens and
+their log-probabilities (`--store-top-k 20`), and a 20-token greedy continuation injected as the
+released protocol injects, from the trial token through generation (`--continuation 20`). Script
+v2026-10-11b; file stems gain `_tok`. The impact-matched cell is not re-run.
+
+**Reported (all descriptive).** Per cell, framing and strength: the most common top-1 first token
+and its share; the top-1 probability; the share of continuations that open with YES or NO, that
+name the concept as a whole word, and that are degenerate (one word over half the continuation).
+Reproducibility: the absolute difference in logp_yes and logp_no against the P2-R rows. Scorer
+`experiments/analyse_b1_tokens.py`, committed with this amendment.
+
+**Use.** B1 says what the model produces where P2-R's readout loses its mass. It cannot change a
+P2-R verdict.
