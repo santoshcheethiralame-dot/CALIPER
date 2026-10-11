@@ -1,0 +1,20 @@
+{
+ "pilot3_f3_opt13b_l12_120k": {
+  "units": 16,
+  "complete": true,
+  "pass": 4,
+  "converged_wrong": 2,
+  "median_alignment": 0.8947,
+  "median_r2": 0.9317595,
+  "median_restart_agreement": 0.87025
+ },
+ "pilot3_f3_opt13b_l12_64k": {
+  "units": 16,
+  "complete": true,
+  "pass": 2,
+  "converged_wrong": 1,
+  "median_alignment": 0.68065,
+  "median_r2": 0.792245,
+  "median_restart_agreement": 0.77305
+ }
+}
