@@ -18,6 +18,7 @@
 \newcommand{\benchname}{\tbd{bench name}}
 % \draft{} = a new result placed with its numbers; wording to be rewritten by the author.
 \newcommand{\draft}[1]{\textcolor{violet}{#1}}
+\input{tables/numbers}
 
 \title{Restart Agreement Is Not Correctness:\\Calibrating Reliability Checks for Direction Recovery\\Against Exact Ground Truth}
 
@@ -48,15 +49,18 @@ restarts predicts these failures worse than held-out fit (AUC 0.79 vs 0.92,
 $p = 1.8\times10^{-4}$; pooled across six conditions, $\Delta$AUC $= -0.134$, 95\% CI
 $[-0.189,-0.078]$). \draft{On units never fitted before the gap is smaller ($-0.035$ and
 $-0.097$ in two replications on GPT-Neo), and at 16,000 tokens, where most remaining failures
-fit well, it shrinks to $-0.05$ with an interval that includes zero (exploratory).} The
+fit well, it shrinks to $-0.05$ with an interval that includes zero (exploratory).}
+% D-1, keep one: holds -> \draft{On 200 fresh GPT-2 units, pre-registered, it is \dOneDelta{} \dOneCI.}
+% not replicated -> \draft{On 200 fresh GPT-2 units, pre-registered, it is \dOneDelta{} \dOneCI, an interval that includes zero.}
+% reversed -> \draft{On 200 fresh GPT-2 units, pre-registered, restart agreement leads (\dOneDelta{} \dOneCI).} The
 advantage comes from under-fitted estimates. On the third of failures
 that fit as well as the reference but point elsewhere, neither check is reliable.
 \draft{Most of those fits differ from the reference along a single direction the data cannot
 see at all: the layer norm feeding the unit holds its output constant along $1/\gamma$. Removing
 that direction, which is read from the model's own weights, from fit and reference (a label we
 pre-registered) cuts the converged-wrong class from 2 to 20 fits per arm to 0 to 6 and widens
-held-out fit's lead in 10 of the 14 arms where it can be computed; it is unchanged in 3 and
-narrower in 1. The remainder lie in poorly sampled directions: a regression that is given the
+held-out fit's lead in \lnWiden{} of the \lnScorable{} arms where it can be computed; it is unchanged in \lnSame{} and
+narrower in \lnNarrow. The remainder lie in poorly sampled directions: a regression that is given the
 nonlinearity recovers every such unit with enough informative tokens.} Restart
 agreement does not improve with more restarts or when measured in the stimulus metric, and
 single-unit verdicts are fragile: \draft{one in five flips when the fit seed, the token sample
@@ -345,11 +349,15 @@ calibration of held-out $R^2$.}
 \paragraph{Matching the checks' targets.}\label{sec:matched} Restart agreement looks only at the
 direct route, while the failure label scores the selected fit, which came from the cascade
 route for 37 of the 46 failures. On the 160 units where the direct route was selected, the
-gap is $-0.113$ (9 failures). Scored instead against the direct route's own alignment, the
-estimate restart agreement actually measures, the gap halves to $-0.061$ (107 failures). Part
-of the headline gap is therefore a mismatch between the checks' targets. Held-out $R^2$ still
-leads under every matching we tried, in every arm with enough failures
-(Appendix~\ref{app:arms}).
+gap is $-0.113$ (9 failures). \draft{Scoring the direct route's own alignment against its own
+held-out $R^2$, the best over its restarts, needs the fitted directions, which the primary run did
+not save. On its replicate (B-14r) the gap is \bROwnDelta{} \bROwnCI{} (\bROwnFail{} failures),
+wider than the headline. Across the \mOwnArms{} arms with saved directions, held-out $R^2$ leads
+under this matching in \mOwnLead, with an interval below zero in \mOwnExcl; the two checks tie in
+one (GPT-2 layer 3, coordinate dropped), and restart agreement leads in the noisiest arm (SNR 4,
+$+0.115$ $[+0.016, +0.224]$), where held-out $R^2$ mostly reads the noise level
+(Section~\ref{sec:noise}). The headline gap is therefore not a mismatch between the checks'
+targets (Appendix~\ref{app:arms}).}
 
 \begin{figure}[t]
 \centering
@@ -411,6 +419,24 @@ coupled estimator, puts the gap at $-0.062$, $-0.138$, $-0.201$ and $-0.052$ at 
 failures disappear and the remaining failures are mostly converged-wrong (0, 0, 5 and 8 of 42,
 22, 17 and 10), the class neither check sees. Held-out fit's advantage is largest where fits are
 data-limited and fades where they are not (exploratory; Appendix~\ref{app:arms}).}
+
+% D-1 (docs/preregistration-d1-fresh-units.md): keep the paragraph matching \dOneReading, delete the rest.
+% holds:
+% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
+% scored on the identifiable label, gives \dOneDelta{} \dOneCI{} (\dOneFail{} failures), and
+% \dOneEucDelta{} \dOneEucCI{} on the Euclidean label: the lead holds on fresh units.}
+% not replicated:
+% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
+% scored on the identifiable label, gives \dOneDelta{} \dOneCI{} (\dOneFail{} failures), an
+% interval that includes zero (\dOneEucDelta{} \dOneEucCI{} on the Euclidean label). The lead is
+% therefore established on re-fits of units already seen, not on fresh units.}
+% reversed:
+% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
+% scored on the identifiable label, gives \dOneDelta{} \dOneCI{}: on fresh units restart
+% agreement leads, so we do not claim that held-out $R^2$ is the better check in general.}
+% underpowered:
+% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1) has
+% only \dOneFail{} failures on the identifiable label, below the pre-registered minimum of 10.}
 
 \begin{figure}[t]
 \centering
@@ -534,8 +560,10 @@ TransformerLens already removes this component when it folds the layer norm into
 layer's weights and centres them \citep{nanda2022transformerlens}; RMSNorm models have no such
 direction. Table~\ref{tab:lnnull} lists every arm with saved fitted directions. Converged-wrong
 fits fall from 2, 20, 6, 7 and 8 to 0, 6, 1, 2 and 2 in the Pythia-160m, GPT-Neo layer-10 and
-three GPT-2 re-fit arms, and from 19 and 16 to 4 and 5 in the two new-unit replications.
-Held-out $R^2$'s lead over restart agreement widens in 10 of the 14 arms where both labels can
+three GPT-2 re-fit arms, and from 19 and 16 to 4 and 5 in the two new-unit replications. On the primary's replicate
+(B-14r) they fall from \bRCwFiled{} to \bRCwIdent{}, and the gap on this label is \bRIdentDelta{}
+\bRIdentCI.
+Held-out $R^2$'s lead over restart agreement widens in \lnWiden{} of the \lnScorable{} arms where both labels can
 be scored; it is unchanged in the three arms with no near-zero gain or with the coordinate
 dropped (Pythia-160m float32, and GPT-Neo layer 6 and GPT-2 layer 3 with the coordinate dropped,
 where restart agreement leads in the first, $+0.066$), and narrows slightly in the noisiest arm
@@ -576,7 +604,7 @@ and reference scored as filed (Euclidean cosine) and with $\mathbf{u} = 1/\gamma
 both (the identifiable label; removing it from the fit alone gives the same verdicts). $\Delta$
 is AUC(restart agreement) minus AUC(held-out $R^2$); the interval is the stratified bootstrap of
 the identifiable $\Delta$. --- where every fit fails on the filed label. The primary run and the
-two depth arms saved no fitted directions; the primary's replicate is listed when it lands.}}
+two depth arms saved no fitted directions; \bRReplicateNote.}}
 \label{tab:lnnull}
 \end{table}
 
@@ -681,14 +709,21 @@ splits}. The run-level comparison is steadier: held-out $R^2$ leads restart
 agreement in all three re-fits, by 0.169, 0.084 and 0.162 (DeLong $p = 0.011$, 0.14 and
 0.017), against 0.123 for the original fit of the same units. Earlier runs add two
 components: changing the restart count from two to five changes 13 to 16\% of verdicts, and
-running on a GPU instead of a CPU changes 4 of 50. Pass rates differ with depth (0.50, 0.86,
+running on a GPU instead of a CPU changes 4 of 50. \draft{Re-running the primary with nothing
+changed but the cascade route's initial draw, which the primary run did not seed per unit
+(B-14r), flips \bRFlips{} of 300 verdicts (\bRFlipRate, 95\% CI \bRFlipCI; Cohen's $\kappa$
+\bRKappa). This component sits inside each re-fit's flips above, so those cannot be attributed
+to the seed, the sample or the split alone. The replicate's gap is \bRDelta{} \bRCI, against
+$-0.127$ for the primary.} Pass rates differ with depth (0.50, 0.86,
 0.90 at layers 2, 6, 10) and with model family at fixed depth (GPT-Neo-125m 0.62 vs GPT-2
 0.90 at layer 10). A failure rate should therefore be quoted with its configuration.
 \draft{Across the four fits of these 100 units, 56 never fail, 22 fail once, 15 twice, 3 three
 times and 4 every time. Taking each unit's median alignment over its four fits, units that
 always fail sit at a median of 0.76 and units that fail only sometimes near the bar, at 0.967. Of the 18 units that are converged-wrong in at
 least one fit, only 2 fail in all four, so most failures are near-threshold instability rather
-than a fixed property of the unit (exploratory).}
+than a fixed property of the unit (exploratory).} \draft{With the replicate as a fifth fit,
+\csNever{} units never fail and \csAll{} fails in all \csFits; \csCwAny{} are converged-wrong in
+at least one fit, \csCwOnce{} in exactly one and \csCwAll{} in all \csFits.}
 
 \subsection{\draft{Under response noise, held-out fit mostly reads the noise level}}
 \label{sec:noise}
@@ -839,7 +874,9 @@ verdicts unchanged (McNemar $p = 0.45$) \\
 Cascade route's head initialised from the process-wide random state &
 Seeded from the unit's own seed & yes &
 Draws came from the intended distribution, so nothing is biased, but cascade alignments
-before the fix are not reproducible to the digit \\
+before the fix \draft{cannot be reproduced: re-running the primary reproduces every
+direct-route fit exactly and no cascade fit, flips \bRFlips{} of 300 verdicts, and gives a gap of
+\bRDelta{} (Section~\ref{sec:budget})} \\
 A ``method disagreement'' check used $\mathbf{w}_j$ &
 Withdrawn as a ground-truth-free check; replaced by route agreement & yes &
 None on the primary endpoint, which never used it \\
@@ -978,8 +1015,9 @@ Every run of the estimator on disk, including arms that are not pooled. $\Delta$
 AUC(restart agreement) minus AUC(held-out $R^2$) against the Euclidean label; the bootstrap
 interval resamples failures and passes separately. The last two columns are the
 route-matched comparisons of Section~\ref{sec:matched}: $\Delta$ on units where the direct
-route was selected, and $\Delta$ against the direct route's own alignment, with the failure
-count in brackets. The GPT-Neo layer-6 run has no passing unit, so no AUC exists; its
+route was selected, and $\Delta$ against the direct route's own alignment, \draft{scored with the direct
+route's own held-out $R^2$ (the best over its restarts)}, with the failure count in brackets
+\draft{(n/s: the arm saved no fitted directions)}. The GPT-Neo layer-6 run has no passing unit, so no AUC exists; its
 diagnostics are in Section~\ref{sec:identifiability}. Precision for the Pythia-1.4B arm,
 run on a Kaggle GPU, was not recorded. Exploratory except where the arm's own filing says
 otherwise. \draft{X-1a and X-1b repeat the pooled GPT-Neo layer-10 settings on 100 new units
@@ -1000,29 +1038,29 @@ analysis, replacing the pooled GPT-Neo layer-10 arm with X-1a gives a pooled gap
 \toprule
 arm & estimator & precision & $n$ & fail & AUC restart & AUC $R^2$ & $\Delta$ & bootstrap 95\% CI & $\Delta$ direct-picked & $\Delta$ direct label & pooled \\
 \midrule
-GPT-2 L6 (B-14) & corrected & fp32 & 300 & 46 & 0.792 & 0.919 & $-$0.127 & [$-$0.197, $-$0.063] & $-$0.113 (9) & $-$0.061 (107) & yes \\
-Pythia-160m L6 (B-2c) & corrected & fp16 & 300 & 13 & 0.828 & 0.951 & $-$0.123 & [$-$0.264, $+$0.005] & $-$0.010 (4) & $-$0.071 (36) & yes \\
-GPT-2 L2 (B-7) & coupled & fp32 & 50 & 25 & 0.789 & 0.950 & $-$0.162 & [$-$0.294, $-$0.050] & $-$0.010 (12) & $-$0.053 (31) & yes \\
-GPT-2 L10 (B-7) & coupled & fp32 & 50 & 5 & 0.729 & 0.818 & $-$0.089 & [$-$0.222, $+$0.044] & $-$0.008 (3) & $-$0.120 (7) & yes \\
-GPT-Neo-125m L10 (B-8b) & corrected & fp32 & 100 & 38 & 0.588 & 0.755 & $-$0.167 & [$-$0.275, $-$0.062] & $-$0.161 (14) & $-$0.157 (55) & yes \\
-Pythia-1.4B L12, 3200 steps (B-11c) & corrected & unrecorded & 50 & 19 & 0.847 & 0.973 & $-$0.126 & [$-$0.251, $-$0.024] & $+$0.000 (2) & $-$0.126 (27) & yes \\
-Pythia-70m (B-11) & coupled & fp16 & 50 & 2 & 0.865 & 0.615 & $+$0.250 & [$-$0.104, $+$0.667] & $+$0.615 (1) & $+$0.021 (6) & no \\
-Pythia-410m (B-11) & coupled & fp16 & 50 & 2 & 0.771 & 1.000 & $-$0.229 & [$-$0.542, $+$0.000] & --- (0) & $-$0.049 (5) & no \\
-Pythia-410m, 3200 steps (B-11) & coupled & fp16 & 50 & 2 & 0.760 & 1.000 & $-$0.240 & [$-$0.500, $-$0.021] & --- (0) & $-$0.067 (5) & no \\
-GPT-2 L6 re-fit, fit seed 1 (B-15a) & corrected & fp32 & 100 & 18 & 0.726 & 0.896 & $-$0.169 & [$-$0.308, $-$0.053] & $-$0.146 (8) & $-$0.116 (29) & no \\
-GPT-2 L6 re-fit, corpus seed 1 (B-15b) & corrected & fp32 & 100 & 20 & 0.761 & 0.845 & $-$0.084 & [$-$0.198, $+$0.022] & $-$0.039 (6) & $-$0.134 (43) & no \\
-GPT-2 L6 re-fit, sequence split (B-15c) & corrected & fp32 & 100 & 22 & 0.723 & 0.885 & $-$0.162 & [$-$0.295, $-$0.029] & $-$0.209 (9) & $-$0.080 (43) & no \\
+GPT-2 L6 (B-14) & corrected & fp32 & 300 & 46 & 0.792 & 0.919 & $-$0.127 & [$-$0.197, $-$0.063] & $-$0.113 (9) & n/s & yes \\
+Pythia-160m L6 (B-2c) & corrected & fp16 & 300 & 13 & 0.828 & 0.951 & $-$0.123 & [$-$0.264, $+$0.005] & $-$0.010 (4) & $-$0.154 (36) & yes \\
+GPT-2 L2 (B-7) & coupled & fp32 & 50 & 25 & 0.789 & 0.950 & $-$0.162 & [$-$0.294, $-$0.050] & $-$0.010 (12) & n/s & yes \\
+GPT-2 L10 (B-7) & coupled & fp32 & 50 & 5 & 0.729 & 0.818 & $-$0.089 & [$-$0.222, $+$0.044] & $-$0.008 (3) & n/s & yes \\
+GPT-Neo-125m L10 (B-8b) & corrected & fp32 & 100 & 38 & 0.588 & 0.755 & $-$0.167 & [$-$0.275, $-$0.062] & $-$0.161 (14) & $-$0.217 (55) & yes \\
+Pythia-1.4B L12, 3200 steps (B-11c) & corrected & unrecorded & 50 & 19 & 0.847 & 0.973 & $-$0.126 & [$-$0.251, $-$0.024] & $+$0.000 (2) & $-$0.159 (27) & yes \\
+Pythia-70m (B-11) & coupled & fp16 & 50 & 2 & 0.865 & 0.615 & $+$0.250 & [$-$0.104, $+$0.667] & $+$0.615 (1) & n/s & no \\
+Pythia-410m (B-11) & coupled & fp16 & 50 & 2 & 0.771 & 1.000 & $-$0.229 & [$-$0.542, $+$0.000] & --- (0) & n/s & no \\
+Pythia-410m, 3200 steps (B-11) & coupled & fp16 & 50 & 2 & 0.760 & 1.000 & $-$0.240 & [$-$0.500, $-$0.021] & --- (0) & n/s & no \\
+GPT-2 L6 re-fit, fit seed 1 (B-15a) & corrected & fp32 & 100 & 18 & 0.726 & 0.896 & $-$0.169 & [$-$0.308, $-$0.053] & $-$0.146 (8) & $-$0.143 (29) & no \\
+GPT-2 L6 re-fit, corpus seed 1 (B-15b) & corrected & fp32 & 100 & 20 & 0.761 & 0.845 & $-$0.084 & [$-$0.198, $+$0.022] & $-$0.039 (6) & $-$0.155 (43) & no \\
+GPT-2 L6 re-fit, sequence split (B-15c) & corrected & fp32 & 100 & 22 & 0.723 & 0.885 & $-$0.162 & [$-$0.295, $-$0.029] & $-$0.209 (9) & $-$0.154 (43) & no \\
 GPT-Neo-125m L6 (B-17) & corrected & fp32 & 20 & 20 & --- & --- & --- & --- & --- (6) & --- (20) & no \\
-\draft{GPT-Neo-125m L10, new units (X-1a)} & corrected & fp32 & 100 & 40 & 0.804 & 0.839 & $-$0.035 & [$-$0.116, $+$0.049] & $-$0.042 (10) & $-$0.093 (55) & no \\
-\draft{GPT-Neo-125m L10, new units, corpus seed 1 (X-1b)} & corrected & fp32 & 100 & 38 & 0.727 & 0.823 & $-$0.097 & [$-$0.186, $-$0.008] & $-$0.017 (14) & $-$0.043 (57) & no \\
-\draft{Pythia-160m L6, 50 units (B-2d)} & corrected & fp32 & 50 & 2 & 0.969 & 0.979 & $-$0.010 & [$-$0.062, $+$0.042] & $+$0.000 (1) & $-$0.131 (8) & no \\
-\draft{GPT-Neo-125m L6, coordinate dropped (B-17b)} & corrected & fp32 & 20 & 7 & 0.769 & 0.703 & $+$0.066 & [$-$0.176, $+$0.308] & $-$0.143 (1) & $-$0.071 (11) & no \\
+\draft{GPT-Neo-125m L10, new units (X-1a)} & corrected & fp32 & 100 & 40 & 0.804 & 0.839 & $-$0.035 & [$-$0.116, $+$0.049] & $-$0.042 (10) & $-$0.111 (55) & no \\
+\draft{GPT-Neo-125m L10, new units, corpus seed 1 (X-1b)} & corrected & fp32 & 100 & 38 & 0.727 & 0.823 & $-$0.097 & [$-$0.186, $-$0.008] & $-$0.017 (14) & $-$0.080 (57) & no \\
+\draft{Pythia-160m L6, 50 units (B-2d)} & corrected & fp32 & 50 & 2 & 0.969 & 0.979 & $-$0.010 & [$-$0.062, $+$0.042] & $+$0.000 (1) & $-$0.220 (8) & no \\
+\draft{GPT-Neo-125m L6, coordinate dropped (B-17b)} & corrected & fp32 & 20 & 7 & 0.769 & 0.703 & $+$0.066 & [$-$0.176, $+$0.308] & $-$0.143 (1) & $-$0.081 (11) & no \\
 \draft{GPT-2 L3 (B-17c)} & corrected & fp32 & 20 & 20 & --- & --- & --- & --- & --- (6) & --- (20) & no \\
-\draft{GPT-2 L3, coordinate dropped (B-17d)} & corrected & fp32 & 20 & 11 & 0.727 & 0.929 & $-$0.202 & [$-$0.505, $+$0.071] & $+$0.000 (2) & $+$0.098 (17) & no \\
+\draft{GPT-2 L3, coordinate dropped (B-17d)} & corrected & fp32 & 20 & 11 & 0.727 & 0.929 & $-$0.202 & [$-$0.505, $+$0.071] & $+$0.000 (2) & $+$0.000 (17) & no \\
 \draft{GPT-2 L6, SAE latents (T-SAE)} & corrected & fp32 & 100 & 97 & 0.945 & 0.979 & $-$0.034 & [$-$0.117, $+$0.024] & $+$0.000 (29) & $-$0.034 (97) & no \\
-GPT-2 L6, noise SNR 1--19 (N-1a) & corrected & fp32 & 100 & 74 & 0.752 & 0.971 & $-$0.219 & [$-$0.348, $-$0.110] & --- & --- & no \\
-GPT-2 L6, noise SNR 19 (N-1b) & corrected & fp32 & 100 & 34 & 0.776 & 0.863 & $-$0.087 & [$-$0.200, $+$0.024] & --- & --- & no \\
-GPT-2 L6, noise SNR 4 (N-1c) & corrected & fp32 & 100 & 95 & 0.657 & 0.735 & $-$0.078 & [$-$0.419, $+$0.181] & --- & --- & no \\
+GPT-2 L6, noise SNR 1--19 (N-1a) & corrected & fp32 & 100 & 74 & 0.752 & 0.971 & $-$0.219 & [$-$0.348, $-$0.110] & --- & $-$0.094 (81) & no \\
+GPT-2 L6, noise SNR 19 (N-1b) & corrected & fp32 & 100 & 34 & 0.776 & 0.863 & $-$0.087 & [$-$0.200, $+$0.024] & --- & $-$0.089 (55) & no \\
+GPT-2 L6, noise SNR 4 (N-1c) & corrected & fp32 & 100 & 95 & 0.657 & 0.735 & $-$0.078 & [$-$0.419, $+$0.181] & --- & $+$0.115 (96) & no \\
 \draft{GPT-2 L6, 2k tokens (B-10)} & coupled & fp32 & 50 & 42 & 0.938 & 1.000 & $-$0.062 & [$-$0.140, $-$0.012] & --- & --- & no \\
 \draft{GPT-2 L6, 4k tokens (B-10)} & coupled & fp32 & 50 & 22 & 0.847 & 0.985 & $-$0.138 & [$-$0.261, $-$0.039] & --- & --- & no \\
 \draft{GPT-2 L6, 8k tokens (B-10)} & coupled & fp32 & 50 & 17 & 0.724 & 0.925 & $-$0.201 & [$-$0.330, $-$0.089] & --- & --- & no \\

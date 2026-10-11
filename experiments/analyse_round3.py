@@ -38,6 +38,17 @@ DIR_ARMS = [  # name, stem, model, layer, corpus seed, sequence split, fp16
     ("GPT-Neo-125m L10, new units (X-1a)", "results/x1a_gptneo_l10", "EleutherAI/gpt-neo-125M", 10, 0, False, False),
     ("GPT-Neo-125m L10, new units (X-1b)", "results/x1b_gptneo_l10", "EleutherAI/gpt-neo-125M", 10, 1, False, False),
 ]
+B1_ONLY = [  # B1 reads saved directions only; these arms are not rebuilt for B2
+    ("Pythia-160m L6, float32 (B-2d)", "results/b2d_pythia160m_fp32"),
+    ("GPT-Neo-125m L6 (B-17)", "results/b17_gptneo125m_l6"),
+    ("GPT-Neo-125m L6, coordinate dropped (B-17b)", "results/b17b_gptneo125m_l6_drop"),
+    ("GPT-2 L3 (B-17c)", "results/b17c_gpt2_l3"),
+    ("GPT-2 L3, coordinate dropped (B-17d)", "results/b17d_gpt2_l3_drop"),
+    ("GPT-2 L6, SAE latents (T-SAE)", "results/tsae_main"),
+    ("GPT-2 L6, noise SNR 1-19 (N-1a)", "results/n1a_snr_mixed"),
+    ("GPT-2 L6, noise SNR 19 (N-1b)", "results/n1b_snr19"),
+    ("GPT-2 L6, noise SNR 4 (N-1c)", "results/n1c_snr4"),
+]
 
 
 def rows(stem):
@@ -54,7 +65,7 @@ def compare(s1, s2, fail):
 
 def b1():
     out = {}
-    for name, stem, *_ in DIR_ARMS:
+    for name, stem, *_ in DIR_ARMS + B1_ONLY:
         R = rows(stem)
         if not R:
             continue
@@ -184,17 +195,25 @@ def b6():
 
 
 def main():
-    rep = {}
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--items", nargs="*", default=None,
+                    help="run only these items (B1 ... B6) and keep the others from the existing json")
+    only = ap.parse_args().items
+    out = ROOT / "results/round3_fixes.json"
+    rep = json.load(open(out)) if only and out.exists() else {}
     for key, fn in (("B1 route-matched with own R2", b1), ("B4 token sweep (B-10)", b4),
                     ("B5 filed secondaries", b5), ("B6 class stability", b6),
                     ("B3 1.4B arm on the identifiable label", b3), ("B2 cascade fallback", b2)):
+        if only and key.split()[0] not in only:
+            continue
         try:
             rep[key] = fn()
             print("done", key, flush=True)
         except Exception as e:  # report and keep going: each item is independent
             rep[key] = f"failed: {type(e).__name__}: {e}"
             print("FAILED", key, e, flush=True)
-    json.dump(rep, open(ROOT / "results/round3_fixes.json", "w"), indent=1, default=float)
+    json.dump(rep, open(out, "w"), indent=1, default=float)
 
 
 if __name__ == "__main__":
