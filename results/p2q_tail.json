@@ -1,0 +1,177 @@
+{
+ "preset": "qwen7b-tail",
+ "cells_found": {
+  "R1": 600,
+  "R2": 600,
+  "R3": 600,
+  "R4": 120,
+  "R4-random": 0
+ },
+ "checks": {
+  "strength0_identical_across_cells": true,
+  "kl_zero_at_strength0": true,
+  "median_mass_at_strength0": {
+   "released_introspective": 0.010395918814026666,
+   "released_neutral": 3.527237163818161e-06,
+   "factual_no": 0.008213851127967249,
+   "factual_yes": 0.0007757647318659376,
+   "factual_contested": 0.0006104834507718831
+  },
+  "framings_passing_mass": [],
+  "factual_baselines_opposite_sign": true,
+  "factual_baseline_median_logodds": {
+   "factual_no": -5.48705530166626,
+   "factual_yes": 0.6117877960205078
+  }
+ },
+ "neutral_injected_vs_uninjected_auc": {
+  "strength 0.25": 0.8788888888888889,
+  "strength 0.5": 0.9333333333333333,
+  "strength 1": 0.9377777777777778
+ },
+ "yesno_mass_median": {
+  "released_introspective": {
+   "0": 0.010395918814026666,
+   "0.25": 0.0016222171476271755,
+   "0.5": 0.007955939993244605,
+   "1": 0.0024022906447223914
+  },
+  "released_neutral": {
+   "0": 3.527237163818161e-06,
+   "0.25": 6.503444444607989e-05,
+   "0.5": 0.0002938680877464793,
+   "1": 0.000875193490666028
+  },
+  "factual_no": {
+   "0": 0.008213851127967249,
+   "0.25": 0.029671167928910728,
+   "0.5": 0.01866294372800774,
+   "1": 0.01011948822173772
+  },
+  "factual_yes": {
+   "0": 0.0007757647318659376,
+   "0.25": 0.03574501322111069,
+   "0.5": 0.0522503779186512,
+   "1": 0.04164985317190358
+  },
+  "factual_contested": {
+   "0": 0.0006104834507718831,
+   "0.25": 0.00572322036092051,
+   "0.5": 0.04306903847685409,
+   "1": 0.014948971462939085
+  }
+ },
+ "identify R4": {
+  "strength 0.25": {
+   "median_change_logp_concept": 1.9841651916503906,
+   "identify_live": 15,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": false,
+    "candle": false,
+    "clock": false,
+    "curiosity": true,
+    "desert": false,
+    "dolphin": true,
+    "eagle": false,
+    "elephant": true,
+    "engine": false,
+    "fear": true,
+    "freedom": true,
+    "garden": false,
+    "grief": false,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": false,
+    "mirror": true,
+    "mountain": false,
+    "nostalgia": true,
+    "river": false,
+    "serenity": true,
+    "spider": false,
+    "telescope": false,
+    "umbrella": true,
+    "violin": false,
+    "volcano": false
+   }
+  },
+  "strength 0.5": {
+   "median_change_logp_concept": 5.239497184753418,
+   "identify_live": 26,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": false,
+    "candle": true,
+    "clock": false,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": true,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": false,
+    "serenity": true,
+    "spider": true,
+    "telescope": false,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  },
+  "strength 1": {
+   "median_change_logp_concept": 9.511556625366211,
+   "identify_live": 28,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": false,
+    "candle": true,
+    "clock": true,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": false,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": true,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  }
+ }
+}

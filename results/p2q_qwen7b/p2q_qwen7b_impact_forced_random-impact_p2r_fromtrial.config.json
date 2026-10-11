@@ -1,0 +1,705 @@
+{
+  "version": "2026-10-10a",
+  "argv": [
+    "--model",
+    "qwen7b",
+    "--quant",
+    "4bit",
+    "--compute-dtype",
+    "fp32",
+    "--alpha-frac",
+    "0",
+    "0.25",
+    "0.5",
+    "1.0",
+    "--inject-from",
+    "trial",
+    "--no-health",
+    "--stage",
+    "forced",
+    "--framing-set",
+    "p2r",
+    "--control",
+    "random-impact",
+    "--out",
+    "/kaggle/working/p2q_qwen7b_impact.jsonl"
+  ],
+  "stage": "forced",
+  "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/7b-instruct/1",
+  "layer": 17,
+  "n_layers": 28,
+  "normalise": false,
+  "control": "random-impact",
+  "vector_recipe": "macar",
+  "alpha_frac": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "alphas": [
+    0.0,
+    20.882,
+    41.764,
+    83.528
+  ],
+  "trial_seed": 0,
+  "concepts": [
+    "elephant",
+    "spider",
+    "eagle",
+    "dolphin",
+    "volcano",
+    "desert",
+    "library",
+    "harbor",
+    "violin",
+    "umbrella",
+    "telescope",
+    "candle",
+    "bread",
+    "mountain",
+    "river",
+    "clock",
+    "mirror",
+    "bridge",
+    "garden",
+    "engine",
+    "joy",
+    "fear",
+    "jealousy",
+    "serenity",
+    "grief",
+    "curiosity",
+    "betrayal",
+    "nostalgia",
+    "justice",
+    "freedom"
+  ],
+  "max_new": 60,
+  "load": {
+    "quant": "4bit",
+    "compute_dtype": "float32",
+    "storage_dtype": "float32",
+    "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/7b-instruct/1"
+  },
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "health": {},
+  "health_pass_counts": {},
+  "impact_match": {
+    "elephant|20.882": {
+      "kl_target": 0.08851,
+      "kl_achieved": 0.08549,
+      "scale_over_norm_match": 0.2973,
+      "matched": true
+    },
+    "elephant|41.764": {
+      "kl_target": 0.40056,
+      "kl_achieved": 0.41044,
+      "scale_over_norm_match": 0.3242,
+      "matched": true
+    },
+    "elephant|83.528": {
+      "kl_target": 16.08043,
+      "kl_achieved": 15.53373,
+      "scale_over_norm_match": 8.0,
+      "matched": true
+    },
+    "spider|20.882": {
+      "kl_target": 0.09995,
+      "kl_achieved": 0.09758,
+      "scale_over_norm_match": 0.5694,
+      "matched": true
+    },
+    "spider|41.764": {
+      "kl_target": 0.40764,
+      "kl_achieved": 0.39845,
+      "scale_over_norm_match": 0.5221,
+      "matched": true
+    },
+    "spider|83.528": {
+      "kl_target": 0.68585,
+      "kl_achieved": 0.67557,
+      "scale_over_norm_match": 0.3536,
+      "matched": true
+    },
+    "eagle|20.882": {
+      "kl_target": 0.05915,
+      "kl_achieved": 0.05769,
+      "scale_over_norm_match": 0.2293,
+      "matched": true
+    },
+    "eagle|41.764": {
+      "kl_target": 0.23449,
+      "kl_achieved": 0.23753,
+      "scale_over_norm_match": 0.2013,
+      "matched": true
+    },
+    "eagle|83.528": {
+      "kl_target": 6.16792,
+      "kl_achieved": 6.19588,
+      "scale_over_norm_match": 1.3839,
+      "matched": true
+    },
+    "dolphin|20.882": {
+      "kl_target": 0.13245,
+      "kl_achieved": 0.12854,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "dolphin|41.764": {
+      "kl_target": 0.28939,
+      "kl_achieved": 0.30251,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "dolphin|83.528": {
+      "kl_target": 8.64592,
+      "kl_achieved": 8.7467,
+      "scale_over_norm_match": 1.4609,
+      "matched": true
+    },
+    "volcano|20.882": {
+      "kl_target": 0.16068,
+      "kl_achieved": 0.15723,
+      "scale_over_norm_match": 0.8052,
+      "matched": true
+    },
+    "volcano|41.764": {
+      "kl_target": 0.88149,
+      "kl_achieved": 0.84412,
+      "scale_over_norm_match": 1.1892,
+      "matched": true
+    },
+    "volcano|83.528": {
+      "kl_target": 1.84893,
+      "kl_achieved": 1.91482,
+      "scale_over_norm_match": 1.2968,
+      "matched": true
+    },
+    "desert|20.882": {
+      "kl_target": 0.08741,
+      "kl_achieved": 0.08604,
+      "scale_over_norm_match": 0.3105,
+      "matched": true
+    },
+    "desert|41.764": {
+      "kl_target": 0.20393,
+      "kl_achieved": 0.20059,
+      "scale_over_norm_match": 0.2293,
+      "matched": true
+    },
+    "desert|83.528": {
+      "kl_target": 1.48883,
+      "kl_achieved": 1.47374,
+      "scale_over_norm_match": 0.4585,
+      "matched": true
+    },
+    "library|20.882": {
+      "kl_target": 0.25928,
+      "kl_achieved": 0.26326,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "library|41.764": {
+      "kl_target": 0.51633,
+      "kl_achieved": 0.54202,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "library|83.528": {
+      "kl_target": 1.17593,
+      "kl_achieved": 1.18498,
+      "scale_over_norm_match": 0.3386,
+      "matched": true
+    },
+    "harbor|20.882": {
+      "kl_target": 0.05764,
+      "kl_achieved": 0.05845,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "harbor|41.764": {
+      "kl_target": 0.31489,
+      "kl_achieved": 0.32222,
+      "scale_over_norm_match": 0.6626,
+      "matched": true
+    },
+    "harbor|83.528": {
+      "kl_target": 1.93461,
+      "kl_achieved": 1.87309,
+      "scale_over_norm_match": 0.5221,
+      "matched": true
+    },
+    "violin|20.882": {
+      "kl_target": 0.07312,
+      "kl_achieved": 0.07259,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "violin|41.764": {
+      "kl_target": 0.28289,
+      "kl_achieved": 0.2844,
+      "scale_over_norm_match": 0.5453,
+      "matched": true
+    },
+    "violin|83.528": {
+      "kl_target": 2.38518,
+      "kl_achieved": 2.38263,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "umbrella|20.882": {
+      "kl_target": 0.38963,
+      "kl_achieved": 0.37753,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "umbrella|41.764": {
+      "kl_target": 1.15902,
+      "kl_achieved": 1.1373,
+      "scale_over_norm_match": 2.4305,
+      "matched": true
+    },
+    "umbrella|83.528": {
+      "kl_target": 4.07907,
+      "kl_achieved": 3.90259,
+      "scale_over_norm_match": 1.3252,
+      "matched": true
+    },
+    "telescope|20.882": {
+      "kl_target": 0.38627,
+      "kl_achieved": 0.38682,
+      "scale_over_norm_match": 1.399,
+      "matched": true
+    },
+    "telescope|41.764": {
+      "kl_target": 1.1868,
+      "kl_achieved": 1.19681,
+      "scale_over_norm_match": 0.8593,
+      "matched": true
+    },
+    "telescope|83.528": {
+      "kl_target": 3.92001,
+      "kl_achieved": 4.05984,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "candle|20.882": {
+      "kl_target": 0.08133,
+      "kl_achieved": 0.07758,
+      "scale_over_norm_match": 0.2726,
+      "matched": true
+    },
+    "candle|41.764": {
+      "kl_target": 0.16597,
+      "kl_achieved": 0.15866,
+      "scale_over_norm_match": 0.1846,
+      "matched": true
+    },
+    "candle|83.528": {
+      "kl_target": 1.39551,
+      "kl_achieved": 1.41441,
+      "scale_over_norm_match": 0.3242,
+      "matched": true
+    },
+    "bread|20.882": {
+      "kl_target": 0.15966,
+      "kl_achieved": 0.15343,
+      "scale_over_norm_match": 0.6771,
+      "matched": true
+    },
+    "bread|41.764": {
+      "kl_target": 0.55204,
+      "kl_achieved": 0.53256,
+      "scale_over_norm_match": 0.4788,
+      "matched": true
+    },
+    "bread|83.528": {
+      "kl_target": 1.70209,
+      "kl_achieved": 1.64824,
+      "scale_over_norm_match": 0.3536,
+      "matched": true
+    },
+    "mountain|20.882": {
+      "kl_target": 0.20008,
+      "kl_achieved": 0.19096,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "mountain|41.764": {
+      "kl_target": 0.53536,
+      "kl_achieved": 0.51303,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "mountain|83.528": {
+      "kl_target": 1.26043,
+      "kl_achieved": 1.21134,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "river|20.882": {
+      "kl_target": 0.0413,
+      "kl_achieved": 0.04134,
+      "scale_over_norm_match": 0.25,
+      "matched": true
+    },
+    "river|41.764": {
+      "kl_target": 0.21227,
+      "kl_achieved": 0.20363,
+      "scale_over_norm_match": 0.25,
+      "matched": true
+    },
+    "river|83.528": {
+      "kl_target": 1.02719,
+      "kl_achieved": 1.05401,
+      "scale_over_norm_match": 0.25,
+      "matched": true
+    },
+    "clock|20.882": {
+      "kl_target": 0.0738,
+      "kl_achieved": 0.0772,
+      "scale_over_norm_match": 0.3856,
+      "matched": true
+    },
+    "clock|41.764": {
+      "kl_target": 0.42418,
+      "kl_achieved": 0.40413,
+      "scale_over_norm_match": 0.4585,
+      "matched": true
+    },
+    "clock|83.528": {
+      "kl_target": 1.92655,
+      "kl_achieved": 1.882,
+      "scale_over_norm_match": 0.6626,
+      "matched": true
+    },
+    "mirror|20.882": {
+      "kl_target": 0.29218,
+      "kl_achieved": 0.28789,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "mirror|41.764": {
+      "kl_target": 0.51168,
+      "kl_achieved": 0.51275,
+      "scale_over_norm_match": 0.7071,
+      "matched": true
+    },
+    "mirror|83.528": {
+      "kl_target": 3.20094,
+      "kl_achieved": 3.14586,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "bridge|20.882": {
+      "kl_target": 0.44412,
+      "kl_achieved": 0.43248,
+      "scale_over_norm_match": 0.7384,
+      "matched": true
+    },
+    "bridge|41.764": {
+      "kl_target": 0.93987,
+      "kl_achieved": 0.89934,
+      "scale_over_norm_match": 0.5453,
+      "matched": true
+    },
+    "bridge|83.528": {
+      "kl_target": 1.56677,
+      "kl_achieved": 1.54528,
+      "scale_over_norm_match": 1.2691,
+      "matched": true
+    },
+    "garden|20.882": {
+      "kl_target": 0.10117,
+      "kl_achieved": 0.10141,
+      "scale_over_norm_match": 0.9786,
+      "matched": true
+    },
+    "garden|41.764": {
+      "kl_target": 0.69605,
+      "kl_achieved": 0.6712,
+      "scale_over_norm_match": 0.8781,
+      "matched": true
+    },
+    "garden|83.528": {
+      "kl_target": 3.21704,
+      "kl_achieved": 3.26468,
+      "scale_over_norm_match": 1.4142,
+      "matched": true
+    },
+    "engine|20.882": {
+      "kl_target": 0.06689,
+      "kl_achieved": 0.06817,
+      "scale_over_norm_match": 0.4788,
+      "matched": true
+    },
+    "engine|41.764": {
+      "kl_target": 0.30302,
+      "kl_achieved": 0.30095,
+      "scale_over_norm_match": 0.4585,
+      "matched": true
+    },
+    "engine|83.528": {
+      "kl_target": 1.61322,
+      "kl_achieved": 1.61903,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "joy|20.882": {
+      "kl_target": 0.10164,
+      "kl_achieved": 0.10632,
+      "scale_over_norm_match": 0.4788,
+      "matched": true
+    },
+    "joy|41.764": {
+      "kl_target": 0.34063,
+      "kl_achieved": 0.33819,
+      "scale_over_norm_match": 0.4204,
+      "matched": true
+    },
+    "joy|83.528": {
+      "kl_target": 2.55218,
+      "kl_achieved": 2.58105,
+      "scale_over_norm_match": 1.2152,
+      "matched": true
+    },
+    "fear|20.882": {
+      "kl_target": 0.06393,
+      "kl_achieved": 0.06656,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "fear|41.764": {
+      "kl_target": 0.4017,
+      "kl_achieved": 0.3951,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "fear|83.528": {
+      "kl_target": 8.29692,
+      "kl_achieved": 8.46624,
+      "scale_over_norm_match": 1.4142,
+      "matched": true
+    },
+    "jealousy|20.882": {
+      "kl_target": 0.20349,
+      "kl_achieved": 0.20472,
+      "scale_over_norm_match": 0.6209,
+      "matched": true
+    },
+    "jealousy|41.764": {
+      "kl_target": 0.4413,
+      "kl_achieved": 0.45418,
+      "scale_over_norm_match": 0.4204,
+      "matched": true
+    },
+    "jealousy|83.528": {
+      "kl_target": 9.48005,
+      "kl_achieved": 9.18927,
+      "scale_over_norm_match": 1.4142,
+      "matched": true
+    },
+    "serenity|20.882": {
+      "kl_target": 0.18944,
+      "kl_achieved": 0.19141,
+      "scale_over_norm_match": 0.5694,
+      "matched": true
+    },
+    "serenity|41.764": {
+      "kl_target": 0.2146,
+      "kl_achieved": 0.21268,
+      "scale_over_norm_match": 0.2973,
+      "matched": true
+    },
+    "serenity|83.528": {
+      "kl_target": 2.56104,
+      "kl_achieved": 2.68056,
+      "scale_over_norm_match": 0.4585,
+      "matched": true
+    },
+    "grief|20.882": {
+      "kl_target": 0.17624,
+      "kl_achieved": 0.17448,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "grief|41.764": {
+      "kl_target": 0.52126,
+      "kl_achieved": 0.51097,
+      "scale_over_norm_match": 0.7384,
+      "matched": true
+    },
+    "grief|83.528": {
+      "kl_target": 5.20615,
+      "kl_achieved": 5.2912,
+      "scale_over_norm_match": 2.0,
+      "matched": true
+    },
+    "curiosity|20.882": {
+      "kl_target": 0.33563,
+      "kl_achieved": 0.3503,
+      "scale_over_norm_match": 0.6209,
+      "matched": true
+    },
+    "curiosity|41.764": {
+      "kl_target": 0.97307,
+      "kl_achieved": 0.98571,
+      "scale_over_norm_match": 0.5453,
+      "matched": true
+    },
+    "curiosity|83.528": {
+      "kl_target": 3.26233,
+      "kl_achieved": 3.22976,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "betrayal|20.882": {
+      "kl_target": 0.09653,
+      "kl_achieved": 0.09297,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "betrayal|41.764": {
+      "kl_target": 0.16672,
+      "kl_achieved": 0.17125,
+      "scale_over_norm_match": 0.3242,
+      "matched": true
+    },
+    "betrayal|83.528": {
+      "kl_target": 4.14974,
+      "kl_achieved": 4.12388,
+      "scale_over_norm_match": 1.0671,
+      "matched": true
+    },
+    "nostalgia|20.882": {
+      "kl_target": 0.13663,
+      "kl_achieved": 0.13896,
+      "scale_over_norm_match": 0.25,
+      "matched": true
+    },
+    "nostalgia|41.764": {
+      "kl_target": 1.08312,
+      "kl_achieved": 1.07967,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "nostalgia|83.528": {
+      "kl_target": 11.71044,
+      "kl_achieved": 11.4686,
+      "scale_over_norm_match": 2.0,
+      "matched": true
+    },
+    "justice|20.882": {
+      "kl_target": 0.48109,
+      "kl_achieved": 0.48308,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "justice|41.764": {
+      "kl_target": 1.01738,
+      "kl_achieved": 0.97743,
+      "scale_over_norm_match": 0.5946,
+      "matched": true
+    },
+    "justice|83.528": {
+      "kl_target": 4.00281,
+      "kl_achieved": 4.13729,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "freedom|20.882": {
+      "kl_target": 0.24318,
+      "kl_achieved": 0.23461,
+      "scale_over_norm_match": 0.7071,
+      "matched": true
+    },
+    "freedom|41.764": {
+      "kl_target": 0.75002,
+      "kl_achieved": 0.76525,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "freedom|83.528": {
+      "kl_target": 1.73836,
+      "kl_achieved": 1.74004,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    }
+  },
+  "residual_norm_at_read_median": 83.52782440185547,
+  "residual_norm_at_read_min": 69.44517517089844,
+  "residual_norm_at_read_max": 95.39195251464844,
+  "vector_norm_median": 55.55868911743164,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "concept",
+  "n_baseline": 30,
+  "gram_offdiag_median_abs": 0.11213050037622452,
+  "gram_offdiag_mean": 0.1422007977962494,
+  "gram_offdiag_max": 0.6148781776428223,
+  "gram_offdiag_min": -0.13690677285194397,
+  "gram_offdiag_p90_abs": 0.34881845116615295,
+  "gram_top_pairs": [
+    [
+      0.6149,
+      22,
+      26
+    ],
+    [
+      0.5863,
+      22,
+      24
+    ],
+    [
+      0.5804,
+      22,
+      25
+    ],
+    [
+      0.5713,
+      22,
+      27
+    ],
+    [
+      0.5629,
+      21,
+      24
+    ],
+    [
+      0.5566,
+      21,
+      22
+    ],
+    [
+      0.5466,
+      28,
+      29
+    ],
+    [
+      0.5412,
+      24,
+      27
+    ],
+    [
+      0.5325,
+      24,
+      26
+    ],
+    [
+      0.5267,
+      25,
+      27
+    ]
+  ]
+}

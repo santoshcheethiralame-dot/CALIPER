@@ -129,7 +129,8 @@ Appendices: every run and its prereg; amendments with dates; the released-code r
 | ~~P2-F~~ | Factual-NO control. **Done 9-10 Oct** (C3, C8) | | |
 | ~~P2-L~~ | Logit-lens accessibility as a health check. **Done 10 Oct** (C1) | | |
 | ~~P2-R~~ | The released protocol on Gemma-3-27B on log-odds. **Done 11 Oct** (C1, C4, C5, C8): flattening, a mostly content-free introspective excess, real > impact-matched random only at strength 4, answer mass collapses at the released strength | | |
-| P2-Q | The same factual controls on Qwen2.5-7B, log-odds stored. **Filed 10 Oct**; awaits the user's Kaggle run (`kaggle/NEXT_SESSION_P2Q.md`) | C8 on a second family; tests whether the content-free excess replicates | one Kaggle session, ~2 h |
+| ~~P2-Q~~ | The same design on Qwen2.5-7B. **Ran 11 Oct; manipulation check failed**: with the released prompt Qwen puts at most 1% of first-token mass on YES/NO in every framing, so no endpoint was scored (`results/p2q_concept.json`, `results/p2q_tail.json`). Evidence for C5/C7 (the readout is defined only for models that answer in the format), not for C8 | | |
+| P2-Q2 | P2-Q with an explicit answer instruction appended to every trial ("Answer YES or NO."), as an amendment filed before data | C8 on a second family; would no longer be the released prompt | one Kaggle session, ~2 h; user decision |
 | P2-H | A Llama-3.1-8B cell, Hahami et al.'s model | shows a published conclusion changing (review EIC F5) | one Kaggle session; optional |
 | P2-K | A known-YES positive control: a model trained to report injections | validates the readout against a reference that should say YES (review R3) | training on Kaggle; optional |
 | P2-B | bf16 precision cells for Gemma-3-12B on an L4 or A100 | the one S-1 question free hardware cannot answer | paid; user decision |
@@ -157,6 +158,11 @@ the forced-choice readout at the released strength is read where the model no lo
 and at the dose where it still answers the introspective excess is mostly content-free. C1, C2,
 C4 stay the core; C5 and C8 are now instrument findings about the readout, not about
 introspection. Before Gate P2: P2-Q on Qwen-7B, then a second internal review of the claims.
+
+Status 11 Oct, later: P2-Q ran and failed its manipulation check (Qwen does not answer YES/NO to
+the released prompt: mass at most 0.01). C8 therefore rests on Gemma-3-27B alone; P2-Q2 (an
+answer instruction, filed as an amendment) is the way to get a second family. Next: the second
+internal review of the claims.
 
 ## 8. Risks
 
