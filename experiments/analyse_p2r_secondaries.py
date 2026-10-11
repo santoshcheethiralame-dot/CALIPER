@@ -5,18 +5,24 @@
 1. Identify-live at strength 4 (R4) against S-1M's steering-gate labels: Cohen's kappa and the 2x2 table.
 2. P(YES) on the probability scale per framing and strength (R1), for continuity with P2-F, and the
    per-concept change on factual_yes at strength 4 (Wilcoxon), the probability-scale twin of P1.
-Both are filed in docs/preregistration-p2r-released-protocol.md (Secondary); neither was in the
+3. P1 and P2 for the content-free cells (R2 norm-matched, R3 impact-matched) at every strength, with
+   analyse_p2r's own functions: does a random vector also flatten, and also give an introspective excess?
+4. Median log-odds change per cell, framing and strength (for the paper's table and figure).
+All are filed in docs/preregistration-p2r-released-protocol.md (Secondary); none was in the
 scorer when the data arrived.
 """
 import argparse
 import glob
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
 from scipy.stats import wilcoxon
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "experiments"))
+import analyse_p2r as p2r  # noqa: E402
 
 
 def rows(p):
@@ -57,6 +63,12 @@ def main():
     rep["P1_probability_scale"] = {"median_change": float(np.median(d)),
                                    "wilcoxon_p": float(wilcoxon(d).pvalue) if np.any(d) else 1.0,
                                    "concepts_down": int((d < 0).sum()), "concepts": len(d)}
+    T = {k: p2r.table(p2r.load(a.dir, tag)) for k, tag in p2r.CELLS.items() if k in ("R1", "R2", "R3")}
+    for k in ("R2", "R3"):
+        rep[f"P1 {k} by strength"] = {f"strength {x:g}": p2r.p1(T[k], x) for x in p2r.STRENGTHS}
+        rep[f"P2 {k} by strength"] = {f"strength {x:g}": p2r.excess(T[k], x, p2r.FACTUAL) for x in p2r.STRENGTHS}
+    rep["median_logodds_change"] = {k: {fr: {f"{x:g}": float(np.median(p2r.change(t, fr, x)[1])) for x in p2r.STRENGTHS}
+                                        for fr in t} for k, t in T.items()}
     json.dump(rep, open(ROOT / "results/p2r_secondaries.json", "w"), indent=1)
     print(json.dumps(rep, indent=1)[:2500])
 

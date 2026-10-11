@@ -90,7 +90,10 @@ accessibility (0.69, 0.77, 0.62) (Table~\ref{tab:health}, Figure~\ref{fig:health
 and concept type fixed, none is consistent (Table~\ref{tab:cells}); the pooled signal comes
 from recipes and concept types that differ in both the check and liveness. Raw norm sits at
 chance once concept type is fixed; the steering rule scores abstract concepts live almost never.
-At the published point no check finds the six dead released vectors (low power).}
+At the published point no check finds the six dead released vectors (low power). A second
+liveness rule, the identify stage's rise of at least 2 nats in $\log P(\text{concept})$, is not
+specific: real vectors pass it 27/30 at strength 4 and random vectors 21/30 (26/30 at 8), and it
+agrees with the steering gate at Cohen's $\kappa$ 0.10 (P2-R, filed secondaries).}
 
 \begin{table}[t]
 \centering
@@ -142,7 +145,10 @@ on Gemma-3-4B and about 1{,}000x less on 27B. The same fraction of the residual 
 that differs about 480x across families at 0.25 and about 4x at 1.0. One vector at one strength
 gives 0.0006 to 12 nats depending on the prompt (S-1M at strength 4: factual-NO, introspective,
 story, neutral), so every KL must name its prompt. Even a vector's own KL does not put models on
-one curve (Table~\ref{tab:dose}, Figures~\ref{fig:dosefrac}, \ref{fig:dosekl}, \ref{fig:livekl}).}
+one curve (Table~\ref{tab:dose}, Figures~\ref{fig:dosefrac}, \ref{fig:dosekl}, \ref{fig:livekl}).
+The released strength 4 sits past the dose at which Gemma-3-27B stops answering YES or NO with
+the released prompt (median YES+NO mass 0.93 at strength 2, $8\times10^{-5}$ at 4;
+Figure~\ref{fig:p2r}a).}
 
 \begin{table}[t]
 \centering
@@ -178,19 +184,56 @@ vectors). Exploratory.}}
 \note{C5. What the first-token readout measures depends on strength and window. At alpha 6
 (Study 3, older window, the filed primary) content-free vectors produce the whole shift (random
 0.305 against real 0.417, $p$ 0.33); at the published alpha 4 real beats random (0.504 against
-0.252, $p$ 0.004), content-free share near half. At the released window the introspective answer
-responds to injection (AUC 0.83) and a matched neutral prompt does not (0.41); on Qwen-7B the
-neutral prompt responds about as much (0.86--0.94). P2-R adds content-free controls at the
-released window.}
+0.252, $p$ 0.004). With the released prompt and window (P2-R, filed), real beats impact-matched
+random only where the model has mostly stopped answering: at strength 4, $+16.3$ against $+10.9$
+log-odds ($p = 1.9\times10^{-4}$, content-free share 0.67). At strengths 1 and 2, where YES and NO
+keep 0.997 and 0.93 of the mass, the two cannot be told apart ($p$ 0.63, 0.22; shares 0.76,
+0.80). The neutral prompt barely responds (injected against uninjected AUC 0.56--0.63 at
+strengths 1--4; Table~\ref{tab:p2r}).}
 
-\note{C8. Read on log-odds, injection moves confident factual-NO answers more than the
-introspective answer (Gemma-3-27B at strength 4: +14.75 against +5.45, 27/30 concepts), while the
-neutral prompt barely moves (Table~\ref{tab:logodds}, Figure~\ref{fig:logodds}). The
-probability-scale reading in P2-F (``the yes-bias is small at moderate dose'') was an artefact of
-the factual baseline sitting near certainty, and is withdrawn. A global yes-bias and a
-flattening of the answer distribution are not yet separated: P2-R's factual-YES arm decides it.
-The one framing-specific signal so far is at the gentlest Qwen dose (tail vectors at 0.25 of the
-norm).}
+\note{C8. Injection flattens confident answers; it does not add a global yes-bias (P2-R P1,
+filed). At strength 4 factual-YES moves down by 4.93 log-odds ($p$ 0.011), after a small rise at
+strength 1 ($+1.07$, $p$ 0.014); impact-matched random vectors flatten it more at every strength
+($-3.6$ already at strength 1). The introspective answer moves more than a regression on the 90
+factual items predicts at its baseline (P2, filed): $+4.98$ $[+2.57, +9.13]$ at strength 2 and
+$+6.90$ $[+3.22, +10.24]$ at strength 4. Most of that excess is not concept-specific:
+norm-matched random vectors give $+3.44$ $[+1.73, +5.67]$ and $+4.79$ $[+2.65, +6.76]$, and
+impact-matched ones $+0.90$ and $+2.76$ with intervals spanning zero (filed secondaries, scored
+after the primary output was seen). With the released prompt the raw ordering differs from
+P2-F's (introspective $+16.3$, factual-NO $+11.2$ at strength 4); once the baseline is regressed
+out the introspective answer moves more in both. At strength 4 every log-odds compares two tokens
+the model is no longer producing, so strength 2 is the operating point that supports a readout
+claim. On the probability scale factual-YES does not move (median 0, $p$ 0.063), the same
+artefact P2-F's withdrawn reading rested on (Table~\ref{tab:p2r}, Figure~\ref{fig:p2r}).}
+
+\note{P2-F's own log-odds reading, kept for the prompt it used: injection moves confident
+factual-NO answers more than the introspective answer (Gemma-3-27B, S-1M prompt, strength 4:
+$+14.75$ against $+5.45$, 27/30 concepts), while the neutral prompt barely moves
+(Table~\ref{tab:logodds}, Figure~\ref{fig:logodds}). The one framing-specific signal on Qwen is
+at the gentlest dose (tail vectors at 0.25 of the norm).}
+
+\begin{table}[t]
+\centering
+\resizebox{\linewidth}{!}{\input{tables/tab_p2r}}
+\caption{\note{P2-R on Gemma-3-27B (4-bit, layer 37, released recipe and prompt), per injection
+strength: median YES+NO mass on the introspective prompt; P1, median change in the log-odds of
+YES on factual-YES items for real and impact-matched random vectors; P2, the introspective excess
+over a regression on the 90 factual items at the same baseline, with bootstrap intervals, for real,
+norm-matched random and impact-matched random vectors; P3, the introspective change for real
+against impact-matched random vectors, Wilcoxon $p$, and the content-free share. Random-vector P1
+and P2 were added to the scorer after the primary output was seen.}}
+\label{tab:p2r}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_p2r}
+\caption{\note{P2-R. (a) Median probability on YES and NO together; below 0.5 (shaded) the model
+mostly answers with something else. (b) Median change in log-odds of YES for the introspective
+and factual-YES prompts, real vectors (filled) against impact-matched random ones (hollow,
+dashed). The dotted line marks the released strength.}}
+\label{fig:p2r}
+\end{figure}
 
 \begin{table}[t]
 \centering
@@ -219,7 +262,9 @@ first-token \pyes{} is flat (about 0.42). Study 3 readout swing; S-4 reanalysis.
 \label{sec:checklist}
 \note{C7 as practice: a steering gate per vector before any detection number; real-vector KL and
 coherence at every dose, with the full dose curve; content-free, impact-matched and span
-controls; a neutral framing and a factual-NO control; first-token readouts beside generated text;
+controls; a neutral framing and factual-YES, factual-NO and contested controls with a
+baseline-matched comparison; YES+NO mass at every dose beside any log-odds; liveness rules
+validated against random vectors; first-token readouts beside generated text;
 never a dose in raw units or fraction of norm alone. Logit-lens accessibility as a cheap screen.}
 
 % ======================================================================
@@ -227,7 +272,9 @@ never a dose in raw units or fraction of norm alone. Logit-lens accessibility as
 \label{sec:limits}
 \note{Free-tier hardware: 4-bit for 12B and 27B; the precision axis is untestable on T4s.
 Open models up to 27B, no closed models. 30 concepts. The steering gate is one rule; a stricter
-rule belongs in an appendix. No judge-scored numbers. Negative results kept: S-1's criterion,
+rule belongs in an appendix. No judge-scored numbers. P2-R was scored once, but three of its
+filed secondaries (random-vector P1 and P2, the identify-gate agreement) were added to the scorer
+after its primary output was seen. Negative results kept: S-1's criterion,
 P2-G, P2-M's secondary.}
 
 \section{Conclusion}
@@ -241,7 +288,9 @@ some regime and the standard checks do not notice.}
 \section{Every run, its filing, and every deviation}
 \label{app:deviations}
 \note{From the notebook and the preregistrations: S-2 (Amendments 1--3), S-1 (Amendments 1--4),
-P2-M, P2-F, P2-L, P2-D, P2-G, A-F1, S-11, S-4; dates of filing against dates of data.}
+P2-M, P2-F, P2-L, P2-D, P2-G, P2-R, A-F1, S-11, S-4; dates of filing against dates of data. P2-R:
+filed 10 Oct, data 11 Oct, scored once; secondaries missing from the scorer computed afterwards
+(\texttt{experiments/analyse\_p2r\_secondaries.py}).}
 
 \section{The released code, read}
 \note{Template-tail read, unnormalised vectors, strength 4--8, injection from the token before

@@ -8,6 +8,7 @@ tab_dose       next-token KL at the same fraction of the residual norm, and real
                KL on the KL-calibrated grid (P2-D)
 tab_logodds    P2-F on log-odds: introspective, factual-NO and neutral changes per cell
 tab_checks_cells  health-check AUCs within recipe, concrete concepts only (20 vectors per cell)
+tab_p2r        P2-R on Gemma-3-27B, per strength: answer-token mass, P1, P2 for real and random vectors, P3
 """
 import json
 import os
@@ -121,7 +122,28 @@ def tab_checks_cells():
           " & ".join(checks) + " \\\\\n\\midrule\n" + "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
 
 
+def tab_p2r():
+    a, b = load("results/p2r_analysis.json"), load("results/p2r_secondaries.json")
+    sg = lambda v: f"{v:+.2f}"
+    iv = lambda v: f"{sg(v['excess_median'])} [{sg(v['ci95'][0])}, {sg(v['ci95'][1])}]"
+    pv = lambda p: f"{p:.1e}" if p < 1e-3 else f"{p:.3f}"
+    lines = []
+    for x in ("1", "2", "4", "8"):
+        k = f"strength {x}"
+        p1, p3 = a["P1"][k], a["P3"][k]["impact-matched"]
+        lines.append(" & ".join([
+            x, f"{a['yesno_mass_median']['released_introspective'][x]:.3g}",
+            f"{sg(p1['median_change'])} ({pv(p1['wilcoxon_p'])})", sg(b["P1 R3 by strength"][k]["median_change"]),
+            iv(a["P2"][k]["all factual"]), iv(b["P2 R2 by strength"][k]), iv(b["P2 R3 by strength"][k]),
+            f"{sg(p3['real_median_change'])} / {sg(p3['random_median_change'])} ({pv(p3['wilcoxon_p_real_minus_random'])})",
+            f"{p3['content_free_share']:.2f}"]) + " \\\\")
+    head = ("strength & YES+NO mass & factual-YES, real ($p$) & factual-YES, impact random & "
+            "excess, real & excess, norm random & excess, impact random & real / impact random ($p$) & share")
+    write("tab_p2r", "\\begin{tabular}{lcccccccc}\n\\toprule\n" + head + " \\\\\n\\midrule\n" +
+          "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
+
+
 if __name__ == "__main__":
-    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells):
+    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r):
         f()
     print("wrote", sorted(os.listdir(OUT)))

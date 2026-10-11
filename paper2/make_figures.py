@@ -11,6 +11,8 @@ fig_live_kl     share of real vectors steered against each vector's own next-tok
                 per model with the others in grey; intervals resample vectors (internal review A7)
 fig_logodds     P2-F on the log-odds scale (internal review, 10 Oct): factual-NO against
                 introspective change per cell; above the diagonal, factual answers move more
+fig_p2r         P2-R, the released protocol on Gemma-3-27B: a, YES+NO mass per framing and strength;
+                b, median log-odds change for real and impact-matched random vectors
 
 Drawn at printed size (NeurIPS text width 5.5 in) in the paper's typeface (Times). Colours are the
 validated categorical palette in fixed slot order; every series also has its own marker, so the
@@ -229,8 +231,50 @@ def fig_logodds():
     save(fig, "fig_logodds")
 
 
+def fig_p2r():
+    a = load("results/p2r_analysis.json")["yesno_mass_median"]
+    ch = load("results/p2r_secondaries.json")["median_logodds_change"]
+    fr = [("released_introspective", "introspective"), ("factual_yes", "factual-YES"),
+          ("factual_no", "factual-NO"), ("factual_contested", "contested")]
+    st = ["0", "1", "2", "4", "8"]
+    xs = np.arange(len(st))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(WIDTH, 2.25), gridspec_kw={"wspace": 0.38})
+    ax1.axhspan(1e-6, 0.5, color=SHADE, lw=0, zorder=0)
+    for i, (k, name) in enumerate(fr):
+        y = [max(a[k][x], 1e-6) for x in st]
+        ax1.plot(xs, y, color=SLOT[i], lw=1.4, marker=MARK[i], ms=4.2, mec="white", mew=0.7, label=name)
+    ax1.set_yscale("log")
+    ax1.set_ylim(1e-6, 2)
+    ax1.set_ylabel("median YES + NO probability")
+    ax1.text(0.03, 0.03, "below 0.5: mostly not answering", color=INK2, fontsize=7,
+             transform=ax1.transAxes, ha="left")
+    panel(ax1, "a", "answer-token mass")
+    for i, (k, name) in enumerate(fr[:2]):
+        for cell, ls, lab in (("R1", "-", "real"), ("R3", (0, (3, 2)), "impact-matched random")):
+            y = [0.0] + [ch[cell][k][x] for x in st[1:]]
+            ax2.plot(xs, y, color=SLOT[i], lw=1.4, ls=ls, marker=MARK[i], ms=4.2,
+                     mec="white" if cell == "R1" else SLOT[i], mew=0.7 if cell == "R1" else 1.0,
+                     mfc=SLOT[i] if cell == "R1" else "white")
+        label_at(ax2, xs[-1], ch["R1"][k]["8"], name, dx=5)
+    ax2.axhline(0, color=INK3, lw=0.6)
+    ax2.set_ylabel("median change, log-odds of YES")
+    from matplotlib.lines import Line2D
+    ax2.legend(handles=[Line2D([], [], color=INK2, lw=1.4, label="real"),
+                        Line2D([], [], color=INK2, lw=1.4, ls=(0, (3, 2)), label="impact-matched random")],
+               loc="lower left", handlelength=2.2)
+    panel(ax2, "b", "introspective and factual-YES")
+    for ax in (ax1, ax2):
+        ax.set_xticks(xs)
+        ax.set_xticklabels(st)
+        ax.set_xlabel("injection strength (released units)")
+        ax.axvline(3, color=INK3, lw=0.6, ls=(0, (1, 2)), zorder=0)
+    ax1.legend(loc="center left", bbox_to_anchor=(0.0, 0.42), ncol=1, handletextpad=0.4)
+    ax1.text(3.08, 1.1, "released", fontsize=7, color=INK2)
+    save(fig, "fig_p2r")
+
+
 def main():
-    for f in (fig_health_auc, fig_dose, fig_live_kl, fig_logodds):
+    for f in (fig_health_auc, fig_dose, fig_live_kl, fig_logodds, fig_p2r):
         f()
     print("wrote", sorted(os.listdir(OUT)))
 
