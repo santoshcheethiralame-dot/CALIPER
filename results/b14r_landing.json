@@ -1,0 +1,88 @@
+{
+ "filed_rows": 300,
+ "rerun_rows": 300,
+ "complete": true,
+ "identity": {
+  "direct_route_identical": 300,
+  "cascade_route_identical": 2,
+  "restart_agreement_identical": 300,
+  "picked_route_changed": 33,
+  "of": 300
+ },
+ "verdicts": {
+  "filed_failures": 46,
+  "rerun_failures": 42,
+  "flips": 50,
+  "flip_rate": 0.16666666666666666,
+  "fail_to_pass": 27,
+  "pass_to_fail": 23,
+  "flips_among_cascade_picked_in_either": 50
+ },
+ "rerun_as_an_arm": {
+  "units": 300,
+  "min_abs_gamma": 0.04236043989658356,
+  "max_abs_diff_raw_vs_filed_label": 5.003415459980953e-05,
+  "as filed": {
+   "failures": 43,
+   "converged_wrong": 18,
+   "under_fitted": 25,
+   "median_alignment": 0.9950442772728585,
+   "primary_comparison": {
+    "failures": 43,
+    "auc_restart": 0.7667179440774591,
+    "auc_r2": 0.894851144692788,
+    "diff": -0.12813320061532896,
+    "delong_p": 0.00013350653823737487,
+    "boot_ci95": [
+     -0.19800244321780838,
+     -0.06614559768346756
+    ],
+    "paired_perm_p": 0.0004997501249375312
+   },
+   "converged_wrong_vs_pass": {
+    "auc_restart": 0.7457846952010376,
+    "auc_r2": 0.772589710332901,
+    "auc_null_share": 0.8966709900562041
+   },
+   "converged_wrong_vs_pass_r2_above_0.99": {
+    "passes_kept": 236,
+    "auc_restart": 0.7707156308851224,
+    "auc_r2": 0.841337099811676,
+    "auc_null_share": 0.8961864406779662
+   },
+   "auc_null_share_all_failures": 0.6838295176907068
+  },
+  "identifiable": {
+   "failures": 25,
+   "converged_wrong": 4,
+   "under_fitted": 21,
+   "median_alignment": 0.9993768701648277,
+   "primary_comparison": {
+    "failures": 25,
+    "auc_restart": 0.773090909090909,
+    "auc_r2": 0.9720727272727273,
+    "diff": -0.19898181818181826,
+    "delong_p": 1.9229183415956134e-06,
+    "boot_ci95": [
+     -0.28495999999999994,
+     -0.12214909090909108
+    ],
+    "paired_perm_p": 0.0004997501249375312
+   },
+   "converged_wrong_vs_pass": {
+    "auc_restart": 0.78,
+    "auc_r2": 0.8736363636363637,
+    "auc_null_share": 0.5054545454545455
+   },
+   "converged_wrong_vs_pass_r2_above_0.99": {
+    "passes_kept": 250,
+    "auc_restart": 0.808,
+    "auc_r2": 0.961,
+    "auc_null_share": 0.505
+   },
+   "auc_null_share_all_failures": 0.44989090909090906
+  },
+  "median_fit_share_on_null": 0.0032889825598856623,
+  "verdicts_changed": 18
+ }
+}

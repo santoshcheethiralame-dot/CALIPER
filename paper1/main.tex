@@ -905,7 +905,8 @@ headline rests on the comparison B-14 filed} \\
 \draft{Identifiable label} & \draft{Pre-registered in the primary's first addendum (5 Oct,
 before unblinding) as a secondary; first computed on 9 Oct, after all arms had run} & yes &
 \draft{Reported beside the filed label; it cannot be computed on the primary run itself, which
-saved no fitted directions} \\
+saved no fitted directions; its replicate (B-14r) gives \bRIdentDelta{} under a scoring plan filed
+before the replicate's last rows} \\
 Reading of the converged-wrong class & The filed rule ("neither check sees the hard case") is
 kept as the primary reading; an identifiability analysis was added & yes & No pre-registered
 number changes; Section~\ref{sec:identifiability} is exploratory \\
@@ -1039,6 +1040,7 @@ analysis, replacing the pooled GPT-Neo layer-10 arm with X-1a gives a pooled gap
 arm & estimator & precision & $n$ & fail & AUC restart & AUC $R^2$ & $\Delta$ & bootstrap 95\% CI & $\Delta$ direct-picked & $\Delta$ direct label & pooled \\
 \midrule
 GPT-2 L6 (B-14) & corrected & fp32 & 300 & 46 & 0.792 & 0.919 & $-$0.127 & [$-$0.197, $-$0.063] & $-$0.113 (9) & n/s & yes \\
+\draft{GPT-2 L6, primary replicate (B-14r)} & corrected & fp32 & 300 & 42 & 0.767 & 0.895 & $-$0.128 & [$-$0.198, $-$0.066] & $-$0.077 (14) & $-$0.136 (107) & no \\
 Pythia-160m L6 (B-2c) & corrected & fp16 & 300 & 13 & 0.828 & 0.951 & $-$0.123 & [$-$0.264, $+$0.005] & $-$0.010 (4) & $-$0.154 (36) & yes \\
 GPT-2 L2 (B-7) & coupled & fp32 & 50 & 25 & 0.789 & 0.950 & $-$0.162 & [$-$0.294, $-$0.050] & $-$0.010 (12) & n/s & yes \\
 GPT-2 L10 (B-7) & coupled & fp32 & 50 & 5 & 0.729 & 0.818 & $-$0.089 & [$-$0.222, $+$0.044] & $-$0.008 (3) & n/s & yes \\

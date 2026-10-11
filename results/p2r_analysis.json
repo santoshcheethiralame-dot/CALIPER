@@ -1,0 +1,561 @@
+{
+ "preset": "gemma27",
+ "cells_found": {
+  "R1": 750,
+  "R2": 750,
+  "R3": 750,
+  "R4": 150,
+  "R4-random": 150
+ },
+ "checks": {
+  "strength0_identical_across_cells": true,
+  "kl_zero_at_strength0": true,
+  "median_mass_at_strength0": {
+   "released_introspective": 0.9998140220663544,
+   "released_neutral": 3.743612755830538e-08,
+   "factual_no": 0.9999402797730333,
+   "factual_yes": 0.9999998807907374,
+   "factual_contested": 0.9665663884466651
+  },
+  "framings_passing_mass": [
+   "released_introspective",
+   "factual_no",
+   "factual_yes",
+   "factual_contested"
+  ],
+  "factual_baselines_opposite_sign": true,
+  "factual_baseline_median_logodds": {
+   "factual_no": -23.65559309895616,
+   "factual_yes": 28.537920355803635
+  }
+ },
+ "P1": {
+  "strength 1": {
+   "median_change": 1.0712319016456497,
+   "wilcoxon_p": 0.013663241639733315,
+   "concepts": 30,
+   "reading": "affirmative shift"
+  },
+  "strength 2": {
+   "median_change": 0.6443145909943127,
+   "wilcoxon_p": 0.20540969260036945,
+   "concepts": 30,
+   "reading": "neither"
+  },
+  "strength 4": {
+   "median_change": -4.9289223119849375,
+   "wilcoxon_p": 0.011303061619400978,
+   "concepts": 30,
+   "reading": "flattening"
+  },
+  "strength 8": {
+   "median_change": -23.357599496847115,
+   "wilcoxon_p": 1.862645149230957e-09,
+   "concepts": 30,
+   "reading": "flattening"
+  }
+ },
+ "P1 R2": {
+  "median_change": -16.667637005449482,
+  "wilcoxon_p": 1.862645149230957e-09,
+  "concepts": 30,
+  "reading": "flattening"
+ },
+ "P1 R3": {
+  "median_change": -14.489416238328204,
+  "wilcoxon_p": 1.30385160446167e-08,
+  "concepts": 30,
+  "reading": "flattening"
+ },
+ "P2": {
+  "strength 1": {
+   "all factual": {
+    "excess_median": 1.3008886923874399,
+    "ci95": [
+     -0.5763854864586404,
+     3.1537036540340746
+    ],
+    "framing_specific": false,
+    "fit_items": 90,
+    "introspective_baseline_median": -16.863560927500657
+   },
+   "contested only": {
+    "excess_median": 1.421970898133259,
+    "ci95": [
+     -0.8983442745051642,
+     3.530591169435779
+    ],
+    "framing_specific": false,
+    "fit_items": 30,
+    "introspective_baseline_median": -16.863560927500657
+   }
+  },
+  "strength 2": {
+   "all factual": {
+    "excess_median": 4.977524159828587,
+    "ci95": [
+     2.5747370513881713,
+     9.130839330243917
+    ],
+    "framing_specific": true,
+    "fit_items": 90,
+    "introspective_baseline_median": -16.863560927500657
+   },
+   "contested only": {
+    "excess_median": 4.276888228245861,
+    "ci95": [
+     0.8065175000436281,
+     8.94815159347791
+    ],
+    "framing_specific": true,
+    "fit_items": 30,
+    "introspective_baseline_median": -16.863560927500657
+   }
+  },
+  "strength 4": {
+   "all factual": {
+    "excess_median": 6.896838232689184,
+    "ci95": [
+     3.2210634612084292,
+     10.244713052451939
+    ],
+    "framing_specific": true,
+    "fit_items": 90,
+    "introspective_baseline_median": -16.863560927500657
+   },
+   "contested only": {
+    "excess_median": 5.410006789484587,
+    "ci95": [
+     1.1077894798539945,
+     10.246334336433945
+    ],
+    "framing_specific": true,
+    "fit_items": 30,
+    "introspective_baseline_median": -16.863560927500657
+   }
+  },
+  "strength 8": {
+   "all factual": {
+    "excess_median": 1.1485341840981977,
+    "ci95": [
+     -0.8849249570156964,
+     3.1161156453697116
+    ],
+    "framing_specific": false,
+    "fit_items": 90,
+    "introspective_baseline_median": -16.863560927500657
+   },
+   "contested only": {
+    "excess_median": 1.5597907918659732,
+    "ci95": [
+     -1.6572369978311707,
+     4.416783320293599
+    ],
+    "framing_specific": false,
+    "fit_items": 30,
+    "introspective_baseline_median": -16.863560927500657
+   }
+  }
+ },
+ "P3": {
+  "strength 1": {
+   "impact-matched": {
+    "real_median_change": 1.51466723671183,
+    "random_median_change": 1.1498949259330402,
+    "wilcoxon_p_real_minus_random": 0.6263462882488966,
+    "content_free_share": 0.759173300948485
+   },
+   "norm-matched": {
+    "real_median_change": 1.51466723671183,
+    "random_median_change": 1.0476947007118724,
+    "wilcoxon_p_real_minus_random": 0.6701805889606476,
+    "content_free_share": 0.6916995860993853
+   }
+  },
+  "strength 2": {
+   "impact-matched": {
+    "real_median_change": 6.341745516401716,
+    "random_median_change": 5.1036544422277075,
+    "wilcoxon_p_real_minus_random": 0.22064675763249397,
+    "content_free_share": 0.8047712461857826
+   },
+   "norm-matched": {
+    "real_median_change": 6.341745516401716,
+    "random_median_change": 5.414707763331535,
+    "wilcoxon_p_real_minus_random": 0.19092952087521553,
+    "content_free_share": 0.8538197802682914
+   }
+  },
+  "strength 4": {
+   "impact-matched": {
+    "real_median_change": 16.30869324340165,
+    "random_median_change": 10.88488914825939,
+    "wilcoxon_p_real_minus_random": 0.00018860027194023132,
+    "content_free_share": 0.6674286520572896
+   },
+   "norm-matched": {
+    "real_median_change": 16.30869324340165,
+    "random_median_change": 12.610706897903583,
+    "wilcoxon_p_real_minus_random": 0.012047622352838516,
+    "content_free_share": 0.7732506038155915
+   }
+  },
+  "strength 8": {
+   "impact-matched": {
+    "real_median_change": 16.32183112828352,
+    "random_median_change": 13.05155082525016,
+    "wilcoxon_p_real_minus_random": 0.00466480478644371,
+    "content_free_share": 0.7996376584630626
+   },
+   "norm-matched": {
+    "real_median_change": 16.32183112828352,
+    "random_median_change": 15.478293190943077,
+    "wilcoxon_p_real_minus_random": 0.39305018074810505,
+    "content_free_share": 0.9483184251380529
+   }
+  }
+ },
+ "neutral_injected_vs_uninjected_auc": {
+  "strength 1": 0.6322222222222222,
+  "strength 2": 0.5644444444444444,
+  "strength 4": 0.5922222222222222,
+  "strength 8": 0.23
+ },
+ "yesno_mass_median": {
+  "released_introspective": {
+   "0": 0.9998140220663544,
+   "1": 0.9973792391253959,
+   "2": 0.9342729834705823,
+   "4": 8.283684493786368e-05,
+   "8": 3.7470651042274174e-05
+  },
+  "released_neutral": {
+   "0": 3.743612755830538e-08,
+   "1": 8.502283667106129e-08,
+   "2": 3.4460763060903696e-07,
+   "4": 4.2803598868474034e-07,
+   "8": 9.545320402284139e-06
+  },
+  "factual_no": {
+   "0": 0.9999402797730333,
+   "1": 0.9994209800967877,
+   "2": 0.996825731287182,
+   "4": 0.023429202701498654,
+   "8": 0.0001375774263394961
+  },
+  "factual_yes": {
+   "0": 0.9999998807907374,
+   "1": 0.9999995231630838,
+   "2": 0.9999929070991707,
+   "4": 0.5417078157451938,
+   "8": 0.0006936815729923466
+  },
+  "factual_contested": {
+   "0": 0.9665663884466651,
+   "1": 0.9815611914927369,
+   "2": 0.06764322527264797,
+   "4": 6.224345312512199e-05,
+   "8": 2.360955023912842e-05
+  }
+ },
+ "identify R4": {
+  "strength 1": {
+   "median_change_logp_concept": 5.320195198059082,
+   "identify_live": 28,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": true,
+    "candle": true,
+    "clock": true,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": false,
+    "eagle": true,
+    "elephant": false,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": true,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  },
+  "strength 2": {
+   "median_change_logp_concept": 7.174798965454102,
+   "identify_live": 29,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": true,
+    "candle": true,
+    "clock": true,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": false,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": true,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  },
+  "strength 4": {
+   "median_change_logp_concept": 8.546268463134766,
+   "identify_live": 27,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": true,
+    "candle": true,
+    "clock": true,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": false,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": false,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": false,
+    "violin": true,
+    "volcano": true
+   }
+  },
+  "strength 8": {
+   "median_change_logp_concept": 12.664857864379883,
+   "identify_live": 27,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": true,
+    "candle": true,
+    "clock": false,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": false,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": false,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": true,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  }
+ },
+ "identify R4-random": {
+  "strength 1": {
+   "median_change_logp_concept": 0.3823060989379883,
+   "identify_live": 7,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": false,
+    "bread": false,
+    "bridge": false,
+    "candle": false,
+    "clock": false,
+    "curiosity": false,
+    "desert": false,
+    "dolphin": true,
+    "eagle": false,
+    "elephant": false,
+    "engine": false,
+    "fear": false,
+    "freedom": false,
+    "garden": true,
+    "grief": false,
+    "harbor": false,
+    "jealousy": false,
+    "joy": true,
+    "justice": true,
+    "library": false,
+    "mirror": false,
+    "mountain": true,
+    "nostalgia": false,
+    "river": false,
+    "serenity": false,
+    "spider": true,
+    "telescope": false,
+    "umbrella": true,
+    "violin": false,
+    "volcano": false
+   }
+  },
+  "strength 2": {
+   "median_change_logp_concept": 1.0732192993164062,
+   "identify_live": 12,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": false,
+    "bread": false,
+    "bridge": false,
+    "candle": false,
+    "clock": false,
+    "curiosity": false,
+    "desert": true,
+    "dolphin": true,
+    "eagle": false,
+    "elephant": true,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": false,
+    "harbor": false,
+    "jealousy": false,
+    "joy": false,
+    "justice": true,
+    "library": false,
+    "mirror": false,
+    "mountain": true,
+    "nostalgia": false,
+    "river": false,
+    "serenity": false,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": false,
+    "volcano": false
+   }
+  },
+  "strength 4": {
+   "median_change_logp_concept": 4.924577713012695,
+   "identify_live": 21,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": false,
+    "bridge": false,
+    "candle": false,
+    "clock": false,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": false,
+    "joy": true,
+    "justice": true,
+    "library": false,
+    "mirror": false,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": false,
+    "spider": false,
+    "telescope": true,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  },
+  "strength 8": {
+   "median_change_logp_concept": 8.898155689239502,
+   "identify_live": 26,
+   "concepts": 30,
+   "live_by_concept": {
+    "betrayal": true,
+    "bread": true,
+    "bridge": true,
+    "candle": false,
+    "clock": false,
+    "curiosity": true,
+    "desert": true,
+    "dolphin": true,
+    "eagle": true,
+    "elephant": true,
+    "engine": true,
+    "fear": true,
+    "freedom": true,
+    "garden": true,
+    "grief": true,
+    "harbor": true,
+    "jealousy": true,
+    "joy": true,
+    "justice": true,
+    "library": false,
+    "mirror": true,
+    "mountain": true,
+    "nostalgia": true,
+    "river": true,
+    "serenity": false,
+    "spider": true,
+    "telescope": true,
+    "umbrella": true,
+    "violin": true,
+    "volcano": true
+   }
+  }
+ }
+}
