@@ -124,6 +124,7 @@ def tab_checks_cells():
 
 def tab_p2r():
     a, b = load("results/p2r_analysis.json"), load("results/p2r_secondaries.json")
+    rv = load("results/p2r_revision.json")
     sg = lambda v: f"{v:+.2f}"
     iv = lambda v: f"{sg(v['excess_median'])} [{sg(v['ci95'][0])}, {sg(v['ci95'][1])}]"
     pv = lambda p: f"{p:.1e}" if p < 1e-3 else f"{p:.3f}"
@@ -135,15 +136,90 @@ def tab_p2r():
             x, f"{a['yesno_mass_median']['released_introspective'][x]:.3g}",
             f"{sg(p1['median_change'])} ({pv(p1['wilcoxon_p'])})", sg(b["P1 R3 by strength"][k]["median_change"]),
             iv(a["P2"][k]["all factual"]), iv(b["P2 R2 by strength"][k]), iv(b["P2 R3 by strength"][k]),
+            "{} ({})".format(sg(rv[k]["R1 minus R3 excess, paired"]["median"]),
+                             pv(rv[k]["R1 minus R3 excess, paired"]["wilcoxon_p"])),
             f"{sg(p3['real_median_change'])} / {sg(p3['random_median_change'])} ({pv(p3['wilcoxon_p_real_minus_random'])})",
             f"{p3['content_free_share']:.2f}"]) + " \\\\")
     head = ("strength & YES+NO mass & factual-YES, real ($p$) & factual-YES, impact random & "
-            "excess, real & excess, norm random & excess, impact random & real / impact random ($p$) & share")
-    write("tab_p2r", "\\begin{tabular}{lcccccccc}\n\\toprule\n" + head + " \\\\\n\\midrule\n" +
+            "excess, real & excess, norm random & excess, impact random & real $-$ impact excess ($p$) & "
+            "real / impact random ($p$) & share")
+    write("tab_p2r", "\\begin{tabular}{lccccccccc}\n\\toprule\n" + head + " \\\\\n\\midrule\n" +
           "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
 
 
+def tab_predictions():
+    """Every filed prediction in Paper 2's evidence and its outcome (second internal review, ruling 17)."""
+    s2 = {n: load(f"results/{s}_analysis.json")["predictions"] for n, s in S2}
+    held = lambda key: sum(bool(v[key]) for v in s2.values())
+    s1 = {m: load(f"results/s1_{m}_analysis.json")["criterion"]["0.5 nat (gate)"] for m in ("gemma12", "gemma27")}
+    s11 = load("results/s11_analysis.json")["centred"]
+    eq = load("results/s3_reanalysis.json")["equivalence"]
+    verdicts = [v["verdict"] for v in eq.values()]
+    lap = load("results/p2l_logit_lens_health.json")
+    lap_ok = sum(v["ci95"][0] > 0.5 for v in lap.values() if isinstance(v, dict) and v.get("counts_for_primary"))
+    lap_n = sum(1 for v in lap.values() if isinstance(v, dict) and v.get("counts_for_primary"))
+    pm = [load(f"results/p2m_{m}.json")["primary"] for m in ("qwen3b", "qwen7b")]
+    pg = load("results/p2g_gemma4b_kl.json")["gemma4b_kl"]["shared share"]
+    pr = load("results/p2r_analysis.json")
+    p1, p2, p3 = pr["P1"]["strength 4"], pr["P2"]["strength 4"]["all factual"], pr["P3"]["strength 4"]["impact-matched"]
+    rows = [
+        ("Study 3 (6 Sep)", "real $>$ random P(YES) at $\\alpha$ 6", "not significant ($p$ 0.33); S-4: inconclusive", "failed"),
+        ("S-2 (6 Oct)", "norm AUC near 0.5", f"{held('norm near 0.5')}/3 sessions", "held"),
+        ("S-2", "distinctness AUC near 0.5", f"{held('distinctness near 0.5')}/3 sessions", "failed"),
+        ("S-2", "P(YES)-shift AUC near 0.5", f"{held('P(YES) shift near 0.5')}/3 (inverted on Qwen)", "failed"),
+        ("S-2", "logit steering AUC $\\geq$ 0.8", f"{held('logit steering >= 0.8')}/3 sessions", "failed"),
+        ("S-1 (6 Oct)", "tail fails the gate more than concept", f"12B $p$ {s1['gemma12']['fisher_p']:.2f}; 27B opposite direction", "failed"),
+        ("S-11 (6 Oct)", "identification $k \\geq 4$/16", f"{s11['k']}/{s11['n']}", "held"),
+        ("S-4 (6 Oct)", "equivalence tests, margin 0.10", f"{verdicts.count('inconclusive')} inconclusive, "
+         f"{sum('equivalent' in v for v in verdicts)} equivalent, {verdicts.count('different')} different", "reported"),
+        ("P2-F (9 Oct)", "Qwen-7B tail: factual-NO shift $>$ 0", "+0.046 at 0.5, $p$ $9\\times10^{-9}$", "held"),
+        ("P2-L (9 Oct)$^\\dagger$", "CI above 0.5 in $\\geq$ 3 of 4 sessions", f"{lap_ok}/{lap_n}", "held"),
+        ("P2-M (9 Oct)", "$\\rho > 0$ on both Qwen models", f"{pm[0]['spearman_rho']:.2f}, {pm[1]['spearman_rho']:.2f}", "held"),
+        ("P2-G (9 Oct)", "shared-share AUC $\\leq$ 0.40", f"{pg['auc']:.2f} [{pg['ci95'][0]:.2f}, {pg['ci95'][1]:.2f}]", "failed"),
+        ("P2-R (10 Oct)", "P1: factual-YES change at strength 4", f"{p1['median_change']:+.2f}, $p$ {p1['wilcoxon_p']:.3f}", "flattening"),
+        ("P2-R", "P2: introspective excess $>$ 0", f"{p2['excess_median']:+.2f} [{p2['ci95'][0]:+.2f}, {p2['ci95'][1]:+.2f}]", "held"),
+        ("P2-R", "P3: real vs impact-matched random", f"$p$ {p3['wilcoxon_p_real_minus_random']:.1e}", "real larger"),
+        ("P2-Q (10 Oct)", "manipulation checks", "YES+NO mass $\\leq$ 0.01", "not scored"),
+        ("P2-Q2 (11 Oct)", "manipulation checks", "factual baselines not opposite", "not scored"),
+    ]
+    body = "\n".join(" & ".join(r) + " \\\\" for r in rows)
+    write("tab_predictions", "\\begin{tabular}{llll}\n\\toprule\nrun (filed) & filed prediction & observed & outcome \\\\\n"
+          "\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}\n")
+
+
+def tab_regimes():
+    """The regime-by-assumption table of the thesis (second internal review, ruling 17)."""
+    st = {n: load(f"results/gate_strict/{s}_analysis.json") for n, s in S2}
+    s1 = {m: load(f"results/gate_strict/s1_{m}_analysis.json")["cells"]["4bit"]["pass_rate"]["0.5 nat (gate)"]
+          for m in ("gemma12", "gemma27")}
+    g = load("results/gate_strict.json")["S-1M released, strength 4"]
+    pr = load("results/p2r_analysis.json")["yesno_mass_median"]["released_introspective"]
+    rv = load("results/p2r_revision.json")
+    lb = lambda d, k: f"{d['live_by_arm'][k][0]}/{d['live_by_arm'][k][1]}"
+    rows = [
+        ("Qwen2.5-3B, 0.5 of norm", f"{lb(st['Qwen2.5-3B'], 'concept token')}, {lb(st['Qwen2.5-3B'], 'template tail')}, "
+         f"{lb(st['Qwen2.5-3B'], 'sentence mean')}", "fraction of norm", "S-2 framing", "---"),
+        ("Qwen2.5-7B, 0.5 of norm", f"{lb(st['Qwen2.5-7B'], 'concept token')}, {lb(st['Qwen2.5-7B'], 'template tail')}, "
+         f"{lb(st['Qwen2.5-7B'], 'sentence mean')}", "fraction of norm", "released prompt: no ($\\leq$ 0.01)", "---"),
+        ("Gemma-3-4B, 0.5-nat grid", f"{lb(st['Gemma-3-4B (KL grid)'], 'concept token')}, "
+         f"{lb(st['Gemma-3-4B (KL grid)'], 'template tail')}, {lb(st['Gemma-3-4B (KL grid)'], 'sentence mean')}",
+         "random-calibrated KL", "---", "---"),
+        ("Gemma-3-12B 4-bit, 0.5-nat grid", f"{s1['gemma12']['concept'][0]}/30, {s1['gemma12']['tail'][0]}/30, "
+         f"{s1['gemma12']['sentence'][0]}/30", "random-calibrated KL", "---", "---"),
+        ("Gemma-3-27B 4-bit, 0.5-nat grid", f"{s1['gemma27']['concept'][0]}/30, {s1['gemma27']['tail'][0]}/30, "
+         f"{s1['gemma27']['sentence'][0]}/30", "below dose onset", "---", "---"),
+        ("Gemma-3-27B 4-bit, released, strength 2", "---", "released units",
+         f"yes (mass {pr['2']:.2f}; {rv['strength 2']['answering gate']['released_introspective']['answering']}/30 items)",
+         f"{rv['strength 2']['introspective YES answers']['R1']}/30 YES"),
+        ("Gemma-3-27B 4-bit, released, strength 4", f"released recipe {g['live_strict']}/30", "released units",
+         f"no (mass {pr['4']:.0e})", f"{rv['strength 4']['introspective YES answers']['R1']}/30 YES"),
+    ]
+    body = "\n".join(" & ".join(r) + " \\\\" for r in rows)
+    write("tab_regimes", "\\begin{tabular}{lllll}\n\\toprule\nregime & live (concept, tail, sentence) & dose unit & "
+          "readout answers & detection \\\\\n\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}\n")
+
+
 if __name__ == "__main__":
-    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r):
+    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r, tab_predictions, tab_regimes):
         f()
     print("wrote", sorted(os.listdir(OUT)))

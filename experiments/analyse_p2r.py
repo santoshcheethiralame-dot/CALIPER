@@ -117,24 +117,30 @@ def p1(t, s):
 
 
 def excess(t, s, fit_on):
-    X, Y = [], []
-    for fr in fit_on:
-        _, d, b = change(t, fr, s)
-        X += list(b)
-        Y += list(d)
-    X, Y = np.array(X), np.array(Y)
+    # Factual question i is paired with concept i and injected with its vector, so the unit is the
+    # concept: the bootstrap resamples concepts and carries each one's factual items with it, as
+    # filed ("bootstrap 95% interval over concepts"). Until 11 Oct it resampled the factual items
+    # and the introspective items independently; point estimates are unchanged.
     ci, di, bi = change(t, "released_introspective", s)
+    fx = {}
+    for fr in fit_on:
+        c, d, b = change(t, fr, s)
+        for k, dd, bb in zip(c, d, b):
+            fx.setdefault(k, []).append((bb, dd))
     rng = np.random.default_rng(0)
 
-    def stat(ix_f, ix_i):
-        A = np.c_[np.ones(len(ix_f)), X[ix_f]]
-        beta = np.linalg.lstsq(A, Y[ix_f], rcond=None)[0]
-        return float(np.median(di[ix_i] - (beta[0] + beta[1] * bi[ix_i])))
-    point = stat(np.arange(len(X)), np.arange(len(di)))
-    boots = [stat(rng.integers(0, len(X), len(X)), rng.integers(0, len(di), len(di))) for _ in range(NB)]
+    def stat(ix):
+        X = np.array([b for i in ix for b, _ in fx.get(ci[i], [])])
+        Y = np.array([d for i in ix for _, d in fx.get(ci[i], [])])
+        beta = np.linalg.lstsq(np.c_[np.ones(len(X)), X], Y, rcond=None)[0]
+        return float(np.median(di[ix] - (beta[0] + beta[1] * bi[ix]))), beta
+    point, beta = stat(np.arange(len(ci)))
+    boots = [stat(rng.integers(0, len(ci), len(ci)))[0] for _ in range(NB)]
     lo_, hi_ = np.percentile(boots, [2.5, 97.5])
     return {"excess_median": point, "ci95": [float(lo_), float(hi_)], "framing_specific": bool(lo_ > 0),
-            "fit_items": int(len(X)), "introspective_baseline_median": float(np.median(bi))}
+            "fit_items": int(sum(len(v) for v in fx.values())), "intercept": float(beta[0]),
+            "slope": float(beta[1]), "introspective_baseline_median": float(np.median(bi)),
+            "bootstrap_unit": "concept"}
 
 
 def p3(real, rand, s):

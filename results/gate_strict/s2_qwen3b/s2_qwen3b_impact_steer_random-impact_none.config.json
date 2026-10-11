@@ -1,0 +1,1124 @@
+{
+  "version": "2026-10-07b",
+  "argv": [
+    "--model",
+    "qwen3b",
+    "--quant",
+    "none",
+    "--compute-dtype",
+    "fp16",
+    "--stage",
+    "steer",
+    "--alpha-frac",
+    "0",
+    "0.25",
+    "0.5",
+    "1.0",
+    "--control",
+    "random-impact",
+    "--out",
+    "/kaggle/working/s2_qwen3b_impact.jsonl"
+  ],
+  "stage": "steer",
+  "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/3b-instruct/1",
+  "layer": 21,
+  "n_layers": 36,
+  "normalise": false,
+  "control": "random-impact",
+  "vector_recipe": "macar",
+  "alpha_frac": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "alphas": [
+    0.0,
+    21.002,
+    42.004,
+    84.008
+  ],
+  "trial_seed": 0,
+  "concepts": [
+    "elephant",
+    "spider",
+    "eagle",
+    "dolphin",
+    "volcano",
+    "desert",
+    "library",
+    "harbor",
+    "violin",
+    "umbrella",
+    "telescope",
+    "candle",
+    "bread",
+    "mountain",
+    "river",
+    "clock",
+    "mirror",
+    "bridge",
+    "garden",
+    "engine",
+    "joy",
+    "fear",
+    "jealousy",
+    "serenity",
+    "grief",
+    "curiosity",
+    "betrayal",
+    "nostalgia",
+    "justice",
+    "freedom"
+  ],
+  "max_new": 60,
+  "load": {
+    "quant": "none",
+    "compute_dtype": "float16",
+    "storage_dtype": "float16",
+    "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/3b-instruct/1"
+  },
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "health": {
+    "elephant": {
+      "norm": 55.9655,
+      "finite": true,
+      "max_cos_other": 0.4432,
+      "stability": 0.8938,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 8.9661,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "spider": {
+      "norm": 54.9952,
+      "finite": true,
+      "max_cos_other": 0.2529,
+      "stability": 0.9144,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.265,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "eagle": {
+      "norm": 57.4483,
+      "finite": true,
+      "max_cos_other": 0.4432,
+      "stability": 0.9443,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 11.8104,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "dolphin": {
+      "norm": 56.9781,
+      "finite": true,
+      "max_cos_other": 0.417,
+      "stability": 0.9378,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 10.2241,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "volcano": {
+      "norm": 60.005,
+      "finite": true,
+      "max_cos_other": 0.466,
+      "stability": 0.9733,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.5335,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "desert": {
+      "norm": 63.9964,
+      "finite": true,
+      "max_cos_other": 0.3869,
+      "stability": 0.9875,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 8.4836,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "library": {
+      "norm": 53.8179,
+      "finite": true,
+      "max_cos_other": 0.2539,
+      "stability": 0.9089,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.3745,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "harbor": {
+      "norm": 64.5406,
+      "finite": true,
+      "max_cos_other": 0.1479,
+      "stability": 0.9488,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 11.7698,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "violin": {
+      "norm": 55.6794,
+      "finite": true,
+      "max_cos_other": 0.2763,
+      "stability": 0.9747,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 6.3055,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "umbrella": {
+      "norm": 58.9133,
+      "finite": true,
+      "max_cos_other": 0.2348,
+      "stability": 0.9746,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.4793,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "telescope": {
+      "norm": 54.7911,
+      "finite": true,
+      "max_cos_other": 0.3459,
+      "stability": 0.9755,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.6536,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "candle": {
+      "norm": 52.6439,
+      "finite": true,
+      "max_cos_other": 0.1771,
+      "stability": 0.9495,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -2.9025,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "bread": {
+      "norm": 53.1646,
+      "finite": true,
+      "max_cos_other": 0.2461,
+      "stability": 0.9681,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.6954,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "mountain": {
+      "norm": 55.2248,
+      "finite": true,
+      "max_cos_other": 0.466,
+      "stability": 0.9841,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 6.1337,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "river": {
+      "norm": 51.1382,
+      "finite": true,
+      "max_cos_other": 0.4457,
+      "stability": 0.9451,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.9059,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "clock": {
+      "norm": 52.5467,
+      "finite": true,
+      "max_cos_other": 0.2014,
+      "stability": 0.9774,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 0.6351,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "mirror": {
+      "norm": 51.0447,
+      "finite": true,
+      "max_cos_other": 0.2014,
+      "stability": 0.9709,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 2.4396,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "bridge": {
+      "norm": 51.9579,
+      "finite": true,
+      "max_cos_other": 0.3167,
+      "stability": 0.9226,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.6505,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "garden": {
+      "norm": 54.0474,
+      "finite": true,
+      "max_cos_other": 0.3273,
+      "stability": 0.9858,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 6.6259,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "engine": {
+      "norm": 55.6122,
+      "finite": true,
+      "max_cos_other": 0.1994,
+      "stability": 0.9235,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.7253,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "joy": {
+      "norm": 61.6681,
+      "finite": true,
+      "max_cos_other": 0.4863,
+      "stability": 0.9868,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -4.7305,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "fear": {
+      "norm": 62.7043,
+      "finite": true,
+      "max_cos_other": 0.5467,
+      "stability": 0.9889,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.6148,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "jealousy": {
+      "norm": 68.2849,
+      "finite": true,
+      "max_cos_other": 0.5871,
+      "stability": 0.9919,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 10.1166,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "serenity": {
+      "norm": 51.5843,
+      "finite": true,
+      "max_cos_other": 0.2934,
+      "stability": 0.9565,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 4.1688,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "grief": {
+      "norm": 62.4441,
+      "finite": true,
+      "max_cos_other": 0.554,
+      "stability": 0.9849,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 2.1442,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "curiosity": {
+      "norm": 65.7445,
+      "finite": true,
+      "max_cos_other": 0.5493,
+      "stability": 0.9853,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.6822,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "betrayal": {
+      "norm": 68.7268,
+      "finite": true,
+      "max_cos_other": 0.5871,
+      "stability": 0.9902,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 9.1369,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "nostalgia": {
+      "norm": 69.7766,
+      "finite": true,
+      "max_cos_other": 0.554,
+      "stability": 0.9843,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -1.4181,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "justice": {
+      "norm": 66.152,
+      "finite": true,
+      "max_cos_other": 0.5484,
+      "stability": 0.9887,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 7.1199,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "freedom": {
+      "norm": 62.5601,
+      "finite": true,
+      "max_cos_other": 0.499,
+      "stability": 0.9852,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.4157,
+      "passes": {
+        "stability": true,
+        "probe": true,
+        "steer_logit": true
+      }
+    }
+  },
+  "health_pass_counts": {
+    "stability": 30,
+    "probe": 30,
+    "steer_logit": 27
+  },
+  "impact_match": {
+    "elephant|21.002": {
+      "kl_target": 0.2467,
+      "kl_achieved": 0.23732,
+      "scale_over_norm_match": 0.3386,
+      "matched": true
+    },
+    "elephant|42.004": {
+      "kl_target": 0.29271,
+      "kl_achieved": 0.29392,
+      "scale_over_norm_match": 0.1846,
+      "matched": true
+    },
+    "elephant|84.008": {
+      "kl_target": 1.77857,
+      "kl_achieved": 1.83517,
+      "scale_over_norm_match": 0.4788,
+      "matched": true
+    },
+    "spider|21.002": {
+      "kl_target": 0.08983,
+      "kl_achieved": 0.09008,
+      "scale_over_norm_match": 0.1768,
+      "matched": true
+    },
+    "spider|42.004": {
+      "kl_target": 0.51542,
+      "kl_achieved": 0.52864,
+      "scale_over_norm_match": 0.2013,
+      "matched": true
+    },
+    "spider|84.008": {
+      "kl_target": 4.18916,
+      "kl_achieved": 4.24648,
+      "scale_over_norm_match": 0.6771,
+      "matched": true
+    },
+    "eagle|21.002": {
+      "kl_target": 0.53133,
+      "kl_achieved": 0.55721,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "eagle|42.004": {
+      "kl_target": 0.8582,
+      "kl_achieved": 0.86406,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "eagle|84.008": {
+      "kl_target": 10.66299,
+      "kl_achieved": 10.53264,
+      "scale_over_norm_match": 1.0905,
+      "matched": true
+    },
+    "dolphin|21.002": {
+      "kl_target": 0.37438,
+      "kl_achieved": 0.36636,
+      "scale_over_norm_match": 0.6771,
+      "matched": true
+    },
+    "dolphin|42.004": {
+      "kl_target": 1.99777,
+      "kl_achieved": 1.98121,
+      "scale_over_norm_match": 0.8781,
+      "matched": true
+    },
+    "dolphin|84.008": {
+      "kl_target": 2.65316,
+      "kl_achieved": 2.60772,
+      "scale_over_norm_match": 0.4788,
+      "matched": true
+    },
+    "volcano|21.002": {
+      "kl_target": 0.77048,
+      "kl_achieved": 0.78182,
+      "scale_over_norm_match": 0.8052,
+      "matched": true
+    },
+    "volcano|42.004": {
+      "kl_target": 1.46113,
+      "kl_achieved": 1.47131,
+      "scale_over_norm_match": 0.8781,
+      "matched": true
+    },
+    "volcano|84.008": {
+      "kl_target": 6.87894,
+      "kl_achieved": 7.02811,
+      "scale_over_norm_match": 0.5453,
+      "matched": true
+    },
+    "desert|21.002": {
+      "kl_target": 0.37557,
+      "kl_achieved": 0.37181,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "desert|42.004": {
+      "kl_target": 0.8192,
+      "kl_achieved": 0.79767,
+      "scale_over_norm_match": 0.7966,
+      "matched": true
+    },
+    "desert|84.008": {
+      "kl_target": 5.49143,
+      "kl_achieved": 5.39211,
+      "scale_over_norm_match": 1.6818,
+      "matched": true
+    },
+    "library|21.002": {
+      "kl_target": 0.16536,
+      "kl_achieved": 0.16615,
+      "scale_over_norm_match": 0.3692,
+      "matched": true
+    },
+    "library|42.004": {
+      "kl_target": 0.11772,
+      "kl_achieved": 0.11984,
+      "scale_over_norm_match": 0.1621,
+      "matched": true
+    },
+    "library|84.008": {
+      "kl_target": 5.58333,
+      "kl_achieved": 5.74159,
+      "scale_over_norm_match": 0.8052,
+      "matched": true
+    },
+    "harbor|21.002": {
+      "kl_target": 1.07289,
+      "kl_achieved": 1.02028,
+      "scale_over_norm_match": 2.253,
+      "matched": true
+    },
+    "harbor|42.004": {
+      "kl_target": 1.73987,
+      "kl_achieved": 1.68535,
+      "scale_over_norm_match": 1.1764,
+      "matched": true
+    },
+    "harbor|84.008": {
+      "kl_target": 10.39598,
+      "kl_achieved": 10.50028,
+      "scale_over_norm_match": 1.3397,
+      "matched": true
+    },
+    "violin|21.002": {
+      "kl_target": 1.43986,
+      "kl_achieved": 1.42265,
+      "scale_over_norm_match": 3.1349,
+      "matched": true
+    },
+    "violin|42.004": {
+      "kl_target": 1.59777,
+      "kl_achieved": 1.52291,
+      "scale_over_norm_match": 1.576,
+      "matched": true
+    },
+    "violin|84.008": {
+      "kl_target": 5.27933,
+      "kl_achieved": 5.36143,
+      "scale_over_norm_match": 0.8593,
+      "matched": true
+    },
+    "umbrella|21.002": {
+      "kl_target": 1.2997,
+      "kl_achieved": 1.30887,
+      "scale_over_norm_match": 1.1892,
+      "matched": true
+    },
+    "umbrella|42.004": {
+      "kl_target": 1.74508,
+      "kl_achieved": 1.69602,
+      "scale_over_norm_match": 0.6076,
+      "matched": true
+    },
+    "umbrella|84.008": {
+      "kl_target": 3.01464,
+      "kl_achieved": 2.92101,
+      "scale_over_norm_match": 0.3207,
+      "matched": true
+    },
+    "telescope|21.002": {
+      "kl_target": 1.4663,
+      "kl_achieved": 1.4648,
+      "scale_over_norm_match": 2.5381,
+      "matched": true
+    },
+    "telescope|42.004": {
+      "kl_target": 1.613,
+      "kl_achieved": 1.57673,
+      "scale_over_norm_match": 1.2968,
+      "matched": true
+    },
+    "telescope|84.008": {
+      "kl_target": 3.52038,
+      "kl_achieved": 3.44252,
+      "scale_over_norm_match": 0.7966,
+      "matched": true
+    },
+    "candle|21.002": {
+      "kl_target": 0.38777,
+      "kl_achieved": 0.36952,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "candle|42.004": {
+      "kl_target": 3.03696,
+      "kl_achieved": 2.99528,
+      "scale_over_norm_match": 1.2968,
+      "matched": true
+    },
+    "candle|84.008": {
+      "kl_target": 7.66692,
+      "kl_achieved": 7.51365,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "bread|21.002": {
+      "kl_target": 1.38089,
+      "kl_achieved": 1.3892,
+      "scale_over_norm_match": 0.6209,
+      "matched": true
+    },
+    "bread|42.004": {
+      "kl_target": 2.23793,
+      "kl_achieved": 2.18823,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "bread|84.008": {
+      "kl_target": 2.69395,
+      "kl_achieved": 2.69773,
+      "scale_over_norm_match": 0.8781,
+      "matched": true
+    },
+    "mountain|21.002": {
+      "kl_target": 0.62317,
+      "kl_achieved": 0.64724,
+      "scale_over_norm_match": 0.4788,
+      "matched": true
+    },
+    "mountain|42.004": {
+      "kl_target": 1.17213,
+      "kl_achieved": 1.21518,
+      "scale_over_norm_match": 0.3242,
+      "matched": true
+    },
+    "mountain|84.008": {
+      "kl_target": 10.67602,
+      "kl_achieved": 10.25281,
+      "scale_over_norm_match": 0.6345,
+      "matched": true
+    },
+    "river|21.002": {
+      "kl_target": 0.61499,
+      "kl_achieved": 0.6142,
+      "scale_over_norm_match": 0.5819,
+      "matched": true
+    },
+    "river|42.004": {
+      "kl_target": 0.95473,
+      "kl_achieved": 0.90806,
+      "scale_over_norm_match": 0.3386,
+      "matched": true
+    },
+    "river|84.008": {
+      "kl_target": 7.13753,
+      "kl_achieved": 7.00628,
+      "scale_over_norm_match": 0.9786,
+      "matched": true
+    },
+    "clock|21.002": {
+      "kl_target": 0.26218,
+      "kl_achieved": 0.2543,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "clock|42.004": {
+      "kl_target": 0.42334,
+      "kl_achieved": 0.42751,
+      "scale_over_norm_match": 0.5453,
+      "matched": true
+    },
+    "clock|84.008": {
+      "kl_target": 12.15334,
+      "kl_achieved": 11.6145,
+      "scale_over_norm_match": 1.2419,
+      "matched": true
+    },
+    "mirror|21.002": {
+      "kl_target": 0.32321,
+      "kl_achieved": 0.31931,
+      "scale_over_norm_match": 1.3543,
+      "matched": true
+    },
+    "mirror|42.004": {
+      "kl_target": 0.73528,
+      "kl_achieved": 0.72712,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "mirror|84.008": {
+      "kl_target": 3.68629,
+      "kl_achieved": 3.8178,
+      "scale_over_norm_match": 0.7384,
+      "matched": true
+    },
+    "bridge|21.002": {
+      "kl_target": 0.52639,
+      "kl_achieved": 0.52601,
+      "scale_over_norm_match": 0.5946,
+      "matched": true
+    },
+    "bridge|42.004": {
+      "kl_target": 1.64737,
+      "kl_achieved": 1.62091,
+      "scale_over_norm_match": 0.7071,
+      "matched": true
+    },
+    "bridge|84.008": {
+      "kl_target": 1.77349,
+      "kl_achieved": 1.73924,
+      "scale_over_norm_match": 0.4391,
+      "matched": true
+    },
+    "garden|21.002": {
+      "kl_target": 0.61471,
+      "kl_achieved": 0.63705,
+      "scale_over_norm_match": 1.4142,
+      "matched": true
+    },
+    "garden|42.004": {
+      "kl_target": 0.91351,
+      "kl_achieved": 0.87884,
+      "scale_over_norm_match": 1.3764,
+      "matched": true
+    },
+    "garden|84.008": {
+      "kl_target": 7.07952,
+      "kl_achieved": 7.04251,
+      "scale_over_norm_match": 0.7324,
+      "matched": true
+    },
+    "engine|21.002": {
+      "kl_target": 0.547,
+      "kl_achieved": 0.55874,
+      "scale_over_norm_match": 0.6771,
+      "matched": true
+    },
+    "engine|42.004": {
+      "kl_target": 1.89396,
+      "kl_achieved": 1.93915,
+      "scale_over_norm_match": 1.0,
+      "matched": true
+    },
+    "engine|84.008": {
+      "kl_target": 5.31243,
+      "kl_achieved": 5.27442,
+      "scale_over_norm_match": 0.8781,
+      "matched": true
+    },
+    "joy|21.002": {
+      "kl_target": 0.56246,
+      "kl_achieved": 0.5494,
+      "scale_over_norm_match": 1.1892,
+      "matched": true
+    },
+    "joy|42.004": {
+      "kl_target": 1.90821,
+      "kl_achieved": 1.89975,
+      "scale_over_norm_match": 0.917,
+      "matched": true
+    },
+    "joy|84.008": {
+      "kl_target": 8.27048,
+      "kl_achieved": 7.97163,
+      "scale_over_norm_match": 0.7071,
+      "matched": true
+    },
+    "fear|21.002": {
+      "kl_target": 1.5281,
+      "kl_achieved": 1.57057,
+      "scale_over_norm_match": 3.668,
+      "matched": true
+    },
+    "fear|42.004": {
+      "kl_target": 1.65775,
+      "kl_achieved": 1.67706,
+      "scale_over_norm_match": 1.854,
+      "matched": true
+    },
+    "fear|84.008": {
+      "kl_target": 7.39685,
+      "kl_achieved": 7.27694,
+      "scale_over_norm_match": 1.0671,
+      "matched": true
+    },
+    "jealousy|21.002": {
+      "kl_target": 1.23312,
+      "kl_achieved": 1.18337,
+      "scale_over_norm_match": 1.1892,
+      "matched": true
+    },
+    "jealousy|42.004": {
+      "kl_target": 2.61785,
+      "kl_achieved": 2.71825,
+      "scale_over_norm_match": 0.917,
+      "matched": true
+    },
+    "jealousy|84.008": {
+      "kl_target": 12.52218,
+      "kl_achieved": 12.24806,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "serenity|21.002": {
+      "kl_target": 0.57815,
+      "kl_achieved": 0.5831,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "serenity|42.004": {
+      "kl_target": 1.15864,
+      "kl_achieved": 1.14934,
+      "scale_over_norm_match": 0.4585,
+      "matched": true
+    },
+    "serenity|84.008": {
+      "kl_target": 2.85963,
+      "kl_achieved": 2.84193,
+      "scale_over_norm_match": 0.3692,
+      "matched": true
+    },
+    "grief|21.002": {
+      "kl_target": 1.26415,
+      "kl_achieved": 1.20374,
+      "scale_over_norm_match": 1.0671,
+      "matched": true
+    },
+    "grief|42.004": {
+      "kl_target": 3.29354,
+      "kl_achieved": 3.44613,
+      "scale_over_norm_match": 0.6771,
+      "matched": true
+    },
+    "grief|84.008": {
+      "kl_target": 7.33888,
+      "kl_achieved": 7.32299,
+      "scale_over_norm_match": 0.8409,
+      "matched": true
+    },
+    "curiosity|21.002": {
+      "kl_target": 1.16569,
+      "kl_achieved": 1.135,
+      "scale_over_norm_match": 1.6818,
+      "matched": true
+    },
+    "curiosity|42.004": {
+      "kl_target": 2.38714,
+      "kl_achieved": 2.43525,
+      "scale_over_norm_match": 1.0671,
+      "matched": true
+    },
+    "curiosity|84.008": {
+      "kl_target": 7.01137,
+      "kl_achieved": 6.97204,
+      "scale_over_norm_match": 1.3469,
+      "matched": true
+    },
+    "betrayal|21.002": {
+      "kl_target": 1.38963,
+      "kl_achieved": 1.34399,
+      "scale_over_norm_match": 1.834,
+      "matched": true
+    },
+    "betrayal|42.004": {
+      "kl_target": 3.21739,
+      "kl_achieved": 3.28795,
+      "scale_over_norm_match": 1.7186,
+      "matched": true
+    },
+    "betrayal|84.008": {
+      "kl_target": 7.55668,
+      "kl_achieved": 7.37498,
+      "scale_over_norm_match": 0.927,
+      "matched": true
+    },
+    "nostalgia|21.002": {
+      "kl_target": 0.37062,
+      "kl_achieved": 0.36866,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "nostalgia|42.004": {
+      "kl_target": 1.94726,
+      "kl_achieved": 1.9301,
+      "scale_over_norm_match": 0.917,
+      "matched": true
+    },
+    "nostalgia|84.008": {
+      "kl_target": 6.94215,
+      "kl_achieved": 6.59933,
+      "scale_over_norm_match": 0.6484,
+      "matched": true
+    },
+    "justice|21.002": {
+      "kl_target": 0.65656,
+      "kl_achieved": 0.66005,
+      "scale_over_norm_match": 0.8781,
+      "matched": true
+    },
+    "justice|42.004": {
+      "kl_target": 3.58084,
+      "kl_achieved": 3.45425,
+      "scale_over_norm_match": 0.7711,
+      "matched": true
+    },
+    "justice|84.008": {
+      "kl_target": 6.0974,
+      "kl_achieved": 6.13128,
+      "scale_over_norm_match": 0.5,
+      "matched": true
+    },
+    "freedom|21.002": {
+      "kl_target": 0.48536,
+      "kl_achieved": 0.48236,
+      "scale_over_norm_match": 1.1892,
+      "matched": true
+    },
+    "freedom|42.004": {
+      "kl_target": 1.2935,
+      "kl_achieved": 1.28298,
+      "scale_over_norm_match": 1.1512,
+      "matched": true
+    },
+    "freedom|84.008": {
+      "kl_target": 4.53871,
+      "kl_achieved": 4.68331,
+      "scale_over_norm_match": 0.6414,
+      "matched": true
+    }
+  },
+  "residual_norm_at_read_median": 84.00785827636719,
+  "residual_norm_at_read_min": 67.91858673095703,
+  "residual_norm_at_read_max": 96.62329864501953,
+  "vector_norm_median": 55.96552276611328,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "concept",
+  "gram_offdiag_median_abs": 0.11182783544063568,
+  "gram_offdiag_mean": 0.1338169425725937,
+  "gram_offdiag_max": 0.5870624780654907,
+  "gram_offdiag_min": -0.14018526673316956,
+  "gram_offdiag_p90_abs": 0.3272876739501953,
+  "gram_top_pairs": [
+    [
+      0.5871,
+      22,
+      26
+    ],
+    [
+      0.554,
+      24,
+      27
+    ],
+    [
+      0.5516,
+      22,
+      24
+    ],
+    [
+      0.5493,
+      22,
+      25
+    ],
+    [
+      0.5484,
+      22,
+      28
+    ],
+    [
+      0.5467,
+      21,
+      24
+    ],
+    [
+      0.5339,
+      22,
+      27
+    ],
+    [
+      0.5081,
+      26,
+      28
+    ],
+    [
+      0.5051,
+      21,
+      22
+    ],
+    [
+      0.499,
+      28,
+      29
+    ]
+  ]
+}

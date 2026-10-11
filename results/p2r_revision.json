@@ -1,0 +1,469 @@
+{
+ "note": "exploratory; requested by the second internal review of Paper 2 (11 Oct 2026)",
+ "strength 1": {
+  "R1 excess": {
+   "median": 1.3008886923874405,
+   "ci95": [
+    -0.41284565034303516,
+    2.93844321033247
+   ],
+   "intercept": 0.6247420718574522,
+   "intercept_ci95": [
+    -0.015473202485740519,
+    1.2287715320753436
+   ],
+   "slope": 0.02679543153685838
+  },
+  "R2 excess": {
+   "median": 0.694031988114441,
+   "ci95": [
+    -0.3686993270176072,
+    1.634814813281768
+   ],
+   "intercept": -1.1622960367141244,
+   "intercept_ci95": [
+    -1.8170107198880592,
+    -0.527644183267124
+   ],
+   "slope": -0.10378992889359569
+  },
+  "R3 excess": {
+   "median": -0.6094993555799967,
+   "ci95": [
+    -1.5495215428262301,
+    0.9912421689526825
+   ],
+   "intercept": -0.8236519147265924,
+   "intercept_ci95": [
+    -1.542023171358387,
+    -0.13563883188943354
+   ],
+   "slope": -0.15741729119446224
+  },
+  "R1 minus R2 excess, paired": {
+   "median": 0.2740225301429011,
+   "wilcoxon_p": 0.3598779272288084,
+   "ci95": [
+    -1.0587716075423526,
+    2.0607645529288323
+   ]
+  },
+  "R1 minus R3 excess, paired": {
+   "median": 1.3966154945575031,
+   "wilcoxon_p": 0.09194962680339813,
+   "ci95": [
+    0.12441696202236785,
+    3.1640717021127145
+   ]
+  },
+  "answering gate": {
+   "released_introspective": {
+    "answering": 26,
+    "median_change": 1.1216733990222565,
+    "wilcoxon_p": 0.03816831111907959
+   },
+   "released_neutral": {
+    "answering": 0,
+    "median_change": null,
+    "wilcoxon_p": null
+   },
+   "factual_no": {
+    "answering": 28,
+    "median_change": 0.1370181361826326,
+    "wilcoxon_p": 0.6136380508542061
+   },
+   "factual_yes": {
+    "answering": 30,
+    "median_change": 1.0712319016456497,
+    "wilcoxon_p": 0.013663241639733315
+   },
+   "factual_contested": {
+    "answering": 17,
+    "median_change": 0.5494500398795026,
+    "wilcoxon_p": 0.7819061279296875
+   },
+   "P3 real minus impact-matched, answering in both": {
+    "concepts": 25,
+    "median_real": 0.8286171188083244,
+    "median_random": 0.8300591464794707,
+    "wilcoxon_p": 0.8948604464530945
+   }
+  },
+  "content-free share R2": {
+   "share": 0.6916995860993853,
+   "ci95": [
+    -13.102230086568817,
+    7.875824723782162
+   ]
+  },
+  "content-free share R3": {
+   "share": 0.759173300948485,
+   "ci95": [
+    -11.956647260845822,
+    7.279427957076051
+   ]
+  },
+  "introspective YES answers": {
+   "R1": 1,
+   "R2": 0,
+   "R3": 0
+  }
+ },
+ "strength 2": {
+  "R1 excess": {
+   "median": 4.977524159828587,
+   "ci95": [
+    2.831511201479948,
+    8.807507245541792
+   ],
+   "intercept": 1.2985758019725946,
+   "intercept_ci95": [
+    0.11257433720520818,
+    2.504314135915628
+   ],
+   "slope": -0.004765739701318721
+  },
+  "R2 excess": {
+   "median": 3.444934855281735,
+   "ci95": [
+    2.053250340417986,
+    5.133410659773094
+   ],
+   "intercept": -1.6848502425274234,
+   "intercept_ci95": [
+    -2.4543561693978613,
+    -0.9321167476002884
+   ],
+   "slope": -0.22105301178309178
+  },
+  "R3 excess": {
+   "median": 0.9044413967193004,
+   "ci95": [
+    -1.419131212601303,
+    2.940808580508798
+   ],
+   "intercept": -0.3507011863381226,
+   "intercept_ci95": [
+    -1.3303630513671185,
+    0.6717580587996329
+   ],
+   "slope": -0.2839463910525652
+  },
+  "R1 minus R2 excess, paired": {
+   "median": 1.0346435515557015,
+   "wilcoxon_p": 0.0803273618221283,
+   "ci95": [
+    -0.1746755683934058,
+    4.846935550253557
+   ]
+  },
+  "R1 minus R3 excess, paired": {
+   "median": 4.644314911099533,
+   "wilcoxon_p": 0.0029870010912418365,
+   "ci95": [
+    2.276543880260875,
+    7.56080278075855
+   ]
+  },
+  "answering gate": {
+   "released_introspective": {
+    "answering": 16,
+    "median_change": 3.992396858320717,
+    "wilcoxon_p": 0.00335693359375
+   },
+   "released_neutral": {
+    "answering": 0,
+    "median_change": null,
+    "wilcoxon_p": null
+   },
+   "factual_no": {
+    "answering": 24,
+    "median_change": 0.03570489040785674,
+    "wilcoxon_p": 0.6431422233581543
+   },
+   "factual_yes": {
+    "answering": 27,
+    "median_change": 1.24790966510772,
+    "wilcoxon_p": 0.08148856461048126
+   },
+   "factual_contested": {
+    "answering": 12,
+    "median_change": 1.0471328022811122,
+    "wilcoxon_p": 0.85009765625
+   },
+   "P3 real minus impact-matched, answering in both": {
+    "concepts": 15,
+    "median_real": 3.9038196113397134,
+    "median_random": 1.5462462287396193,
+    "wilcoxon_p": 0.063720703125
+   }
+  },
+  "content-free share R2": {
+   "share": 0.8538197802682914,
+   "ci95": [
+    0.4730061710649143,
+    1.3288560436565322
+   ]
+  },
+  "content-free share R3": {
+   "share": 0.8047712461857826,
+   "ci95": [
+    0.35047907772237263,
+    1.233605530907026
+   ]
+  },
+  "introspective YES answers": {
+   "R1": 1,
+   "R2": 0,
+   "R3": 1
+  }
+ },
+ "strength 4": {
+  "R1 excess": {
+   "median": 6.896838232689183,
+   "ci95": [
+    4.879753237097465,
+    8.97304101031164
+   ],
+   "intercept": 3.986742478174886,
+   "intercept_ci95": [
+    2.1155393183888034,
+    5.8040490777314
+   ],
+   "slope": -0.32575050826028384
+  },
+  "R2 excess": {
+   "median": 4.792681898202284,
+   "ci95": [
+    3.1107175060507197,
+    6.337765170763532
+   ],
+   "intercept": -0.9144273773703334,
+   "intercept_ci95": [
+    -2.228107920631237,
+    0.3526454883431826
+   ],
+   "slope": -0.5571485401033501
+  },
+  "R3 excess": {
+   "median": 2.7582252824789713,
+   "ci95": [
+    1.131442915707566,
+    4.958580345599394
+   ],
+   "intercept": -0.2555223662792,
+   "intercept_ci95": [
+    -1.1765209868239337,
+    0.7113787791488498
+   ],
+   "slope": -0.46054713627600885
+  },
+  "R1 minus R2 excess, paired": {
+   "median": 2.240724001496874,
+   "wilcoxon_p": 0.07672121562063694,
+   "ci95": [
+    -0.26009811003735805,
+    4.902159674867791
+   ]
+  },
+  "R1 minus R3 excess, paired": {
+   "median": 5.2086683681132,
+   "wilcoxon_p": 0.00466480478644371,
+   "ci95": [
+    0.1560081053164497,
+    7.776113327337455
+   ]
+  },
+  "answering gate": {
+   "released_introspective": {
+    "answering": 5,
+    "median_change": 7.891925940057263,
+    "wilcoxon_p": null
+   },
+   "released_neutral": {
+    "answering": 0,
+    "median_change": null,
+    "wilcoxon_p": null
+   },
+   "factual_no": {
+    "answering": 9,
+    "median_change": 8.433406129479408,
+    "wilcoxon_p": 0.00390625
+   },
+   "factual_yes": {
+    "answering": 16,
+    "median_change": -1.9983428706821122,
+    "wilcoxon_p": 0.40374755859375
+   },
+   "factual_contested": {
+    "answering": 5,
+    "median_change": -5.138190031049589,
+    "wilcoxon_p": null
+   },
+   "P3 real minus impact-matched, answering in both": {
+    "concepts": 4,
+    "median_real": 7.773919907223899,
+    "median_random": 2.4942462911967596,
+    "wilcoxon_p": null
+   }
+  },
+  "content-free share R2": {
+   "share": 0.7732506038155915,
+   "ci95": [
+    0.6510377139941288,
+    0.9782531426693132
+   ]
+  },
+  "content-free share R3": {
+   "share": 0.6674286520572896,
+   "ci95": [
+    0.3679008032848555,
+    0.8749573744888692
+   ]
+  },
+  "introspective YES answers": {
+   "R1": 1,
+   "R2": 1,
+   "R3": 1
+  }
+ },
+ "strength 8": {
+  "R1 excess": {
+   "median": 1.1485341840981933,
+   "ci95": [
+    -0.7270211395728433,
+    2.660929590598925
+   ],
+   "intercept": 1.8026074957696838,
+   "intercept_ci95": [
+    0.09261226213733116,
+    3.5136534783824658
+   ],
+   "slope": -0.7973900880112076
+  },
+  "R2 excess": {
+   "median": -0.5905990215185799,
+   "ci95": [
+    -1.5773615751444954,
+    1.041666687792886
+   ],
+   "intercept": 1.4273821101823765,
+   "intercept_ci95": [
+    0.08241632193087751,
+    2.735070401155251
+   ],
+   "slope": -0.8859915322220437
+  },
+  "R3 excess": {
+   "median": 3.043520889518028,
+   "ci95": [
+    0.7438082754112042,
+    4.882070148862304
+   ],
+   "intercept": 0.013653862008952368,
+   "intercept_ci95": [
+    -1.143237990382808,
+    1.1367374519056022
+   ],
+   "slope": -0.606041263894687
+  },
+  "R1 minus R2 excess, paired": {
+   "median": 1.7215776270204426,
+   "wilcoxon_p": 0.07672121562063694,
+   "ci95": [
+    -0.9478410967386077,
+    4.462988563154811
+   ]
+  },
+  "R1 minus R3 excess, paired": {
+   "median": -0.6980138767491106,
+   "wilcoxon_p": 0.4399667661637068,
+   "ci95": [
+    -4.1422587579321934,
+    2.618133772667017
+   ]
+  },
+  "answering gate": {
+   "released_introspective": {
+    "answering": 0,
+    "median_change": null,
+    "wilcoxon_p": null
+   },
+   "released_neutral": {
+    "answering": 0,
+    "median_change": null,
+    "wilcoxon_p": null
+   },
+   "factual_no": {
+    "answering": 0,
+    "median_change": null,
+    "wilcoxon_p": null
+   },
+   "factual_yes": {
+    "answering": 1,
+    "median_change": -7.583051800727844,
+    "wilcoxon_p": null
+   },
+   "factual_contested": {
+    "answering": 1,
+    "median_change": -12.150102615356445,
+    "wilcoxon_p": null
+   },
+   "P3 real minus impact-matched, answering in both": {
+    "concepts": 0,
+    "median_real": null,
+    "median_random": null,
+    "wilcoxon_p": null
+   }
+  },
+  "content-free share R2": {
+   "share": 0.9483184251380529,
+   "ci95": [
+    0.8437003633035356,
+    1.0757204052871046
+   ]
+  },
+  "content-free share R3": {
+   "share": 0.7996376584630626,
+   "ci95": [
+    0.6746321534771498,
+    0.9485661234109096
+   ]
+  },
+  "introspective YES answers": {
+   "R1": 0,
+   "R2": 1,
+   "R3": 1
+  }
+ },
+ "identify": {
+  "strength 1": {
+   "two_nat_real": 28,
+   "two_nat_random": 7,
+   "rank_top10_real": 1,
+   "rank_top10_random": 0,
+   "auc_change_real_vs_random": 0.9555555555555556
+  },
+  "strength 2": {
+   "two_nat_real": 29,
+   "two_nat_random": 12,
+   "rank_top10_real": 4,
+   "rank_top10_random": 0,
+   "auc_change_real_vs_random": 0.9388888888888889
+  },
+  "strength 4": {
+   "two_nat_real": 27,
+   "two_nat_random": 21,
+   "rank_top10_real": 6,
+   "rank_top10_random": 0,
+   "auc_change_real_vs_random": 0.6955555555555556
+  },
+  "strength 8": {
+   "two_nat_real": 27,
+   "two_nat_random": 26,
+   "rank_top10_real": 7,
+   "rank_top10_random": 0,
+   "auc_change_real_vs_random": 0.6455555555555555
+  }
+ }
+}

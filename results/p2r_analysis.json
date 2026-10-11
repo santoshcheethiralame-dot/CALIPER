@@ -70,90 +70,114 @@
  "P2": {
   "strength 1": {
    "all factual": {
-    "excess_median": 1.3008886923874399,
+    "excess_median": 1.3008886923874405,
     "ci95": [
-     -0.5763854864586404,
-     3.1537036540340746
+     -0.41284565034303516,
+     2.93844321033247
     ],
     "framing_specific": false,
     "fit_items": 90,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 0.6247420718574522,
+    "slope": 0.02679543153685838,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    },
    "contested only": {
     "excess_median": 1.421970898133259,
     "ci95": [
-     -0.8983442745051642,
-     3.530591169435779
+     -0.5355321749076675,
+     3.075978963650563
     ],
     "framing_specific": false,
     "fit_items": 30,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 0.705287720836328,
+    "slope": 0.03994186671963629,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    }
   },
   "strength 2": {
    "all factual": {
     "excess_median": 4.977524159828587,
     "ci95": [
-     2.5747370513881713,
-     9.130839330243917
+     2.831511201479948,
+     8.807507245541792
     ],
     "framing_specific": true,
     "fit_items": 90,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 1.2985758019725946,
+    "slope": -0.004765739701318721,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    },
    "contested only": {
     "excess_median": 4.276888228245861,
     "ci95": [
-     0.8065175000436281,
-     8.94815159347791
+     1.207339350827814,
+     8.408807719100333
     ],
     "framing_specific": true,
     "fit_items": 30,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 1.8479240443592297,
+    "slope": -0.015748931954167752,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    }
   },
   "strength 4": {
    "all factual": {
-    "excess_median": 6.896838232689184,
+    "excess_median": 6.896838232689183,
     "ci95": [
-     3.2210634612084292,
-     10.244713052451939
+     4.879753237097465,
+     8.97304101031164
     ],
     "framing_specific": true,
     "fit_items": 90,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 3.986742478174886,
+    "slope": -0.32575050826028384,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    },
    "contested only": {
     "excess_median": 5.410006789484587,
     "ci95": [
-     1.1077894798539945,
-     10.246334336433945
+     2.4542053049139834,
+     8.65915849694629
     ],
     "framing_specific": true,
     "fit_items": 30,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 4.471992508959398,
+    "slope": -0.38589039516642426,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    }
   },
   "strength 8": {
    "all factual": {
-    "excess_median": 1.1485341840981977,
+    "excess_median": 1.1485341840981933,
     "ci95": [
-     -0.8849249570156964,
-     3.1161156453697116
+     -0.7270211395728433,
+     2.660929590598925
     ],
     "framing_specific": false,
     "fit_items": 90,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 1.8026074957696838,
+    "slope": -0.7973900880112076,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    },
    "contested only": {
     "excess_median": 1.5597907918659732,
     "ci95": [
-     -1.6572369978311707,
-     4.416783320293599
+     -0.9741683151051694,
+     3.8481231133840366
     ],
     "framing_specific": false,
     "fit_items": 30,
-    "introspective_baseline_median": -16.863560927500657
+    "intercept": 1.6398704151077377,
+    "slope": -0.7816813467482046,
+    "introspective_baseline_median": -16.863560927500657,
+    "bootstrap_unit": "concept"
    }
   }
  },

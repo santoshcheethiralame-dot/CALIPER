@@ -1,0 +1,583 @@
+{
+  "version": "2026-10-07b",
+  "argv": [
+    "--model",
+    "qwen3b",
+    "--quant",
+    "none",
+    "--compute-dtype",
+    "fp16",
+    "--stage",
+    "forced",
+    "--alpha-frac",
+    "0",
+    "0.25",
+    "0.5",
+    "1.0",
+    "--vector-pos",
+    "template-tail",
+    "--out",
+    "/kaggle/working/s2_qwen3b_tail.jsonl"
+  ],
+  "stage": "forced",
+  "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/3b-instruct/1",
+  "layer": 21,
+  "n_layers": 36,
+  "normalise": false,
+  "control": "none",
+  "vector_recipe": "macar",
+  "alpha_frac": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "alphas": [
+    0.0,
+    18.68,
+    37.36,
+    74.72
+  ],
+  "trial_seed": 0,
+  "concepts": [
+    "elephant",
+    "spider",
+    "eagle",
+    "dolphin",
+    "volcano",
+    "desert",
+    "library",
+    "harbor",
+    "violin",
+    "umbrella",
+    "telescope",
+    "candle",
+    "bread",
+    "mountain",
+    "river",
+    "clock",
+    "mirror",
+    "bridge",
+    "garden",
+    "engine",
+    "joy",
+    "fear",
+    "jealousy",
+    "serenity",
+    "grief",
+    "curiosity",
+    "betrayal",
+    "nostalgia",
+    "justice",
+    "freedom"
+  ],
+  "max_new": 60,
+  "load": {
+    "quant": "none",
+    "compute_dtype": "float16",
+    "storage_dtype": "float16",
+    "model_id": "/kaggle/input/models/qwen-lm/qwen2.5/transformers/3b-instruct/1"
+  },
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "health": {
+    "elephant": {
+      "norm": 6.6406,
+      "finite": true,
+      "max_cos_other": 0.8109,
+      "stability": 0.5286,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -0.978,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "spider": {
+      "norm": 4.4768,
+      "finite": true,
+      "max_cos_other": 0.5465,
+      "stability": 0.5447,
+      "stability_kind": "second-template",
+      "probe": 0.375,
+      "steer_logit_delta": -3.8267,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": false
+      }
+    },
+    "eagle": {
+      "norm": 6.1437,
+      "finite": true,
+      "max_cos_other": 0.8109,
+      "stability": 0.6452,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -2.5623,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "dolphin": {
+      "norm": 7.7864,
+      "finite": true,
+      "max_cos_other": 0.6872,
+      "stability": 0.7594,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 1.2177,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "volcano": {
+      "norm": 7.5294,
+      "finite": true,
+      "max_cos_other": 0.8458,
+      "stability": 0.7473,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.4376,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "desert": {
+      "norm": 8.3242,
+      "finite": true,
+      "max_cos_other": 0.8458,
+      "stability": 0.7901,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 0.2867,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "library": {
+      "norm": 7.3121,
+      "finite": true,
+      "max_cos_other": 0.5599,
+      "stability": 0.66,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -2.988,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "harbor": {
+      "norm": 8.6673,
+      "finite": true,
+      "max_cos_other": 0.3545,
+      "stability": 0.7208,
+      "stability_kind": "second-template",
+      "probe": 0.25,
+      "steer_logit_delta": 0.445,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": true
+      }
+    },
+    "violin": {
+      "norm": 8.3569,
+      "finite": true,
+      "max_cos_other": 0.7052,
+      "stability": 0.7723,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.5043,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "umbrella": {
+      "norm": 5.7968,
+      "finite": true,
+      "max_cos_other": 0.585,
+      "stability": 0.7197,
+      "stability_kind": "second-template",
+      "probe": 0.875,
+      "steer_logit_delta": -9.1112,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": false
+      }
+    },
+    "telescope": {
+      "norm": 6.5977,
+      "finite": true,
+      "max_cos_other": 0.6713,
+      "stability": 0.7877,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -1.2114,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "candle": {
+      "norm": 4.3944,
+      "finite": true,
+      "max_cos_other": 0.5422,
+      "stability": 0.7223,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 5.8346,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "bread": {
+      "norm": 7.9455,
+      "finite": true,
+      "max_cos_other": 0.7052,
+      "stability": 0.7401,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -0.6881,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "mountain": {
+      "norm": 7.8678,
+      "finite": true,
+      "max_cos_other": 0.8067,
+      "stability": 0.7978,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -0.7926,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "river": {
+      "norm": 5.9284,
+      "finite": true,
+      "max_cos_other": 0.8067,
+      "stability": 0.6698,
+      "stability_kind": "second-template",
+      "probe": 0.875,
+      "steer_logit_delta": 4.9451,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": true
+      }
+    },
+    "clock": {
+      "norm": 5.3968,
+      "finite": true,
+      "max_cos_other": 0.589,
+      "stability": 0.6747,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 0.6772,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "mirror": {
+      "norm": 4.5385,
+      "finite": true,
+      "max_cos_other": 0.471,
+      "stability": 0.5571,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 0.9363,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "bridge": {
+      "norm": 4.9119,
+      "finite": true,
+      "max_cos_other": 0.55,
+      "stability": 0.5847,
+      "stability_kind": "second-template",
+      "probe": 0.25,
+      "steer_logit_delta": -3.8123,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": false
+      }
+    },
+    "garden": {
+      "norm": 7.6827,
+      "finite": true,
+      "max_cos_other": 0.759,
+      "stability": 0.7852,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -0.8782,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "engine": {
+      "norm": 8.3691,
+      "finite": true,
+      "max_cos_other": 0.4554,
+      "stability": 0.4793,
+      "stability_kind": "second-template",
+      "probe": 0.875,
+      "steer_logit_delta": -6.0622,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": false
+      }
+    },
+    "joy": {
+      "norm": 10.3478,
+      "finite": true,
+      "max_cos_other": 0.8406,
+      "stability": 0.7876,
+      "stability_kind": "second-template",
+      "probe": 0.875,
+      "steer_logit_delta": 1.9352,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": true
+      }
+    },
+    "fear": {
+      "norm": 10.9697,
+      "finite": true,
+      "max_cos_other": 0.8752,
+      "stability": 0.7994,
+      "stability_kind": "second-template",
+      "probe": 0.875,
+      "steer_logit_delta": 1.7115,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": true
+      }
+    },
+    "jealousy": {
+      "norm": 10.7871,
+      "finite": true,
+      "max_cos_other": 0.8776,
+      "stability": 0.7798,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": -3.7076,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": false
+      }
+    },
+    "serenity": {
+      "norm": 6.1907,
+      "finite": true,
+      "max_cos_other": 0.5965,
+      "stability": 0.6225,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 0.3638,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "grief": {
+      "norm": 10.4165,
+      "finite": true,
+      "max_cos_other": 0.8752,
+      "stability": 0.7696,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 3.2037,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "curiosity": {
+      "norm": 10.2731,
+      "finite": true,
+      "max_cos_other": 0.7813,
+      "stability": 0.7912,
+      "stability_kind": "second-template",
+      "probe": 0.625,
+      "steer_logit_delta": 1.8444,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": true
+      }
+    },
+    "betrayal": {
+      "norm": 11.7255,
+      "finite": true,
+      "max_cos_other": 0.8776,
+      "stability": 0.8124,
+      "stability_kind": "second-template",
+      "probe": 0.875,
+      "steer_logit_delta": 0.3822,
+      "passes": {
+        "stability": true,
+        "probe": false,
+        "steer_logit": true
+      }
+    },
+    "nostalgia": {
+      "norm": 9.0208,
+      "finite": true,
+      "max_cos_other": 0.7853,
+      "stability": 0.719,
+      "stability_kind": "second-template",
+      "probe": 0.5,
+      "steer_logit_delta": -5.1239,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": false
+      }
+    },
+    "justice": {
+      "norm": 10.6021,
+      "finite": true,
+      "max_cos_other": 0.8707,
+      "stability": 0.774,
+      "stability_kind": "second-template",
+      "probe": 1.0,
+      "steer_logit_delta": 2.1951,
+      "passes": {
+        "stability": false,
+        "probe": true,
+        "steer_logit": true
+      }
+    },
+    "freedom": {
+      "norm": 11.2713,
+      "finite": true,
+      "max_cos_other": 0.8707,
+      "stability": 0.7885,
+      "stability_kind": "second-template",
+      "probe": 0.5,
+      "steer_logit_delta": 4.1628,
+      "passes": {
+        "stability": false,
+        "probe": false,
+        "steer_logit": true
+      }
+    }
+  },
+  "health_pass_counts": {
+    "stability": 1,
+    "probe": 18,
+    "steer_logit": 17
+  },
+  "impact_match": {},
+  "residual_norm_at_read_median": 74.72015380859375,
+  "residual_norm_at_read_min": 73.55426788330078,
+  "residual_norm_at_read_max": 75.77793884277344,
+  "vector_norm_median": 7.786380767822266,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "template-tail",
+  "gram_offdiag_median_abs": 0.30560702085494995,
+  "gram_offdiag_mean": 0.28127408027648926,
+  "gram_offdiag_max": 0.8776229619979858,
+  "gram_offdiag_min": -0.45543360710144043,
+  "gram_offdiag_p90_abs": 0.6579433679580688,
+  "gram_top_pairs": [
+    [
+      0.8776,
+      22,
+      26
+    ],
+    [
+      0.8752,
+      21,
+      24
+    ],
+    [
+      0.8719,
+      22,
+      24
+    ],
+    [
+      0.8707,
+      28,
+      29
+    ],
+    [
+      0.8598,
+      21,
+      22
+    ],
+    [
+      0.8458,
+      4,
+      5
+    ],
+    [
+      0.8406,
+      20,
+      21
+    ],
+    [
+      0.8306,
+      24,
+      26
+    ],
+    [
+      0.8265,
+      21,
+      28
+    ],
+    [
+      0.8243,
+      21,
+      26
+    ]
+  ]
+}

@@ -1,0 +1,37 @@
+{
+ "s2_qwen3b": {
+  "steer_rows_relabelled": 14,
+  "analysis": "results\\gate_strict\\s2_qwen3b_analysis.json"
+ },
+ "s2_qwen7b": {
+  "steer_rows_relabelled": 29,
+  "analysis": "results\\gate_strict\\s2_qwen7b_analysis.json"
+ },
+ "s2_gemma4b_kl": {
+  "steer_rows_relabelled": 39,
+  "analysis": "results\\gate_strict\\s2_gemma4b_kl_analysis.json"
+ },
+ "s1_gemma12": {
+  "steer_rows_relabelled": 13,
+  "analysis": "results\\gate_strict\\s1_gemma12_analysis.json"
+ },
+ "s1_gemma27": {
+  "steer_rows_relabelled": 28,
+  "analysis": "results\\gate_strict\\s1_gemma27_analysis.json"
+ },
+ "S-1M released, strength 4": {
+  "live_filed": 24,
+  "live_strict": 27,
+  "gained": [
+   "dolphin",
+   "umbrella",
+   "volcano"
+  ],
+  "lost": [],
+  "dead_strict": [
+   "freedom",
+   "joy",
+   "serenity"
+  ]
+ }
+}
