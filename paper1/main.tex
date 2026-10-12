@@ -171,10 +171,12 @@ built versions as evidence of correctness is classic in software reliability
 \citep{knight1986nversion}. \draft{Treating circuit discovery as statistical estimation,
 \citet{meloux2025variance} measure its variance across seeds and resamples and propose
 reporting it, and \citet{meloux2025everything} show that several circuits and interpretations
-can explain the same behaviour, so agreement on one is not identification.} Appendix~\ref{app:census} lists 34 published uses
-of agreement across eight sub-areas\draft{, 24 of them as a reliability check; none uses the
-exact two-restart check tested here, and the closest analogues are concept-vector and
-subspace-search methods}.
+can explain the same behaviour, so agreement on one is not identification.} Appendix~\ref{app:census} lists \draft{36} published uses
+of agreement across eight sub-areas\draft{, 26 of them as a reliability check; none uses the
+exact two-restart check tested here. The closest analogue reads agreement across four seeds on
+MLP neuron weights as evidence that the recovered directions are genuine structure
+\citep{avrahamy2026rotate}, and a widely cited position paper presents seed consistency of sparse
+dictionaries as a reliable proxy for ground-truth recovery \citep{song2025position}}.
 
 \paragraph{Predictability before stability.} The PCS framework for veridical data science
 uses ``predictability as a reality check'', screens models on prediction before assessing
@@ -1185,20 +1187,20 @@ comparison with held-out $R^2$. \tbd{licence and anonymised link}.
 \section{Usage census}
 \label{app:census}
 We searched for published uses of agreement across restarts, seeds or resamples as grounds
-for trusting a result, choosing a model or its size, or reporting robustness. We list 34
+for trusting a result, choosing a model or its size, or reporting robustness. We list \draft{36}
 instances across eight sub-areas\draft{; the citation ledger released with the bench records
 how each was checked, most against the source text and a few from secondary reports}:
 \begin{itemize}
-  \item sixteen use agreement to validate or trust a result;
+  \item \draft{eighteen} use agreement to validate or trust a result;
   \item twelve use it to select a hyperparameter, a model or the number of components;
   \item nine report it as robustness.
 \end{itemize}
-\draft{Of the 34, six document that agreement is low and four argue that stability is not
+\draft{Of the 36, six document that agreement is low and four argue that stability is not
 correctness; these use it as a measurement, not as a check.}
 Some instances do more than one of these. A few, such as convergent learning and universal
 neurons, ask whether independently trained networks converge, which is a scientific question
 rather than a check on an estimate; we count them because they cite agreement as evidence that
-a recovered unit or feature is real. Thirteen are 2025--2026 interpretability papers.
+a recovered unit or feature is real. \draft{Fifteen} are 2025--2026 interpretability papers.
 Table~\ref{tab:census} lists representative instances. The full list, with quoted passages,
 is released with the bench.
 
@@ -1221,9 +1223,10 @@ Representation similarity & validate & convergent learning \citep{li2016converge
 Concept-based explanation & validate & TCAV \citep{kim2018tcav}; seed-sensitive
 explanations \citep{madhyastha2019stability} \\
 Sparse dictionaries & validate, train for & \citet{sharkey2022interim,bricken2023monosemanticity},
-Archetypal SAE \citep{fel2025archetypal}, \citet{song2025position} \\
+Archetypal SAE \citep{fel2025archetypal}, \citet{song2025position}, \draft{\citet{chen2025taming}} \\
 \draft{Sparse dictionaries} & \draft{document instability} & \draft{\citet{paulo2025sparse,gerasimov2026unstable}} \\
 Circuits & validate & certified circuits \citep{anani2026certified} \\
+\draft{Weight-space directions} & \draft{validate} & \draft{MLP neuron weights \citep{avrahamy2026rotate}} \\
 \bottomrule
 \end{tabular}
 \caption{Where agreement is used as a reliability check. ``Use'' gives the dominant use in the
