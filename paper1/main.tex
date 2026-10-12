@@ -128,9 +128,12 @@ contributions are:
   every run is listed in Appendix~\ref{app:arms}).
   \item \textbf{The hard case is mostly one exact null direction.} Neither check detects fits
   that converge to a direction other than the reference. \draft{Most of them differ from it
-  along $1/\gamma$ of the layer norm feeding the unit, along which the stimulus never varies.
-  Removing that direction from the fit, using public weights (as TransformerLens already does
-  when it folds and centres weights), recovers most of them. The small remainder lies in
+  along $1/\gamma$ of the layer norm feeding the unit, a direction along which the stimulus never
+  varies, a known algebraic fact \citep{shirodkar2026dead}. What is new is its effect on direction
+  estimators and their checks: per-coordinate standardisation magnifies the fit's arbitrary
+  component along it, and restart agreement certifies that component. Removing it from the fit,
+  using public weights (as TransformerLens and \citet{gurnee2024universal} do when they centre
+  reading weights), recovers most of them. The small remainder lies in
   poorly sampled directions and is identifiable in principle: a regression told the
   nonlinearity recovers it (Section~\ref{sec:identifiability}, Table~\ref{tab:lnnull}).}
   \item \textbf{More restarts are not a remedy.} Restart agreement does not improve as
@@ -256,7 +259,10 @@ are identical either way.}
 \label{tab:verify}
 \end{table}
 
-\paragraph{One direction is not identifiable, and we remove it.} Because $\mathbf{u}$ has
+\paragraph{One direction is not identifiable, and we remove it.} \draft{That $1/\gamma$ is an
+exact kernel of what follows a layer norm is known \citep{shirodkar2026dead}; interpretability
+practice already removes it when reading weights are centred \citep{nanda2022transformerlens,
+gurnee2024universal}.} Because $\mathbf{u}$ has
 zero mean across coordinates, $\mathbf{s}\cdot(\boldsymbol{1}/\boldsymbol{\gamma})$ is
 constant on every token. The component of $\mathbf{w}_j$ along $\boldsymbol{1}/\boldsymbol{\gamma}$
 only shifts the bias and cannot be recovered from data. In GPT-2 small its median share of
@@ -538,7 +544,8 @@ without it, the 21 converged-wrong fits that remain across eight arms put a medi
 their error there, against 35\% for under-fitted fits.}
 A GPT-Neo layer-6 run is the extreme case. All 20 units fail the Euclidean bar, at a median
 alignment of 0.01, yet their stimulus-weighted alignment is 0.9998 and restarts agree at 1.0.
-\draft{Its cause is exact rather than statistical. The layer norm feeding the MLP outputs
+\draft{Its cause is exact rather than statistical, and the algebra is known
+\citep{shirodkar2026dead}; what it does to a direction estimator is not. The layer norm feeding the MLP outputs
 $\gamma \odot \mathbf{z} + \beta$ with $\mathbf{z}$ zero-mean across coordinates, so every
 stimulus has the same value of $\mathbf{s}\cdot(1/\gamma)$: a direction's component along
 $\mathbf{u} = 1/\gamma$ changes no projection and cannot be recovered from any data. At GPT-Neo
@@ -564,8 +571,10 @@ when checking the cosine ceiling (Appendix~\ref{app:threats}). Removing it from 
 is the identifiable label of the primary run's first addendum, filed before unblinding but not
 computed until now. A practitioner can apply it because $\gamma$ is a public weight, and
 TransformerLens already removes this component when it folds the layer norm into the next
-layer's weights and centres them \citep{nanda2022transformerlens}; RMSNorm models have no such
-direction. Table~\ref{tab:lnnull} lists every arm with saved fitted directions. Converged-wrong
+layer's weights and centres them \citep{nanda2022transformerlens}, as does
+\citet{gurnee2024universal} when comparing neurons; RMSNorm models have no such direction
+\citep{shirodkar2026dead}. We found no paper that connects the direction to direction estimators
+or agreement checks (searches on 8, 9 and 12 October 2026). Table~\ref{tab:lnnull} lists every arm with saved fitted directions. Converged-wrong
 fits fall from 2, 20, 6, 7 and 8 to 0, 6, 1, 2 and 2 in the Pythia-160m, GPT-Neo layer-10 and
 three GPT-2 re-fit arms, and from 19 and 16 to 4 and 5 in the two new-unit replications. On the primary's replicate
 (B-14r) they fall from \bRCwFiled{} to \bRCwIdent{}, and the gap on this label is \bRIdentDelta{}
@@ -786,9 +795,39 @@ the opposite, false alarms: on the primary run no failure reaches agreement 0.99
 estimates of correctness are never guaranteed \citep{garg2022leveraging}; held-out fit is a
 necessary condition, not a certificate.
 
+\draft{\paragraph{What each check can certify.} The two checks fail in different places because
+they resample different things. Held-out fit weighs a fit's error by the stimulus covariance: to
+first order its deficit is the error's energy in the stimulus metric, so it cannot see error in
+directions the stimulus does not excite, and the Euclidean error it tolerates per unit of $R^2$
+deficit grows with the error's share in the bottom 1\% of stimulus variance (Spearman 0.74 over
+494 passing fits). Restart agreement varies only the optimiser's starting point, so it can be high
+whenever every restart shares the same error. In our data it rarely certifies a converged-wrong
+fit: 3 of 118 reach agreement 0.97 on the filed label and 0 of 35 on the identifiable label,
+against 41\% of passing fits. The exception is the layer norm's null direction, which every restart
+shares: in the two arms with a near-zero gain, all 34 fits that reach agreement 0.97 are wrong.
+Agreement between fits on disjoint documents, which redraws the data rather than the optimiser,
+did not rank the GPT-Neo replication's failures better than restart agreement on the filed labels
+($+0.068$, $[-0.018, +0.154]$). Read together, these are scope conditions rather than defects of one
+check: each certifies only what its resampling redraws or its metric weighs (exploratory).}
+
 % ======================================================================
 \section{Discussion}
 \label{sec:discussion}
+\draft{\paragraph{A rule a practitioner can use.} At the thresholds people use, held-out fit
+certifies about twice as many correct directions as restart agreement, at a comparable error rate.
+Over the 15 noiseless arms with saved directions (1{,}580 fits, identifiable label), accepting
+fits with held-out $R^2 \geq 0.995$ certifies 1{,}162 correct directions, and accepting restart
+agreement $\geq 0.97$ certifies 520; each accepts 25 wrong fits, only 2 of them the same, so 2.1\%
+and 4.6\% of the accepted fits are wrong (difference $-0.025$, $[-0.045, -0.006]$). The rate
+difference rests on the two near-zero-gain arms: on GPT-2 layer 6 the two rules tie ($-0.005$,
+$[-0.028, +0.012]$), and on the filed label, without removing the layer norm's null direction,
+held-out fit over-certifies (9.4\% against 8.1\%). The rule is therefore to fold and centre the
+layer norm first and then threshold held-out fit, and it holds for noiseless responses only
+(Section~\ref{sec:noise}). The thresholds were chosen on these data, so this is exploratory. A
+pre-registered test on D-3's 16{,}000-token cell, filed before its data, gives a yield difference
+of \dThreeYield{} \dThreeYieldCI{} and an error-rate difference of \dThreeFcr{} \dThreeFcrCI{}
+(\dThreeReading; margin $+0.03$).}
+
 We expected the hard case to be a fit that is wrong yet fits perfectly, and it exists:
 neither check detects it. On this substrate the exploratory analysis says why. These fits
 differ from the reference only where the stimulus has almost no variance. \draft{Along one of
