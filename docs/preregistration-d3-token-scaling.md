@@ -71,3 +71,42 @@ Euclidean Δ (−0.169, −0.084). Run once, when all four budgets have 150 rows
 - No unit, budget, threshold, label or reading is changed after seeing output.
 - If the queue stops early, completed budgets are reported and the rest marked not run; P1 is
   computed only if both 8k and 16k are complete.
+
+## Addendum 1 (12 October 2026, 10:30, before the 16k cell's first row exists)
+
+**Why.** An exploratory analysis of the 15 noiseless arms with saved directions (1,580 fits) found
+that, at thresholds practitioners use, held-out R² certifies about twice as many correct directions
+as restart agreement (rule A, held-out R² ≥ 0.995: 1,162 correct certified; rule B, restart agreement
+≥ 0.97: 520), with false-certification rates within a few points of each other on the identifiable
+label. The rate advantage comes from two 20-unit arms; on GPT-2 layer 6, D-3's condition, the two
+rules tie. The pairing and thresholds were chosen with those data in view, so the result is
+exploratory. This addendum tests it once on data no one has seen.
+
+**Population.** D-3's 16k cell, all 150 units, identifiable label as D-3 defines it. The 8k cell's
+rows already exist; they were not read and are excluded from this addendum.
+
+**Rules (frozen; no other pairing is scored).** A: held-out R² of the selected fit ≥ 0.995.
+B: stored restart agreement ≥ 0.97.
+
+**Endpoints.** E1, yield: Y_A − Y_B, the share of identifiable-correct fits each rule accepts.
+E2, false certification: FCR_A − FCR_B, the share of each rule's accepted fits that are wrong.
+
+**Inference.** Paired unit bootstrap, 2,000 resamples, `numpy.random.default_rng(20261012)`,
+percentile 95% intervals. A resample in which a rule accepts nothing is dropped from E2, and the
+number dropped is reported.
+
+**Readings.** E1 holds if its lower bound is above 0. E2, non-inferiority margin +0.03: non-inferior
+if the upper bound is below +0.03; R² worse if the lower bound is above 0; inconclusive otherwise.
+With fewer than 5 accepted-wrong fits across both rules, E2 is underpowered and reported
+descriptively.
+
+**Predictions.** E1 holds (expected; low information). E2 has no directional prediction: on GPT-2
+layer 6 the in-sample estimate is a tie, and at 16k converged-wrong fits should raise R²'s rate.
+
+**Paper reading.** E2 non-inferior: "comparable false certification at twice the yield" is confirmed
+on fresh units at 16k. R² worse: the operating-point paragraph states that held-out R² over-certifies
+once failures are converged-wrong, consistent with the fading lead.
+
+**Scorer.** `certification()` in `experiments/analyse_d3.py`, added with this addendum and run once
+with the rest of D-3. Development run on B-15a/B-15b standing in for 8k/16k
+(`results/d3_dev.json`): E1 +0.49 [+0.37, +0.60], E2 underpowered (1 accepted-wrong fit).

@@ -56,6 +56,44 @@ def ci(xs):
     return [float(np.percentile(xs, 2.5)), float(np.percentile(xs, 97.5))] if len(xs) > NB // 2 else None
 
 
+def certification(d, keys):
+    """D-3 Addendum 1: rule A (held-out R2 >= 0.995) against rule B (restart agreement >= 0.97) on
+    the identifiable label. E1 = yield_A - yield_B (share of correct fits accepted); E2 = FCR_A - FCR_B
+    (share of accepted fits that are wrong). Paired unit bootstrap, 2,000 resamples, default_rng(20261012)."""
+    ok = np.array([d[k]["ident"] >= ln.PASS for k in keys])
+    acc = {"A": np.array([d[k]["r2"] >= 0.995 for k in keys]), "B": np.array([d[k]["restart"] >= 0.97 for k in keys])}
+
+    def stats(ix):
+        o, y, f = ok[ix], {}, {}
+        for r, a in acc.items():
+            a = a[ix]
+            y[r] = (a & o).sum() / o.sum() if o.sum() else np.nan
+            f[r] = (a & ~o).sum() / a.sum() if a.sum() else np.nan
+        return y["A"] - y["B"], f["A"] - f["B"]
+    e1, e2 = stats(np.arange(len(keys)))
+    rng = np.random.default_rng(20261012)
+    b1, b2, dropped = [], [], 0
+    for _ in range(NB):
+        x, y = stats(rng.integers(0, len(keys), len(keys)))
+        b1.append(x)
+        if np.isnan(y):
+            dropped += 1
+        else:
+            b2.append(y)
+    ci1 = [float(np.nanpercentile(b1, 2.5)), float(np.nanpercentile(b1, 97.5))]
+    ci2 = [float(np.percentile(b2, 2.5)), float(np.percentile(b2, 97.5))] if b2 else None
+    wrong = int(sum((a & ~ok).sum() for a in acc.values()))
+    if wrong < 5 or ci2 is None:
+        r2 = "underpowered (fewer than 5 accepted-wrong fits across both rules)"
+    else:
+        r2 = "non-inferior" if ci2[1] < 0.03 else ("R2 worse" if ci2[0] > 0 else "inconclusive")
+    return {"units": len(keys), "correct": int(ok.sum()),
+            "accepted": {r: int(a.sum()) for r, a in acc.items()},
+            "accepted_wrong": {r: int((a & ~ok).sum()) for r, a in acc.items()},
+            "E1_yield_diff": float(e1), "E1_ci95": ci1, "E1_reading": "holds" if ci1[0] > 0 else "does not hold",
+            "E2_fcr_diff": float(e2), "E2_ci95": ci2, "E2_dropped_resamples": dropped, "E2_reading": r2}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dev", action="store_true", help="B-15a as 8k and B-15b as 16k; no row-count check")
@@ -90,6 +128,7 @@ def main():
         reading = ("underpowered" if nf < MIN_FAIL else "lead shrinks" if c and c[0] > 0 else
                    "lead grows" if c and c[1] < 0 else "no change detected")
         rep[f"change 8k to 16k, {name}"] = {"delta_16k_minus_8k": point, "ci95_paired": c, "reading": reading}
+    rep["addendum 1, certification at 16k"] = certification(D[16000], keys)
     out = ROOT / ("results/d3_dev.json" if a.dev else "results/d3_analysis.json")
     json.dump(rep, open(out, "w"), indent=1, default=float)
     print(json.dumps({k: v for k, v in rep.items() if k.startswith("change")}, indent=1, default=float))

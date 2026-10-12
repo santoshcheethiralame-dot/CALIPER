@@ -62,5 +62,30 @@
    0.26515314109677246
   ],
   "reading": "no change detected"
+ },
+ "addendum 1, certification at 16k": {
+  "units": 100,
+  "correct": 86,
+  "accepted": {
+   "A": 73,
+   "B": 30
+  },
+  "accepted_wrong": {
+   "A": 1,
+   "B": 0
+  },
+  "E1_yield_diff": 0.48837209302325585,
+  "E1_ci95": [
+   0.3734262894273724,
+   0.6024096385542168
+  ],
+  "E1_reading": "holds",
+  "E2_fcr_diff": 0.0136986301369863,
+  "E2_ci95": [
+   0.0,
+   0.04225352112676056
+  ],
+  "E2_dropped_resamples": 0,
+  "E2_reading": "underpowered (fewer than 5 accepted-wrong fits across both rules)"
  }
 }
