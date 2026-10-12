@@ -47,12 +47,11 @@ one estimator family, noiseless responses and an 8,000-token stimulus.} The esti
 the reference direction on 15\% of units. Agreement across
 restarts predicts these failures worse than held-out fit (AUC 0.79 vs 0.92,
 $p = 1.8\times10^{-4}$; pooled across six conditions, $\Delta$AUC $= -0.134$, 95\% CI
-$[-0.189,-0.078]$). \draft{On units never fitted before the gap is smaller ($-0.035$ and
-$-0.097$ in two replications on GPT-Neo), and at 16,000 tokens, where most remaining failures
-fit well, it shrinks to $-0.05$ with an interval that includes zero (exploratory).}
-% D-1, keep one: holds -> \draft{On 200 fresh GPT-2 units, pre-registered, it is \dOneDelta{} \dOneCI.}
-% not replicated -> \draft{On 200 fresh GPT-2 units, pre-registered, it is \dOneDelta{} \dOneCI, an interval that includes zero.}
-% reversed -> \draft{On 200 fresh GPT-2 units, pre-registered, restart agreement leads (\dOneDelta{} \dOneCI).} The
+$[-0.189,-0.078]$). \draft{A pre-registered replication on 200 GPT-2 units never fitted before
+gives \dOneDelta{} \dOneCI{} on the label that removes the layer norm's null direction
+(\dOneEucDelta{} on the filed label). On new GPT-Neo units the gap is smaller ($-0.035$ and
+$-0.097$), and at 16,000 tokens, where most remaining failures fit well, it shrinks to $-0.05$
+with an interval that includes zero (exploratory).} The
 advantage comes from under-fitted estimates. On the third of failures
 that fit as well as the reference but point elsewhere, neither check is reliable.
 \draft{Most of those fits differ from the reference along a single direction the data cannot
@@ -123,8 +122,9 @@ contributions are:
   failure (Appendix~\ref{app:bench}).
   \item \textbf{Restart agreement is the weaker check.} Held-out fit predicts failure better
   in each of the six pooled conditions, with a pooled gap of 0.13 AUC. \draft{The lead grows
-  when each check is scored on its own estimation route, and it is smaller on fresh units and at
-  larger token budgets; in two small unpooled arms restart agreement leads} (Section~\ref{sec:results};
+  when each check is scored on its own estimation route and replicates on 200 GPT-2 units never
+  fitted before (pre-registered, \dOneDelta{}); it is smaller on new GPT-Neo units and at larger
+  token budgets, and in two small unpooled arms restart agreement leads} (Section~\ref{sec:results};
   every run is listed in Appendix~\ref{app:arms}).
   \item \textbf{The hard case is mostly one exact null direction.} Neither check detects fits
   that converge to a direction other than the reference. \draft{Most of them differ from it
@@ -420,23 +420,11 @@ failures disappear and the remaining failures are mostly converged-wrong (0, 0, 
 22, 17 and 10), the class neither check sees. Held-out fit's advantage is largest where fits are
 data-limited and fades where they are not (exploratory; Appendix~\ref{app:arms}).}
 
-% D-1 (docs/preregistration-d1-fresh-units.md): keep the paragraph matching \dOneReading, delete the rest.
-% holds:
-% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
-% scored on the identifiable label, gives \dOneDelta{} \dOneCI{} (\dOneFail{} failures), and
-% \dOneEucDelta{} \dOneEucCI{} on the Euclidean label: the lead holds on fresh units.}
-% not replicated:
-% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
-% scored on the identifiable label, gives \dOneDelta{} \dOneCI{} (\dOneFail{} failures), an
-% interval that includes zero (\dOneEucDelta{} \dOneEucCI{} on the Euclidean label). The lead is
-% therefore established on re-fits of units already seen, not on fresh units.}
-% reversed:
-% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
-% scored on the identifiable label, gives \dOneDelta{} \dOneCI{}: on fresh units restart
-% agreement leads, so we do not claim that held-out $R^2$ is the better check in general.}
-% underpowered:
-% \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1) has
-% only \dOneFail{} failures on the identifiable label, below the pre-registered minimum of 10.}
+\draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
+scored on the identifiable label, gives \dOneDelta{} \dOneCI{} (\dOneFail{} failures; DeLong
+$p = 3.0\times10^{-5}$), and \dOneEucDelta{} \dOneEucCI{} on the Euclidean label (\dOneEucFail{}
+failures): the lead holds on fresh units. With the direct route scored against its own held-out
+$R^2$ it is $-0.091$ $[-0.146, -0.046]$.}
 
 \begin{figure}[t]
 \centering
