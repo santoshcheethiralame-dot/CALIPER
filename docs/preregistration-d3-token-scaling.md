@@ -72,7 +72,7 @@ Euclidean Δ (−0.169, −0.084). Run once, when all four budgets have 150 rows
 - If the queue stops early, completed budgets are reported and the rest marked not run; P1 is
   computed only if both 8k and 16k are complete.
 
-## Addendum 1 (12 October 2026, 10:30, before the 16k cell's first row exists)
+## Addendum 1 (12 October 2026, committed 10:22, before the 16k cell's first row exists)
 
 **Why.** An exploratory analysis of the 15 noiseless arms with saved directions (1,580 fits) found
 that, at thresholds practitioners use, held-out R² certifies about twice as many correct directions
