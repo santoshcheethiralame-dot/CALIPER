@@ -116,33 +116,62 @@ the instrument measures what it is taken to measure, and answer it per assumptio
 \label{sec:related}
 \draft{\paragraph{Concept injection.} \citet{lindsey2025introspection} report that models detect
 injected concepts at moderate rates with few false positives, and \citet{macar2026mechanisms}
-locate a mechanism for the effect in Gemma-3-27B at layer 37, best at strength 4. We run their
-released recipe, strength and prompt inside the audit (Section~\ref{sec:protocol}).}
+locate a mechanism for the effect in Gemma-3-27B at layer 37, best at strength 4. Related work
+reports detection in smaller models \citep{vogel2025small}, detection of injections made earlier in
+the context \citep{pearsonvogel2026latent}, and mechanisms of the detection itself
+\citep{zou2026mechanistic}. We run the released recipe, strength and prompt of
+\citet{macar2026mechanisms} inside the audit (Section~\ref{sec:protocol}).}
 
-\draft{\paragraph{Critiques.} Detection can be content-agnostic \citep{lederman2026contentagnostic},
-indistinguishable from editing the input \citep{singh2026realitycheck}, or explained by a global
-shift in the log-odds of \yes{} measured against factual-\no{} controls
-\citep{hahami2025disturbance}; C8 tests the last on Gemma-3-27B with factual-\yes{} controls that
-can separate a shift toward \yes{} from a flattening of confident answers. Intervention-versus-sham
-scoring with impact-matched random directions \citep{ferrara2026masked} is the closest prior
-design; we add per-vector liveness, dose transfer across families and the health-check audit.
-Models trained to report injections \citep{fonsecarivera2025awareness,hahami2026ift} are a
-different object from the untrained paradigm audited here.}
+\draft{\paragraph{Critiques of the paradigm.} Detection can be content-agnostic
+\citep{lederman2026contentagnostic}, indistinguishable from editing the input
+\citep{singh2026realitycheck}, or explained by a global shift in the log-odds of \yes{} measured
+against factual-\no{} controls \citep{hahami2025disturbance}; C8 tests the last on Gemma-3-27B with
+factual-\yes{} controls that can separate a shift toward \yes{} from a flattening of confident
+answers. Other critiques ask whether the reports reflect confusion or localisation rather than
+introspection \citep{godet2025confusion,godet2025localization}, and whether a test rules out causal
+bypassing \citep{morris2025bypassing}. Intervention-versus-sham scoring with impact-matched random
+directions \citep{ferrara2026masked} is the closest prior design; we add per-vector liveness, dose
+transfer across families and the health-check audit. The question is old: people's verbal reports
+about their own mental processes can be fluent and wrong \citep{nisbett1977telling}.}
 
-\draft{\paragraph{Dose.} \citet{wu2026steerable} recommend setting steering strength as a fraction
-of the residual norm so that interventions are comparable across scales, and note that this does
-not guarantee an equal functional dose across models. C4 measures how far from equal it is.}
+\draft{\paragraph{Self-knowledge beyond injection.} Models have been trained or prompted to predict
+their own behaviour \citep{binder2024looking,zeng2026selfmodeling}, tested on whether they know their
+own grammaticality judgements \citep{song2025fail}, and probed for metacognitive monitoring of their
+internal states \citep{jian2025metacognitive}; whether the word introspection applies at all is
+itself debated \citep{comsa2025introspection}. Methods that turn activations into text, such as
+Patchscopes \citep{ghandeharioun2024patchscopes}, SelfIE \citep{chen2024selfie} and LatentQA
+\citep{pan2024latentqa}, raise the same measurement question \citep{li2025verbalization}, and
+verbalisable representations have been studied directly \citep{gurnee2026verbalizable}. Models
+trained to report injections \citep{fonsecarivera2025awareness,hahami2026ift} are a different object
+from the untrained paradigm audited here.}
 
-\draft{\paragraph{Steerability predictors.} Several works predict which concepts or layers steer
-well \citep{billa2026predicting,braun2025unreliability,bas2025whatcan}. They rank concept families
-and layers; C1 tests the per-vector use their authors do not claim, as a screen for whether one
-vector is live.}
+\draft{\paragraph{Activation steering and its reliability.} Concept injection borrows its instrument
+from activation steering, which adds a direction to the residual stream to change behaviour
+\citep{turner2023actadd,rimsky2024caa,zou2023repe} or to monitor a trait \citep{chen2025persona}.
+Steering vectors are known to be unreliable across inputs and concepts
+\citep{tan2024generalisation,braun2025unreliability,dasilva2025steering}, simple baselines can match
+more elaborate methods \citep{wu2025axbench,im2025unified}, and steering carries safety risks of its
+own \citep{safetypitfalls2026}. Several works predict which concepts or layers steer well
+\citep{billa2026predicting,bas2025whatcan,canary2026}. They rank concept families and layers; C1
+tests the per-vector use their authors do not claim, as a screen for whether one vector is live.}
+
+\draft{\paragraph{Dose.} \citet{wu2026steerable} recommend setting steering strength as a fraction of
+the residual norm so that interventions are comparable across scales, and note that this does not
+guarantee an equal functional dose across models; geometric accounts of steering propose other
+parameterisations \citep{anglenorm2026,riemannian2026}. C4 measures how far a fraction of the norm is
+from an equal dose, and how far a random-direction calibration is from one.}
+
+\draft{\paragraph{Perturbations in safety evaluation.} The same instrument is used to make safety
+claims: steering against evaluation awareness to argue that evaluations measure deployed behaviour
+\citep{hua2025steering,heidari2026evalaware}, and injecting noise to expose sandbagging
+\citep{tice2024noise}. The controls such claims need are the controls this audit calibrates.}
 
 % ======================================================================
 \section{The audit protocol}
 \label{sec:protocol}
-\draft{\paragraph{Models and vectors.} We use Qwen2.5-3B and -7B, Gemma-3-4B, and Gemma-3-12B and
--27B in 4-bit NF4 with float32 compute, the largest precision that fits on free T4 GPUs. Vectors
+\draft{\paragraph{Models and vectors.} We use Qwen2.5-3B and -7B \citep{qwen2025qwen25}, Gemma-3-4B,
+and Gemma-3-12B and -27B \citep{gemma2025gemma3}, the larger ones in 4-bit NF4 \citep{dettmers2023qlora}
+with float32 compute, the largest precision that fits on free T4 GPUs. Vectors
 are read at 0.6 of depth, and at layer 37 for the released Gemma-3-27B cells, for 30 concepts: 20
 concrete (animals, places, objects) and 10 abstract (emotions and two abstract nouns). Four recipes
 build a vector: the concept token, the chat template's final token (the template tail), the mean
@@ -165,6 +194,13 @@ stored beside it, and from generated text. The identify stage reads the log-prob
 concept word after the released prefill ``I notice an injected thought about''. Framings are the
 released introspective prompt, a matched neutral prompt, and thirty factual questions each whose
 answer is \yes{}, \no{}, or contested, all inside the released two-turn frame.}
+
+\draft{\paragraph{Statistics.} A health check's ability to tell live from dead vectors is an AUC
+\citep{hanley1982meaning}, with stratified bootstrap intervals \citep{efron1979bootstrap}; paired
+per-concept changes use the Wilcoxon signed-rank test \citep{wilcoxon1945individual}; agreement of a
+check across cells is tested with Cochran's $Q$ on inverse-variance weights
+\citep{cochran1954combination,hanley1982meaning}; and per-session tests are combined with Fisher's method
+\citep{fisher1925statistical}.}
 
 \draft{\paragraph{Pre-registration.} Every arm was filed before its data, with its endpoints,
 predictions and readings; amendments were filed before the data they govern. Every filed
