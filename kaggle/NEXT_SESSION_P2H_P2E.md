@@ -26,7 +26,8 @@ pip install -q -U bitsandbytes accelerate transformers
 ## Cell 2: load the scripts by name and check versions
 
 ```python
-import glob, os, sys, gc, torch, logging, transformers
+import glob, os, sys, gc, torch, logging, transformers, time, signal
+T0 = time.time()                        # session clock for the deadline guard in Cell 4
 logging.getLogger("bitsandbytes").setLevel(logging.ERROR)
 transformers.logging.set_verbosity_error()
 transformers.logging.disable_progress_bar()
@@ -62,13 +63,28 @@ p2h._CLEAN.clear(); gc.collect(); torch.cuda.empty_cache()
 ## Cell 4: P2-E
 
 ```python
+# Deadline guard: P2-E's cost on 2xT4 has not been measured, and Kaggle stops a session at 12 h.
+# Stop P2-E at 11 h after Cell 2 so that Cell 5 still packages every finished row (P2-H's
+# included). Doses run 0.5, 0.1, 2.0, and the prereg scores whatever completed, in that order.
+class _Deadline(Exception):
+    pass
+def _stop(*_):
+    raise _Deadline()
+signal.signal(signal.SIGALRM, _stop)
+signal.alarm(max(60, int(11 * 3600 - (time.time() - T0))))
 sys.argv = ["run", *PREC, "--out", "/kaggle/working/p2e_llama8b.jsonl"]
 try:
     p2e.main()
 except SystemExit as e:
     print("STOPPED:", e, flush=True)
+except _Deadline:
+    print(f"DEADLINE at {(time.time() - T0) / 3600:.2f} h: P2-E stopped; finished rows are kept", flush=True)
+finally:
+    signal.alarm(0)
 p2e.s3._CLEAN.clear(); gc.collect(); torch.cuda.empty_cache()
 ```
+
+If P2-E is cut off, a later session finishes it with `NEXT_SESSION_P2E.md`: rows resume by key.
 
 **If either stops with `M1 FAILED`** (non-finite logits in fp16): delete that run's `.jsonl` and
 `_sidecar.json`, restart the session, run Cells 1-2, set
