@@ -1,5 +1,8 @@
 # Kaggle session: P2-E, eval-awareness steering against matched controls (Llama-3.1-8B)
 
+> **For the planned run use `NEXT_SESSION_P2H_P2E.md`**, which runs P2-H and then P2-E in one
+> session. This sheet stays for a P2-E-only rerun.
+
 Prereg: `docs/preregistration-p2e-eval-awareness.md` (filed 13 Oct, before data). Scripts:
 `kaggle_p2e_eval_awareness.py` **v2026-10-13a**, which imports `kaggle_s3_positive_control.py`
 **v2026-10-11b**. Forced choice only (first-token YES/NO log-odds, no generation). About 3-5
