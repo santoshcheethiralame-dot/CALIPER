@@ -91,6 +91,11 @@ Leads in `docs/CITATIONS.md` §26. Verify each before citing.
 - **Imperfect-reference-standard statistics** (latent-class models): grounding for treating
   the Euclidean label as imperfect.
 - **Massive activations and residual sinks:** why the stimulus covariance is ill-conditioned.
+- **Reliability without validity, outside interpretability** (2606.19544, 13 Oct, ABS): across
+  21 LLM judges, two production judges combine test-retest reliability above 0.95 with position
+  bias above 0.10, and exact-match agreement runs 33-41 points above Cohen's kappa. The same
+  point as the headline, reached independently in another field: one sentence in the
+  introduction or discussion. Read the paper before citing a number.
 
 ## Beyond Paper 1
 

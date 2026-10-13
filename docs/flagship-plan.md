@@ -185,6 +185,13 @@ an interventional consistency check (does steering along v-hat move the unit as 
 including off the data manifold). Primary endpoint per cell: data-resampling agreement vs
 seed agreement, DeLong, pooled by random effects.
 
+*13 Oct, from the cross-field sweep (`projects/research-radar`).* Every check's AUC is also
+reported per model family, and the table states whether a check calibrated on one family holds on
+another. A pooled verdict hides the failure we already have (B-8b: held-out R2 adds nothing over
+difficulty baselines on GPT-Neo, though it did on GPT-2), and sabotage monitors show the same
+pattern (Calibration-Family Overfit, 2607.06596: 41% detection on-lineage, 19% off; ABS). Fix
+this in the F-9 / F-10 preregs before they are filed.
+
 **F-11. Scale.** Pythia-6.9B and 12B (GELU), OPT-13B (ReLU), Qwen2.5-7B (SwiGLU) on Kaggle,
 50-100 units each. Turns "124M to 1.4B" into "up to 13B".
 
@@ -194,6 +201,8 @@ seed agreement, DeLong, pooled by random effects.
 directions people publish: the refusal direction, persona vectors (Chen et al., released
 pipeline), the concept vectors of the introspection-mechanisms release (Macar et al.), and our
 own (S-1, S-2). Which pass the checks that work? Bridges the flagship to Papers 2 and 3.
+*13 Oct:* add the eval-awareness vector (Hua et al. 2510.20487's 16 pairs), which P2-E builds
+on Llama-3.1-8B; its released pairs and code are MIT-licensed.
 
 **F-13. Which checks see which failure: the bias-variance split, across papers (offline).**
 Classify every failure type found so far (under-fitted, converged-wrong, standardisation
@@ -201,6 +210,15 @@ artifact, dead vector, saturated dose) as variance-type or bias-type by F-0's te
 move when the data are resampled?), and report each check's AUC by type. Prediction:
 resampling checks catch variance-type only; geometric checks catch both where the answer lives
 in poorly sampled or shared directions. Uses existing data plus F-1 and P2-G.
+
+**Lead, 13 Oct (not in the calendar): capture-recapture over seeds.** Paper 1's "beyond" note
+plans to calibrate SAE cross-seed agreement against planted features (SynthSAEBench). The same
+runs can also estimate how many true features every seed misses: treat seeds as independent
+captures and fit Lincoln-Petersen and Chao estimators to their overlap. SynthSAEBench knows the
+true count, so the estimator itself gets calibrated, and its failure under unequal catchability
+is measurable rather than assumed. It turns "agreement predicts correctness?" into "can agreement
+count what is missing?", and ties Proposal III to Proposal V. Leask et al. (2502.04878, SAEs are
+not canonical; ABS) is the motivating prior. Decide at Gate F-B whether it enters Paper 3.
 
 ---
 
