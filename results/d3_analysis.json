@@ -1,0 +1,135 @@
+{
+ "dev": false,
+ "units": 150,
+ "by_budget": {
+  "2000": {
+   "identifiable": {
+    "failures": 108,
+    "converged_wrong": 0,
+    "under_fitted": 108,
+    "delta": -0.2114197530864197,
+    "delta_ci95": [
+     -0.31135028123575753,
+     -0.11967328535881193
+    ]
+   },
+   "as filed": {
+    "failures": 108,
+    "converged_wrong": 0,
+    "under_fitted": 108,
+    "delta": -0.2114197530864197,
+    "delta_ci95": [
+     -0.31135028123575753,
+     -0.11967328535881193
+    ]
+   }
+  },
+  "4000": {
+   "identifiable": {
+    "failures": 54,
+    "converged_wrong": 0,
+    "under_fitted": 54,
+    "delta": -0.1913580246913581,
+    "delta_ci95": [
+     -0.261391617063492,
+     -0.12923761186425659
+    ]
+   },
+   "as filed": {
+    "failures": 62,
+    "converged_wrong": 2,
+    "under_fitted": 60,
+    "delta": -0.1638563049853372,
+    "delta_ci95": [
+     -0.2333257815536676,
+     -0.10213797004540102
+    ]
+   }
+  },
+  "8000": {
+   "identifiable": {
+    "failures": 28,
+    "converged_wrong": 5,
+    "under_fitted": 23,
+    "delta": -0.1696428571428571,
+    "delta_ci95": [
+     -0.2563205209461385,
+     -0.0911477272727273
+    ]
+   },
+   "as filed": {
+    "failures": 39,
+    "converged_wrong": 15,
+    "under_fitted": 24,
+    "delta": -0.06802956802956805,
+    "delta_ci95": [
+     -0.15108467058850836,
+     0.0070995822789962654
+    ]
+   }
+  },
+  "16000": {
+   "identifiable": {
+    "failures": 10,
+    "converged_wrong": 2,
+    "under_fitted": 8,
+    "delta": -0.2589285714285714,
+    "delta_ci95": [
+     -0.42437971716464357,
+     -0.12620379673608575
+    ]
+   },
+   "as filed": {
+    "failures": 23,
+    "converged_wrong": 14,
+    "under_fitted": 9,
+    "delta": -0.07685724067100308,
+    "delta_ci95": [
+     -0.19048923907249465,
+     0.0309343878215664
+    ]
+   }
+  }
+ },
+ "change 8k to 16k, identifiable": {
+  "delta_16k_minus_8k": -0.0892857142857143,
+  "ci95_paired": [
+   -0.2656717648700873,
+   0.05279804506443565
+  ],
+  "reading": "no change detected"
+ },
+ "change 8k to 16k, as filed": {
+  "delta_16k_minus_8k": -0.008827672641435025,
+  "ci95_paired": [
+   -0.14324572968215252,
+   0.12795514222903423
+  ],
+  "reading": "no change detected"
+ },
+ "addendum 1, certification at 16k": {
+  "units": 150,
+  "correct": 140,
+  "accepted": {
+   "A": 129,
+   "B": 64
+  },
+  "accepted_wrong": {
+   "A": 0,
+   "B": 1
+  },
+  "E1_yield_diff": 0.47142857142857136,
+  "E1_ci95": [
+   0.3829787234042554,
+   0.5594405594405594
+  ],
+  "E1_reading": "holds",
+  "E2_fcr_diff": -0.015625,
+  "E2_ci95": [
+   -0.05172413793103448,
+   0.0
+  ],
+  "E2_dropped_resamples": 0,
+  "E2_reading": "underpowered (fewer than 5 accepted-wrong fits across both rules)"
+ }
+}

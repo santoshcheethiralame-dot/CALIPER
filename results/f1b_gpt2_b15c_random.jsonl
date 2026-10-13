@@ -1,0 +1,1 @@
+{"align_direct": 0.9999, "align_cascade": 0.9998, "align_selected": 0.9999, "best_available": 0.9999, "picked": "direct", "r2_k1": 0.999768, "augment": "random", "augment_n": 2000, "k2_gain": -0.0299, "disagreement": 0.0001, "route_agreement": 1.0, "stability": 1.0, "r2_spread": 4.4e-05, "stability_pairs": [0.999992], "n_restarts": 2, "_key": 1698}

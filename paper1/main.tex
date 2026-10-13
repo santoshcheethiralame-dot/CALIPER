@@ -49,9 +49,11 @@ restarts predicts these failures worse than held-out fit (AUC 0.79 vs 0.92,
 $p = 1.8\times10^{-4}$; pooled across six conditions, $\Delta$AUC $= -0.134$, 95\% CI
 $[-0.189,-0.078]$). \draft{A pre-registered replication on 200 GPT-2 units never fitted before
 gives \dOneDelta{} \dOneCI{} on the label that removes the layer norm's null direction
-(\dOneEucDelta{} on the filed label). On new GPT-Neo units the gap is smaller ($-0.035$ and
-$-0.097$), and at 16,000 tokens, where most remaining failures fit well, it shrinks to $-0.05$
-with an interval that includes zero (exploratory).} The
+(\dOneEucDelta{} on the filed label), and a pre-registered sweep from 2,000 to 16,000 tokens finds
+the lead on that label at every budget ($-0.17$ to $-0.26$), with no change detected between
+8,000 and 16,000. On the filed label it shrinks with the budget, because the failures that remain
+lie along the null direction. On new GPT-Neo units the gap is smaller ($-0.035$ and $-0.097$,
+exploratory).} The
 advantage comes from under-fitted estimates. On the third of failures
 that fit as well as the reference but point elsewhere, neither check is reliable.
 \draft{Most of those fits differ from the reference along a single direction the data cannot
@@ -123,8 +125,9 @@ contributions are:
   \item \textbf{Restart agreement is the weaker check.} Held-out fit predicts failure better
   in each of the six pooled conditions, with a pooled gap of 0.13 AUC. \draft{The lead grows
   when each check is scored on its own estimation route and replicates on 200 GPT-2 units never
-  fitted before (pre-registered, \dOneDelta{}); it is smaller on new GPT-Neo units and at larger
-  token budgets, and in two small unpooled arms restart agreement leads} (Section~\ref{sec:results};
+  fitted before (pre-registered, \dOneDelta{}) and holds at every budget of a pre-registered token
+  sweep on the same label; it is smaller on new GPT-Neo units, and in two small unpooled arms
+  restart agreement leads} (Section~\ref{sec:results};
   every run is listed in Appendix~\ref{app:arms}).
   \item \textbf{The hard case is mostly one exact null direction.} Neither check detects fits
   that converge to a direction other than the reference. \draft{Most of them differ from it
@@ -421,12 +424,17 @@ $-0.094$ and $-0.133$ to $-0.127$, $-0.123$ and $-0.167$.
 fitted in an earlier run (B-1, whose own five-restart arm gave $-0.068$). On 100 GPT-Neo layer-10
 units never fitted before, the gap is $-0.035$ $[-0.116, +0.049]$, and $-0.097$
 $[-0.186, -0.008]$ when the same units are fitted on disjoint documents; both are smaller than
-the pooled $-0.134$. An earlier token-budget sweep on 50 GPT-2 layer-6 units, fitted with the
-coupled estimator, puts the gap at $-0.062$, $-0.138$, $-0.201$ and $-0.052$ at 2,000, 4,000,
-8,000 and 16,000 tokens (the last interval $[-0.218, +0.107]$). As the budget grows, under-fitted
-failures disappear and the remaining failures are mostly converged-wrong (0, 0, 5 and 8 of 42,
-22, 17 and 10), the class neither check sees. Held-out fit's advantage is largest where fits are
-data-limited and fades where they are not (exploratory; Appendix~\ref{app:arms}).}
+the pooled $-0.134$. An earlier, exploratory token-budget sweep on 50 GPT-2 layer-6 units with
+the coupled estimator suggested that the lead fades at 16,000 tokens ($-0.052$, $[-0.218, +0.107]$;
+Appendix~\ref{app:arms}). A pre-registered sweep on the corrected estimator (D-3: 150 GPT-2
+layer-6 units never fitted before, each fitted at 2,000, 4,000, 8,000 and 16,000 tokens) does not
+bear that out on the identifiable label. The gap is $-0.211$ $[-0.311, -0.120]$, $-0.191$
+$[-0.261, -0.129]$, $-0.170$ $[-0.256, -0.091]$ and $-0.259$ $[-0.424, -0.126]$ at the four
+budgets, and its change from 8,000 to 16,000 tokens, the filed primary, is \dThreeChange{}
+\dThreeChangeCI{} (\dThreeChangeReading; 10 failures at 16,000, the filed minimum). On the
+filed Euclidean label the gap shrinks ($-0.211$, $-0.164$, $-0.068$ and $-0.077$), because as the
+budget grows the under-fitted failures disappear and those that remain are converged-wrong fits
+along the layer norm's null direction (14 of 23 at 16,000 tokens).}
 
 \draft{A pre-registered replication on 200 GPT-2 layer-6 units never fitted before (D-1),
 scored on the identifiable label, gives \dOneDelta{} \dOneCI{} (\dOneFail{} failures; DeLong
@@ -565,7 +573,11 @@ wherever a gain is near zero; at GPT-2 layer 3, never fitted before, 20 new unit
 it raises passes to 9 (median 0.911). The gains themselves give the map. In GPT-2 small the
 smallest gain is below $10^{-3}$ only at layer 3 ($2.6\times10^{-4}$; elsewhere 0.015 to
 0.07). In GPT-Neo-125m it is below $4\times10^{-4}$ at layers 0 to 9, but $9.9\times10^{-3}$
-at layer 10 and 0.22 at layer 11. In Pythia-160m no gain is below 0.29.}
+at layer 10 and 0.22 at layer 11. In Pythia-160m no gain is below 0.29. A pre-registered test of
+a sharper rule, which predicts damage from the spread of all the gains rather than the smallest,
+was underpowered at GPT-2 layer 0: only 9 of 50 units passed the identifiable label, and none of
+the 9 failed the Euclidean one, against the rule's forecast of 0.41; its calibration constant also
+moved (median 0.40 against 1.47), so we do not use it.}
 
 \paragraph{\draft{The same null direction across arms.}} \draft{The pre-registered label
 compares the raw fit with $\mathbf{w}_j$; we had removed $\mathbf{u}$ only from $\mathbf{w}_j$
@@ -827,8 +839,9 @@ held-out fit over-certifies (9.4\% against 8.1\%). The rule is therefore to fold
 layer norm first and then threshold held-out fit, and it holds for noiseless responses only
 (Section~\ref{sec:noise}). The thresholds were chosen on these data, so this is exploratory. A
 pre-registered test on D-3's 16{,}000-token cell, filed before its data, gives a yield difference
-of \dThreeYield{} \dThreeYieldCI{} and an error-rate difference of \dThreeFcr{} \dThreeFcrCI{}
-(\dThreeReading; margin $+0.03$).}
+of \dThreeYield{} \dThreeYieldCI{}: held-out fit certifies 129 of 140 correct directions and no
+wrong one, restart agreement 63 and one wrong. With a single wrong fit accepted across both rules,
+the error-rate comparison is underpowered as filed (\dThreeFcr{} \dThreeFcrCI{}).}
 
 We expected the hard case to be a fit that is wrong yet fits perfectly, and it exists:
 neither check detects it. On this substrate the exploratory analysis says why. These fits
