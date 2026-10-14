@@ -20,7 +20,7 @@ OUT = ROOT / "release" / "caliper-anon"
 INCLUDE = ("caliper/", "experiments/", "tests/", "results/", "data/")
 DOCS = re.compile(r"docs/(preregistration-[^/]+\.md|LAB_NOTEBOOK\.md)$")
 # Paper 2 material: not part of this paper, and it names the author's earlier project throughout.
-PAPER2 = re.compile(r"^results/(s1_gemma|s2_|s3|s11|p2)")
+PAPER2 = re.compile(r"^results/(s1_gemma|s2_|s3|s11|p2|gate_strict/)")
 EXTRA = [ROOT / "results" / "corpus_cache"]  # public-domain stimulus texts, gitignored
 TEXT = {".py", ".md", ".json", ".jsonl", ".txt", ".sh", ".cmd", ".ps1", ".csv", ".tex", ".yaml", ".yml",
         ".cfg", ".toml", ""}
@@ -37,7 +37,7 @@ REWRITE = [
 REDACT_LINE = re.compile(r"mentor|capstone|APERTURE|\bMIRROR\b|Proposal (III|V)\b|proposal-iii|PROPOSAL_III|rubric|"
                          r"semester|teammate|4-person|\bPES\b|internship|hand-off|ownership table|"
                          r"docs/team/", re.I)
-BLOCK = re.compile(r"santosh|cheethirala|carbo|gmail|mentor|capstone|APERTURE|PES University|"
+BLOCK = re.compile(r"santosh|cheethirala|\bcarbo\b|gmail|mentor|capstone|APERTURE|PES University|"
                    r"hf_[A-Za-z0-9]{30,}|KGAT_[A-Za-z0-9]+|sk-[A-Za-z0-9]{20,}", re.I)
 MARK = "[Redacted for anonymous review: course administration or the author's other work.]"
 
