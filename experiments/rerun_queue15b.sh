@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
-# Queue 15, continued (14 Oct). Queue 15 rebuilt the vectors and recomputed every health check
-# in each forced run; analyse_s2.py reads health only from the steer configs, so the forced runs
-# here pass --no-health (the forced rows are unchanged). A stage whose file already holds all
-# its rows is skipped before the model loads. Takes over once queue 15's first run ends.
+# Queue 15, continued (14 Oct), after queue 15 was stopped: a direct fp32 load of Qwen3.5-2B
+# committed 15.7 GB on the 16 GB laptop and the run paged to disk without writing a row. The
+# Qwen3.5 runs now go through experiments/cpu_fp32_lowmem.py (same script, same fp32 weights,
+# lower peak memory). analyse_s2.py reads health only from the steer configs, so the forced runs
+# pass --no-health (the forced rows are unchanged). A stage whose file already holds all its rows
+# is skipped before the model loads. Then P2-H-1B on Llama-3.2-1B-Instruct.
 case "$0" in
   */*) cd "${0%/*}/.." ;;
 esac
-export PYTHONPATH=.
+export PYTHONPATH=. HF_HUB_DISABLE_XET=1
 LOG=results/rerun_queue15.log
 say () { printf '[%(%Y-%m-%d %H:%M)T] %s\n' -1 "$*" >> "$LOG"; }
-snap () { python -c "from huggingface_hub import snapshot_download as s; print(s('$1'))" 2>/dev/null | tail -1; }
+snap () {  # the hub snapshot without the duplicate original/ weights; up to 6 tries, then the local copy
+  local p
+  for i in 1 2 3 4 5 6; do
+    p=$(python -c "from huggingface_hub import snapshot_download as s; print(s('$1', ignore_patterns=['original/*']))" 2>/dev/null | tail -1)
+    [ -d "$p" ] && { echo "$p"; return; }
+    sleep 120
+  done
+  python -c "from huggingface_hub import snapshot_download as s; print(s('$1', local_files_only=True))" 2>/dev/null | tail -1
+}
 rows () { [ -f "$1" ] && grep -c . "$1" || echo 0; }
-
-until grep -q "P2-N qwen35_2b concept steer exit" "$LOG"; do sleep 60; done
-powershell -NoProfile -c "Stop-ScheduledTask caliper-queue15; Get-CimInstance Win32_Process -Filter \"Name='bash.exe'\" | Where-Object { \$_.CommandLine -like '*rerun_queue15.sh*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }; Start-Sleep 5; Get-CimInstance Win32_Process -Filter \"Name like 'python%'\" | Where-Object { \$_.CommandLine -like '*kaggle_s3_positive_control*p2n*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }"
-sleep 10
-say "queue 15b takes over (forced runs without health checks)"
+mkdir -p results/p2n results/p2h1b
+say "queue 15b starts (Qwen3.5 through cpu_fp32_lowmem.py; forced runs without health checks)"
 
 p2n () {  # p2n <tag> <hub id>
   local tag=$1 path
@@ -33,7 +40,7 @@ p2n () {  # p2n <tag> <hub id>
       [ $stage = forced ] && want=240 extra=(--no-health)
       if [ "$(rows ${f}_none.jsonl)" -ge $want ]; then say "P2-N $tag $arm $stage complete, skipped"; continue; fi
       say "starting P2-N $tag $arm $stage"
-      python experiments/kaggle_s3_positive_control.py "${base[@]}" --stage $stage $flag "${extra[@]}" \
+      python experiments/cpu_fp32_lowmem.py "${base[@]}" --stage $stage $flag "${extra[@]}" \
         --out results/p2n/s2_${tag}_${arm}.jsonl >> results/p2n/${tag}.log 2>&1
       say "P2-N $tag $arm $stage exit $?"
     done
@@ -45,8 +52,12 @@ p2n qwen35_08b Qwen/Qwen3.5-0.8B
 say "P2-N done"
 
 path=$(snap meta-llama/Llama-3.2-1B-Instruct)
-say "starting P2-H-1B ($path)"
-python experiments/kaggle_p2h_hahami.py --model-path "$path" --quant none --compute-dtype fp32 --layers 0 10 \
-  --alphas 5 3 1 2 4 8 12 --no-fidelity --out results/p2h1b/p2h1b_llama1b.jsonl >> results/p2h1b/p2h1b.log 2>&1
-say "P2-H-1B exit $?"
+if [ -d "$path" ]; then
+  say "starting P2-H-1B ($path)"
+  python experiments/kaggle_p2h_hahami.py --model-path "$path" --quant none --compute-dtype fp32 --layers 0 10 \
+    --alphas 5 3 1 2 4 8 12 --no-fidelity --out results/p2h1b/p2h1b_llama1b.jsonl >> results/p2h1b/p2h1b.log 2>&1
+  say "P2-H-1B exit $?"
+else
+  say "P2-H-1B: download of meta-llama/Llama-3.2-1B-Instruct failed"
+fi
 say "queue 15 done"

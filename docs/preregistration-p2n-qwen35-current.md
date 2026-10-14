@@ -78,6 +78,14 @@ alphas, not fractions. `analyse_p2n.py` now computes the measure in (1) and (2),
 nonzero alphas as 0.25, 0.5 and 1.0. Checked on renamed Qwen2.5 files: it reproduces P2-D's 0.0036,
 0.090 and 3.1.
 
+**Loading change, 14 October 10:00, still before any row.** A direct fp32 load of Qwen3.5-2B
+committed 15.7 GB on the 15.7 GB laptop, and the first run paged to disk for two hours without
+writing a row. The runs now go through `experiments/cpu_fp32_lowmem.py`, which runs the same script
+with the same arguments but loads the checkpoint in bf16, casts it to fp32 and copies back the 36
+tensors the checkpoint stores in fp32. All 320 tensors equal the checkpoint's values exactly (checked),
+so the computation is the filed fp32 one. Forced runs pass `--no-health`; health is read only from
+the steer configs.
+
 ## Secondary (descriptive)
 
 - The same AUCs on Qwen3.5-0.8B; both labels; live counts per recipe and dose.
