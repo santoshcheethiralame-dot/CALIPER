@@ -569,6 +569,77 @@ does not normalise it, uses strengths 4 to 8, and injects from the token before 
 every generated token. The read position is the template tail, the arm that is inert on Qwen. The
 absence of normalisation is in the code and is not stated in the paper.}
 
+\section{Concepts, prompts and the steering gate}
+\label{app:prompts}
+\draft{Every session uses the same 30 concepts: 20 concrete (animals, places, objects) and 10
+abstract (eight emotions, justice and freedom), with the associate terms in
+Table~\ref{tab:concepts}. The prompts below are verbatim; \texttt{\{n\}} is the trial number and
+\texttt{\{question\}} one of 30 factual questions per control type. P2-R and S-1M use the released
+prompt and recipe of \citet{macar2026mechanisms} (Appendix~\ref{app:deviations}).}
+
+\input{tables/app_prompts}
+
+\draft{\paragraph{The steering gate.} The vector is injected at every position, prompt and generated
+tokens, while the model writes a 60-token greedy story in reply to the steering-gate prompt. A
+story is steered if it contains the concept or one of its associate terms. The filed rule matched
+any substring of the lower-cased story; the strict rule, applied after the data, counts a term only
+at the start of a word and only if it does not already occur at a word start in the same concept's
+dose-0 story. A vector is live if its story at the gate dose is steered and its dose-0 story is
+not; under the strict rule the second condition holds by construction.}
+
+\begin{table}[h]
+\centering
+\small
+\input{tables/tab_concepts}
+\caption{\draft{The 30 concepts, their categories, and the associate terms the steering gate
+matches. Stems such as \texttt{arachn} match any word starting with them.}}
+\label{tab:concepts}
+\end{table}
+
+\section{Liveness at every dose}
+\label{app:livedose}
+\begin{table}[h]
+\centering
+\resizebox{\linewidth}{!}{\input{tables/tab_live_dose}}
+\caption{\draft{Stories steered (filed substring rule, of 30) at each dose, per model and recipe.
+Doses are fractions of the residual norm on Qwen and random-calibrated KL targets on Gemma. The
+random arm is a norm-matched random direction scored against the paired concept's terms: it
+measures how often the gate fires with no concept present. S-1 (Gemma-3-12B and -27B) ran no random
+steering arm.}}
+\label{tab:livedose}
+\end{table}
+
+\section{Models, precision and compute}
+\label{app:compute}
+\draft{All GPU sessions ran on Kaggle with two NVIDIA T4 GPUs, each within one 12-hour session.
+Qwen2.5-3B ran unquantised in float16, Gemma-3-4B unquantised in float32, and Qwen2.5-7B,
+Gemma-3-12B and Gemma-3-27B in 4-bit NF4 with float32 compute. Vectors are read and injected at 0.6
+of depth (layers 21 of 36, 17 of 28, 20 of 34 and 29 of 48), except on Gemma-3-27B, where we use the
+published layer 37 of 62. Every run's command, configuration, library versions and GPU are stored
+beside its rows; the run sheets and the scripts are released with the paper.}
+
+\section{Threats to validity}
+\label{app:threats}
+\draft{\begin{itemize}
+  \item \textbf{Lexical liveness.} The gate scores one greedy story per dose by word matching. A
+  vector that steers toward a concept without naming it or an associate counts as dead, so the
+  gate undercounts liveness; the random arm (Table~\ref{tab:livedose}) bounds its false positives.
+  \item \textbf{Thirty concepts.} Every per-vector AUC rests on at most 30 vectors per cell, and
+  within-cell tests on 20; the intervals are wide and heterogeneity tests have low power.
+  \item \textbf{Precision.} The three largest models ran in 4-bit; quantisation may change which
+  vectors are live and how far a dose moves the next token. We could not test this on free GPUs.
+  \item \textbf{Prompts.} Every KL value depends on its prompt (Section~\ref{sec:dose}); the
+  random-direction calibration used a median over three prompts, while real vectors were measured on
+  one.
+  \item \textbf{One readout model.} The readout analysis rests on Gemma-3-27B; both Qwen sessions
+  failed their manipulation checks, and no model in the audit detects injections often enough to
+  serve as a positive control.
+  \item \textbf{Analyses added after the data.} The strict gate, the answering gate, the rank rule
+  and several random-vector comparisons were added after the primary outputs were seen; each is
+  labelled exploratory and reported beside the filed result.
+  \item \textbf{Layer.} Each model is read at one layer; liveness and dose may differ at others.
+\end{itemize}}
+
 \section{P2-R with an answering gate on every endpoint}
 \label{app:gated}
 \begin{table}[h]

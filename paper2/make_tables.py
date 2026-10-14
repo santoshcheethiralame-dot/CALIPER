@@ -279,6 +279,51 @@ def tab_gated():
           " \\\\\n\\midrule\n" + "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
 
 
+def tex_escape(s):
+    rep = {"\\": "\\textbackslash{}", "{": "\\{", "}": "\\}", "_": "\\_", "%": "\\%", "&": "\\&", "#": "\\#", "$": "\\$"}
+    return "".join(rep.get(ch, ch) for ch in s)
+
+
+def app_concepts_prompts():
+    """The 30 concepts with the associate terms the steering gate matches, and the prompts verbatim,
+    taken from the run script itself."""
+    import sys
+    sys.path.insert(0, os.path.join(ROOT, "experiments"))
+    import kaggle_s3_positive_control as s3
+    lines = [f"{c} & {s3.CATEGORY[c]} & {tex_escape(', '.join(s3.ASSOCIATES.get(c, [])))} \\\\" for c in s3.CONCEPTS]
+    write("tab_concepts", "\\begin{tabular}{llp{0.62\\linewidth}}\n\\toprule\nconcept & category & associate terms "
+          "(matched as word starts by the strict gate) \\\\\n\\midrule\n" + "\n".join(lines) +
+          "\n\\bottomrule\n\\end{tabular}\n")
+    prompts = [("Introspective (S-2, S-1, P2-D)", s3.INTROSPECTIVE.format(n="{n}")),
+               ("Matched neutral", s3.NEUTRAL_MATCHED.format(n="{n}")),
+               ("Steering gate", s3.STEER),
+               ("Factual control", s3.FACTUAL_NO_TEMPLATE.format(n="{n}", q="{question}"))]
+    body = "".join(f"\\paragraph{{{name}.}} \\texttt{{{tex_escape(p).replace(chr(10), ' ')}}}\n\n" for name, p in prompts)
+    write("app_prompts", body)
+
+
+def tab_live_dose():
+    """Steered stories per recipe and dose, filed (substring) rule, every steering session."""
+    sess = [("Qwen2.5-3B", "s2_qwen3b", "s2_qwen3b_{}_steer{}_none", "0, 0.25, 0.5, 1 of norm"),
+            ("Qwen2.5-7B", "s2_qwen7b", "s2_qwen7b_{}_steer{}", "0, 0.25, 0.5, 1 of norm"),
+            ("Gemma-3-4B", "s2_gemma4b_kl", "s2_gemma4b_kl_{}_steer{}_none", "0, 0.05, 0.5, 5 nats"),
+            ("Gemma-3-12B", "s1_gemma12", "s1_gemma12_4bit_{}_steer{}", "0, 0.05, 0.5, 5 nats"),
+            ("Gemma-3-27B", "s1_gemma27", "s1_gemma27_4bit_{}_steer{}", "0, 0.05, 0.5, 5 nats")]
+    arms = [("concept", "concept", ""), ("tail", "tail", ""), ("sentence", "sentence", "_aperture"),
+            ("random", "random", "_random")]
+    lines = []
+    for name, d, pat, grid in sess:
+        for label, arm, suf in arms:
+            p = os.path.join(ROOT, "results", d, pat.format(arm, suf) + ".jsonl")
+            if not os.path.exists(p):
+                continue
+            R = rows(os.path.relpath(p, ROOT))
+            counts = [sum(r["steered"] for r in R if r["alpha"] == a) for a in sorted({r["alpha"] for r in R})]
+            lines.append(f"{name} & {grid} & {label} & " + " & ".join(map(str, counts)) + " \\\\")
+    write("tab_live_dose", "\\begin{tabular}{lllcccc}\n\\toprule\nmodel & doses & recipe & dose 0 & dose 1 & dose 2 & "
+          "dose 3 \\\\\n\\midrule\n" + "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
+
+
 def numbers():
     """Prose numbers as macros, from results/p2_numbers.json (experiments/analyse_p2_numbers.py)."""
     n = load("results/p2_numbers.json")
@@ -307,6 +352,6 @@ def numbers():
 if __name__ == "__main__":
     numbers()
     for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r, tab_predictions, tab_regimes,
-              tab_gated):
+              tab_gated, app_concepts_prompts, tab_live_dose):
         f()
     print("wrote", sorted(os.listdir(OUT)))
