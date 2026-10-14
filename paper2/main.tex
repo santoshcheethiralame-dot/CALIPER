@@ -41,7 +41,8 @@ vector is live, the dose means the same thing across models and prompts, and the
 the injection rather than something else. We audit the three on five open models, with controls
 whose answer is known and every arm pre-registered. Liveness depends on model and read position,
 and the health checks in use do not certify it: within one recipe and concept type, vector norm,
-a held-out probe, logit steering and the ``significant \pyes{} shift'' check all sit at chance.
+a held-out probe, logit steering and the ``significant \pyes{} shift'' check carry no detectable
+signal (pooled AUCs 0.52 to 0.55, no variation between cells beyond sampling noise).
 Dose has no transferable unit: the same fraction of the residual norm moves the next token 25 to
 480 times more in one model than in another, and calibrating on random directions misjudges real
 vectors by an amount that depends on how they were built. The readout is defined only where the
@@ -82,8 +83,8 @@ Every arm was pre-registered, and every deviation is listed (Appendix~\ref{app:d
 findings, each scoped to where it was measured, are:}
 \begin{itemize}
   \item \draft{\textbf{Liveness is not certified by the checks in use} (C1). Within one recipe and
-  concept type, norm, a held-out probe, logit steering and the \pyes{}-shift check are
-  consistently at chance, and distinctness, stability and logit-lens accessibility vary from cell
+  concept type, norm, a held-out probe, logit steering and the \pyes{}-shift check carry no
+  detectable signal (pooled AUCs 0.52 to 0.55, no heterogeneity across cells), and distinctness, stability and logit-lens accessibility vary from cell
   to cell (Section~\ref{sec:liveness}).}
   \item \draft{\textbf{Liveness depends on model and read position} (C2): vectors read at the chat
   template's tail are mostly inert on Qwen and live on Gemma-3-27B at the released strength.}
@@ -219,16 +220,17 @@ exploratory.}
 \draft{Whether a vector steers at all depends on the model and on where the vector is read. On Qwen
 the template-tail vectors are mostly inert (4 and 3 of 30 live), while on Gemma-3-27B the released
 recipe, which reads the same position, is live for 27 of 30 concepts at its released strength
-(Table~\ref{tab:regimes}). Our filed prediction for this contrast, that the template tail fails the
+with the gate rescored by whole word, 24 as filed (Table~\ref{tab:regimes}). Our filed prediction for this contrast, that the template tail fails the
 gate more often than the concept token on Gemma-3-12B and -27B, did not hold: the 12B difference ran
 in the predicted direction without reaching significance, and the 27B difference ran the other
 way. On the calibrated 27B grid the doses stopped below the point at which real vectors begin to
 steer (Section~\ref{sec:dose}).}
 
 \draft{Pooled across recipes, some health checks look useful: distinctness from the other vectors
-scores 0.78, 0.82 and 0.73 at telling live from dead, and logit-lens accessibility 0.69, 0.77 and
-0.62 (Table~\ref{tab:health}, Figure~\ref{fig:health}). Within one recipe and concrete concepts
-only (12 cells of 20 vectors, Table~\ref{tab:cells}), the checks split two ways. Norm, the
+scores 0.78 and 0.82 at telling live from dead on the two Qwen models and 0.61 on Gemma-3-4B, and
+logit-lens accessibility 0.69, 0.77, 0.50 and 0.62 on those three and Gemma-3-12B
+(Table~\ref{tab:health}, Figure~\ref{fig:health}). Within one recipe and concrete concepts only (12
+cells of 20 vectors, 9 for the \pyes{}-shift check, Table~\ref{tab:cells}), the checks split two ways. Norm, the
 held-out probe, logit steering and the \pyes{}-shift check are consistently uninformative, with
 pooled AUCs of 0.52, 0.52, 0.52 and 0.55 and no heterogeneity across cells (Cochran's $Q$, $p$
 0.43 to 0.98). Distinctness, stability and logit-lens accessibility vary across cells beyond
@@ -241,7 +243,8 @@ sessions, so concept type alone does not explain it.}
 by whole words, 3 of the 30 released vectors are dead (freedom, joy and serenity). As filed, the
 gate counted 24 live, because a substring of the shared dose-0 story (``echoed'', ``crashing'',
 ``spoken'') matched the associates of three concepts and made them unscorable; the rescoring is
-exploratory and moves live counts by 0 to 3 per cell and health-check AUCs by at most 0.06. A second
+exploratory and moves live counts by 0 to 3 per cell and health-check AUCs by at most 0.08 (the
+probe on Gemma-3-27B). A second
 liveness rule, a rise of at least 2 nats in the concept's log-probability at the identify stage,
 separates real from random vectors at low strength (28 against 7 at strength 1, 29 against 12 at
 2; AUC of the change 0.96 and 0.94) and loses its specificity as the dose rises (27 against 21 at
@@ -263,7 +266,7 @@ Table~\ref{tab:regimes} gives the counts with the gate rescored by whole word.}}
 \centering
 \resizebox{\linewidth}{!}{\input{tables/tab_health}}
 \caption{\draft{AUC of each health check at telling live from dead vectors, pooled across recipes,
-with stratified bootstrap intervals (none stored for Gemma-3-12B). Logit-lens accessibility was
+with stratified bootstrap intervals (none stored for Gemma-3-12B's own checks). Logit-lens accessibility was
 filed before analysis but after the liveness labels were known.}}
 \label{tab:health}
 \end{table}
@@ -290,10 +293,11 @@ chance. Table~\ref{tab:cells} shows what is left within one recipe and concept t
 under injection, points the wrong way: it scores 0.367 and 0.353 at telling live vectors from dead
 ones, so dead vectors shift \pyes{} more (exploratory). The inversion sits in the concept-token
 arm (0.375 and 0.338), not the sentence-mean arm (0.554 and 0.593), and the tail arm differs
-between the two models (0.567 and 0.346). Combined over the two sessions it gives $p = 0.006$,
-two-sided as the S-2 prediction was filed (0.036 and 0.022 per session). Within one recipe and
-concrete concepts the check is consistently near chance (pooled 0.55, $Q$ $p$ 0.85), so the
-inversion is carried by which recipe and concept type a vector comes from, not by the vector. A
+between the two models (0.567 and 0.346). Combined over the two sessions it gives $p = 0.006$
+two-sided (0.036 and 0.022 per session; 0.0019 one-sided; the filing does not fix the side).
+Within one recipe and concrete concepts the check shows no detectable signal (pooled 0.55, $Q$ $p$
+0.85), so the pooled inversion reflects differences between recipes and concept types; within a
+cell we detect none. A
 direct path from the vector to the answer tokens explains part of the shift ($\rho$ 0.26 and 0.29)
 but not the inversion.}
 
@@ -355,15 +359,14 @@ inconclusive), while at the published strength 4 real vectors raised \pyes{} mor
 0.252, $p$ 0.004). With the released prompt and window (P2-R), real vectors move the introspective
 answer more than impact-matched random ones at strength 4 ($+16.3$ against $+10.9$ log-odds,
 $p = 1.9\times10^{-4}$). On the raw introspective change the two are not separated at strengths 1
-and 2 ($p$ 0.63 and 0.22; random vectors reproduce a share of 0.80, $[0.35, 1.23]$, at 2); the
-difference appears once each vector's effect on the factual questions is accounted for
+and 2 ($p$ 0.63 and 0.22); the difference appears once each vector's effect on the factual questions is accounted for
 (Section~\ref{sec:c8}).}
 
-\draft{At the published strength, though, the readout is read where the model has mostly stopped
-answering \yes{} or \no{}, and the matched neutral prompt never answers in that format at all
+\draft{At the published strength, though, the readout is read where the model puts almost none of
+its first-token probability on \yes{} or \no{} (median $8\times10^{-5}$), and the matched neutral prompt never answers in that format at all
 (median mass $4\times10^{-8}$); it fails the filed mass check and supports no readout claim. The
 same design on Qwen2.5-7B failed its manipulation check: the released prompt never asks for a
-\yes{} or a \no{}, and at strength 0 Qwen puts at most 1\% of its first-token probability on either
+\yes{} or a \no{}, and at strength 0 Qwen puts about 1\% of its first-token probability on either
 answer in every framing, so, as filed, no endpoint was scored. With an answer instruction added,
 in an amendment filed before its data, Qwen answers in the format (mass near 1) but its factual
 controls fail: inside the injection frame it leans \no{} on half of thirty obvious-\yes{}
@@ -375,7 +378,7 @@ apart.}
 \subsection{Where the readout is defined, real vectors move it below the threshold of an answer}
 \label{sec:c8}
 \draft{At the doses where Gemma-3-27B still answers, real vectors add a framing-specific shift
-toward \yes{} that content-matched random vectors do not, and it almost never changes an answer.
+toward \yes{} that impact-matched random vectors do not, and it almost never changes an answer.
 Regressing each factual question's change in log-odds on its baseline and comparing the
 introspective answer with the regression's prediction at its own baseline gives an excess of
 $+4.98$, $[+2.83, +8.81]$, at strength 2 and $+6.90$, $[+4.88, +8.97]$, at 4 (filed, bootstrap over
@@ -385,22 +388,25 @@ by concept, real vectors exceed impact-matched random ones by $+4.64$ at strengt
 0.003) and $+5.21$ at 4 ($p$ 0.005); against norm-matched random vectors the difference is smaller
 ($+1.03$ and $+2.24$, $p$ 0.08 each). Restricted to items that still answer (answer mass at least
 0.5 at strength 0 and at the strength scored), the introspective change at strength 2 is $+3.99$
-(16 of 30 items, $p$ 0.003). These comparisons are exploratory (Table~\ref{tab:p2r},
+(16 of 30 items, $p$ 0.003), but against impact-matched random vectors, among concepts answering
+under both, it is $+3.90$ against $+1.55$ (15 concepts, $p$ 0.064). These comparisons are exploratory (Table~\ref{tab:p2r},
 Figure~\ref{fig:p2r}).}
 
 \draft{The shift stays below the threshold of an answer: the model answers \yes{} to the
-introspective question for one concept in thirty at strengths 1, 2 and 4. The filed test of a
+introspective question (\pyes{} above 0.5 with answer mass at least 0.5) for one concept in thirty
+at strengths 1, 2 and 4, and impact-matched random vectors do so for none, one and one. The filed test of a
 global push toward \yes{} reads an affirmative shift at strength 1 (factual-\yes{} $+1.07$, $p$
 0.014) and flattening at strength 4 ($-4.93$, $p$ 0.011), but among factual-\yes{} items still
 answering at strength 4 (16 of 30) the change is $-2.00$ ($p$ 0.40): the flattening is a change of
 margin on items that are collapsing, not a change of answers. Random vectors move factual-\yes{}
 further down than real ones at strengths 1 to 4 (impact-matched $-3.6$, $-8.5$ and $-14.5$), though
-not at 8.}
+not at 8; the random vectors are impact-matched on the introspective prompt only, and on factual
+prompts they move the next token 1.5 to 2 times more than real vectors.}
 
 \draft{An earlier filed control with a different prompt reads differently on the raw scale: there,
 injection moved confident factual-\no{} answers more than the introspective answer (Gemma-3-27B,
-strength 4: $+14.75$ against $+5.45$ log-odds, 27 of 30 concepts), while the neutral prompt barely
-moved (Table~\ref{tab:logodds}, Figure~\ref{fig:logodds}). Raw log-odds changes depend on where an
+strength 4: $+14.75$ against $+5.45$ log-odds, 27 of 30 concepts), and the neutral prompt by
+$-1.51$ (Table~\ref{tab:logodds}, Figure~\ref{fig:logodds}). Raw log-odds changes depend on where an
 answer starts, which is why the comparison above matches baselines.}
 
 \begin{table}[t]
@@ -465,8 +471,7 @@ items still answering. --- where the cell did not measure it.}}
 \label{sec:readout}
 \draft{Two readouts of the same trials disagree about dose. In the earlier Gemma-3-27B study,
 detection read from generated text falls from 43\% to 0\% across doses over which the first-token
-\pyes{} stays near 0.42 to 0.50, largely because the generations degrade as the dose rises
-(descriptive). A detection rate is therefore a property of the readout as well as of the model,
+\pyes{} stays near 0.42 to 0.50, while the generations degrade as the dose rises (descriptive). A detection rate is therefore a property of the readout as well as of the model,
 and a study should report both.}
 
 % ======================================================================
@@ -497,17 +502,21 @@ axis could not be tested. The models are open and at most 27B parameters; closed
 reach. Thirty concepts bound every per-vector statistic, and the gate's dead counts at the
 published point are too small to score a check. The steering gate is one rule, and its filed
 substring matching needed rescoring; both counts are reported. We report no judge-scored numbers.
-P2-R was scored once, but three of its filed secondaries were added to the scorer after its
-primary output was seen, and several comparisons in Section~\ref{sec:c8} are exploratory. The
-readout result rests on Gemma-3-27B alone: both Qwen sessions failed their manipulation checks.
+P2-R was re-scored once, after its bootstrap was corrected to the filed unit, and three of its
+filed secondaries were added to the scorer after its primary output was seen; several comparisons
+in Section~\ref{sec:c8} are exploratory. The readout result rests on Gemma-3-27B alone: both Qwen
+sessions failed their manipulation checks. There is no positive control for detection yet: on
+Gemma-3-27B the model almost never answers \yes{}, with real or random vectors, so the audit has
+not observed the effect it audits; P2-H, Hahami et al.'s protocol on Llama-3.1-8B, is filed for
+that purpose.
 Negative results are kept: S-1's criterion, the shared-direction account of dead vectors, and a
 secondary of the output-steering analysis.}
 
 \section{Conclusion}
 \draft{Concept-injection experiments rest on an instrument whose three assumptions, liveness,
-dose and readout, each fail in some regime, and the checks a practitioner would use do not tell
+dose and readout, each fail in some regime (Table~\ref{tab:regimes}), and the checks a practitioner would use do not tell
 which regime an experiment is in. Where the instrument works on the model we could test, real
-vectors move the introspective answer in a way content-matched controls do not, but too little
+vectors move the introspective answer in a way impact-matched controls do not, but too little
 to change it. That is a statement about the instrument, and it is the measurement any claim about
 introspection from this paradigm has to start from.}
 
