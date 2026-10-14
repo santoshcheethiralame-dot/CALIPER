@@ -21,6 +21,8 @@ matching (exploratory); regime and every-prediction tables added. **Earlier on 1
 C5 and C8 revised below; `tab_p2r` and `fig_p2r` added. Supersedes the
 framing of `docs/paper-s3-draft.md` (3 Sep) and the Paper 2 lines of `flagship-plan.md` §4 and
 §12.2. Venue unchanged: ICML 2027 if Gate P2 (15 Jan) passes, else an interpretability workshop.
+**Revised 14 Oct: venue is TACL, fallback TMLR; Gate P2 is now a readiness gate, not a date
+(`flagship-plan.md` §4, §4a, §4b). §7's ICML-or-workshop rule below is historical.**
 
 ## 1. What changed and why
 

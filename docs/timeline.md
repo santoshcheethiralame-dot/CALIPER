@@ -4,7 +4,8 @@
 
 
 > **Addendum, 9 October 2026.** The dates and staffing below are historical. The live calendar
-> is `docs/flagship-plan.md` §7; the project is run by one person.
+> is `docs/flagship-plan.md` §7; the project is run by one person. Venues: `flagship-plan.md` §4
+> (revised 14 Oct 2026).
 
 ---
 

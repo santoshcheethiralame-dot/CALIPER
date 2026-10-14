@@ -87,20 +87,62 @@ identifiability failure. One search pass cannot prove absence; repeat monthly wi
 
 ## 4. The programme
 
-| paper | claim | venue | submit |
-|---|---|---|---|
-| **Paper 1** (L1) | Restart agreement is a weaker check than held-out fit; the hard case is identifiability | **TMLR** + arXiv | **by 20 Nov 2026** |
-| **Paper 2** (L3) | The checks used to trust concept-injection results fail: dead vectors, an inverted P(YES) check, a dose that does not transfer | **ICML 2027** if Gate P2 passes, else an interpretability workshop | late Jan 2027 |
-| **Flagship** (L1 broad + L2 exact) | Stability checks are blind to sampling error; data-resampling and geometric checks see it; interventional data repairs it. Shown on six weight-derived substrates and the methods people use | **NeurIPS 2027 main track**; Evaluations & Datasets as fallback | May 2027 |
-| **Paper 3** (L2, L3 planted) | Trait- and self-level instruments calibrated with the flagship's checks | ICLR 2028 or NeurIPS 2027 E&D | Sep 2027 |
+**Venues revised 14 October 2026.** The university prefers journals, and a conference rejection
+costs a cycle. Two journals and two A\* conferences, every conference paper with a journal
+fallback, every paper on arXiv. Nothing is ever under review at two venues at once.
+
+| paper | claim | venue | fallback | submit |
+|---|---|---|---|---|
+| **Paper 1** (L1) | Restart agreement is a weaker check than held-out fit; the hard case is identifiability | **TMLR** + arXiv | JMLR if TMLR does not count for the university | **by 20 Nov 2026** |
+| **Paper 2** (L3) | The checks used to trust concept-injection results fail: dead vectors, an inverted P(YES) check, a dose that does not transfer | **TACL** (Q1 journal; accepted papers are presented at ACL, EMNLP or NAACL) | TMLR | when Gate P2 passes (§4b); monthly submission |
+| **Flagship** (L1 broad + L2 exact) | Stability checks are blind to sampling error; data-resampling and geometric checks see it; interventional data repairs it. Shown on six weight-derived substrates and the methods people use | **NeurIPS 2027 main track** (A\*); Evaluations & Datasets track as second choice | JMLR or TMLR | May 2027 |
+| **Paper 3** (L2, L3 planted) | Trait- and self-level instruments calibrated with the flagship's checks | **ICLR 2028** (A\*) | JMLR or TMLR | Sep 2027 |
+
+Open with the university before any submission: which index defines Q1 (Scopus/SJR, Web of
+Science, a university list); whether TMLR counts; whether CORE A\* conferences count; whether a
+TACL paper counts as a journal paper. Check TACL's current length, anonymity and preprint rules
+before Paper 2 is converted or posted.
 
 **Working title for the flagship:** *Stable Is Not True: Calibrating Interpretability's
 Reliability Checks Against Exact Ground Truth in Trained Models.* Bench name pending (VOUCH /
 WARRANT shortlist).
 
-**Gate P2 (15 Jan 2027).** ICML only if S-1 (both Gemma sizes) and S-2 Gemma-kl have landed,
-pass their manipulation checks, and S-3/S-11 are written up. Otherwise the workshop, and the
-dose result moves to the flagship.
+**Gate P2 (15 Jan 2027), as first written.** ICML only if S-1 (both Gemma sizes) and S-2 Gemma-kl
+have landed, pass their manipulation checks, and S-3/S-11 are written up. Otherwise the workshop,
+and the dose result moves to the flagship. *Superseded 14 Oct by §4b.*
+
+### 4a. The rigour standard (every paper, whatever the venue)
+
+Journal reviewers judge correctness; A\* reviewers judge correctness and look harder. Every paper
+is built to pass the harder reading, so a journal decision turns on nothing we could have fixed.
+
+1. **Claims.** Every claim in the abstract and introduction maps to a filed prediction and its
+   outcome, or is labelled exploratory. Failed predictions are reported as failed.
+2. **Uncertainty.** Every estimate carries an interval; the resampling unit (concept, unit, item)
+   is the filed one and is named; tests are two-sided unless filed otherwise; multiplicity is
+   stated where several tests support one claim.
+3. **Controls.** Every effect is shown against content-free controls (norm- and impact-matched
+   random directions where applicable); every null claim has a positive control showing the
+   instrument can detect the effect.
+4. **Generality.** A general claim holds on at least two model families, one of them current
+   (P2-N for Paper 2), or is scoped to the models tested.
+5. **Numbers.** No number is typed by hand: tables and macros are generated from the results
+   files, and a numbers trace (prose against tables and JSON) runs before each submission.
+6. **Reproducibility.** Code, configs, seeds and the command for every arm; the anonymous release
+   builds and passes its blocked-term gate; compute and hardware stated; model and data licences
+   listed.
+7. **Scope.** A limitations section and a threats-to-validity appendix; the NeurIPS paper
+   checklist is filled in for every paper, journal or not.
+8. **Literature.** Every citation checked against its source for metadata and for what it is
+   cited for; related work from the last six months covered by the arXiv sweep.
+9. **Review.** Before submission: a full internal review of the whole paper, re-checked against the
+   stored results, with every critical and major finding resolved or answered in the text.
+
+### 4b. Gate P2, revised 14 Oct (readiness for TACL, not a date)
+
+Paper 2 goes to TACL when: P2-N, P2-H and P2-E are scored and folded in (B1 if it lands); the
+draft meets §4a; the full internal review finds no unresolved critical or major issue. Target
+December 2026 to January 2027. TMLR if TACL declines.
 
 ---
 

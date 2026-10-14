@@ -8,6 +8,11 @@ This is a drafting plan, not a draft. Its most important section is the claim-ev
 because that is where a paper is usually lost.
 
 
+> **Addendum, 14 October 2026.** Venues revised again: Paper 1 TMLR, Paper 2 TACL, flagship
+> NeurIPS 2027, Paper 3 ICLR 2028, each conference paper with a journal fallback, all held to one
+> rigour standard. See `docs/flagship-plan.md` §4, §4a, §4b. The 9 October addendum below is
+> historical.
+>
 > **Addendum, 9 October 2026.** The venue table in §2 is superseded by
 > `docs/flagship-plan.md` §4: Paper 1 to TMLR and arXiv by 20 November 2026; Paper 2 to ICML
 > 2027 or a workshop (Gate P2, 15 January); a flagship paper to the NeurIPS 2027 main track
