@@ -65,6 +65,19 @@ at 0.5 of the norm (median random KL over median real KL above 1, as on every ea
 - P1 differs: reported per check; Paper 2 states which checks behave differently on Qwen3.5.
 - P2 holds: C4's "no transferable unit" extends to a current family.
 
+**Amendment, 14 October 09:40, before any P2-N row existed.** P2 above did not name its KL
+quantity, and two statements in it were wrong. (1) The measure is P2-D's, the one in Paper 2's dose
+table: forced-stage next-token KL, median over both framings, concept-token arm, at the second of
+the three nonzero doses (0.25 of the norm). On that measure Qwen2.5-3B and -7B differ 24.6-fold
+(0.0036 and 0.090), so the parenthetical stands. (2) The random-against-real comparison uses the
+same measure at 0.5 of the norm, random arm over concept-token arm. "As on every earlier model" was
+false: the ratio is 3.1 on Qwen2.5-3B but 0.05 on Qwen2.5-7B. The prediction (above 1 on
+Qwen3.5-2B) is unchanged; its stated basis was wrong. (3) The committed scorer computed an
+introspective-only median over the three real recipes, and it would have failed: rows carry absolute
+alphas, not fractions. `analyse_p2n.py` now computes the measure in (1) and (2), ranking each file's
+nonzero alphas as 0.25, 0.5 and 1.0. Checked on renamed Qwen2.5 files: it reproduces P2-D's 0.0036,
+0.090 and 3.1.
+
 ## Secondary (descriptive)
 
 - The same AUCs on Qwen3.5-0.8B; both labels; live counts per recipe and dose.

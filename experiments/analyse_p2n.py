@@ -4,8 +4,8 @@
 
 For each model (qwen35_2b primary, qwen35_08b secondary): the unchanged S-2 scorer on the filed
 substring label, and on the strict gate (a copy of the steer rows rescored with
-rescore_steering_gate.rescore); then the dose comparison of P2 from the forced rows (median
-next-token KL per fraction, real arms and the norm-matched random arm).
+rescore_steering_gate.rescore); then the dose comparison of P2 from the forced rows: median
+next-token KL per fraction and arm over both framings, the quantity of P2-D's dose table.
 """
 import json
 import shutil
@@ -24,6 +24,7 @@ MODELS = ["qwen35_2b", "qwen35_08b"]
 ARMS = ["concept_steer_none", "tail_steer_none", "sentence_steer_aperture_none"]
 FORCED = {"concept": "concept_forced_none", "tail": "tail_forced_none",
           "sentence": "sentence_forced_aperture_none", "random": "random_forced_random_none"}
+FRACS = ["0.25", "0.5", "1"]
 
 
 def rows(p):
@@ -54,27 +55,29 @@ def main():
             f = strict / f"s2_{m}_{arm}.jsonl"
             new = rescore(rows(f))
             f.write_text("".join(json.dumps(r) + "\n" for r in new), encoding="utf-8")
+        # P2-D's quantity: forced-stage next-token KL, median over both framings, per arm. Rows carry the
+        # absolute alpha; the three nonzero alphas of a file are the fractions 0.25, 0.5 and 1.0 in order.
         kl = {}
         for arm, stem in FORCED.items():
             R = rows(SRC / f"s2_{m}_{stem}.jsonl")
-            kl[arm] = {f"{a:g}": float(np.median([r["kl"] for r in R if r["alpha"] == a and r["framing"] == "introspective"]))
-                       for a in sorted({r["alpha"] for r in R}) if a} if R else None
-        real = [kl[a] for a in ("concept", "tail", "sentence") if kl.get(a)]
-        ratio = None
-        if kl.get("random") and real and "0.5" in kl["random"]:
-            med_real = float(np.median([k["0.5"] for k in real]))
-            ratio = kl["random"]["0.5"] / med_real if med_real else None
-        rep[m] = {"filed_substring_label": s2(SRC, m), "strict_label": s2(strict, m), "median_kl_introspective": kl,
-                  "random_over_real_kl_at_0.5": ratio}
+            nz = sorted({r["alpha"] for r in R} - {0})
+            if not R or len(nz) != 3:
+                kl[arm] = None
+                continue
+            kl[arm] = {f: float(np.median([r["kl"] for r in R if r["alpha"] == a])) for f, a in zip(FRACS, nz)}
+        ratio = kl["random"]["0.5"] / kl["concept"]["0.5"] if kl["random"] and kl["concept"] else None
+        rep[m] = {"filed_substring_label": s2(SRC, m), "strict_label": s2(strict, m), "median_kl": kl,
+                  "random_over_concept_kl_at_0.5": ratio}
     a, b = rep.get("qwen35_2b"), rep.get("qwen35_08b")
-    if isinstance(a, dict) and isinstance(b, dict):
-        ka = np.median([v["0.25"] for k, v in a["median_kl_introspective"].items() if k != "random" and v])
-        kb = np.median([v["0.25"] for k, v in b["median_kl_introspective"].items() if k != "random" and v])
-        rep["P2"] = {"kl_at_0.25_2b": float(ka), "kl_at_0.25_08b": float(kb),
-                     "fold_difference": float(max(ka, kb) / min(ka, kb)) if min(ka, kb) > 0 else None,
-                     "random_over_real_2b": a["random_over_real_kl_at_0.5"]}
+    if isinstance(a, dict) and isinstance(b, dict) and a["median_kl"]["concept"] and b["median_kl"]["concept"]:
+        ka, kb = a["median_kl"]["concept"]["0.25"], b["median_kl"]["concept"]["0.25"]
+        fold = max(ka, kb) / min(ka, kb) if min(ka, kb) > 0 else None
+        r2 = a["random_over_concept_kl_at_0.5"]
+        rep["P2"] = {"concept_kl_at_0.25_2b": ka, "concept_kl_at_0.25_08b": kb, "fold_difference": fold,
+                     "random_over_concept_2b": r2,
+                     "holds": bool(fold and fold > 2 and r2 and r2 > 1)}
     json.dump(rep, open(ROOT / "results/p2n_analysis.json", "w"), indent=1, default=float)
-    print(json.dumps({m: (v if isinstance(v, str) else {k: v[k] for k in v if k != "median_kl_introspective"})
+    print(json.dumps({m: (v if isinstance(v, str) else {k: v[k] for k in v if k != "median_kl"})
                       for m, v in rep.items()}, indent=1, default=float)[:3000])
 
 
