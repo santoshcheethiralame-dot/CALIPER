@@ -193,8 +193,9 @@ def tab_predictions():
         ("S-11 (6 Oct)", "identification $k \\geq 4$/16", f"{s11['k']}/{s11['n']}", "held"),
         ("S-4 (6 Oct)", "equivalence tests, margin 0.10", f"{verdicts.count('inconclusive')} inconclusive, "
          f"{sum('equivalent' in v for v in verdicts)} equivalent, {verdicts.count('different')} different", "reported"),
-        ("P2-F (9 Oct)", "Qwen-7B tail: factual-NO shift $>$ 0", "+0.046 at 0.5, $p$ $9\\times10^{-9}$", "held"),
-        ("P2-L (9 Oct)$^\\dagger$", "CI above 0.5 in $\\geq$ 3 of 4 sessions", f"{lap_ok}/{lap_n}", "held"),
+        ("P2-F (9 Oct)", "Qwen-7B tail: factual-NO shift $>$ 0", "+0.046 at 0.5, one-sided $p$ $9\\times10^{-9}$", "held"),
+        ("P2-L (9 Oct)$^\\dagger$", "CI above 0.5 in $\\geq$ 3 of 4 sessions",
+         f"{lap_ok}/{lap_n} (Gemma-3-12B lower bound {lap['S-1 Gemma-3-12B, 4-bit']['ci95'][0]:.3f})", "held"),
         ("P2-M (9 Oct)", "$\\rho > 0$ on both Qwen models", f"{pm[0]['spearman_rho']:.2f}, {pm[1]['spearman_rho']:.2f}", "held"),
         ("P2-G (9 Oct)", "shared-share AUC $\\leq$ 0.40", f"{pg['auc']:.2f} [{pg['ci95'][0]:.2f}, {pg['ci95'][1]:.2f}]", "failed"),
         ("P2-R (10 Oct)", "P1: factual-YES change at strength 4", f"{p1['median_change']:+.2f}, $p$ {p1['wilcoxon_p']:.3f}", "flattening"),
@@ -251,7 +252,61 @@ def tab_regimes():
           "readout answers & detection \\\\\n\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}\n")
 
 
+def tab_gated():
+    """P2-R with the item-level answering gate on every endpoint and framing (ruling 8): items whose
+    YES+NO mass is at least 0.5 at strength 0 and at the strength scored, real vectors."""
+    rv = load("results/p2r_revision.json")
+    names = [("released_introspective", "introspective"), ("released_neutral", "neutral"),
+             ("factual_yes", "factual-\\yes{}"), ("factual_no", "factual-\\no{}"),
+             ("factual_contested", "factual contested")]
+    cell = lambda g: "---" if not g["answering"] else (
+        f"{g['answering']} & {g['median_change']:+.2f} & " + (f"{g['wilcoxon_p']:.3f}" if g["wilcoxon_p"] is not None else "---"))
+    lines = []
+    for key, label in names:
+        cells = []
+        for s in ("1", "2", "4", "8"):
+            g = rv[f"strength {s}"]["answering gate"][key]
+            cells.append(cell(g) if g["answering"] else "0 & --- & ---")
+        lines.append(f"{label} & " + " & ".join(cells) + " \\\\")
+    p3 = [rv[f"strength {s}"]["answering gate"]["P3 real minus impact-matched, answering in both"] for s in ("1", "2", "4", "8")]
+    lines.append("\\midrule\nintrospective, real / impact-matched & " + " & ".join(
+        "0 & --- & ---" if not g["concepts"] else
+        f"{g['concepts']} & {g['median_real']:+.2f} / {g['median_random']:+.2f} & " +
+        (f"{g['wilcoxon_p']:.3f}" if g["wilcoxon_p"] is not None else "---") for g in p3) + " \\\\")
+    head = " & ".join(f"\\multicolumn{{3}}{{c}}{{strength {s}}}" for s in ("1", "2", "4", "8"))
+    sub = " & ".join(["$n$ & change & $p$"] * 4)
+    write("tab_gated", "\\begin{tabular}{l" + "rrr" * 4 + "}\n\\toprule\nframing & " + head + " \\\\\n & " + sub +
+          " \\\\\n\\midrule\n" + "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
+
+
+def numbers():
+    """Prose numbers as macros, from results/p2_numbers.json (experiments/analyse_p2_numbers.py)."""
+    n = load("results/p2_numbers.json")
+    c4, kl, idr, s3 = n["c4_s1_27b"], n["p2r_kl_ratio"], n["identify_rank"], n["s3_readout"]
+    sig = lambda v: f"{float(f'{v:.3g}'):,.0f}" if v >= 100 else f"{v:.2g}"
+    lst = lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1]
+    fac = lambda ss: [kl[f][s]["impact-matched"] for f in ("factual_yes", "factual_no", "factual_contested") for s in ss]
+    pct = lambda k: lst([f"{100 * s3[a][k] / s3[a]['n']:.0f}" for a in ("2", "4", "8")])
+    m = {
+        "cfourRatioLo": sig(c4["range"]["random_over_real"][0]), "cfourRatioHi": sig(c4["range"]["random_over_real"][1]),
+        "cfourTopLo": f"{c4['range']['top_fraction'][0]:.2f}", "cfourTopHi": f"{c4['range']['top_fraction'][1]:.2f}",
+        "cfourTopSteered": lst([str(list(c4[a]["steered"].values())[-1]) for a in ("concept", "tail", "sentence")]),
+        "cfourZeroSteered": lst([str(list(c4[a]["steered"].values())[0]) for a in ("concept", "tail", "sentence")]),
+        "ptwoIntroRatio": lst([f"{kl['released_introspective'][s]['norm-matched']:.2f}" for s in ("1", "2", "4", "8")]),
+        "ptwoFactualHighLo": f"{min(fac(('4', '8'))):.1f}", "ptwoFactualHighHi": f"{max(fac(('4', '8'))):.1f}",
+        "ptwoFactualLowHi": sig(max(fac(('1', '2')))),
+        "idTopThousandReal": lst([str(idr["real"][s]["1000"]) for s in ("2", "4", "8")]),
+        "idTopThousandRandom": lst([str(idr["random"][s]["1000"]) for s in ("2", "4", "8")]),
+        "idTopHundredReal": lst([str(idr["real"][s]["100"]) for s in ("2", "4", "8")]),
+        "idTopTenReal": lst([str(idr["real"][s]["10"]) for s in ("2", "4", "8")]),
+        "sthreeFiled": pct("filed_scorer"), "sthreeYes": pct("first_yes"), "sthreeNamed": pct("yes_and_names"),
+    }
+    write("numbers", "".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in m.items()))
+
+
 if __name__ == "__main__":
-    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r, tab_predictions, tab_regimes):
+    numbers()
+    for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r, tab_predictions, tab_regimes,
+              tab_gated):
         f()
     print("wrote", sorted(os.listdir(OUT)))

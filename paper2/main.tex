@@ -24,6 +24,7 @@
 \newcommand{\yes}{\textup{\textsc{yes}}}
 \newcommand{\no}{\textup{\textsc{no}}}
 \newcommand{\draft}[1]{\textcolor{violet}{#1}}
+\input{tables/numbers}
 
 \title{Auditing the Instrument: What Concept-Injection Experiments Measure About LLM
 Introspection}
@@ -224,7 +225,9 @@ with the gate rescored by whole word, 24 as filed (Table~\ref{tab:regimes}). Our
 gate more often than the concept token on Gemma-3-12B and -27B, did not hold: the 12B difference ran
 in the predicted direction without reaching significance, and the 27B difference ran the other
 way. On the calibrated 27B grid the doses stopped below the point at which real vectors begin to
-steer (Section~\ref{sec:dose}).}
+steer: the top dose was \cfourTopLo{} to \cfourTopHi{} of the residual norm, and at it \cfourTopSteered{}
+of 30 vectors steered for the concept, tail and sentence recipes, against \cfourZeroSteered{} with no
+injection (Section~\ref{sec:dose}).}
 
 \draft{Pooled across recipes, some health checks look useful: distinctness from the other vectors
 scores 0.78 and 0.82 at telling live from dead on the two Qwen models and 0.61 on Gemma-3-4B, and
@@ -248,8 +251,11 @@ probe on Gemma-3-27B). A second
 liveness rule, a rise of at least 2 nats in the concept's log-probability at the identify stage,
 separates real from random vectors at low strength (28 against 7 at strength 1, 29 against 12 at
 2; AUC of the change 0.96 and 0.94) and loses its specificity as the dose rises (27 against 21 at
-4, 27 against 26 at 8). Requiring the concept among the top ten first tokens never fires for a
-random vector but catches at most 7 of 30 real ones. On Qwen2.5-7B random vectors pass the 2-nat
+4, 27 against 26 at 8). A rule on the concept token's rank separates at every strength, with a
+threshold we did not fix in advance: within the top 1,000 first tokens for \idTopThousandReal{} real
+vectors at strengths 2, 4 and 8 against \idTopThousandRandom{} random ones, within the top 100 for
+\idTopHundredReal{} and within the top ten for \idTopTenReal{}, against no random vector at either
+(exploratory). On Qwen2.5-7B random vectors pass the 2-nat
 rule for 20 of 30 concepts at half the norm, against 29 for concept vectors.}
 
 \begin{table}[t]
@@ -309,9 +315,11 @@ Gemma-3-4B at a quarter of the norm, and about 4-fold across the three at the fu
 (Table~\ref{tab:dose}, Figure~\ref{fig:dosefrac}). Calibrating the dose on random directions does
 not transfer to real vectors either, and by how much depends on the recipe: at a random-calibrated
 dose, real vectors move the next token 3 to 20 times less than random directions on Gemma-3-4B and
-about 1{,}000 times less on Gemma-3-27B for S-1's concept, tail and sentence recipes, while the
-released recipe on 27B moves it about as much as norm-matched random vectors (random over real KL
-0.3 to 2.3 at strengths 1 to 8).}
+\cfourRatioLo{} to \cfourRatioHi{} times less on Gemma-3-27B (S-1's concept, tail and sentence
+recipes across the three grid points; random directions were calibrated on the median over the
+introspective, neutral and story prompts, real vectors measured on the story prompt), while the released recipe on 27B
+stays within a factor of about 2.5 of norm-matched random vectors on the introspective prompt
+(random over real KL \ptwoIntroRatio{} at strengths 1, 2, 4 and 8).}
 
 \draft{The prompt matters as much as the model. One vector at one strength gives 0.0006 to 12 nats
 depending on the prompt it is injected into (released vectors at strength 4: factual-\no{},
@@ -401,7 +409,9 @@ answering at strength 4 (16 of 30) the change is $-2.00$ ($p$ 0.40): the flatten
 margin on items that are collapsing, not a change of answers. Random vectors move factual-\yes{}
 further down than real ones at strengths 1 to 4 (impact-matched $-3.6$, $-8.5$ and $-14.5$), though
 not at 8; the random vectors are impact-matched on the introspective prompt only, and on factual
-prompts they move the next token 1.5 to 2 times more than real vectors.}
+prompts they move the next token \ptwoFactualHighLo{} to \ptwoFactualHighHi{} times as much as real
+vectors at strengths 4 and 8, and up to \ptwoFactualLowHi{} times as much at 1 and 2. The same
+item-level answering gate applied to every endpoint and framing is in Table~\ref{tab:gated}.}
 
 \draft{An earlier filed control with a different prompt reads differently on the raw scale: there,
 injection moved confident factual-\no{} answers more than the introspective answer (Gemma-3-27B,
@@ -469,9 +479,11 @@ items still answering. --- where the cell did not measure it.}}
 
 \subsection{The detection rate is a property of the readout}
 \label{sec:readout}
-\draft{Two readouts of the same trials disagree about dose. In the earlier Gemma-3-27B study,
-detection read from generated text falls from 43\% to 0\% across doses over which the first-token
-\pyes{} stays near 0.42 to 0.50, while the generations degrade as the dose rises (descriptive). A detection rate is therefore a property of the readout as well as of the model,
+\draft{Two readouts of the same trials disagree about dose. In the earlier Gemma-3-27B study, over
+doses 2, 4 and 8 at which the first-token \pyes{} stays near 0.42 to 0.50, detection read from the
+generated text is \sthreeFiled{}\% under the filed scorer and \sthreeYes{}\% when any first \yes{}
+counts, and a \yes{} that names the injected concept occurs \sthreeNamed{}\% of the time
+(descriptive; 30 trials per dose). A detection rate is therefore a property of the readout as well as of the model,
 and a study should report both.}
 
 % ======================================================================
@@ -556,5 +568,18 @@ of the chat-templated ``Tell me about \{concept\}'' prompt minus the mean over 1
 does not normalise it, uses strengths 4 to 8, and injects from the token before ``Trial'' through
 every generated token. The read position is the template tail, the arm that is inert on Qwen. The
 absence of normalisation is in the code and is not stated in the paper.}
+
+\section{P2-R with an answering gate on every endpoint}
+\label{app:gated}
+\begin{table}[h]
+\centering
+\resizebox{\linewidth}{!}{\input{tables/tab_gated}}
+\caption{\draft{P2-R on Gemma-3-27B, real vectors, restricted to items whose \yes{}+\no{} mass is at
+least 0.5 at strength 0 and at the strength scored: items answering ($n$), median change in the
+log-odds of \yes{}, and Wilcoxon $p$ (not computed below 6 items). Last row: the introspective
+change for real and impact-matched random vectors among concepts answering under both. The gate was
+added in revision after the primary output was seen; exploratory.}}
+\label{tab:gated}
+\end{table}
 
 \end{document}
