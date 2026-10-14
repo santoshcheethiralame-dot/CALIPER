@@ -127,9 +127,10 @@ the context \citep{pearsonvogel2026latent}, and mechanisms of the detection itse
 \citep{singh2026realitycheck}, or explained by a global shift in the log-odds of \yes{} measured
 against factual-\no{} controls \citep{hahami2025disturbance}; C8 tests the last on Gemma-3-27B with
 factual-\yes{} controls that can separate a shift toward \yes{} from a flattening of confident
-answers. Other critiques ask whether the reports reflect confusion or localisation rather than
-introspection \citep{godet2025confusion,godet2025localization}, and whether a test rules out causal
-bypassing \citep{morris2025bypassing}. Intervention-versus-sham scoring with impact-matched random
+answers. Other critiques ask whether the reports reflect steering noise (``confusion'') rather than
+introspection \citep{godet2025confusion}, and whether a test rules out causal bypassing
+\citep{morris2025bypassing}; asking the model which sentence received the injection has been
+proposed as a cleaner test \citep{godet2025localization,hahami2025disturbance}. Intervention-versus-sham scoring with impact-matched random
 directions \citep{ferrara2026masked} is the closest prior design; we add per-vector liveness, dose
 transfer across families and the health-check audit. The question is old: people's verbal reports
 about their own mental processes can be fluent and wrong \citep{nisbett1977telling}.}
@@ -150,20 +151,21 @@ from activation steering, which adds a direction to the residual stream to chang
 \citep{turner2023actadd,rimsky2024caa,zou2023repe} or to monitor a trait \citep{chen2025persona}.
 Steering vectors are known to be unreliable across inputs and concepts
 \citep{tan2024generalisation,braun2025unreliability,dasilva2025steering}, simple baselines can match
-more elaborate methods \citep{wu2025axbench,im2025unified}, and steering carries safety risks of its
-own \citep{safetypitfalls2026}. Several works predict which concepts or layers steer well
-\citep{billa2026predicting,bas2025whatcan,canary2026}. They rank concept families and layers; C1
+more elaborate methods \citep{wu2025axbench}, and steering carries safety risks of its
+own \citep{safetypitfalls2026}. Several works predict how well steering will work: by concept
+family and layer \citep{billa2026predicting}, by behaviour type \citep{bas2025whatcan}, or across
+embedding models and tasks \citep{canary2026}. They predict for families, behaviours or models; C1
 tests the per-vector use their authors do not claim, as a screen for whether one vector is live.}
 
-\draft{\paragraph{Dose.} \citet{wu2026steerable} recommend setting steering strength as a fraction of
-the residual norm so that interventions are comparable across scales, and note that this does not
-guarantee an equal functional dose across models; geometric accounts of steering propose other
+\draft{\paragraph{Dose.} \citet{wu2026steerable} express steering strength as a fraction of the
+residual norm so that interventions are comparable across scales. Geometric accounts of steering propose other
 parameterisations \citep{anglenorm2026,riemannian2026}. C4 measures how far a fraction of the norm is
 from an equal dose, and how far a random-direction calibration is from one.}
 
 \draft{\paragraph{Perturbations in safety evaluation.} The same instrument is used to make safety
 claims: steering against evaluation awareness to argue that evaluations measure deployed behaviour
-\citep{hua2025steering,heidari2026evalaware}, and injecting noise to expose sandbagging
+\citep{hua2025steering}, steering along probed evaluation-awareness directions to shift what models
+verbalise \citep{heidari2026evalaware}, and injecting noise to expose sandbagging
 \citep{tice2024noise}. The controls such claims need are the controls this audit calibrates.}
 
 % ======================================================================
