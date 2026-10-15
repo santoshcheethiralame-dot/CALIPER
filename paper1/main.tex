@@ -926,6 +926,16 @@ directions.} A reliability check is itself a measuring
 instrument, and like any instrument it should be calibrated against a known answer before its
 readings are trusted.
 
+\section*{Broader impact statement}
+\draft{This is a methods paper about measurement. Its intended effect is fewer false claims about
+what a model represents: interpretability results are increasingly used to argue that a model is
+safe, and a check that certifies wrong answers makes those arguments weaker than they look. The
+main risk is over-generalisation in the other direction. The calibration holds for MLP units of
+small LayerNorm language models, one estimator family and noiseless responses; it does not show
+that held-out fit can be trusted everywhere, and it should not be cited as validating
+interpretability methods outside that setting. The study uses publicly released model weights and
+public-domain text, involves no human subjects or personal data, and releases no model.}
+
 \bibliography{references}
 \bibliographystyle{tmlr}
 
@@ -1090,6 +1100,18 @@ units move with restart count, token sample and hardware. Section~\ref{sec:resul
 those components, so that a failure rate carries its conditions.
 
 \FloatBarrier
+\section{Compute and software}
+\label{app:compute}
+\draft{Every arm except Pythia-1.4B ran on one laptop CPU (Intel Core i7-1255U, 12 logical cores,
+10 PyTorch threads, 16 GB of memory). The 35 local runs with recorded timings, including pilots
+and batch-size controls, took 169 CPU-hours in all, from under an hour to 19 hours each; each
+run's summary file records its seconds per unit, and Appendix~\ref{app:arms} lists the arms. The
+Pythia-1.4B arm ran on a free Kaggle GPU, and its precision was not recorded. Every run that
+recorded its libraries used PyTorch 2.12.0 (CPU build) and Transformers 5.13.0 under Python
+3.12; 13 early runs did not record them. No arm needed
+more than one machine, and the whole study can be repeated on a single laptop.}
+
+\FloatBarrier
 \section{Every arm}
 \label{app:arms}
 Every run of the estimator on disk, including arms that are not pooled. $\Delta$ is
@@ -1213,7 +1235,10 @@ check, against the reference standard of Section~\ref{sec:substrate}:
 \end{itemize}
 A new check is scored by computing it for each unit's fit and passing the per-unit values to
 the analysis script, which returns its AUC against the reference label and its paired
-comparison with held-out $R^2$. \draft{Code is released under the MIT licence, and the unit lists, labels and fitted rows under CC BY 4.0; an anonymised copy accompanies this submission as supplementary material.}
+comparison with held-out $R^2$. \draft{Code is released under the MIT licence, and the unit lists, labels and fitted rows under CC BY 4.0; an anonymised copy accompanies this submission as supplementary material. The assets it builds on
+are GPT-2 and GPT-Neo-125m (MIT), the Pythia models (Apache-2.0), the GPT-2 small residual-stream
+sparse autoencoders used for T-SAE (MIT) and Project Gutenberg texts (public domain in the United
+States).}
 
 \FloatBarrier
 \section{Usage census}
