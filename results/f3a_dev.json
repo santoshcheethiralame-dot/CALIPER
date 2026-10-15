@@ -1,0 +1,30 @@
+{
+ "B-17c GPT-2 L3, as usual": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 0,
+  "median_alignment": 0.05255170512323257,
+  "passes_identifiable": 5,
+  "median_alignment_identifiable": 0.707856441616247,
+  "median_share": 0.9951443672180176,
+  "fits_with_share_gt_0.5": 18,
+  "direct_fits_with_share_gt_0.5": 18,
+  "median_restart_agreement_of_those": 0.9984999999999999,
+  "median_restart_agreement_all": 0.99685
+ },
+ "B-17d GPT-2 L3, coordinate dropped": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 9,
+  "median_alignment": 0.9111928823358534,
+  "passes_identifiable": 9,
+  "median_alignment_identifiable": 0.9114245244788517,
+  "median_share": 0.0,
+  "fits_with_share_gt_0.5": 0,
+  "direct_fits_with_share_gt_0.5": 0,
+  "median_restart_agreement_of_those": null,
+  "median_restart_agreement_all": 0.72805
+ }
+}
