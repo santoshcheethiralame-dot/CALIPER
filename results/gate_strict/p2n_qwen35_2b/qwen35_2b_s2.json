@@ -1,0 +1,1063 @@
+{
+ "model": "qwen35_2b",
+ "vectors": 90,
+ "live": 27,
+ "dead": 63,
+ "live_by_arm": {
+  "concept token": [
+   10,
+   30
+  ],
+  "template tail": [
+   5,
+   30
+  ],
+  "sentence mean": [
+   12,
+   30
+  ]
+ },
+ "scored": true,
+ "auc": {
+  "norm": {
+   "auc": 0.41211052322163433,
+   "ci95": [
+    0.2827748383303939,
+    0.5502645502645502
+   ]
+  },
+  "distinctness": {
+   "auc": 0.6628453850676073,
+   "ci95": [
+    0.5467078189300412,
+    0.7704365079365079
+   ]
+  },
+  "stability": {
+   "auc": 0.5702527924750147,
+   "ci95": [
+    0.44265873015873014,
+    0.6931363903586125
+   ]
+  },
+  "probe": {
+   "auc": 0.5420340975896532,
+   "ci95": [
+    0.4714873603762493,
+    0.6111111111111112
+   ]
+  },
+  "logit steering": {
+   "auc": 0.5132275132275133,
+   "ci95": [
+    0.3885655496766608,
+    0.6320105820105818
+   ]
+  },
+  "P(YES) shift": {
+   "auc": 0.49265138154027044,
+   "ci95": [
+    0.34509112286890065,
+    0.628497942386831
+   ]
+  }
+ },
+ "predictions": {
+  "norm near 0.5": true,
+  "distinctness near 0.5": false,
+  "P(YES) shift near 0.5": true,
+  "logit steering >= 0.8": false
+ },
+ "per_vector": [
+  {
+   "arm": "concept token",
+   "concept": "elephant",
+   "live": true,
+   "norm": 7.7156,
+   "distinctness": -0.5059,
+   "stability": 0.9909,
+   "probe": 1.0,
+   "logit steering": 3.4402,
+   "P(YES) shift": -0.24362968385484576
+  },
+  {
+   "arm": "concept token",
+   "concept": "spider",
+   "live": true,
+   "norm": 7.2468,
+   "distinctness": -0.2922,
+   "stability": 0.9922,
+   "probe": 1.0,
+   "logit steering": 3.0391,
+   "P(YES) shift": -36.161051255934645
+  },
+  {
+   "arm": "concept token",
+   "concept": "eagle",
+   "live": false,
+   "norm": 7.5409,
+   "distinctness": -0.4799,
+   "stability": 0.9889,
+   "probe": 1.0,
+   "logit steering": 8.597,
+   "P(YES) shift": -14.27387043819819
+  },
+  {
+   "arm": "concept token",
+   "concept": "dolphin",
+   "live": true,
+   "norm": 8.4284,
+   "distinctness": -0.5059,
+   "stability": 0.991,
+   "probe": 1.0,
+   "logit steering": 4.1234,
+   "P(YES) shift": -16.488984831207468
+  },
+  {
+   "arm": "concept token",
+   "concept": "volcano",
+   "live": true,
+   "norm": 7.9877,
+   "distinctness": -0.3958,
+   "stability": 0.9916,
+   "probe": 1.0,
+   "logit steering": 4.8821,
+   "P(YES) shift": 69.3178520564705
+  },
+  {
+   "arm": "concept token",
+   "concept": "desert",
+   "live": false,
+   "norm": 8.0353,
+   "distinctness": -0.3772,
+   "stability": 0.9898,
+   "probe": 1.0,
+   "logit steering": 2.3163,
+   "P(YES) shift": 9.438295541882956
+  },
+  {
+   "arm": "concept token",
+   "concept": "library",
+   "live": false,
+   "norm": 7.1349,
+   "distinctness": -0.2561,
+   "stability": 0.9882,
+   "probe": 1.0,
+   "logit steering": -0.8638,
+   "P(YES) shift": 41.707849053646314
+  },
+  {
+   "arm": "concept token",
+   "concept": "harbor",
+   "live": false,
+   "norm": 6.8742,
+   "distinctness": -0.2318,
+   "stability": 0.9781,
+   "probe": 1.0,
+   "logit steering": 9.8611,
+   "P(YES) shift": 0.30380373349889156
+  },
+  {
+   "arm": "concept token",
+   "concept": "violin",
+   "live": true,
+   "norm": 7.9084,
+   "distinctness": -0.3175,
+   "stability": 0.9921,
+   "probe": 1.0,
+   "logit steering": 5.6948,
+   "P(YES) shift": 66.2401006396375
+  },
+  {
+   "arm": "concept token",
+   "concept": "umbrella",
+   "live": false,
+   "norm": 7.0009,
+   "distinctness": -0.1721,
+   "stability": 0.9918,
+   "probe": 1.0,
+   "logit steering": 3.6932,
+   "P(YES) shift": -26.032207818162046
+  },
+  {
+   "arm": "concept token",
+   "concept": "telescope",
+   "live": false,
+   "norm": 7.5979,
+   "distinctness": -0.3856,
+   "stability": 0.9887,
+   "probe": 1.0,
+   "logit steering": 6.5454,
+   "P(YES) shift": 2.426165778211495
+  },
+  {
+   "arm": "concept token",
+   "concept": "candle",
+   "live": true,
+   "norm": 6.5663,
+   "distinctness": -0.2444,
+   "stability": 0.9553,
+   "probe": 1.0,
+   "logit steering": 6.3886,
+   "P(YES) shift": 35.45415206092107
+  },
+  {
+   "arm": "concept token",
+   "concept": "bread",
+   "live": true,
+   "norm": 7.593,
+   "distinctness": -0.212,
+   "stability": 0.9907,
+   "probe": 1.0,
+   "logit steering": -1.9919,
+   "P(YES) shift": 1.7939746958070582
+  },
+  {
+   "arm": "concept token",
+   "concept": "mountain",
+   "live": true,
+   "norm": 6.5534,
+   "distinctness": -0.3958,
+   "stability": 0.9885,
+   "probe": 1.0,
+   "logit steering": -4.6907,
+   "P(YES) shift": 8.05563299159083
+  },
+  {
+   "arm": "concept token",
+   "concept": "river",
+   "live": true,
+   "norm": 6.5986,
+   "distinctness": -0.3819,
+   "stability": 0.987,
+   "probe": 1.0,
+   "logit steering": 0.4661,
+   "P(YES) shift": -8.895332186547842
+  },
+  {
+   "arm": "concept token",
+   "concept": "clock",
+   "live": false,
+   "norm": 6.2895,
+   "distinctness": -0.2444,
+   "stability": 0.9886,
+   "probe": 1.0,
+   "logit steering": 0.7613,
+   "P(YES) shift": 0.1390661452067738
+  },
+  {
+   "arm": "concept token",
+   "concept": "mirror",
+   "live": false,
+   "norm": 6.4412,
+   "distinctness": -0.2123,
+   "stability": 0.9831,
+   "probe": 1.0,
+   "logit steering": -2.1663,
+   "P(YES) shift": -27.870303574583364
+  },
+  {
+   "arm": "concept token",
+   "concept": "bridge",
+   "live": false,
+   "norm": 6.7599,
+   "distinctness": -0.2061,
+   "stability": 0.9811,
+   "probe": 1.0,
+   "logit steering": 1.9469,
+   "P(YES) shift": -1.285365306904606
+  },
+  {
+   "arm": "concept token",
+   "concept": "garden",
+   "live": true,
+   "norm": 6.5221,
+   "distinctness": -0.2755,
+   "stability": 0.9816,
+   "probe": 1.0,
+   "logit steering": 1.5892,
+   "P(YES) shift": 5.974135120125508
+  },
+  {
+   "arm": "concept token",
+   "concept": "engine",
+   "live": false,
+   "norm": 6.7417,
+   "distinctness": -0.2143,
+   "stability": 0.9884,
+   "probe": 1.0,
+   "logit steering": 0.7563,
+   "P(YES) shift": 5.820904177263672
+  },
+  {
+   "arm": "concept token",
+   "concept": "joy",
+   "live": false,
+   "norm": 7.9696,
+   "distinctness": -0.5699,
+   "stability": 0.9756,
+   "probe": 1.0,
+   "logit steering": 5.3535,
+   "P(YES) shift": 2.3252894831431945
+  },
+  {
+   "arm": "concept token",
+   "concept": "fear",
+   "live": false,
+   "norm": 8.3285,
+   "distinctness": -0.5496,
+   "stability": 0.9891,
+   "probe": 1.0,
+   "logit steering": 2.2036,
+   "P(YES) shift": 0.5389655187882781
+  },
+  {
+   "arm": "concept token",
+   "concept": "jealousy",
+   "live": false,
+   "norm": 9.2679,
+   "distinctness": -0.5595,
+   "stability": 0.9907,
+   "probe": 1.0,
+   "logit steering": 9.053,
+   "P(YES) shift": -15.611744207861298
+  },
+  {
+   "arm": "concept token",
+   "concept": "serenity",
+   "live": false,
+   "norm": 6.5776,
+   "distinctness": -0.35,
+   "stability": 0.9849,
+   "probe": 1.0,
+   "logit steering": 8.1334,
+   "P(YES) shift": -0.9617758783643874
+  },
+  {
+   "arm": "concept token",
+   "concept": "grief",
+   "live": false,
+   "norm": 9.8466,
+   "distinctness": -0.5229,
+   "stability": 0.9933,
+   "probe": 1.0,
+   "logit steering": 6.1705,
+   "P(YES) shift": 919.7998624957031
+  },
+  {
+   "arm": "concept token",
+   "concept": "curiosity",
+   "live": false,
+   "norm": 8.5161,
+   "distinctness": -0.5151,
+   "stability": 0.9878,
+   "probe": 1.0,
+   "logit steering": 3.0695,
+   "P(YES) shift": 3.4975286064616404
+  },
+  {
+   "arm": "concept token",
+   "concept": "betrayal",
+   "live": false,
+   "norm": 8.7181,
+   "distinctness": -0.5595,
+   "stability": 0.9898,
+   "probe": 1.0,
+   "logit steering": 9.6915,
+   "P(YES) shift": 0.1679583798722091
+  },
+  {
+   "arm": "concept token",
+   "concept": "nostalgia",
+   "live": false,
+   "norm": 9.6184,
+   "distinctness": -0.5225,
+   "stability": 0.9913,
+   "probe": 1.0,
+   "logit steering": -1.5102,
+   "P(YES) shift": 5.457746287066111
+  },
+  {
+   "arm": "concept token",
+   "concept": "justice",
+   "live": false,
+   "norm": 8.2999,
+   "distinctness": -0.5699,
+   "stability": 0.9901,
+   "probe": 1.0,
+   "logit steering": 5.0398,
+   "P(YES) shift": -14.30691349082741
+  },
+  {
+   "arm": "concept token",
+   "concept": "freedom",
+   "live": false,
+   "norm": 7.9288,
+   "distinctness": -0.5386,
+   "stability": 0.9885,
+   "probe": 1.0,
+   "logit steering": 1.6873,
+   "P(YES) shift": 38.66803822995006
+  },
+  {
+   "arm": "template tail",
+   "concept": "elephant",
+   "live": false,
+   "norm": 3.0325,
+   "distinctness": -0.9626,
+   "stability": 0.931,
+   "probe": 1.0,
+   "logit steering": 0.5012,
+   "P(YES) shift": -2.234523494344377
+  },
+  {
+   "arm": "template tail",
+   "concept": "spider",
+   "live": false,
+   "norm": 2.5445,
+   "distinctness": -0.8992,
+   "stability": 0.9107,
+   "probe": 0.5,
+   "logit steering": 1.3892,
+   "P(YES) shift": 1.6779197672877995
+  },
+  {
+   "arm": "template tail",
+   "concept": "eagle",
+   "live": false,
+   "norm": 2.3066,
+   "distinctness": -0.904,
+   "stability": 0.9061,
+   "probe": 0.625,
+   "logit steering": 2.4758,
+   "P(YES) shift": -2.2144779941882806
+  },
+  {
+   "arm": "template tail",
+   "concept": "dolphin",
+   "live": true,
+   "norm": 2.6543,
+   "distinctness": -0.9626,
+   "stability": 0.9208,
+   "probe": 1.0,
+   "logit steering": 3.0566,
+   "P(YES) shift": -1.0762647697679701
+  },
+  {
+   "arm": "template tail",
+   "concept": "volcano",
+   "live": false,
+   "norm": 2.859,
+   "distinctness": -0.8507,
+   "stability": 0.91,
+   "probe": 1.0,
+   "logit steering": 2.4251,
+   "P(YES) shift": 3.3403771974914167
+  },
+  {
+   "arm": "template tail",
+   "concept": "desert",
+   "live": false,
+   "norm": 2.8288,
+   "distinctness": -0.8165,
+   "stability": 0.9111,
+   "probe": 1.0,
+   "logit steering": 9.6219,
+   "P(YES) shift": -1.3461907497323984
+  },
+  {
+   "arm": "template tail",
+   "concept": "library",
+   "live": false,
+   "norm": 1.8116,
+   "distinctness": -0.7655,
+   "stability": 0.8072,
+   "probe": 0.875,
+   "logit steering": -0.9347,
+   "P(YES) shift": 9.746294503456646
+  },
+  {
+   "arm": "template tail",
+   "concept": "harbor",
+   "live": false,
+   "norm": 1.9203,
+   "distinctness": -0.2856,
+   "stability": 0.7805,
+   "probe": 1.0,
+   "logit steering": 3.8012,
+   "P(YES) shift": -14.202550373536564
+  },
+  {
+   "arm": "template tail",
+   "concept": "violin",
+   "live": false,
+   "norm": 2.9312,
+   "distinctness": -0.7962,
+   "stability": 0.902,
+   "probe": 1.0,
+   "logit steering": 1.7078,
+   "P(YES) shift": 1.8706414299672416
+  },
+  {
+   "arm": "template tail",
+   "concept": "umbrella",
+   "live": false,
+   "norm": 1.691,
+   "distinctness": -0.6635,
+   "stability": 0.8813,
+   "probe": 0.625,
+   "logit steering": -3.5348,
+   "P(YES) shift": 4.0282800277255175
+  },
+  {
+   "arm": "template tail",
+   "concept": "telescope",
+   "live": true,
+   "norm": 2.4083,
+   "distinctness": -0.8507,
+   "stability": 0.8858,
+   "probe": 1.0,
+   "logit steering": 3.5774,
+   "P(YES) shift": 3.502196316416557
+  },
+  {
+   "arm": "template tail",
+   "concept": "candle",
+   "live": false,
+   "norm": 0.9856,
+   "distinctness": -0.4521,
+   "stability": 0.7024,
+   "probe": 1.0,
+   "logit steering": 2.868,
+   "P(YES) shift": 46.61891142799759
+  },
+  {
+   "arm": "template tail",
+   "concept": "bread",
+   "live": false,
+   "norm": 2.9115,
+   "distinctness": -0.7619,
+   "stability": 0.9151,
+   "probe": 1.0,
+   "logit steering": -2.778,
+   "P(YES) shift": 8.121432104900556
+  },
+  {
+   "arm": "template tail",
+   "concept": "mountain",
+   "live": false,
+   "norm": 2.1868,
+   "distinctness": -0.8826,
+   "stability": 0.8581,
+   "probe": 1.0,
+   "logit steering": 2.4115,
+   "P(YES) shift": 3.3415477689003126
+  },
+  {
+   "arm": "template tail",
+   "concept": "river",
+   "live": false,
+   "norm": 2.1479,
+   "distinctness": -0.8826,
+   "stability": 0.881,
+   "probe": 1.0,
+   "logit steering": 4.6497,
+   "P(YES) shift": -0.07993638193359513
+  },
+  {
+   "arm": "template tail",
+   "concept": "clock",
+   "live": true,
+   "norm": 1.4399,
+   "distinctness": -0.7011,
+   "stability": 0.833,
+   "probe": 0.5,
+   "logit steering": 2.018,
+   "P(YES) shift": 9.9101312335958
+  },
+  {
+   "arm": "template tail",
+   "concept": "mirror",
+   "live": true,
+   "norm": 1.0486,
+   "distinctness": -0.5362,
+   "stability": 0.7011,
+   "probe": 0.875,
+   "logit steering": 4.8739,
+   "P(YES) shift": -0.7320734310874225
+  },
+  {
+   "arm": "template tail",
+   "concept": "bridge",
+   "live": false,
+   "norm": 2.4934,
+   "distinctness": -0.7121,
+   "stability": 0.8062,
+   "probe": 0.625,
+   "logit steering": -0.0428,
+   "P(YES) shift": 2.751024119871255
+  },
+  {
+   "arm": "template tail",
+   "concept": "garden",
+   "live": false,
+   "norm": 2.261,
+   "distinctness": -0.7683,
+   "stability": 0.8431,
+   "probe": 1.0,
+   "logit steering": 4.5295,
+   "P(YES) shift": 5.893174782708898
+  },
+  {
+   "arm": "template tail",
+   "concept": "engine",
+   "live": true,
+   "norm": 1.9362,
+   "distinctness": -0.655,
+   "stability": 0.8274,
+   "probe": 1.0,
+   "logit steering": 3.8545,
+   "P(YES) shift": 0.8952913986610471
+  },
+  {
+   "arm": "template tail",
+   "concept": "joy",
+   "live": false,
+   "norm": 3.7906,
+   "distinctness": -0.9124,
+   "stability": 0.9249,
+   "probe": 1.0,
+   "logit steering": 1.9603,
+   "P(YES) shift": 1.8285133001945604
+  },
+  {
+   "arm": "template tail",
+   "concept": "fear",
+   "live": false,
+   "norm": 3.8285,
+   "distinctness": -0.9124,
+   "stability": 0.921,
+   "probe": 0.75,
+   "logit steering": 3.3059,
+   "P(YES) shift": -1.583595019537946
+  },
+  {
+   "arm": "template tail",
+   "concept": "jealousy",
+   "live": false,
+   "norm": 3.6046,
+   "distinctness": -0.8752,
+   "stability": 0.9267,
+   "probe": 0.875,
+   "logit steering": 4.358,
+   "P(YES) shift": -3.61490113470577
+  },
+  {
+   "arm": "template tail",
+   "concept": "serenity",
+   "live": false,
+   "norm": 2.4891,
+   "distinctness": -0.7662,
+   "stability": 0.8801,
+   "probe": 1.0,
+   "logit steering": 1.2519,
+   "P(YES) shift": -5.60446704167939
+  },
+  {
+   "arm": "template tail",
+   "concept": "grief",
+   "live": false,
+   "norm": 4.7286,
+   "distinctness": -0.8549,
+   "stability": 0.9113,
+   "probe": 1.0,
+   "logit steering": 5.7618,
+   "P(YES) shift": 3.4392146178142355
+  },
+  {
+   "arm": "template tail",
+   "concept": "curiosity",
+   "live": false,
+   "norm": 3.4186,
+   "distinctness": -0.9123,
+   "stability": 0.8983,
+   "probe": 1.0,
+   "logit steering": 0.55,
+   "P(YES) shift": 13.322003922411195
+  },
+  {
+   "arm": "template tail",
+   "concept": "betrayal",
+   "live": false,
+   "norm": 3.7143,
+   "distinctness": -0.8508,
+   "stability": 0.8758,
+   "probe": 0.875,
+   "logit steering": 4.73,
+   "P(YES) shift": -3.8003254643423015
+  },
+  {
+   "arm": "template tail",
+   "concept": "nostalgia",
+   "live": false,
+   "norm": 3.6374,
+   "distinctness": -0.9123,
+   "stability": 0.9022,
+   "probe": 0.875,
+   "logit steering": 2.0772,
+   "P(YES) shift": 5.624646779807864
+  },
+  {
+   "arm": "template tail",
+   "concept": "justice",
+   "live": false,
+   "norm": 3.267,
+   "distinctness": -0.9367,
+   "stability": 0.5415,
+   "probe": 0.0,
+   "logit steering": 0.4716,
+   "P(YES) shift": -11.899473932885781
+  },
+  {
+   "arm": "template tail",
+   "concept": "freedom",
+   "live": false,
+   "norm": 3.6867,
+   "distinctness": -0.9367,
+   "stability": 0.5314,
+   "probe": 1.0,
+   "logit steering": 3.5332,
+   "P(YES) shift": -3.378360996661167
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "elephant",
+   "live": false,
+   "norm": 1.0024,
+   "distinctness": -0.2173,
+   "stability": 0.9772,
+   "probe": 1.0,
+   "logit steering": 2.9049,
+   "P(YES) shift": 3.044902413249625
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "spider",
+   "live": true,
+   "norm": 1.2902,
+   "distinctness": -0.5247,
+   "stability": 0.9869,
+   "probe": 1.0,
+   "logit steering": 2.7778,
+   "P(YES) shift": -15.77969286399004
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "eagle",
+   "live": false,
+   "norm": 1.1183,
+   "distinctness": -0.5247,
+   "stability": 0.9794,
+   "probe": 1.0,
+   "logit steering": 5.5422,
+   "P(YES) shift": -64.38477714819793
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "dolphin",
+   "live": false,
+   "norm": 1.1792,
+   "distinctness": -0.4782,
+   "stability": 0.9826,
+   "probe": 1.0,
+   "logit steering": 7.3111,
+   "P(YES) shift": 2.667222212548538
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "volcano",
+   "live": true,
+   "norm": 1.2219,
+   "distinctness": -0.2447,
+   "stability": 0.9584,
+   "probe": 1.0,
+   "logit steering": 10.4953,
+   "P(YES) shift": -0.28234409052714304
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "desert",
+   "live": true,
+   "norm": 1.2451,
+   "distinctness": -0.3677,
+   "stability": 0.9638,
+   "probe": 1.0,
+   "logit steering": 2.8893,
+   "P(YES) shift": 12.115242308011123
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "library",
+   "live": false,
+   "norm": 1.2698,
+   "distinctness": -0.3262,
+   "stability": 0.9642,
+   "probe": 1.0,
+   "logit steering": -2.7831,
+   "P(YES) shift": 12.791322354312772
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "harbor",
+   "live": false,
+   "norm": 1.1941,
+   "distinctness": -0.2178,
+   "stability": 0.9544,
+   "probe": 1.0,
+   "logit steering": 14.1087,
+   "P(YES) shift": -2.7871563000260524
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "violin",
+   "live": true,
+   "norm": 1.2619,
+   "distinctness": -0.2954,
+   "stability": 0.9415,
+   "probe": 1.0,
+   "logit steering": 10.3862,
+   "P(YES) shift": 44.17485004127031
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "umbrella",
+   "live": false,
+   "norm": 1.2654,
+   "distinctness": -0.2797,
+   "stability": 0.9434,
+   "probe": 1.0,
+   "logit steering": 8.855,
+   "P(YES) shift": -16.26402930992834
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "telescope",
+   "live": true,
+   "norm": 1.1818,
+   "distinctness": -0.3396,
+   "stability": 0.9356,
+   "probe": 1.0,
+   "logit steering": 8.1075,
+   "P(YES) shift": -2.0307359521302275
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "candle",
+   "live": true,
+   "norm": 1.1411,
+   "distinctness": -0.3079,
+   "stability": 0.9234,
+   "probe": 1.0,
+   "logit steering": 7.6712,
+   "P(YES) shift": 5.626556676418246
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "bread",
+   "live": true,
+   "norm": 1.5052,
+   "distinctness": -0.3396,
+   "stability": 0.9671,
+   "probe": 1.0,
+   "logit steering": 3.3585,
+   "P(YES) shift": 0.8693389975588879
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "mountain",
+   "live": true,
+   "norm": 1.0498,
+   "distinctness": -0.3262,
+   "stability": 0.9314,
+   "probe": 1.0,
+   "logit steering": -0.3049,
+   "P(YES) shift": 24.04631809358609
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "river",
+   "live": true,
+   "norm": 1.0043,
+   "distinctness": -0.222,
+   "stability": 0.9222,
+   "probe": 1.0,
+   "logit steering": 2.1254,
+   "P(YES) shift": -9.886339418279873
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "clock",
+   "live": true,
+   "norm": 1.085,
+   "distinctness": -0.2954,
+   "stability": 0.9386,
+   "probe": 1.0,
+   "logit steering": 1.495,
+   "P(YES) shift": -30.13383781429605
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "mirror",
+   "live": true,
+   "norm": 1.1666,
+   "distinctness": -0.2316,
+   "stability": 0.9482,
+   "probe": 1.0,
+   "logit steering": 4.164,
+   "P(YES) shift": -29.564324422961047
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "bridge",
+   "live": true,
+   "norm": 1.2279,
+   "distinctness": -0.3677,
+   "stability": 0.9517,
+   "probe": 1.0,
+   "logit steering": 7.8116,
+   "P(YES) shift": -14.891232815962914
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "garden",
+   "live": false,
+   "norm": 1.1149,
+   "distinctness": -0.3411,
+   "stability": 0.9285,
+   "probe": 1.0,
+   "logit steering": 1.4583,
+   "P(YES) shift": 5.0490738992167135
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "engine",
+   "live": false,
+   "norm": 1.2881,
+   "distinctness": -0.282,
+   "stability": 0.9543,
+   "probe": 1.0,
+   "logit steering": 2.048,
+   "P(YES) shift": 1.5719071036772316
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "joy",
+   "live": false,
+   "norm": 1.1205,
+   "distinctness": -0.2076,
+   "stability": 0.938,
+   "probe": 1.0,
+   "logit steering": 6.6468,
+   "P(YES) shift": 4.369771663434116
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "fear",
+   "live": false,
+   "norm": 1.0964,
+   "distinctness": -0.3363,
+   "stability": 0.9361,
+   "probe": 1.0,
+   "logit steering": 0.164,
+   "P(YES) shift": -0.4184658994785578
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "jealousy",
+   "live": false,
+   "norm": 1.1111,
+   "distinctness": -0.4075,
+   "stability": 0.9347,
+   "probe": 1.0,
+   "logit steering": 13.2644,
+   "P(YES) shift": 1.1742448628864985
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "serenity",
+   "live": false,
+   "norm": 1.9161,
+   "distinctness": -0.4075,
+   "stability": 0.9764,
+   "probe": 1.0,
+   "logit steering": 6.0652,
+   "P(YES) shift": 10.4772151288205
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "grief",
+   "live": false,
+   "norm": 1.2887,
+   "distinctness": -0.3865,
+   "stability": 0.9282,
+   "probe": 1.0,
+   "logit steering": 7.5158,
+   "P(YES) shift": 12.817301520151924
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "curiosity",
+   "live": false,
+   "norm": 1.2383,
+   "distinctness": -0.3865,
+   "stability": 0.9198,
+   "probe": 1.0,
+   "logit steering": 7.7728,
+   "P(YES) shift": 20.827333451200744
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "betrayal",
+   "live": false,
+   "norm": 1.3449,
+   "distinctness": -0.239,
+   "stability": 0.9348,
+   "probe": 1.0,
+   "logit steering": 10.9302,
+   "P(YES) shift": -10.820877856240987
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "nostalgia",
+   "live": false,
+   "norm": 1.2405,
+   "distinctness": -0.3363,
+   "stability": 0.9249,
+   "probe": 1.0,
+   "logit steering": 2.0415,
+   "P(YES) shift": 1.5976586764904581
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "justice",
+   "live": false,
+   "norm": 1.3404,
+   "distinctness": -1.0,
+   "stability": 0.9982,
+   "probe": 1.0,
+   "logit steering": 7.8151,
+   "P(YES) shift": -9.058904528892782
+  },
+  {
+   "arm": "sentence mean",
+   "concept": "freedom",
+   "live": false,
+   "norm": 1.3404,
+   "distinctness": -1.0,
+   "stability": 0.9982,
+   "probe": 1.0,
+   "logit steering": 7.5292,
+   "P(YES) shift": 1.9914786963023496
+  }
+ ]
+}

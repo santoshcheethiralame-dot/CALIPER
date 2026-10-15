@@ -346,6 +346,19 @@ def numbers():
         "idTopTenReal": lst([str(idr["real"][s]["10"]) for s in ("2", "4", "8")]),
         "sthreeFiled": pct("filed_scorer"), "sthreeYes": pct("first_yes"), "sthreeNamed": pct("yes_and_names"),
     }
+    pd = load("results/p2d_dose_transfer.json")
+    rc = lambda s: pd[s]["arms"]["random"][2]["median_kl"] / pd[s]["arms"]["concept"][2]["median_kl"]
+    m["pdRandThree"], m["pdRandSeven"] = f"{rc('Qwen2.5-3B'):.1f}", f"{rc('Qwen2.5-7B'):.2f}"
+    d, models = p2n()
+    if "P2" in d:  # P2-N, filed label as in the tables
+        mm = dict(models)
+        f = lambda name, c: f"{mm[name]['filed_substring_label']['auc'][c]['auc']:.2f}"
+        for tag, name in (("Two", "Qwen3.5-2B"), ("Small", "Qwen3.5-0.8B")):
+            for key, c in (("Norm", "norm"), ("Dist", "distinctness"), ("Logit", "logit steering"), ("Pyes", "P(YES) shift")):
+                m[f"pn{tag}{key}"] = f(name, c)
+        m["pnFold"] = f"{d['P2']['fold_difference']:.1f}"
+        m["pnRandTwo"] = f"{mm['Qwen3.5-2B']['random_over_concept_kl_at_0.5']:.2f}"
+        m["pnRandSmall"] = f"{mm['Qwen3.5-0.8B']['random_over_concept_kl_at_0.5']:.2f}"
     write("numbers", "".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in m.items()))
 
 

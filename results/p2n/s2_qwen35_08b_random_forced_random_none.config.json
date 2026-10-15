@@ -1,0 +1,159 @@
+{
+  "version": "2026-10-11b",
+  "argv": [
+    "--model",
+    "qwen3b",
+    "--model-path",
+    "C:\\Users\\carbo\\.cache\\huggingface\\hub\\models--Qwen--Qwen3.5-0.8B\\snapshots\\2fc06364715b967f1860aea9cf38778875588b17",
+    "--quant",
+    "none",
+    "--compute-dtype",
+    "fp32",
+    "--alpha-frac",
+    "0",
+    "0.25",
+    "0.5",
+    "1.0",
+    "--stage",
+    "forced",
+    "--control",
+    "random",
+    "--no-health",
+    "--out",
+    "results/p2n/s2_qwen35_08b_random.jsonl"
+  ],
+  "stage": "forced",
+  "model_id": "C:\\Users\\carbo\\.cache\\huggingface\\hub\\models--Qwen--Qwen3.5-0.8B\\snapshots\\2fc06364715b967f1860aea9cf38778875588b17",
+  "layer": 14,
+  "n_layers": 24,
+  "normalise": false,
+  "control": "random",
+  "vector_recipe": "macar",
+  "alpha_frac": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "alphas": [
+    0.0,
+    0.999,
+    1.997,
+    3.994
+  ],
+  "trial_seed": 0,
+  "concepts": [
+    "elephant",
+    "spider",
+    "eagle",
+    "dolphin",
+    "volcano",
+    "desert",
+    "library",
+    "harbor",
+    "violin",
+    "umbrella",
+    "telescope",
+    "candle",
+    "bread",
+    "mountain",
+    "river",
+    "clock",
+    "mirror",
+    "bridge",
+    "garden",
+    "engine",
+    "joy",
+    "fear",
+    "jealousy",
+    "serenity",
+    "grief",
+    "curiosity",
+    "betrayal",
+    "nostalgia",
+    "justice",
+    "freedom"
+  ],
+  "max_new": 60,
+  "load": {
+    "quant": "none",
+    "compute_dtype": "float32",
+    "storage_dtype": "float32",
+    "model_id": "C:\\Users\\carbo\\.cache\\huggingface\\hub\\models--Qwen--Qwen3.5-0.8B\\snapshots\\2fc06364715b967f1860aea9cf38778875588b17"
+  },
+  "libraries": {
+    "torch": "2.12.0",
+    "transformers": "5.13.0",
+    "accelerate": "1.14.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpus": [],
+  "health": {},
+  "health_pass_counts": {},
+  "impact_match": {},
+  "residual_norm_at_read_median": 3.9940993785858154,
+  "residual_norm_at_read_min": 3.1952922344207764,
+  "residual_norm_at_read_max": 4.32200813293457,
+  "vector_norm_median": 2.8034067153930664,
+  "n_vectors": 30,
+  "non_finite_vectors": 0,
+  "vector_read_position": "concept",
+  "n_baseline": 30,
+  "gram_offdiag_median_abs": 0.13939672708511353,
+  "gram_offdiag_mean": 0.15106651186943054,
+  "gram_offdiag_max": 0.6325048208236694,
+  "gram_offdiag_min": -0.1679813116788864,
+  "gram_offdiag_p90_abs": 0.35878604650497437,
+  "gram_top_pairs": [
+    [
+      0.6325,
+      22,
+      26
+    ],
+    [
+      0.6072,
+      22,
+      24
+    ],
+    [
+      0.5862,
+      22,
+      27
+    ],
+    [
+      0.5771,
+      21,
+      24
+    ],
+    [
+      0.5635,
+      24,
+      27
+    ],
+    [
+      0.5617,
+      28,
+      29
+    ],
+    [
+      0.5424,
+      21,
+      22
+    ],
+    [
+      0.5346,
+      20,
+      28
+    ],
+    [
+      0.5262,
+      24,
+      26
+    ],
+    [
+      0.5233,
+      0,
+      3
+    ]
+  ]
+}

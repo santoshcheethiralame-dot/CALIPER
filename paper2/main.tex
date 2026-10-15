@@ -39,13 +39,15 @@ Introspection}
 ask the model whether it notices an injected thought, and read the answer as evidence about
 introspection. Every such result rests on three assumptions about the instrument: the injected
 vector is live, the dose means the same thing across models and prompts, and the readout reports
-the injection rather than something else. We audit the three on five open models, with controls
+the injection rather than something else. We audit the three on seven open models from three
+families, two of them current, with controls
 whose answer is known and every arm pre-registered. Liveness depends on model and read position,
 and the health checks in use do not certify it: within one recipe and concept type, vector norm,
 a held-out probe, logit steering and the ``significant \pyes{} shift'' check carry no detectable
 signal (pooled AUCs 0.52 to 0.55, no variation between cells beyond sampling noise).
-Dose has no transferable unit: the same fraction of the residual norm moves the next token 25 to
-480 times more in one model than in another, and calibrating on random directions misjudges real
+Dose has no unit that transfers across families: the same fraction of the residual norm moves the
+next token 25 to 480 times more in one model than in another, though two sizes of the current Qwen3.5
+family differ by under 2-fold, and calibrating on random directions misjudges real
 vectors by an amount that depends on how they were built. The readout is defined only where the
 model answers: at the published strength Gemma-3-27B puts less than $10^{-4}$ of its first-token
 probability on \yes{} or \no{}, and Qwen2.5-7B never answers the released prompt in that format.
@@ -76,7 +78,8 @@ produced. None of the three is checked as a matter of course, and when one fails
 measures something other than what it reports.}
 
 \draft{This paper audits the instrument rather than the model's introspection. We run the
-paradigm on five open models (Qwen2.5-3B and -7B, Gemma-3-4B, -12B and -27B) with four ways of
+paradigm on seven open models (Qwen2.5-3B and -7B, Gemma-3-4B, -12B and -27B, and the current
+Qwen3.5-0.8B and -2B, a hybrid of linear and full attention) with four ways of
 building concept vectors, including the released recipe of \citet{macar2026mechanisms}, and we
 calibrate each assumption against controls whose answer is known: random directions matched in
 norm or in effect, factual questions whose correct answer is \yes{} or \no{}, and a neutral prompt.
@@ -89,11 +92,12 @@ findings, each scoped to where it was measured, are:}
   to cell (Section~\ref{sec:liveness}).}
   \item \draft{\textbf{Liveness depends on model and read position} (C2): vectors read at the chat
   template's tail are mostly inert on Qwen and live on Gemma-3-27B at the released strength.}
-  \item \draft{\textbf{One health check is inverted on Qwen} (C3, exploratory): a significant
-  \pyes{} shift marks dead vectors, through which recipe they come from
-  (Section~\ref{sec:inverted}).}
-  \item \draft{\textbf{Dose has no transferable unit} (C4): neither a fraction of the residual
-  norm nor a random-direction calibration puts models, recipes or prompts on one scale
+  \item \draft{\textbf{One health check is inverted on Qwen2.5} (C3, exploratory): a significant
+  \pyes{} shift marks dead vectors, through which recipe they come from; it does not recur on
+  Qwen3.5 (Section~\ref{sec:inverted}).}
+  \item \draft{\textbf{Dose has no unit that transfers across families} (C4): neither a fraction
+  of the residual norm nor a random-direction calibration puts models from different families,
+  recipes or prompts on one scale; within Qwen3.5 two sizes agree to within 2-fold
   (Section~\ref{sec:dose}).}
   \item \draft{\textbf{The readout is defined only where the model answers} (C5): at the published
   strength the answer tokens have lost their probability, and on Qwen the released prompt is not
@@ -242,6 +246,14 @@ The pooled signal therefore comes from recipes and concept types that differ bot
 in liveness. Pooled over recipes, concrete-only norm still ranges from 0.36 to 0.77 across
 sessions, so concept type alone does not explain it.}
 
+\draft{The pattern holds on a current family, in a run filed before its data (P2-N, Qwen3.5-0.8B and
+-2B on CPU in float32). Norm (\pnSmallNorm{} and \pnTwoNorm{}), logit steering (\pnSmallLogit{} and
+\pnTwoLogit{}) and the \pyes{} shift (\pnSmallPyes{} and \pnTwoPyes{}) carry no signal, and
+distinctness again does (\pnSmallDist{} and \pnTwoDist{}; Table~\ref{tab:health}). Two of S-2's four
+filed predictions hold on Qwen3.5-2B under either gate, norm and the \pyes{} shift near 0.5 (on
+Qwen2.5 only norm held); distinctness is informative rather than near 0.5, and logit steering stays
+far below 0.8.}
+
 \draft{At the published operating point no check can be scored: with the steering gate rescored
 by whole words, 3 of the 30 released vectors are dead (freedom, joy and serenity). As filed, the
 gate counted 24 live, because a substring of the shared dose-0 story (``echoed'', ``crashing'',
@@ -305,11 +317,12 @@ Within one recipe and concrete concepts the check shows no detectable signal (po
 0.85), so the pooled inversion reflects differences between recipes and concept types; within a
 cell we detect none. A
 direct path from the vector to the answer tokens explains part of the shift ($\rho$ 0.26 and 0.29)
-but not the inversion.}
+but not the inversion. On Qwen3.5 the check is not inverted (\pnSmallPyes{} and \pnTwoPyes{}, both
+intervals including 0.5), so the inversion is a property of Qwen2.5, not of the check.}
 
 \subsection{Dose without a unit}
 \label{sec:dose}
-\draft{No dose scale we tested transfers. The same fraction of the residual norm gives next-token
+\draft{No dose scale we tested transfers across families. The same fraction of the residual norm gives next-token
 KL that differs about 25-fold between Qwen2.5-3B and -7B and about 480-fold between Qwen2.5-7B and
 Gemma-3-4B at a quarter of the norm, and about 4-fold across the three at the full norm
 (Table~\ref{tab:dose}, Figure~\ref{fig:dosefrac}). Calibrating the dose on random directions does
@@ -320,6 +333,16 @@ recipes across the three grid points; random directions were calibrated on the m
 introspective, neutral and story prompts, real vectors measured on the story prompt), while the released recipe on 27B
 stays within a factor of about 2.5 of norm-matched random vectors on the introspective prompt
 (random over real KL \ptwoIntroRatio{} at strengths 1, 2, 4 and 8).}
+
+\draft{Within one current family the fraction of the norm comes closer to a unit. We filed that
+Qwen3.5-0.8B and -2B would differ more than 2-fold at a quarter of the norm, as Qwen2.5-3B and -7B
+differ about 25-fold; they differ \pnFold{}-fold, so the prediction failed (P2-N, concept vectors,
+both framings of the forced prompts, Table~\ref{tab:dose}). We also filed that norm-matched random
+directions would move the next token more than concept vectors at half the norm; on Qwen3.5 they
+move it less (ratio \pnRandSmall{} and \pnRandTwo{}), as on Qwen2.5-7B (\pdRandSeven{}) and unlike
+Qwen2.5-3B (\pdRandThree{}), so whether a random control over- or under-doses real vectors depends on the
+model. A fraction of the norm transfers within this family and not across families or across
+Qwen2.5's sizes.}
 
 \draft{The prompt matters as much as the model. One vector at one strength gives 0.0006 to 12 nats
 depending on the prompt it is injected into (released vectors at strength 4: factual-\no{},
