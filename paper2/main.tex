@@ -574,6 +574,16 @@ vectors move the introspective answer in a way impact-matched controls do not, b
 to change it. That is a statement about the instrument, and it is the measurement any claim about
 introspection from this paradigm has to start from.}
 
+\section*{Broader impact statement}
+\draft{Claims that language models can introspect, and steering experiments run against evaluation
+awareness, are starting to inform how models are evaluated and trusted. This paper audits the
+instrument behind those claims, so its intended effect is that such claims are made with the
+controls they need. The main risk is misreading: the audit does not show that models cannot
+introspect, and it should not be cited as evidence about introspection either way. It uses
+publicly released model weights, involves no human subjects or personal data, and releases no
+model; the steering vectors it builds are for common concepts and carry no misuse value beyond
+the published recipe.}
+
 \bibliographystyle{plainnat}
 \bibliography{references}
 
@@ -657,8 +667,17 @@ steering arm.}}
 Qwen2.5-3B ran unquantised in float16, Gemma-3-4B unquantised in float32, and Qwen2.5-7B,
 Gemma-3-12B and Gemma-3-27B in 4-bit NF4 with float32 compute. Vectors are read and injected at 0.6
 of depth (layers 21 of 36, 17 of 28, 20 of 34 and 29 of 48), except on Gemma-3-27B, where we use the
-published layer 37 of 62. Every run's command, configuration, library versions and GPU are stored
-beside its rows; the run sheets and the scripts are released with the paper.}
+published layer 37 of 62. The Qwen3.5 runs (P2-N) and P2-H-1B ran on one laptop CPU (Intel Core
+i7-1255U, 12 logical cores, 16 GB of memory) in float32, at layer 14 of 24 for Qwen3.5; P2-N took
+9.8 CPU-hours for Qwen3.5-2B and 4.9 for Qwen3.5-0.8B. Qwen3.5-2B's float32 weights were loaded as a
+bfloat16 checkpoint cast to float32 with its float32 tensors restored, which equals a direct float32
+load exactly and halves the peak memory. Every run's command, configuration, library versions and
+hardware are stored beside its rows; the run sheets and the scripts are released with the paper.
+
+\paragraph{Licences.} Qwen2.5-7B and the Qwen3.5 models are released under Apache-2.0, Qwen2.5-3B
+under the Qwen Research License, the Gemma 3 models under the Gemma Terms of Use, and Llama-3.1-8B
+and Llama-3.2-1B under the Llama 3.1 and 3.2 Community Licenses; all permit this research use.
+We run the released code of \citet{macar2026mechanisms} as published.}
 
 \section{Threats to validity}
 \label{app:threats}
