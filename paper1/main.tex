@@ -335,6 +335,45 @@ secondary or exploratory.
 \section{Results}
 \label{sec:results}
 
+\subsection{The main comparison: one route, independent restarts, an untouched test set}
+\label{sec:eone}
+\draft{The comparison that answers the paper's question most directly was filed last, after an
+internal review identified four ways the earlier design could favour one check (E-1, filed before
+its data). It fits \eOneUnits{} GPT-2 layer-6 and \eOneNeoUnits{} GPT-Neo-125m layer-10 units that
+no earlier run had fitted, with the direct route only and five restarts that all start at random, so
+restart agreement and the fit it describes are the same estimate. Training stops on a validation
+split, and the fit check is $R^2$ on 4{,}000 tokens from documents the fit never saw, through a link
+fitted on the training rows. Failure is judged on the identifiable label (Section~\ref{sec:substrate}).
+On GPT-2, \eOneFail{} units fail; restart agreement predicts failure with AUC \eOneAucRestart{} and
+test $R^2$ with \eOneAucTest{}, a difference of \eOneDelta{} \eOneCI{} (DeLong $p$ \eOneP), so the
+filed prediction \eOneReading. On GPT-Neo (\eOneNeoFail{} failures) the difference is
+\eOneNeoDelta{} \eOneNeoCI{}, and the filed replication \eOneNeoReading. Of the failures on GPT-2,
+\eOneUf{} are under-fitted and \eOneCw{} converged-wrong (Table~\ref{tab:eone}).
+Applied without change to these new units, the practitioner rule of Section~\ref{sec:discussion}
+certifies \eOneRuleCorrect{} correct directions at validation $R^2 \geq 0.995$ against
+\eOneRuleRestartCorrect{} at restart agreement $\geq 0.97$, with \eOneRuleFcr{} and
+\eOneRuleRestartFcr{} of accepted fits wrong (difference \eOneRuleFcrCI); its filed prediction
+\eOneRuleHolds. The sections below analyse the earlier arms, which share E-1's estimator but not
+its safeguards.}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrcccl}
+\toprule
+arm & units & failures & AUC restart & AUC test $R^2$ & $\Delta$ [95\% CI] & reading \\
+\midrule
+GPT-2 small, layer 6 & \eOneUnits & \eOneFail & \eOneAucRestart & \eOneAucTest & \eOneDelta{} \eOneCI & \eOneReading \\
+GPT-Neo-125m, layer 10 & \eOneNeoUnits & \eOneNeoFail & \eOneNeoAucRestart & \eOneNeoAucTest & \eOneNeoDelta{} \eOneNeoCI & \eOneNeoReading \\
+\bottomrule
+\end{tabular}
+\caption{\draft{E-1: restart agreement against test $R^2$ on one estimator route, five independent
+restarts, a test set of unseen documents and the identifiable label. $\Delta$ is AUC(restart
+agreement) minus AUC(test $R^2$); the interval is the stratified bootstrap. On the Euclidean label
+the GPT-2 difference is \eOneEucDelta{} \eOneEucCI.}}
+\label{tab:eone}
+\end{table}
+
 \subsection{The estimator fails on a minority of units}
 Of 300 GPT-2 layer-6 units, 254 pass (0.847, 95\% CI $[0.80, 0.88]$) and 46 fail. The median
 alignment across all units is 0.994 and the minimum 0.047, so aggregate statistics hide the
