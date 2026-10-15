@@ -16,6 +16,19 @@ marked as redacted; nothing else is changed.
 - `tests/`: identity and regression tests (`python -m pytest tests`).
 - `results/corpus_cache/`: the public-domain Project Gutenberg texts used as stimulus.
 
+## Scoring your own estimator or check (OXIDE)
+
+```
+PYTHONPATH=. python -m caliper.oxide --model gpt2 --layer 6 --directions mine.npz --checks mine.csv --out report.json
+```
+
+`mine.npz` holds `units` (MLP unit ids) and `directions` (one recovered direction per unit, in the
+coordinates of the layer norm feeding the MLP). `mine.csv` is optional: a `unit` column and one column
+per check, higher meaning more trusted. The report gives each unit's Euclidean and identifiable
+alignment with its weight column (the identifiable one removes the layer norm's null direction
+1/gamma, which no data can determine), the failures at alignment below 0.95, and each check's AUC at
+predicting failure with a stratified bootstrap interval. Nothing is fitted.
+
 ## Reproducing the main tables
 
 ```
