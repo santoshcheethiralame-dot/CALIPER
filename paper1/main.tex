@@ -34,42 +34,67 @@
 \maketitle
 
 \begin{abstract}
-Interpretability methods are usually trusted on the strength of checks that need no ground
-truth: an estimate is believed if independent restarts agree on it, if two methods agree,
-or if it fits held-out data. None of these checks has itself been calibrated against a
-known answer, because the known answer is exactly what is missing. We point out one place
-where it is not missing. The pre-activation of an MLP neuron is exactly the inner product of
-its layer's normalised residual stream with the neuron's input weight column, so the
-direction the neuron reads is written in the weights. Using this as a reference standard, we
-score a single-index estimator related to maximally informative dimensions, and the checks
-used to vouch for it, on 300 units of GPT-2 small, with replications across depth and model
-family. \draft{The setting is narrow by design: MLP units of small LayerNorm language models,
-one estimator family, noiseless responses and an 8,000-token stimulus.} The estimator misses
-the reference direction on 15\% of units. Held-out fit predicts these failures better than
-agreement across restarts: AUC 0.92 against 0.79 ($p = 1.8\times10^{-4}$). Pooled over six
-conditions that share no units, the difference (restart agreement minus held-out fit) is
-$-0.134$ AUC, 95\% CI $[-0.189,-0.078]$. \draft{A pre-registered replication on 200 GPT-2 units never fitted before
-gives \dOneDelta{} \dOneCI{} on the label that removes the layer norm's null direction
-(\dOneEucDelta{} on the filed label), and a pre-registered sweep from 2,000 to 16,000 tokens finds
-the lead on that label at every budget ($-0.17$ to $-0.26$), with no change detected between
-8,000 and 16,000. On the filed label the lead shrinks as the budget grows, because the failures
-that remain lie along the null direction. On 100 new GPT-Neo units the gap is smaller: $-0.035$,
-and $-0.097$ when the same units are fitted on disjoint documents (exploratory).} Held-out fit's
-advantage comes from under-fitted estimates. On the third of the failures (16 of 46) that fit as
-well as the reference but point elsewhere, neither check is reliable.
-\draft{Most of these fits differ from the reference along one direction that no data can reveal:
-the layer norm feeding the unit gives every token the same projection onto $1/\gamma$. Removing
-that direction, which is read from the model's own weights, from fit and reference (a label we
-pre-registered) cuts the converged-wrong class from 2 to 20 fits per arm to 0 to 6 and widens
-held-out fit's lead in \lnWiden{} of the \lnScorable{} arms where it can be computed; it is unchanged in \lnSame{} and
-narrower in \lnNarrow. The rest lie in directions the stimulus samples poorly: a regression that is
-told the nonlinearity recovers every such unit that has enough informative tokens.} Restart
-agreement does not get better with more restarts, or when it is measured in the metric of the
-stimulus. Single-unit verdicts are fragile: \draft{one in five flips when the fit seed, the token
-sample or the held-out split changes, and about as many flip when only the estimator's initial
-draw changes. Our main responses are noiseless. When we add noise that makes the best attainable
-fit differ between units, held-out fit still leads, mostly because it tracks the noise level
-itself.} We release \benchname{}, the pre-registrations and every run.
+\draft{Interpretability results are often vouched for by checks that need no ground truth, such as
+agreement across restarts or fit on held-out data. That agreement can be high for a wrong answer is
+known in principle; how often it happens on real models, and why, has not been measured, because the
+right answer is usually missing. We release \benchname{}, a calibration bench built on one place where
+it is not missing: an MLP neuron's pre-activation is the inner product of its layer-norm output with
+the neuron's input weight column, so the direction the neuron reads is written in the weights.
+Scoring a single-index direction estimator and its checks against this reference on GPT-2, GPT-Neo
+and Pythia, we find a failure mode created by a common preprocessing step. The layer norm gives every
+token the same projection onto $1/\gamma$, so a fit's component along it is invisible to the data;
+per-coordinate standardisation magnifies that component and every restart reproduces it, so restart
+agreement certifies wrong directions. On one GPT-Neo layer all 20 units fail, at a median alignment of
+0.01, while their restarts agree at 1.0. A pre-registered test predicted the same failure at GPT-2
+layer 3 from the weights alone (0 of 20 units pass) and its fix. In the main comparison, filed before
+its data (one estimator route, five independent restarts and a test set of unseen documents), restart
+agreement predicts failure with AUC \eOneAucRestart{} and test fit with \eOneAucTest{} on
+\eOneUnits{} GPT-2 units (difference \eOneDelta{} \eOneCI); six earlier conditions pooled give
+$-0.134$, 95\% CI $[-0.189,-0.078]$. Held-out fit's advantage comes from under-fitted estimates. Fits
+that predict the response as well as the reference but point elsewhere escape both checks, and
+differ from the reference only where the stimulus barely varies. Applied to new units, a simple rule
+(remove the null direction, then accept fits with validation $R^2 \geq 0.995$) certifies
+\eOneRuleCorrect{} correct directions against \eOneRuleRestartCorrect{} for restart agreement. The
+setting is narrow by design: MLP units of small LayerNorm models, noiseless responses and fixed
+stimuli. We release the bench, every pre-registration and every run.}
+%
+% Previous abstract (15 Oct), kept for comparison:
+% Interpretability methods are usually trusted on the strength of checks that need no ground
+% truth: an estimate is believed if independent restarts agree on it, if two methods agree,
+% or if it fits held-out data. None of these checks has itself been calibrated against a
+% known answer, because the known answer is exactly what is missing. We point out one place
+% where it is not missing. The pre-activation of an MLP neuron is exactly the inner product of
+% its layer's normalised residual stream with the neuron's input weight column, so the
+% direction the neuron reads is written in the weights. Using this as a reference standard, we
+% score a single-index estimator related to maximally informative dimensions, and the checks
+% used to vouch for it, on 300 units of GPT-2 small, with replications across depth and model
+% family. \draft{The setting is narrow by design: MLP units of small LayerNorm language models,
+% one estimator family, noiseless responses and an 8,000-token stimulus.} The estimator misses
+% the reference direction on 15\% of units. Held-out fit predicts these failures better than
+% agreement across restarts: AUC 0.92 against 0.79 ($p = 1.8\times10^{-4}$). Pooled over six
+% conditions that share no units, the difference (restart agreement minus held-out fit) is
+% $-0.134$ AUC, 95\% CI $[-0.189,-0.078]$. \draft{A pre-registered replication on 200 GPT-2 units never fitted before
+% gives \dOneDelta{} \dOneCI{} on the label that removes the layer norm's null direction
+% (\dOneEucDelta{} on the filed label), and a pre-registered sweep from 2,000 to 16,000 tokens finds
+% the lead on that label at every budget ($-0.17$ to $-0.26$), with no change detected between
+% 8,000 and 16,000. On the filed label the lead shrinks as the budget grows, because the failures
+% that remain lie along the null direction. On 100 new GPT-Neo units the gap is smaller: $-0.035$,
+% and $-0.097$ when the same units are fitted on disjoint documents (exploratory).} Held-out fit's
+% advantage comes from under-fitted estimates. On the third of the failures (16 of 46) that fit as
+% well as the reference but point elsewhere, neither check is reliable.
+% \draft{Most of these fits differ from the reference along one direction that no data can reveal:
+% the layer norm feeding the unit gives every token the same projection onto $1/\gamma$. Removing
+% that direction, which is read from the model's own weights, from fit and reference (a label we
+% pre-registered) cuts the converged-wrong class from 2 to 20 fits per arm to 0 to 6 and widens
+% held-out fit's lead in \lnWiden{} of the \lnScorable{} arms where it can be computed; it is unchanged in \lnSame{} and
+% narrower in \lnNarrow. The rest lie in directions the stimulus samples poorly: a regression that is
+% told the nonlinearity recovers every such unit that has enough informative tokens.} Restart
+% agreement does not get better with more restarts, or when it is measured in the metric of the
+% stimulus. Single-unit verdicts are fragile: \draft{one in five flips when the fit seed, the token
+% sample or the held-out split changes, and about as many flip when only the estimator's initial
+% draw changes. Our main responses are noiseless. When we add noise that makes the best attainable
+% fit differ between units, held-out fit still leads, mostly because it tracks the noise level
+% itself.} We release \benchname{}, the pre-registrations and every run.
 \end{abstract}
 
 % ======================================================================
@@ -112,7 +137,9 @@ read off the weights (Section~\ref{sec:substrate}). Any method that claims to re
 unit responds to from stimulus and response alone can be scored against it, on units shaped
 by training rather than built by hand, in unlimited supply.
 
-We use it to ask a narrow question with a broad reach: \emph{when a direction-recovery
+\draft{That agreement need not mean correctness is known in principle
+\citep{nehzati2026restarts,paulo2025sparse}; what has been missing is how often it fails on real
+models, why, and what to do instead.} We use it to ask a narrow question with a broad reach: \emph{when a direction-recovery
 estimator fails, which of the checks available without ground truth notices?} Our
 contributions are:
 \begin{enumerate}
@@ -122,30 +149,29 @@ contributions are:
   \citep{sharpee2004mid,williamson2015equivalence}, four reliability checks that need no ground
   truth, and a pre-registered protocol that scores each check by how well it predicts failure
   (Appendix~\ref{app:bench}).
-  \item \textbf{Restart agreement is the weaker check.} Held-out fit has the higher AUC in all
-  six pooled conditions, with an interval that excludes zero in four, and the pooled gap is 0.13
-  AUC (95\% CI $[0.08, 0.19]$). \draft{The lead grows
-  when each check is scored on its own estimation route and replicates on 200 GPT-2 units never
-  fitted before (pre-registered, \dOneDelta{}) and holds at every budget of a pre-registered token
-  sweep on the same label; it is smaller on new GPT-Neo units, and in two small unpooled arms
-  restart agreement leads} (Section~\ref{sec:results};
-  every run is listed in Appendix~\ref{app:arms}).
-  \item \textbf{The hard case is mostly one exact null direction.} Neither check detects fits
-  that converge to a direction other than the reference. \draft{Most of them differ from it
-  along $1/\gamma$ of the layer norm feeding the unit, a direction along which the stimulus never
-  varies, a known algebraic fact \citep{shirodkar2026dead}. What is new is its effect on direction
-  estimators and their checks: per-coordinate standardisation magnifies the fit's arbitrary
-  component along it, and restart agreement certifies that component. Removing it from the fit,
-  using public weights (as TransformerLens and \citet{gurnee2024universal} do when they centre
-  reading weights), recovers most of them. The small remainder lies in
-  poorly sampled directions and is identifiable in principle: a regression told the
-  nonlinearity recovers it (Section~\ref{sec:identifiability}, Table~\ref{tab:lnnull}).}
-  \item \textbf{More restarts are not a remedy.} Restart agreement does not improve as
-  restarts are added, and about a quarter of units are not recovered by the direct route
-  within four random restarts (Section~\ref{sec:restarts}).
-  \item \textbf{An error budget.} Verdicts move with restart count, token sample, held-out
-  split and hardware; failure rates move with depth and model family. We report each
-  component, so that a single quoted failure rate carries its conditions.
+  \item \draft{\textbf{A failure mode made by preprocessing, predicted from the weights.} That
+  $1/\gamma$ of a layer norm is an exact null direction of its output is known
+  \citep{shirodkar2026dead}. What is new is its effect on direction estimators: per-coordinate
+  standardisation magnifies a fit's arbitrary component along it, and restart agreement certifies
+  that component. The near-zero gains that cause it can be read from public weights, and a
+  pre-registered test predicted both the failure at an unseen layer and its fix
+  (Section~\ref{sec:identifiability}, Table~\ref{tab:lnnull}).}
+  \item \draft{\textbf{Restart agreement is the weaker check, in a comparison built to be fair.}
+  With one estimator route, five independent restarts, a test set of unseen documents and the
+  identifiable label, filed before its data, the difference is \eOneDelta{} \eOneCI{} on GPT-2 and
+  \eOneNeoDelta{} \eOneNeoCI{} on GPT-Neo (Section~\ref{sec:eone}). Six earlier conditions agree in
+  sign (pooled $-0.134$, 95\% CI $[-0.189, -0.078]$); held-out fit's lead comes from under-fitted
+  estimates, and fits that are wrong but fit well escape both checks (Section~\ref{sec:results};
+  every run is listed in Appendix~\ref{app:arms}).}
+  \item \draft{\textbf{A rule that transfers.} Removing the null direction and then thresholding
+  validation fit certifies about twice as many correct directions as restart agreement on the
+  arms where it was found, and \eOneRuleCorrect{} against \eOneRuleRestartCorrect{} on E-1's new
+  units, where it was filed in advance (Section~\ref{sec:discussion}).}
+  \item \textbf{Limits and an error budget.} Restart agreement does not improve as restarts are
+  added, and about a quarter of units are not recovered by the direct route within four random
+  restarts (Section~\ref{sec:restarts}). Verdicts move with restart count, token sample, held-out
+  split and hardware, and failure rates with depth and model family; we report each component, so
+  that a single quoted failure rate carries its conditions.
 \end{enumerate}
 We do not claim that models resemble brains. We claim that interpretability and systems
 neuroscience share a measurement problem, and that the discipline neuroscience built for it,
