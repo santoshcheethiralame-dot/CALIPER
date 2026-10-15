@@ -1,7 +1,7 @@
 # Gate F-A: decision memo (prepared 15 Oct 2026; gate date 15 Dec)
 
-**Decision needed from:** the author (with the mentor if wanted). This memo sets out the evidence
-and a recommendation; nothing in the plan changes until the decision is recorded.
+**Decided 15 Oct 2026 by the author: option 1, partial pass.** Recorded in `flagship-plan.md` (§4 claim
+and §7 Gates).
 
 ## The gate as filed
 

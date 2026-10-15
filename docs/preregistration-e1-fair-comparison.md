@@ -87,7 +87,21 @@ for 150 steps with three restarts (output not kept).
 Local CPU queue 16, after queue 15. Expected 8 to 12 hours for both arms (to be reported from the
 run's `seconds_per_unit`).
 
+## Amendment 1 (15 October 2026, before any E-1 row): a code-text arm
+
+**Arm.** 100 of the 200 GPT-2 layer-6 units (`default_rng(20261017).choice` from that list, written to
+`results/e1_units.json` as `gpt2_l6_code`), fitted exactly as above on Python source code instead of
+prose: the non-test `.py` files of the installed Python 3.12.10 standard library (676 files, PSF
+licence, no download), in a seeded order whose first 300 files are the training draw and the rest the
+test pool, so training and test never share a file. The run's summary records the file order.
+
+**P5 (secondary).** On this arm, $\Delta$ = AUC(restart agreement) $-$ AUC(test $R^2$) is negative,
+with the same readings as P1. Because the units are shared with the prose arm, the domain is the only
+thing that changes; their verdicts on prose and on code are reported side by side (descriptive). The
+code arm is not pooled into P3.
+
+**Order.** The code arm runs after both prose arms in queue 16.
+
 ## Not in E-1
 
-A second text domain (a code corpus needs a download the laptop's cached corpus does not cover) and a
-second estimator family, both proposed in the same review, are left for a later filing.
+A second estimator family, proposed in the same review, is left for a later filing.

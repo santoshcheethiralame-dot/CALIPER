@@ -42,16 +42,37 @@ ap.add_argument("--restarts", type=int, default=5)
 ap.add_argument("--steps", type=int, default=1600)
 ap.add_argument("--batch", type=int, default=32)
 ap.add_argument("--bins", type=int, default=60)
+ap.add_argument("--corpus", choices=("gutenberg", "python-stdlib"), default="gutenberg",
+                help="python-stdlib: the installed Python standard library's non-test .py files (E-1 Amendment 1)")
 ap.add_argument("--out", required=True)
 a = ap.parse_args()
+
+
+def stdlib_docs():
+    """Every non-test .py file of the installed standard library, in a seeded order. The first 300 are
+    the training draw and the rest the test pool, so the two never share a file."""
+    import glob
+    import os
+    import sysconfig
+    lib = sysconfig.get_paths()["stdlib"]
+    files = sorted(os.path.relpath(f, lib).replace("\\", "/")
+                   for f in glob.glob(os.path.join(lib, "**", "*.py"), recursive=True)
+                   if "test" not in f.lower() and "site-packages" not in f)
+    order = np.random.default_rng(0).permutation(len(files))
+    texts = [open(os.path.join(lib, files[i]), encoding="utf-8", errors="replace").read() for i in order]
+    return texts[:300], texts[300:], [files[i] for i in order]
 
 TEST_FRAC = 0.2
 t0 = time.time()
 units = np.array([int(u) for u in a.units.split(",")])
 model, tok = load_model(a.model, dtype=torch.float32)
-train_docs = sample_corpus(n_docs=300, seed=0)
-seen = set(train_docs)
-test_docs = [t for t in sample_corpus(n_docs=300, seed=1) if t not in seen]
+if a.corpus == "python-stdlib":
+    train_docs, test_docs, file_order = stdlib_docs()
+else:
+    train_docs = sample_corpus(n_docs=300, seed=0)
+    seen = set(train_docs)
+    test_docs = [t for t in sample_corpus(n_docs=300, seed=1) if t not in seen]
+    file_order = None
 p = collect(model, tok, train_docs, layer=a.layer, neurons=units, max_tokens=a.tokens, seed=0,
             shuffle="token")
 q = collect(model, tok, test_docs, layer=a.layer, neurons=units, max_tokens=a.test_tokens, seed=0,
@@ -113,7 +134,9 @@ for start in range(0, len(todo), a.batch):
     el = time.time() - t0
     print(f"  {len(ck.rows())}/{int(alive.sum())} units  {el:.0f}s ({el / max(len(ck.rows()), 1):.1f}s each)",
           flush=True)
-json.dump({"model": a.model, "layer": a.layer, "units": len(units), "rows": len(ck.rows()),
+import platform  # noqa: E402
+json.dump({"model": a.model, "layer": a.layer, "corpus": a.corpus, "python": platform.python_version(),
+           "corpus_files": file_order, "units": len(units), "rows": len(ck.rows()),
            "restarts": a.restarts, "steps": a.steps, "tokens": a.tokens, "test_tokens": a.test_tokens,
            "test_docs": len(test_docs), "seconds_per_unit": round((time.time() - t0) / max(len(ck.rows()), 1), 1),
            "torch_threads": torch.get_num_threads()},

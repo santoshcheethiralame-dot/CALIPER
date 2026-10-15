@@ -95,7 +95,7 @@ fallback, every paper on arXiv. Nothing is ever under review at two venues at on
 |---|---|---|---|---|
 | **Paper 1** (L1) | Restart agreement is a weaker check than held-out fit; the hard case is identifiability | **TMLR** + arXiv | JMLR if TMLR does not count for the university | **by 20 Nov 2026** |
 | **Paper 2** (L3) | The checks used to trust concept-injection results fail: dead vectors, an inverted P(YES) check, a dose that does not transfer | **TACL** (Q1 journal; accepted papers are presented at ACL, EMNLP or NAACL) | TMLR | when Gate P2 passes (§4b); monthly submission |
-| **Flagship** (L1 broad + L2 exact) | Stability checks are blind to sampling error; data-resampling and geometric checks see it; interventional data repairs it. Shown on six weight-derived substrates and the methods people use | **NeurIPS 2027 main track** (A\*); Evaluations & Datasets track as second choice | JMLR or TMLR | May 2027 |
+| **Flagship** (L1 broad + L2 exact) | Stability checks are blind to sampling error; data-resampling and geometric checks see it; extra off-manifold data repairs it, targeted or not (Gate F-A, 15 Oct). Shown on six weight-derived substrates and the methods people use | **NeurIPS 2027 main track** (A\*); Evaluations & Datasets track as second choice | JMLR or TMLR | May 2027 |
 | **Paper 3** (L2, L3 planted) | Trait- and self-level instruments calibrated with the flagship's checks | **ICLR 2028** (A\*) | JMLR or TMLR | Sep 2027 |
 
 Open with the university before any submission: which index defines Q1 (Scopus/SJR, Web of
@@ -290,7 +290,8 @@ not canonical; ABS) is the motivating prior. Decide at Gate F-B whether it enter
 
 ### Gates
 
-- **F-A, 15 Dec.** F-1 result. Pass: targeted interventions recover >= 80% of converged-wrong
+- **F-A, decided 15 Oct (early): partial pass** (`docs/gate-fa-memo.md`). F-1b repairs 17 of 17 converged-wrong units against 8 for re-fitting alone (p = 0.002) and breaks no passing unit, but targeted does not beat natural tokens (5 vs 0 discordant, p = 0.0625) and random augmentation repairs 16 of 17. The flagship keeps the remedy as "extra off-manifold data repairs the hard case; targeting adds nothing measurable", leads with detection, and December's compute goes to F-4 and F-2. Powering targeted against natural (F-1c, 30-50 CPU-hours) is a January candidate only if the draft needs it.
+- **F-A, as first written (15 Dec).** F-1 result. Pass: targeted interventions recover >= 80% of converged-wrong
   fits and beat natural tokens. Fail: the flagship leads with detection (findings 5-7, F-10),
   and the remedy is reported as tested and negative.
 - **F-B, 31 Jan.** At least three new substrates reach a 20-80% failure rate with the

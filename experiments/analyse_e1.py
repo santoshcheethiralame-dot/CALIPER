@@ -21,7 +21,10 @@ import analyse_ln_null as ln  # noqa: E402
 
 PASS, CW, MIN_FAIL = 0.95, 0.99, 10
 ARMS = {"gpt2_l6": ("results/e1_gpt2_l6", "gpt2", 6, 200),
-        "gptneo_l10": ("results/e1_gptneo_l10", "EleutherAI/gpt-neo-125M", 10, 100)}
+        "gptneo_l10": ("results/e1_gptneo_l10", "EleutherAI/gpt-neo-125M", 10, 100),
+        # Amendment 1: the same GPT-2 units (100 of the 200) on Python source code. Not in P3's pool.
+        "gpt2_l6_code": ("results/e1_gpt2_l6_code", "gpt2", 6, 100)}
+POOLED = ("gpt2_l6", "gptneo_l10")
 RULE = {"r2": 0.995, "restart_agreement": 0.97}
 
 
@@ -136,8 +139,19 @@ def main():
         if len(load(stem)) < n_units:
             raise SystemExit(f"{name}: {len(load(stem))} of {n_units} rows; score only once all rows exist")
         rep[name], rows = score_arm(stem, model, layer)
-        pooled += rows
+        if name in POOLED:
+            pooled += rows
+        else:
+            code_rows = rows
     rep["practitioner_rule"] = practitioner_rule(pooled)
+    # Amendment 1, descriptive: the same units' verdicts on prose and on code.
+    prose = {r["_key"]: r for r in score_arm(*ARMS["gpt2_l6"][:3])[1]}
+    paired = [(prose[r["_key"]]["align_ident"] >= PASS, r["align_ident"] >= PASS) for r in code_rows if r["_key"] in prose]
+    rep["code_vs_prose_same_units"] = {"units": len(paired),
+                                       "pass_prose": int(sum(p for p, _ in paired)),
+                                       "pass_code": int(sum(c for _, c in paired)),
+                                       "pass_prose_fail_code": int(sum(p and not c for p, c in paired)),
+                                       "fail_prose_pass_code": int(sum(c and not p for p, c in paired))}
     json.dump(rep, open(ROOT / "results/e1_analysis.json", "w"), indent=1, default=float)
     for name in ARMS:
         c = rep[name]["primary"]
