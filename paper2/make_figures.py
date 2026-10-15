@@ -67,6 +67,14 @@ def panel(ax, letter, text=None):
         ax.text(0.02, 1.05, text, transform=ax.transAxes, fontsize=7.5, color=INK2, va="bottom")
 
 
+MODEL_ORDER = ["Qwen2.5-3B", "Qwen2.5-7B", "Gemma-3-4B", "Gemma-3-12B", "Qwen3.5-0.8B", "Qwen3.5-2B"]
+
+
+def slot(name):
+    """One colour and marker per model in every figure, whatever else a figure shows."""
+    return next(i for i, m in enumerate(MODEL_ORDER) if name.startswith(m))
+
+
 def label_at(ax, x, y, text, dx=4, dy=0, ha="left", color=INK, size=7.2):
     ax.annotate(text, (x, y), xytext=(dx, dy), textcoords="offset points", va="center",
                 ha=ha, fontsize=size, color=color)
@@ -82,28 +90,41 @@ def fig_health_auc():
              "logit-lens accessibility"]
     lap = load("results/p2l_logit_lens_health.json")
     sens = load("results/p2_rule_sensitivity.json")  # holds the Gemma-12B intervals
-    fig, ax = plt.subplots(figsize=(WIDTH, 2.9))
+    p2n = os.path.join(ROOT, "results/p2n_analysis.json")
+    if os.path.exists(p2n):  # P2-N, filed substring label as in tab_health; no logit-lens check was run
+        runs += [("Qwen3.5-0.8B", "p2n:qwen35_08b", None), ("Qwen3.5-2B", "p2n:qwen35_2b", None)]
+    n_runs = len(runs)
+    step = 0.76 / n_runs
+    fig, ax = plt.subplots(figsize=(WIDTH, 3.4 if n_runs > 4 else 2.9))
     ax.axvspan(0, 0.5, color=SHADE, lw=0, zorder=0)
     ax.axvline(0.5, color=INK3, lw=0.6, ls=(0, (1, 2)))
     for j in range(len(stats) - 1):
         ax.axhline(j + 0.5, color=GRID, lw=0.5, zorder=1)
     for i, (name, path, key) in enumerate(runs):
-        a = load(path)
-        if "cells" in a:
+        if path.startswith("p2n:"):
+            a = load("results/p2n_analysis.json")[path[4:]]["filed_substring_label"]
+            auc, live, total = dict(a["auc"]), a["live"], a["vectors"]
+        else:
+            a = load(path)
+        if path.startswith("p2n:"):
+            pass
+        elif "cells" in a:
             auc = dict(sens["S-1 Gemma-3-12B, 4-bit"]["filed"]["auc"])
             gate = a["cells"]["4bit"]["pass_rate"]["0.5 nat (gate)"]
             live, total = sum(n for n, _ in gate.values()), sum(m for _, m in gate.values())
         else:
             auc, live, total = dict(a["auc"]), a["live"], a["vectors"]
-        auc["logit-lens accessibility"] = {"auc": lap[key]["auc"], "ci95": lap[key]["ci95"]}
+        if key is not None:
+            auc["logit-lens accessibility"] = {"auc": lap[key]["auc"], "ci95": lap[key]["ci95"]}
         first = True
         for j, s_ in enumerate(stats):
             if s_ not in auc:
                 continue
             v = auc[s_]
-            yy = j + (i - 1.5) * 0.19
-            ax.plot(v["ci95"], [yy, yy], color=SLOT[i], lw=1.3, solid_capstyle="round", zorder=2)
-            ax.plot(v["auc"], yy, marker=MARK[i], color=SLOT[i], ms=4.6, mec="white", mew=0.7,
+            yy = j + (i - (n_runs - 1) / 2) * step
+            c = slot(name)
+            ax.plot(v["ci95"], [yy, yy], color=SLOT[c], lw=1.3, solid_capstyle="round", zorder=2)
+            ax.plot(v["auc"], yy, marker=MARK[c], color=SLOT[c], ms=4.6, mec="white", mew=0.7,
                     ls="none", zorder=3, label=f"{name}  ({live} live of {total})" if first else None)
             first = False
     ax.set_yticks(range(len(stats)), stats)
@@ -126,20 +147,32 @@ def fig_dose():
     d = load("results/p2d_dose_transfer.json")
     fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.45), gridspec_kw={"wspace": 0.42})
     ax = axes[0]
-    for i, (name, pts) in enumerate(d["transfer_at_same_fraction"].items()):
-        x = [p["fraction"] for p in pts if p["fraction"] > 0]
-        y = [p["median_kl"] for p in pts if p["fraction"] > 0]
-        ax.plot(x, y, color=SLOT[i], lw=1.5, marker=MARK[i], ms=4.6, mec="white", mew=0.7)
-        label_at(ax, x[0], y[0], name, dx=-6, ha="right")
+    curves = [(name, [p["fraction"] for p in pts if p["fraction"] > 0],
+               [p["median_kl"] for p in pts if p["fraction"] > 0])
+              for name, pts in d["transfer_at_same_fraction"].items()]
+    if os.path.exists(os.path.join(ROOT, "results/p2n_analysis.json")):
+        n = load("results/p2n_analysis.json")
+        for name, key in (("Qwen3.5-0.8B", "qwen35_08b"), ("Qwen3.5-2B", "qwen35_2b")):
+            kl = n[key]["median_kl"]["concept"]  # same measure as P2-D's rows
+            curves.append((name, [0.25, 0.5, 1.0], [kl["0.25"], kl["0.5"], kl["1"]]))
+    for i, (name, x, y) in enumerate(curves):
+        ax.plot(x, y, color=SLOT[slot(name)], lw=1.5, marker=MARK[slot(name)], ms=4.6, mec="white", mew=0.7)
+    # Labels at the 0.25 end, nudged apart by at least 0.3 decades so close curves stay readable.
+    order = sorted(range(len(curves)), key=lambda k: curves[k][2][0])
+    pos = np.log10([curves[k][2][0] for k in order])
+    for a_ in range(1, len(pos)):
+        pos[a_] = max(pos[a_], pos[a_ - 1] + 0.3)
+    for k, p in zip(order, pos):
+        label_at(ax, curves[k][1][0], 10 ** p, curves[k][0], dx=-6, ha="right", color=SLOT[slot(curves[k][0])])
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xticks([0.25, 0.5, 1.0], ["0.25", "0.5", "1"])
     ax.minorticks_off()
-    ax.set_xlim(0.06, 1.3)
+    ax.set_xlim(0.03, 1.3)
     ax.yaxis.grid(True)
     ax.set_xlabel("dose, fraction of the residual norm")
     ax.set_ylabel("median next-token KL (nats)")
-    panel(ax, "a", "same fraction, three models")
+    panel(ax, "a", f"same fraction, {len(curves)} models")
 
     ax = axes[1]
     rows = d["real_vs_random_on_kl_grid"]

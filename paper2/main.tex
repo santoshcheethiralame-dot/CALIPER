@@ -300,7 +300,8 @@ read as direction, not as tests). Exploratory.}}
 \centering
 \includegraphics[width=\textwidth]{fig_health_auc}
 \caption{\draft{Health-check AUCs by model, pooled across recipes, with 95\% intervals; 0.5 is
-chance. Table~\ref{tab:cells} shows what is left within one recipe and concept type.}}
+chance. Qwen3.5 (P2-N) has no logit-lens interval because that check was not run on it.
+Table~\ref{tab:cells} shows what is left within one recipe and concept type.}}
 \label{fig:health}
 \end{figure*}
 
@@ -364,7 +365,8 @@ each target.}}
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_dose}
-\caption{\draft{(a) One fraction of the residual norm, three models. (b) The KL-calibrated grid
+\caption{\draft{(a) One fraction of the residual norm, five models: concept vectors, median
+next-token KL over both framings of the forced prompts (Qwen3.5 from P2-N). (b) The KL-calibrated grid
 on Gemma-3-4B: real and on-manifold (span) vectors against off-manifold ones (random,
 shuffled); the dashed line is the calibration target.}}
 \label{fig:dosefrac}
