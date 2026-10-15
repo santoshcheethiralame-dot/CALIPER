@@ -1,0 +1,98 @@
+{
+ "qwen35_2b, filed substring label": {
+  "vectors": 90,
+  "live": 28,
+  "scored": true,
+  "auc": 0.6157834101382489,
+  "ci95": [
+   0.5028657834101383,
+   0.7258208525345622
+  ],
+  "auc_logit_steering": 0.5345622119815668,
+  "diff_vs_logit_steering_ci95": [
+   -0.02536002304147471,
+   0.18549827188940085
+  ],
+  "within_arm_auc": {
+   "concept token": 0.465,
+   "sentence mean": 0.4722222222222222,
+   "template tail": 0.8263888888888888
+  },
+  "median_z_live_dead": [
+   2.021246314048767,
+   1.6891568899154663
+  ]
+ },
+ "qwen35_2b, strict gate": {
+  "vectors": 90,
+  "live": 27,
+  "scored": true,
+  "auc": 0.5955320399764844,
+  "ci95": [
+   0.4773662551440329,
+   0.7095825984714874
+  ],
+  "auc_logit_steering": 0.5132275132275133,
+  "diff_vs_logit_steering_ci95": [
+   -0.03057025279247505,
+   0.18522927689594337
+  ],
+  "within_arm_auc": {
+   "concept token": 0.465,
+   "sentence mean": 0.4722222222222222,
+   "template tail": 0.76
+  },
+  "median_z_live_dead": [
+   2.0129146575927734,
+   1.7682030200958252
+  ]
+ },
+ "qwen35_08b, filed substring label": {
+  "vectors": 90,
+  "live": 30,
+  "scored": true,
+  "auc": 0.555,
+  "ci95": [
+   0.42441666666666666,
+   0.687236111111111
+  ],
+  "auc_logit_steering": 0.47,
+  "diff_vs_logit_steering_ci95": [
+   -0.04002777777777781,
+   0.21002777777777765
+  ],
+  "within_arm_auc": {
+   "concept token": 0.4074074074074074,
+   "sentence mean": 0.37962962962962965,
+   "template tail": 0.9236111111111112
+  },
+  "median_z_live_dead": [
+   2.0539751052856445,
+   1.8342841863632202
+  ]
+ },
+ "qwen35_08b, strict gate": {
+  "vectors": 90,
+  "live": 33,
+  "scored": true,
+  "auc": 0.5454545454545454,
+  "ci95": [
+   0.4242025518341308,
+   0.6709330143540669
+  ],
+  "auc_logit_steering": 0.5289739500265817,
+  "diff_vs_logit_steering_ci95": [
+   -0.10579479000531633,
+   0.14356725146198818
+  ],
+  "within_arm_auc": {
+   "concept token": 0.3936651583710407,
+   "sentence mean": 0.39285714285714285,
+   "template tail": 0.8888888888888888
+  },
+  "median_z_live_dead": [
+   1.94746732711792,
+   1.8262542486190796
+  ]
+ }
+}

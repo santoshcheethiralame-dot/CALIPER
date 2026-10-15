@@ -78,8 +78,11 @@ def tab_health():
     for name, v in p2n()[1]:
         a = v["filed_substring_label"]
         if a.get("scored"):
+            ll = load("results/p2n_logit_lens.json") if os.path.exists(os.path.join(ROOT, "results/p2n_logit_lens.json")) else {}
+            key = {"Qwen3.5-2B": "qwen35_2b", "Qwen3.5-0.8B": "qwen35_08b"}[name] + ", filed substring label"
+            lcell = fmt(ll[key]) if key in ll and "ci95" in ll[key] else "---"
             lines.append(f"{name} ({a['live']}/{a['vectors']}) & " + " & ".join(fmt(a["auc"][c]) for c in checks) +
-                         " & --- \\\\")
+                         f" & {lcell} \\\\")
     a = load("results/s1_gemma12_analysis.json")["cells"]["4bit"]
     h = a["health_auc_at_gate"]
     live = sum(n for n, _ in a["pass_rate"]["0.5 nat (gate)"].values())

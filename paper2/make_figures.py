@@ -104,6 +104,10 @@ def fig_health_auc():
         if path.startswith("p2n:"):
             a = load("results/p2n_analysis.json")[path[4:]]["filed_substring_label"]
             auc, live, total = dict(a["auc"]), a["live"], a["vectors"]
+            if os.path.exists(os.path.join(ROOT, "results/p2n_logit_lens.json")):
+                ll = load("results/p2n_logit_lens.json").get(path[4:] + ", filed substring label", {})
+                if "ci95" in ll:
+                    auc["logit-lens accessibility"] = {"auc": ll["auc"], "ci95": ll["ci95"]}
         else:
             a = load(path)
         if path.startswith("p2n:"):
