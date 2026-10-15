@@ -42,11 +42,51 @@ BLOCK = re.compile(r"santosh|cheethirala|\bcarbo\b|gmail|mentor|capstone|APERTUR
 MARK = "[Redacted for anonymous review: course administration or the author's other work.]"
 
 
+P2_MODE = "--paper2" in sys.argv
+if P2_MODE:
+    # Paper 2's release: its own results, and the earlier project's name (also a public repository's)
+    # renamed consistently in file names, file contents and the strings inside .npz files, so the
+    # code still runs under the new name.
+    OUT = ROOT / "release" / "paper2-anon"
+    REWRITE = REWRITE + [(re.compile(r"\bMIRROR\b"), "an earlier project")]
+
+
+def p2_rename(s):
+    """aperture -> sentmean, keeping the case pattern (aperture, Aperture, APERTURE)."""
+    def rep(m):
+        w = m.group(0)
+        return "SENTMEAN" if w.isupper() else ("Sentmean" if w[0].isupper() else "sentmean")
+    return re.sub(r"aperture", rep, s, flags=re.I)
+
+
 def tracked():
     out = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
     for f in out.splitlines():
-        if (f.startswith(INCLUDE) or DOCS.match(f)) and not PAPER2.match(f):
+        if P2_MODE:
+            if (f.startswith(("caliper/", "experiments/", "tests/", "data/")) or DOCS.match(f)
+                    or (f.startswith("results/") and PAPER2.match(f))):
+                yield ROOT / f
+        elif (f.startswith(INCLUDE) or DOCS.match(f)) and not PAPER2.match(f):
             yield ROOT / f
+
+
+def copy_npz(src, dst):
+    import numpy as np
+    z = np.load(src, allow_pickle=True)
+    arrays = {k: z[k] for k in z.files}
+    changed = False
+    for k, v in arrays.items():
+        if v.dtype.kind in "OUS":
+            new = np.vectorize(lambda x: p2_rename(x) if isinstance(x, str) else x, otypes=[v.dtype])(v) \
+                if v.size else v
+            if not np.array_equal(new, v):
+                arrays[k], changed = new, True
+    if changed:
+        np.savez_compressed(dst, **arrays)
+        if not str(dst).endswith(".npz"):
+            Path(str(dst) + ".npz").replace(dst)
+    else:
+        shutil.copy2(src, dst)
 
 
 def redact(line):
@@ -72,32 +112,37 @@ def main():
         if not src.exists():
             continue
         rel = src.relative_to(ROOT)
-        dst = OUT / rel
+        dst = OUT / (Path(p2_rename(str(rel))) if P2_MODE else rel)
         dst.parent.mkdir(parents=True, exist_ok=True)
-        if BLOCK.search(str(rel).replace("\\", "/")):
+        if BLOCK.search(str(dst.relative_to(OUT)).replace("\\", "/")):
             hits.append(f"file name: {rel}")
         if src.suffix.lower() in TEXT and "corpus_cache" not in rel.parts:
             raw = src.read_text(encoding="utf-8", errors="surrogateescape")
-            if rel.name != "LAB_NOTEBOOK.md" and "aperture" in raw.lower():
+            if not P2_MODE and rel.name != "LAB_NOTEBOOK.md" and "aperture" in raw.lower():
                 skipped.append(str(rel))
                 continue
+            # Redact first, so notebook lines naming the earlier project are caught before the rename.
             text = clean(raw, notebook=rel.name == "LAB_NOTEBOOK.md")
+            if P2_MODE:
+                text = p2_rename(text)
             redacted += text.count(MARK)
             for m in BLOCK.finditer(text):
                 line = text.count("\n", 0, m.start()) + 1
                 hits.append(f"{rel}:{line}: {text[max(0, m.start() - 40):m.end() + 40]!r}")
             dst.write_text(text, encoding="utf-8", errors="surrogateescape")
+        elif P2_MODE and src.suffix.lower() == ".npz":
+            copy_npz(src, dst)
         else:
             shutil.copy2(src, dst)
     (OUT / "LICENSE").write_text("Released under the licence stated in the paper. Copyright the anonymous "
                                  "authors.\n", encoding="utf-8")
-    shutil.copy2(ROOT / "tools" / "RELEASE_README.md", OUT / "README.md")
+    shutil.copy2(ROOT / "tools" / ("RELEASE_README_P2.md" if P2_MODE else "RELEASE_README.md"), OUT / "README.md")
     if hits:
         print(f"BLOCKED: {len(hits)} hit(s); release not zipped", file=sys.stderr)
         for h in hits[:60]:
             print("  " + h, file=sys.stderr)
         sys.exit(1)
-    z = ROOT / "release" / "caliper-anon.zip"
+    z = ROOT / "release" / ("paper2-anon.zip" if P2_MODE else "caliper-anon.zip")
     with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
         for p in sorted(OUT.rglob("*")):
             if p.is_file():
