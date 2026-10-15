@@ -507,7 +507,13 @@ items still answering. --- where the cell did not measure it.}}
 binary detection protocol of \citet{hahami2025disturbance}, with their released code and quirks, on
 Llama-3.1-8B, the model they report detection on; P2-H-1B runs the same filing on Llama-3.2-1B on
 CPU. Both were filed before their data, with manipulation checks first and the primary cell at
-layer 0 and strength 5 (Table~\ref{tab:p2h}). [Readings are added when each run is scored.]}
+layer 0 and strength 5 (Table~\ref{tab:p2h}). On Llama-3.2-1B the protocol fails its manipulation
+checks, so, as filed, no endpoint is scored: the model puts most of its first-token probability on
+\yes{} or \no{} for the introspective prompt (median mass 0.77) but only 3 to 4\% for the factual
+controls, and inside the injection frame it leans \no{} even on obvious-\yes{} questions (median
+log-odds $-0.43$). It is the third model, after Qwen2.5-7B with the released prompt and with an
+answer instruction (Section~\ref{sec:operating}), whose factual controls are not answered in the
+readout's format. P2-H, on the 8B model of the original report, is pending.}
 
 \begin{table*}[t]
 \centering

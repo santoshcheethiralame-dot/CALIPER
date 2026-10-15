@@ -1,0 +1,55 @@
+{
+ "version": "2026-10-13a",
+ "s3_version": "2026-10-11b",
+ "hahami_commit": "7d9280d79e4aa37599dc0fd89974be4bc7a54827",
+ "model_path": "C:\\Users\\carbo\\.cache\\huggingface\\hub\\models--meta-llama--Llama-3.2-1B-Instruct\\snapshots\\9213176726f574b556790deb65791e0c5aa438b6",
+ "load": {
+  "quant": "none",
+  "compute_dtype": "float32",
+  "storage_dtype": "float32",
+  "model_id": "C:\\Users\\carbo\\.cache\\huggingface\\hub\\models--meta-llama--Llama-3.2-1B-Instruct\\snapshots\\9213176726f574b556790deb65791e0c5aa438b6"
+ },
+ "layers": [
+  0,
+  10
+ ],
+ "alphas": [
+  5.0,
+  3.0,
+  1.0,
+  2.0,
+  4.0,
+  8.0,
+  12.0
+ ],
+ "n_items": 30,
+ "yes_ids": {
+  "yes": [
+   7566,
+   9642,
+   9891,
+   10035,
+   14331,
+   14410
+  ],
+  "no": [
+   912,
+   2201,
+   2360,
+   2822,
+   5782,
+   9173
+  ]
+ },
+ "hahami_ids": {
+  "yes": 14331,
+  "no": 9173
+ },
+ "libraries": {
+  "torch": "2.12.0",
+  "transformers": "5.13.0",
+  "accelerate": "1.14.0",
+  "bitsandbytes": "0.50.2"
+ },
+ "fidelity": {}
+}
