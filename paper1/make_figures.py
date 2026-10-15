@@ -277,7 +277,47 @@ def fig_restart_curve():
     save(fig, "fig_restart_curve")
 
 
+def fig_eone():
+    """E-1: ROC of restart agreement and test R^2 for every arm, identifiable label. Drawn only once
+    every E-1 arm is complete; the scores are E-1's scorer's own (analyse_e1.score_arm)."""
+    import sys
+    sys.path.insert(0, os.path.join(ROOT, "experiments"))
+    import analyse_e1 as e1
+    arms = [(name, stem, model, layer, n) for name, (stem, model, layer, n) in e1.ARMS.items()]
+    if any(len(rows(f"{stem}.jsonl")) < n for _, stem, _, _, n in arms):
+        print("  fig_eone: E-1 incomplete, skipped")
+        return
+    titles = {"gpt2_l6": "GPT-2 small, layer 6", "gptneo_l10": "GPT-Neo-125m, layer 10",
+              "gpt2_l6_code": "GPT-2 small, layer 6, code"}
+    col = {"test R2": COL["held-out R2"], "restart agreement": COL["restart agreement"]}
+    dash = {"test R2": DASH["held-out R2"], "restart agreement": DASH["restart agreement"]}
+    lab = {"test R2": "test $R^2$", "restart agreement": "restart agreement"}
+    score = {"test R2": lambda r: -r["test_r2"], "restart agreement": lambda r: -r["restart_agreement"]}
+    fig, axes = plt.subplots(1, len(arms), figsize=(WIDTH, 2.6), gridspec_kw={"wspace": 0.35})
+    for ax, (name, stem, model, layer, _), letter in zip(axes, arms, "abc"):
+        _, R = e1.score_arm(stem, model, layer)
+        fail = [r["align_ident"] < PASS for r in R]
+        ax.plot([0, 1], [0, 1], color=INK3, lw=0.6, ls=(0, (1, 2)))
+        for s_ in ("test R2", "restart agreement"):
+            pts, auc = roc([score[s_](r) for r in R], fail)
+            fpr = [0.0] + sorted(p[2] for p in pts) + [1.0]
+            tpr = [0.0] + sorted(p[1] for p in pts) + [1.0]
+            ax.plot(fpr, tpr, ls=dash[s_], color=col[s_], lw=1.5, solid_capstyle="round",
+                    label=f"{lab[s_]}  {auc:.2f}")
+        ax.set_xlim(-0.01, 1.01)
+        ax.set_ylim(-0.01, 1.02)
+        ax.set_aspect("equal")
+        ax.set_xticks([0, 0.5, 1])
+        ax.set_yticks([0, 0.5, 1])
+        ax.set_xlabel("false-alarm rate")
+        if letter == "a":
+            ax.set_ylabel("failures caught")
+        ax.legend(loc="lower right", title="AUC", title_fontsize=7, fontsize=6.5)
+        panel(ax, letter, f"{titles[name]}: {len(R)} units, {sum(fail)} failures")
+    save(fig, "fig_eone")
+
+
 if __name__ == "__main__":
-    for f in (fig_roc, fig_threshold_and_classes, fig_forest, fig_restart_curve):
+    for f in (fig_roc, fig_threshold_and_classes, fig_forest, fig_restart_curve, fig_eone):
         f()
     print("wrote", sorted(os.listdir(OUT)))

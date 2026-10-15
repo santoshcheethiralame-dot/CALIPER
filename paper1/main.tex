@@ -400,6 +400,16 @@ the GPT-2 difference is \eOneEucDelta{} \eOneEucCI.}}
 \label{tab:eone}
 \end{table}
 
+\IfFileExists{figures/fig_eone.pdf}{%
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_eone.pdf}
+\caption{\draft{E-1: ROC curves for predicting failure on the identifiable label from test $R^2$ and
+restart agreement, one panel per arm (GPT-2 and GPT-Neo on prose, GPT-2 on Python source code).
+AUCs in the legends.}}
+\label{fig:eone}
+\end{figure}}{}
+
 \subsection{The estimator fails on a minority of units}
 Of 300 GPT-2 layer-6 units, 254 pass (0.847, 95\% CI $[0.80, 0.88]$) and 46 fail. The median
 alignment across all units is 0.994 and the minimum 0.047, so aggregate statistics hide the
