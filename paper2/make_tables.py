@@ -336,7 +336,7 @@ def app_concepts_prompts():
     sys.path.insert(0, os.path.join(ROOT, "experiments"))
     import kaggle_s3_positive_control as s3
     lines = [f"{c} & {s3.CATEGORY[c]} & {tex_escape(', '.join(s3.ASSOCIATES.get(c, [])))} \\\\" for c in s3.CONCEPTS]
-    write("tab_concepts", "\\begin{tabular}{llp{0.62\\linewidth}}\n\\toprule\nconcept & category & associate terms "
+    write("tab_concepts", "\\begin{tabular}{llp{0.50\\linewidth}}\n\\toprule\nconcept & category & associate terms "
           "(matched as word starts by the strict gate) \\\\\n\\midrule\n" + "\n".join(lines) +
           "\n\\bottomrule\n\\end{tabular}\n")
     prompts = [("Introspective (S-2, S-1, P2-D)", s3.INTROSPECTIVE.format(n="{n}")),

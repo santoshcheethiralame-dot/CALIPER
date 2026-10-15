@@ -2,22 +2,20 @@
 % Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
 % Tables come from paper2/make_tables.py and figures from paper2/make_figures.py; regenerate,
 % never edit by hand. Violet \draft{} text is placeholder wording carrying the verified claims and
-% numbers; the author rewrites it. Venue style: ICML 2027 when its style file is released; the
-% NeurIPS preprint style stands in until then.
-\documentclass{article}
-\usepackage[preprint]{styles/neurips_2026}
-
+% numbers; the author rewrites it. Venue: TACL (revised 14 Oct 2026); official style tacl2021v1 from
+% transacl.org, in tacl/. Submission mode: anonymous, line-numbered; [acceptedWithA] for camera-ready.
+\documentclass[11pt,a4paper]{article}
+\usepackage{times,latexsym}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref}
+\usepackage[]{tacl/tacl2021v1}
+
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{microtype}
 \usepackage{graphicx}
-\usepackage{xcolor}
-\usepackage{natbib}
 \graphicspath{{figures/}}
 
 \newcommand{\pyes}{P(\textup{\textsc{yes}})}
@@ -29,7 +27,8 @@
 \title{Auditing the Instrument: What Concept-Injection Experiments Measure About LLM
 Introspection}
 
-\author{Anonymous authors}
+\author{}
+\date{}
 
 \begin{document}
 \maketitle
@@ -270,40 +269,40 @@ vectors at strengths 2, 4 and 8 against \idTopThousandRandom{} random ones, with
 (exploratory). On Qwen2.5-7B random vectors pass the 2-nat
 rule for 20 of 30 concepts at half the norm, against 29 for concept vectors.}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \small
-\input{tables/tab_liveness}
+\resizebox{\textwidth}{!}{\input{tables/tab_liveness}}
 \caption{\draft{Live vectors per recipe at each session's gate dose (steered at the gate, not at
 dose 0), and the released recipe at its released strength, as filed (substring matching);
 Table~\ref{tab:regimes} gives the counts with the gate rescored by whole word.}}
 \label{tab:liveness}
-\end{table}
+\end{table*}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_health}}
+\resizebox{\textwidth}{!}{\input{tables/tab_health}}
 \caption{\draft{AUC of each health check at telling live from dead vectors, pooled across recipes,
 with stratified bootstrap intervals (none stored for Gemma-3-12B's own checks). Logit-lens accessibility was
 filed before analysis but after the liveness labels were known.}}
 \label{tab:health}
-\end{table}
+\end{table*}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_checks_cells}}
+\resizebox{\textwidth}{!}{\input{tables/tab_checks_cells}}
 \caption{\draft{Health-check AUCs within one recipe, concrete concepts only (20 vectors per cell;
 read as direction, not as tests). Exploratory.}}
 \label{tab:cells}
-\end{table}
+\end{table*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{fig_health_auc}
+\includegraphics[width=\textwidth]{fig_health_auc}
 \caption{\draft{Health-check AUCs by model, pooled across recipes, with 95\% intervals; 0.5 is
 chance. Table~\ref{tab:cells} shows what is left within one recipe and concept type.}}
 \label{fig:health}
-\end{figure}
+\end{figure*}
 
 \subsection{An inverted health check}
 \label{sec:inverted}
@@ -355,31 +354,31 @@ at strength 2 and $8\times10^{-5}$ at 4 (Figure~\ref{fig:p2r}a).}
 \begin{table}[t]
 \centering
 \small
-\input{tables/tab_dose}
+\resizebox{\linewidth}{!}{\input{tables/tab_dose}}
 \caption{\draft{Top: median next-token KL (nats) at the same fraction of the residual norm.
 Bottom: on Gemma-3-4B's KL-calibrated grid, real concept vectors' KL over random directions' KL at
 each target.}}
 \label{tab:dose}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{fig_dose}
+\includegraphics[width=\textwidth]{fig_dose}
 \caption{\draft{(a) One fraction of the residual norm, three models. (b) The KL-calibrated grid
 on Gemma-3-4B: real and on-manifold (span) vectors against off-manifold ones (random,
 shuffled); the dashed line is the calibration target.}}
 \label{fig:dosefrac}
 \label{fig:dosekl}
-\end{figure}
+\end{figure*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{fig_live_kl}
+\includegraphics[width=\textwidth]{fig_live_kl}
 \caption{\draft{Share of real vectors steered against each vector's own next-token KL, one panel
 per model with the other models in grey (bins of at least 10 vector-doses; bands resample
 vectors). Exploratory.}}
 \label{fig:livekl}
-\end{figure}
+\end{figure*}
 
 \subsection{What detection measures at the published operating point}
 \label{sec:operating}
@@ -442,9 +441,9 @@ strength 4: $+14.75$ against $+5.45$ log-odds, 27 of 30 concepts), and the neutr
 $-1.51$ (Table~\ref{tab:logodds}, Figure~\ref{fig:logodds}). Raw log-odds changes depend on where an
 answer starts, which is why the comparison above matches baselines.}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_p2r}}
+\resizebox{\textwidth}{!}{\input{tables/tab_p2r}}
 \caption{\draft{P2-R on Gemma-3-27B (4-bit, layer 37, released recipe and prompt), per injection
 strength: median \yes{}+\no{} mass on the introspective prompt; the median change in the
 log-odds of \yes{} on factual-\yes{} items for real and impact-matched random vectors; the
@@ -454,34 +453,34 @@ real-minus-impact-matched excess; the introspective change for real against impa
 vectors with its Wilcoxon $p$; and the content-free share. Random-vector rows and the paired column
 are exploratory.}}
 \label{tab:p2r}
-\end{table}
+\end{table*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{fig_p2r}
+\includegraphics[width=\textwidth]{fig_p2r}
 \caption{\draft{(a) Median probability on \yes{} and \no{} together; below 0.5 (shaded) the model
 mostly answers with something else. (b) Median change in the log-odds of \yes{} for the
 introspective and factual-\yes{} prompts, real vectors (filled) against impact-matched random ones
 (hollow, dashed). The dotted line marks the released strength.}}
 \label{fig:p2r}
-\end{figure}
+\end{figure*}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_logodds}}
+\resizebox{\textwidth}{!}{\input{tables/tab_logodds}}
 \caption{\draft{The earlier factual-\no{} control on the log-odds scale: median change from dose 0
 per framing, and the paired factual-minus-introspective difference with a bootstrap interval of
 the median.}}
 \label{tab:logodds}
-\end{table}
+\end{table*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=0.55\linewidth]{fig_logodds}
+\includegraphics[width=0.55\textwidth]{fig_logodds}
 \caption{\draft{Factual-\no{} against introspective change in the log-odds of \yes{}, per cell;
 above the diagonal, factual answers move more.}}
 \label{fig:logodds}
-\end{figure}
+\end{figure*}
 
 \subsection{The three assumptions, regime by regime}
 \label{sec:regimes}
@@ -490,15 +489,15 @@ vectors are live, what unit the dose is set in, whether the first-token readout 
 all, and whether detection is observed. No regime shows all three assumptions holding, and no
 regime observes detection on the introspective prompt.}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_regimes}}
+\resizebox{\textwidth}{!}{\input{tables/tab_regimes}}
 \caption{\draft{Live vectors per recipe at each session's gate (steering gate rescored with
 whole-word matching), the unit the dose is set in, whether the first-token readout is answered
 (median \yes{}+\no{} mass on the introspective prompt), and introspective \yes{} answers among
 items still answering. --- where the cell did not measure it.}}
 \label{tab:regimes}
-\end{table}
+\end{table*}
 
 \subsection{A positive control: the released binary protocol}
 \label{sec:p2h}
@@ -508,16 +507,16 @@ Llama-3.1-8B, the model they report detection on; P2-H-1B runs the same filing o
 CPU. Both were filed before their data, with manipulation checks first and the primary cell at
 layer 0 and strength 5 (Table~\ref{tab:p2h}). [Readings are added when each run is scored.]}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_p2h}}
+\resizebox{\textwidth}{!}{\input{tables/tab_p2h}}
 \caption{\draft{P2-H and P2-H-1B, primary cell (layer 0, strength 5, released readout). P0: median
 change in the log-odds of \yes{} on the introspective prompt and concepts answered \yes{}; P1:
 real minus impact-matched random vectors (Wilcoxon); P2: introspective excess over the
 factual-baseline regression (concept bootstrap); P3: change on factual-\yes{} items. Endpoints are
 scored only if manipulation checks M2 to M4 pass.}}
 \label{tab:p2h}
-\end{table}
+\end{table*}
 
 \subsection{The detection rate is a property of the readout}
 \label{sec:readout}
@@ -584,7 +583,7 @@ publicly released model weights, involves no human subjects or personal data, an
 model; the steering vectors it builds are for common concepts and carry no misuse value beyond
 the published recipe.}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{tacl/acl_natbib}
 \bibliography{references}
 
 \appendix
@@ -606,13 +605,13 @@ enforced only the answer-mass check, not the check that the factual baselines ha
 signs; it was corrected to the filed rule before any P2-Q2 number was reported. (4) Three filed
 P2-R secondaries missing from the scorer were computed after its primary output was seen.}
 
-\begin{table}[h]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_predictions}}
+\resizebox{\textwidth}{!}{\input{tables/tab_predictions}}
 \caption{\draft{Every filed prediction behind the paper's claims, with its filing date and
 outcome. $^\dagger$Filed after the liveness labels were known.}}
 \label{tab:predictions}
-\end{table}
+\end{table*}
 
 \section{The released code, read}
 \draft{The released code of \citet{macar2026mechanisms} reads the concept vector at the last token
@@ -650,16 +649,16 @@ matches. Stems such as \texttt{arachn} match any word starting with them.}}
 
 \section{Liveness at every dose}
 \label{app:livedose}
-\begin{table}[h]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_live_dose}}
+\resizebox{\textwidth}{!}{\input{tables/tab_live_dose}}
 \caption{\draft{Stories steered (filed substring rule, of 30) at each dose, per model and recipe.
 Doses are fractions of the residual norm on Qwen and random-calibrated KL targets on Gemma. The
 random arm is a norm-matched random direction scored against the paired concept's terms: it
 measures how often the gate fires with no concept present. S-1 (Gemma-3-12B and -27B) ran no random
 steering arm.}}
 \label{tab:livedose}
-\end{table}
+\end{table*}
 
 \section{Models, precision and compute}
 \label{app:compute}
@@ -703,15 +702,15 @@ We run the released code of \citet{macar2026mechanisms} as published.}
 
 \section{P2-R with an answering gate on every endpoint}
 \label{app:gated}
-\begin{table}[h]
+\begin{table*}[t]
 \centering
-\resizebox{\linewidth}{!}{\input{tables/tab_gated}}
+\resizebox{\textwidth}{!}{\input{tables/tab_gated}}
 \caption{\draft{P2-R on Gemma-3-27B, real vectors, restricted to items whose \yes{}+\no{} mass is at
 least 0.5 at strength 0 and at the strength scored: items answering ($n$), median change in the
 log-odds of \yes{}, and Wilcoxon $p$ (not computed below 6 items). Last row: the introspective
 change for real and impact-matched random vectors among concepts answering under both. The gate was
 added in revision after the primary output was seen; exploratory.}}
 \label{tab:gated}
-\end{table}
+\end{table*}
 
 \end{document}
