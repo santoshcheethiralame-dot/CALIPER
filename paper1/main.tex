@@ -173,7 +173,7 @@ importance without tracking correctness. Warnings that stability is not correctn
 in clustering \citep{bendavid2006sober}, and the failure of agreement between independently
 built versions as evidence of correctness is classic in software reliability
 \citep{knight1986nversion}. \draft{Treating circuit discovery as statistical estimation,
-\citet{meloux2025variance} measure its variance across seeds and resamples and propose
+\citet{meloux2025variance} measure its variance under perturbed inputs and changed hyperparameters and propose
 reporting it, and \citet{meloux2025everything} show that several circuits and interpretations
 can explain the same behaviour, so agreement on one is not identification.} Appendix~\ref{app:census} lists \draft{36} published uses
 of agreement across \draft{nine} sub-areas\draft{, 26 of them as a reliability check; none uses the
@@ -187,8 +187,8 @@ uses ``predictability as a reality check'', screens models on prediction before 
 stability, and lists random initial values in gradient descent among the perturbations
 stability should survive \citep{yu2020veridical}. Our result is a ground-truth test of that
 ordering: the predictability check outperforms the stability check. Restart agreement
-estimates how much of the initialisation distribution flows into a basin, which is evidence
-about the basin's size rather than its correctness \citep{nehzati2026restarts}.
+estimates how much of the initialisation distribution flows into a basin \citep{nehzati2026restarts}, which bears on the
+basin's size, not on whether its answer is correct.
 
 \paragraph{Ground truth in interpretability evaluation.} Benchmarks with known answers
 plant or compile them \citep{gupta2024interpbench}\draft{, compile known programs into
@@ -208,8 +208,7 @@ Probing has control tasks \citep{hewitt2019control}, and automated interpretabil
 \draft{\citep{bills2023explain}} have been found not to separate trained from random networks \citep{heap2025random}.
 \draft{Sparse autoencoders often fail to beat random baselines on standard metrics
 \citep{korznikov2026sanity}, and in explainable AI, MetaQuantus tests evaluation metrics
-themselves for resilience to noise and reactivity to adversarial change
-\citep{hedstrom2023metaquantus}.} These
+themselves for resilience to noise and reactivity to randomness \citep{hedstrom2023metaquantus}.} These
 works plant or supervise their ground truth and mostly score methods. Ours is read off a
 trained network's weights, and we score the checks.
 
@@ -269,8 +268,9 @@ are identical either way.}
 mean across coordinates, $\mathbf{s}\cdot(\boldsymbol{1}/\boldsymbol{\gamma})$ takes the same
 value on every token. The component of $\mathbf{w}_j$ along $\boldsymbol{1}/\boldsymbol{\gamma}$
 therefore adds only a constant to the pre-activation, which the bias absorbs, and no data can
-recover it. \draft{That $\boldsymbol{1}/\boldsymbol{\gamma}$ is an exact kernel of what follows a
-layer norm is known \citep{shirodkar2026dead}, and interpretability practice already removes it
+recover it. \draft{That $\boldsymbol{1}/\boldsymbol{\gamma}$ lies in the kernel of the
+covariance of a layer norm's output is known for the final layer norm \citep{shirodkar2026dead},
+and the same algebra holds for every layer norm. Interpretability practice already removes it
 when reading weights are centred \citep{nanda2022transformerlens,gurnee2024universal}.} In GPT-2
 small this component's median share of $\|\mathbf{w}_j\|^2$ is about $5\times10^{-4}$. At layer 6
 no unit has a share large enough to keep the best attainable cosine below the 0.95 failure bar;
@@ -632,8 +632,9 @@ $\mathbf{n}$ removed has had no prospective test. A pre-registered replication o
 confirmed the share on the converged-wrong fits (0.929 against 0.711 for held-out $R^2$,
 difference 0.218, bootstrap 95\% CI $[0.099, 0.340]$), although without the restriction to
 $R^2 > 0.99$ that comparison handicaps held-out $R^2$; over all failures it scores 0.880 against
-0.839 for held-out $R^2$. A fixed 1\% cut-off is fragile in models with
-massive activations \citep{sun2024massive}, where a few coordinates dominate the variance. The same replication did not confirm agreement between
+0.839 for held-out $R^2$. A fixed 1\% cut-off may also behave differently in models with massive activations
+\citep{sun2024massive}, where a few coordinates take values orders of magnitude larger than the
+rest and nearly constant across inputs. The same replication did not confirm agreement between
 fits on document-disjoint samples as a better check: 0.775 on the converged-wrong fits against
 0.711 for held-out $R^2$ (difference 0.065, $[-0.052, 0.183]$). An earlier figure of 0.911 on 6
 fits came from fits that also differed in restart count.}
@@ -798,8 +799,8 @@ Restart agreement measures how much of the initialisation distribution flows int
 the estimator ends in. If a wrong basin is large, restarts agree on it, and agreement grows
 with the number of restarts exponentially faster than evidence that the basin is the only one
 \citep{nehzati2026restarts}. Single-neuron regression with a biased, non-monotone activation is
-a known source of such basins: gradient descent on a single neuron with bias fails from a
-large fraction of initialisations \citep{vardi2021learning}, and the units that fail here sit
+a known source of such basins: gradient descent on a single ReLU neuron with a bias term has failure
+cases that the bias-free problem lacks \citep{vardi2021learning}, and the units that fail here sit
 in GELU's non-monotone region, where the first-order signal that guides early optimisation
 nearly vanishes. Held-out fit, by contrast, measures the basin's loss. Because our
 responses are noiseless functions of $\mathbf{w}_j^\top\mathbf{s}$, the true direction attains
@@ -813,8 +814,8 @@ leads mainly because the noise that lowers the fit is also what makes those unit
 layer-6 run, restarts agree at 0.99 or above on 19 of 20 failures, because they agree on the
 layer-norm null direction (Section~\ref{sec:identifiability}).}\draft{ Elsewhere its weakness is
 the opposite, false alarms: on the primary run no failure reaches agreement 0.99, but 186 of
-254 passing units fall below it.} Label-free
-estimates of correctness are never guaranteed \citep{garg2022leveraging}; held-out fit is a
+254 passing units fall below it.} Without labels, any estimate of correctness rests on assumptions the data cannot check
+\citep{garg2022leveraging}; held-out fit is a
 necessary condition, not a certificate.
 
 \draft{\paragraph{What each check can certify.} The two checks fail in different places because
@@ -864,8 +865,8 @@ pinned down only within the subspace those activations explore, and an agreement
 cannot reach outside it, however many restarts it uses. Detecting the failures that remain has
 the same shape as detecting unreliable behaviour where our understanding of the offending
 behaviour, in per-instance labels, is sparse, as in click-fraud detection from traffic
-analysis \citep{nagaraja2019clicktok}. Security research has long treated
-reliability signals adversarially, assuming a check will be evaded until shown otherwise
+analysis \citep{nagaraja2019clicktok}. Security research evaluates detectors against an adversary who adapts
+to them, and treats an evaluation without such a threat model as a pitfall
 \citep{gardiner2016security,arp2022dos}; interpretability's reliability checks have not yet
 been held to that standard.
 
