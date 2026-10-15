@@ -500,6 +500,25 @@ items still answering. --- where the cell did not measure it.}}
 \label{tab:regimes}
 \end{table}
 
+\subsection{A positive control: the released binary protocol}
+\label{sec:p2h}
+\draft{The audit has not yet observed the effect it audits (Section~\ref{sec:limits}). P2-H runs the
+binary detection protocol of \citet{hahami2025disturbance}, with their released code and quirks, on
+Llama-3.1-8B, the model they report detection on; P2-H-1B runs the same filing on Llama-3.2-1B on
+CPU. Both were filed before their data, with manipulation checks first and the primary cell at
+layer 0 and strength 5 (Table~\ref{tab:p2h}). [Readings are added when each run is scored.]}
+
+\begin{table}[t]
+\centering
+\resizebox{\linewidth}{!}{\input{tables/tab_p2h}}
+\caption{\draft{P2-H and P2-H-1B, primary cell (layer 0, strength 5, released readout). P0: median
+change in the log-odds of \yes{} on the introspective prompt and concepts answered \yes{}; P1:
+real minus impact-matched random vectors (Wilcoxon); P2: introspective excess over the
+factual-baseline regression (concept bootstrap); P3: change on factual-\yes{} items. Endpoints are
+scored only if manipulation checks M2 to M4 pass.}}
+\label{tab:p2h}
+\end{table}
+
 \subsection{The detection rate is a property of the readout}
 \label{sec:readout}
 \draft{Two readouts of the same trials disagree about dose. In the earlier Gemma-3-27B study, over

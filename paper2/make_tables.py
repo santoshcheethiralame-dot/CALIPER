@@ -210,6 +210,18 @@ def tab_predictions():
         k = sum(map(bool, st["predictions"].values()))
         rows.append(("P2-N (14 Oct)", "S-2's four predictions, Qwen3.5-2B, strict gate", f"{k}/4 as predicted",
                      "held" if k == 4 else "partly" if k else "failed"))
+    for name, path, filed in (("P2-H", "results/p2h_analysis.json", "13 Oct"),
+                              ("P2-H-1B", "results/p2h1b_analysis.json", "14 Oct")):
+        if os.path.exists(os.path.join(ROOT, path)):
+            h = load(path)["primary"]
+            if not h.get("scored") or "P0" not in h:
+                rows.append((f"{name} ({filed})", "P0: released protocol detects at layer 0, strength 5",
+                             "manipulation checks failed", "not scored"))
+            else:
+                p0 = h["P0"]
+                rows.append((f"{name} ({filed})", "P0: released protocol detects at layer 0, strength 5",
+                             f"{p0['median_change']:+.2f}, {p0['n_yes']}/{h['n_concepts']} YES",
+                             "held" if p0["pass"] else "failed"))
     if "P2" in d:
         p = d["P2"]
         rows.append(("P2-N", "KL at 0.25 differs $>$ 2-fold; random/concept $>$ 1 at 0.5",
@@ -277,6 +289,39 @@ def tab_gated():
     sub = " & ".join(["$n$ & change & $p$"] * 4)
     write("tab_gated", "\\begin{tabular}{l" + "rrr" * 4 + "}\n\\toprule\nframing & " + head + " \\\\\n & " + sub +
           " \\\\\n\\midrule\n" + "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
+
+
+P2H = [("Llama-3.1-8B (P2-H, GPU, fp16)", "results/p2h_analysis.json"),
+       ("Llama-3.2-1B (P2-H-1B, CPU, fp32)", "results/p2h1b_analysis.json")]
+
+
+def tab_p2h():
+    """Hahami et al.'s released protocol under the audit (P2-H, P2-H-1B), primary cell layer 0, strength 5.
+    Rows appear once each run is scored."""
+    lines = []
+    sg = lambda v: f"{v:+.2f}"
+    pv = lambda p: f"{p:.1e}" if p < 1e-3 else f"{p:.3f}"
+    for name, path in P2H:
+        if not os.path.exists(os.path.join(ROOT, path)):
+            continue
+        d = load(path)
+        c, p = d["checks"], d["primary"]
+        chk = " ".join(f"{k} {'pass' if v['pass'] else 'fail'}" for k, v in c.items())
+        if not p.get("scored") or "P0" not in p:
+            lines.append(f"{name} & {chk} & \\multicolumn{{4}}{{c}}{{not scored (manipulation checks)}} \\\\")
+            continue
+        p0, p1, p2, p3 = p["P0"], p["P1"], p["P2"], p["P3"]
+        lines.append(" & ".join([
+            name, chk,
+            f"{sg(p0['median_change'])}, {p0['n_yes']}/{p['n_concepts']} ({'pass' if p0['pass'] else 'fail'})",
+            f"{sg(p1['median_diff'])} ({pv(p1['p'])})",
+            f"{sg(p2['excess'])} [{sg(p2['ci95'][0])}, {sg(p2['ci95'][1])}]",
+            f"{sg(p3['median'])} ({pv(p3['p'])})"]) + " \\\\")
+    if not lines:
+        lines.append("\\multicolumn{6}{c}{(runs pending)} \\\\")
+    write("tab_p2h", "\\begin{tabular}{llcccc}\n\\toprule\nmodel & checks & P0: change, YES answers & "
+          "P1: real $-$ impact-matched ($p$) & P2: excess [95\\% CI] & P3: factual-\\yes{} ($p$) \\\\\n\\midrule\n" +
+          "\n".join(lines) + "\n\\bottomrule\n\\end{tabular}\n")
 
 
 def tex_escape(s):
@@ -365,6 +410,6 @@ def numbers():
 if __name__ == "__main__":
     numbers()
     for f in (tab_liveness, tab_health, tab_dose, tab_logodds, tab_checks_cells, tab_p2r, tab_predictions, tab_regimes,
-              tab_gated, app_concepts_prompts, tab_live_dose):
+              tab_gated, app_concepts_prompts, tab_live_dose, tab_p2h):
         f()
     print("wrote", sorted(os.listdir(OUT)))
