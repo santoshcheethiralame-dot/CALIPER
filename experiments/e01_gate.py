@@ -260,6 +260,12 @@ if a.drop_constant_coords is not None:
 alive = p.response.std(0) > 1e-4
 print(f"  alive: {int(alive.sum())}/{len(alive)} (screened units are reported, not dropped)",
       flush=True)
+# A unit silent on every validation row has no defined held-out R2, so early stopping never keeps a
+# state and the fit cannot run (F-3a, 16 Oct). It is reported as unscoreable, like a dead unit.
+silent = alive & (p.response[:int(len(p.response) * test_frac)].std(0) <= 1e-4)
+if silent.any():
+    print(f"  unscoreable (silent on the validation rows): {p.neurons[silent].tolist()}", flush=True)
+alive &= ~silent
 
 todo = [i for i in range(len(p.neurons)) if alive[i] and not ck.done(int(p.neurons[i]))]
 for start in range(0, len(todo), a.batch):
