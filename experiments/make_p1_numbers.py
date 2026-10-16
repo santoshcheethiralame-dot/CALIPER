@@ -132,7 +132,7 @@ def e1(m):
     d = load("results/e1_analysis.json")
     if not d:
         return
-    for tag, arm in (("", "gpt2_l6"), ("Neo", "gptneo_l10")):
+    for tag, arm in (("", "gpt2_l6"), ("Neo", "gptneo_l10"), ("Code", "gpt2_l6_code")):
         a = d[arm]
         m[f"eOne{tag}Units"] = str(a["units"])
         m[f"eOne{tag}Fail"] = str(a["failures_identifiable"])
@@ -157,7 +157,10 @@ def e1(m):
              eOneRuleFcr=f"{100 * r['r2_rule']['fcr']:.1f}\\%", eOneRuleRestartFcr=f"{100 * r['restart_rule']['fcr']:.1f}\\%",
              eOneRuleFcrCI=ci(r["fcr_difference_ci95"]), eOneRuleHolds="holds" if r["prediction_holds"] else "fails")
     secs = 0.0
-    for arm in ("gpt2_l6", "gptneo_l10"):
+    cp = d["code_vs_prose_same_units"]
+    m.update(eOneCodePassProse=str(cp["pass_prose"]), eOneCodePassCode=str(cp["pass_code"]),
+             eOneCodeLost=str(cp["pass_prose_fail_code"]), eOneCodeGained=str(cp["fail_prose_pass_code"]))
+    for arm in ("gpt2_l6", "gptneo_l10", "gpt2_l6_code"):
         s = load(f"results/e1_{arm}_summary.json")
         if s:
             secs += s["seconds_per_unit"] * s["rows"]
@@ -165,10 +168,11 @@ def e1(m):
         m["eOneHours"] = f"{secs / 3600:.0f}"
 
 
-E1_NAMES = [f"eOne{t}{k}" for t in ("", "Neo") for k in
+E1_NAMES = [f"eOne{t}{k}" for t in ("", "Neo", "Code") for k in
             ("Units", "Fail", "Reading", "Cw", "Uf", "AucRestart", "AucTest", "Delta", "CI", "P", "EucDelta", "EucCI",
              "ValTest")] + ["eOneLowVar", "eOneRuleCorrect", "eOneRuleRestartCorrect", "eOneRuleFcr",
-                            "eOneRuleRestartFcr", "eOneRuleFcrCI", "eOneRuleHolds", "eOneHours"]
+                            "eOneRuleRestartFcr", "eOneRuleFcrCI", "eOneRuleHolds", "eOneHours",
+                            "eOneCodePassProse", "eOneCodePassCode", "eOneCodeLost", "eOneCodeGained"]
 
 NAMES = ("bRFlips bRFlipRate bRFlipCI bRKappa bRFail bRDelta bRCI bRCwFiled bRCwIdent bRIdentDelta bRIdentCI bROwnDelta bROwnCI "
          "bROwnFail lnScorable lnWiden lnSame lnNarrow mOwnArms mOwnLead mOwnExcl mOwnTie mOwnRestart csFits "

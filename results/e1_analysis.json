@@ -1,0 +1,234 @@
+{
+ "gpt2_l6": {
+  "units": 200,
+  "failures_identifiable": 41,
+  "failures_euclidean": 45,
+  "primary": {
+   "failures": 41,
+   "auc_restart": 0.9001380579843534,
+   "auc_r2": 0.9622641509433962,
+   "diff": -0.06212609295904281,
+   "delong_p": 0.0069470084988211495,
+   "boot_ci95": [
+    -0.10569105691056913,
+    -0.02162524927136067
+   ],
+   "paired_perm_p": 0.00849575212393803
+  },
+  "euclidean": {
+   "failures": 45,
+   "auc_restart": 0.8870250896057348,
+   "auc_r2": 0.9549820788530466,
+   "diff": -0.06795698924731186,
+   "delong_p": 0.0017918723685335202,
+   "boot_ci95": [
+    -0.11097132616487465,
+    -0.026659498207885404
+   ],
+   "paired_perm_p": 0.0014992503748125937
+  },
+  "restart_vs_validation": {
+   "failures": 41,
+   "auc_restart": 0.9001380579843534,
+   "auc_r2": 0.9817456665132689,
+   "diff": -0.08160760852891547,
+   "delong_p": 0.000647009888081143,
+   "boot_ci95": [
+    -0.12948304954747666,
+    -0.0371184230710232
+   ],
+   "paired_perm_p": 0.0009995002498750624
+  },
+  "validation_vs_test": {
+   "failures": 41,
+   "auc_restart": 0.9817456665132689,
+   "auc_r2": 0.9622641509433962,
+   "diff": 0.019481515569872654,
+   "delong_p": 0.04800209852580507,
+   "boot_ci95": [
+    0.001994170885105115,
+    0.04065040650406504
+   ],
+   "paired_perm_p": 0.034482758620689655
+  },
+  "median_test_minus_val": -0.036387,
+  "reading": "holds",
+  "classes": {
+   "under_fitted": 41,
+   "converged_wrong": 0
+  },
+  "low_variance_diagnostic": "not scored: fewer than 5 converged-wrong fits or passes",
+  "verdicts_changed_by_null_removal": 4
+ },
+ "gptneo_l10": {
+  "units": 100,
+  "failures_identifiable": 20,
+  "failures_euclidean": 35,
+  "primary": {
+   "failures": 20,
+   "auc_restart": 0.895625,
+   "auc_r2": 0.956875,
+   "diff": -0.06125000000000003,
+   "delong_p": 0.1508718269667888,
+   "boot_ci95": [
+    -0.14626562499999998,
+    0.022499999999999968
+   ],
+   "paired_perm_p": 0.13793103448275862
+  },
+  "euclidean": {
+   "failures": 35,
+   "auc_restart": 0.8430769230769231,
+   "auc_r2": 0.8316483516483516,
+   "diff": 0.011428571428571455,
+   "delong_p": 0.7862369315720313,
+   "boot_ci95": [
+    -0.07342857142857141,
+    0.09714285714285709
+   ],
+   "paired_perm_p": 0.7821089455272364
+  },
+  "restart_vs_validation": {
+   "failures": 20,
+   "auc_restart": 0.895625,
+   "auc_r2": 0.993125,
+   "diff": -0.09750000000000003,
+   "delong_p": 0.0017753512082703897,
+   "boot_ci95": [
+    -0.16751562499999997,
+    -0.04062500000000002
+   ],
+   "paired_perm_p": 0.001999000499750125
+  },
+  "validation_vs_test": {
+   "failures": 20,
+   "auc_restart": 0.993125,
+   "auc_r2": 0.956875,
+   "diff": 0.036250000000000004,
+   "delong_p": 0.15479963232046287,
+   "boot_ci95": [
+    0.0024999999999999467,
+    0.09312500000000001
+   ],
+   "paired_perm_p": 0.03948025987006497
+  },
+  "median_test_minus_val": -0.05118450000000002,
+  "reading": "not replicated",
+  "classes": {
+   "under_fitted": 20,
+   "converged_wrong": 0
+  },
+  "low_variance_diagnostic": "not scored: fewer than 5 converged-wrong fits or passes",
+  "verdicts_changed_by_null_removal": 15
+ },
+ "gpt2_l6_code": {
+  "units": 100,
+  "failures_identifiable": 52,
+  "failures_euclidean": 52,
+  "primary": {
+   "failures": 52,
+   "auc_restart": 0.8345352564102564,
+   "auc_r2": 0.953926282051282,
+   "diff": -0.11939102564102566,
+   "delong_p": 0.013585342877100944,
+   "boot_ci95": [
+    -0.2123397435897435,
+    -0.028435496794871912
+   ],
+   "paired_perm_p": 0.010994502748625687
+  },
+  "euclidean": {
+   "failures": 52,
+   "auc_restart": 0.8345352564102564,
+   "auc_r2": 0.953926282051282,
+   "diff": -0.11939102564102566,
+   "delong_p": 0.013585342877100944,
+   "boot_ci95": [
+    -0.2123397435897435,
+    -0.028435496794871912
+   ],
+   "paired_perm_p": 0.010994502748625687
+  },
+  "restart_vs_validation": {
+   "failures": 52,
+   "auc_restart": 0.8345352564102564,
+   "auc_r2": 0.9903846153846154,
+   "diff": -0.15584935897435903,
+   "delong_p": 0.00031009079871158684,
+   "boot_ci95": [
+    -0.24118589743589736,
+    -0.07732371794871795
+   ],
+   "paired_perm_p": 0.0004997501249375312
+  },
+  "validation_vs_test": {
+   "failures": 52,
+   "auc_restart": 0.9903846153846154,
+   "auc_r2": 0.953926282051282,
+   "diff": 0.03645833333333337,
+   "delong_p": 0.03362252602717617,
+   "boot_ci95": [
+    0.007211538461538436,
+    0.07332732371794867
+   ],
+   "paired_perm_p": 0.00849575212393803
+  },
+  "median_test_minus_val": -0.09788450000000004,
+  "reading": "holds",
+  "classes": {
+   "under_fitted": 52,
+   "converged_wrong": 0
+  },
+  "low_variance_diagnostic": "not scored: fewer than 5 converged-wrong fits or passes",
+  "verdicts_changed_by_null_removal": 0
+ },
+ "practitioner_rule": {
+  "val_r2": {
+   "r2_rule": {
+    "accepted": 216,
+    "correct": 213,
+    "wrong": 3,
+    "fcr": 0.013888888888888888
+   },
+   "restart_rule": {
+    "accepted": 103,
+    "correct": 102,
+    "wrong": 1,
+    "fcr": 0.009708737864077669
+   },
+   "fcr_difference": 0.004180151024811219,
+   "fcr_difference_ci95": [
+    -0.021053476800505663,
+    0.027649769585253458
+   ],
+   "prediction_holds": false
+  },
+  "test_r2": {
+   "r2_rule": {
+    "accepted": 10,
+    "correct": 10,
+    "wrong": 0,
+    "fcr": 0.0
+   },
+   "restart_rule": {
+    "accepted": 103,
+    "correct": 102,
+    "wrong": 1,
+    "fcr": 0.009708737864077669
+   },
+   "fcr_difference": -0.009708737864077669,
+   "fcr_difference_ci95": [
+    -0.031578947368421054,
+    0.0
+   ],
+   "prediction_holds": false
+  }
+ },
+ "code_vs_prose_same_units": {
+  "units": 100,
+  "pass_prose": 81,
+  "pass_code": 48,
+  "pass_prose_fail_code": 34,
+  "fail_prose_pass_code": 1
+ }
+}

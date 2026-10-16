@@ -7,7 +7,8 @@ re-checked once E-1 (`docs/preregistration-e1-fair-comparison.md`) is scored and
 1. **Claims.** Yes. The abstract and the contribution list claim only what §5 and the appendices
    show, each with its interval, and scope the setting (MLP units of small LayerNorm models, one
    estimator family, noiseless responses). Failed predictions are reported as failed (Appendix D).
-   **(after E-1)** Re-check every abstract number against the new main experiment.
+   **(E-1 scored 16 Oct)** The abstract's E-1 numbers are generated. Three claims need the author's
+   wording, listed under "Still to do".
 2. **Limitations.** Yes: "Limitations and scope" (§6) and Appendix B (threats to validity:
    construct, internal, external).
 3. **Theory, assumptions and proofs.** Partly applicable. The one exact result (the pre-activation is
@@ -24,7 +25,7 @@ re-checked once E-1 (`docs/preregistration-e1-fair-comparison.md`) is scored and
    $p$ and, where filed, a paired permutation $p$; pooling uses HKSJ random effects with a prediction
    interval; the resampling unit is named in each case.
 8. **Compute resources.** Yes: Appendix "Compute and software" (one laptop CPU, 169 CPU-hours over
-   35 runs; one Kaggle GPU arm). **(after E-1)** Add E-1's hours.
+   35 runs; one Kaggle GPU arm). E-1's 7 CPU-hours added (generated, `\eOneHours`).
 9. **Code of ethics.** Yes. No human subjects, personal data or deployment.
 10. **Broader impacts.** Yes: "Broader impact statement" (after the conclusion).
 11. **Safeguards.** Not applicable: no model or data with misuse risk is released.
@@ -42,4 +43,16 @@ re-checked once E-1 (`docs/preregistration-e1-fair-comparison.md`) is scored and
 ## Still to do before submission
 
 - (Done 15 Oct) The licence list of item 12 is in Appendix E.
-- Re-check items 1 and 8 after E-1.
+- Item 1, after E-1 (16 Oct), for the author to word:
+  - The abstract and contribution 2 quote the six earlier conditions pooled at -0.134 [-0.189, -0.078].
+    That pooling used held-out R2 on the fit's own documents. On unseen documents
+    (`results/test_r2_saved_arms.json`) every earlier arm keeps the negative sign, but the gaps
+    shrink (B-14r -0.199 to -0.069 [-0.174, +0.032]; D-1 -0.147 to -0.100 [-0.179, -0.018]) and
+    most intervals now include zero. E-1's -0.062 is the honest size; the pooled figure should be
+    labelled as same-document held-out fit, or replaced.
+  - The practitioner rule: 213 against 102 correct holds, but its filed prediction fails (1.4% of
+    accepted fits wrong against 1.0%, difference CI [-0.021, +0.028]). "A rule that transfers"
+    must say the error rate was not lower.
+  - "Fits that predict as well as the reference but point elsewhere ... differ only where the
+    stimulus barely varies": E-1 has no converged-wrong fit (41 of 41 failures under-fitted), so
+    P4 was not scorable; the claim rests on the earlier arms only.

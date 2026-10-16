@@ -287,8 +287,8 @@ def fig_eone():
     if any(len(rows(f"{stem}.jsonl")) < n for _, stem, _, _, n in arms):
         print("  fig_eone: E-1 incomplete, skipped")
         return
-    titles = {"gpt2_l6": "GPT-2 small, layer 6", "gptneo_l10": "GPT-Neo-125m, layer 10",
-              "gpt2_l6_code": "GPT-2 small, layer 6, code"}
+    titles = {"gpt2_l6": "GPT-2 L6, prose", "gptneo_l10": "GPT-Neo L10, prose",
+              "gpt2_l6_code": "GPT-2 L6, code"}
     col = {"test R2": COL["held-out R2"], "restart agreement": COL["restart agreement"]}
     dash = {"test R2": DASH["held-out R2"], "restart agreement": DASH["restart agreement"]}
     lab = {"test R2": "test $R^2$", "restart agreement": "restart agreement"}
@@ -313,7 +313,7 @@ def fig_eone():
         if letter == "a":
             ax.set_ylabel("failures caught")
         ax.legend(loc="lower right", title="AUC", title_fontsize=7, fontsize=6.5)
-        panel(ax, letter, f"{titles[name]}: {len(R)} units, {sum(fail)} failures")
+        panel(ax, letter, f"{titles[name]}: {sum(fail)} of {len(R)} fail")
     save(fig, "fig_eone")
 
 

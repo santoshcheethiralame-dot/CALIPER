@@ -377,8 +377,11 @@ fitted on the training rows. Failure is judged on the identifiable label (Sectio
 On GPT-2, \eOneFail{} units fail; restart agreement predicts failure with AUC \eOneAucRestart{} and
 test $R^2$ with \eOneAucTest{}, a difference of \eOneDelta{} \eOneCI{} (DeLong $p$ \eOneP), so the
 filed prediction \eOneReading. On GPT-Neo (\eOneNeoFail{} failures) the difference is
-\eOneNeoDelta{} \eOneNeoCI{}, and the filed replication \eOneNeoReading. Of the failures on GPT-2,
-\eOneUf{} are under-fitted and \eOneCw{} converged-wrong (Table~\ref{tab:eone}).
+\eOneNeoDelta{} \eOneNeoCI{} (filed replication: \eOneNeoReading). Of the failures on GPT-2,
+\eOneUf{} are under-fitted and \eOneCw{} converged-wrong (Table~\ref{tab:eone}). On Python source code
+(the same GPT-2 units, filed as a secondary), the difference is \eOneCodeDelta{} \eOneCodeCI{}
+(\eOneCodeReading); \eOneCodePassProse{} of these units pass on prose and \eOneCodePassCode{} on code,
+\eOneCodeLost{} passing on prose only and \eOneCodeGained{} on code only.
 Applied without change to these new units, the practitioner rule of Section~\ref{sec:discussion}
 certifies \eOneRuleCorrect{} correct directions at validation $R^2 \geq 0.995$ against
 \eOneRuleRestartCorrect{} at restart agreement $\geq 0.97$, with \eOneRuleFcr{} and
@@ -395,6 +398,7 @@ arm & units & failures & AUC restart & AUC test $R^2$ & $\Delta$ [95\% CI] & rea
 \midrule
 GPT-2 small, layer 6 & \eOneUnits & \eOneFail & \eOneAucRestart & \eOneAucTest & \eOneDelta{} \eOneCI & \eOneReading \\
 GPT-Neo-125m, layer 10 & \eOneNeoUnits & \eOneNeoFail & \eOneNeoAucRestart & \eOneNeoAucTest & \eOneNeoDelta{} \eOneNeoCI & \eOneNeoReading \\
+GPT-2 small, layer 6, code & \eOneCodeUnits & \eOneCodeFail & \eOneCodeAucRestart & \eOneCodeAucTest & \eOneCodeDelta{} \eOneCodeCI & \eOneCodeReading \\
 \bottomrule
 \end{tabular}
 \caption{\draft{E-1: restart agreement against test $R^2$ on one estimator route, five independent
@@ -1185,7 +1189,8 @@ those components, so that a failure rate carries its conditions.
 \draft{Every arm except Pythia-1.4B ran on one laptop CPU (Intel Core i7-1255U, 12 logical cores,
 10 PyTorch threads, 16 GB of memory). The 35 local runs with recorded timings, including pilots
 and batch-size controls, took 169 CPU-hours in all, from under an hour to 19 hours each; each
-run's summary file records its seconds per unit, and Appendix~\ref{app:arms} lists the arms. The
+run's summary file records its seconds per unit, and Appendix~\ref{app:arms} lists the arms. E-1's
+three arms took a further \eOneHours{} CPU-hours. The
 Pythia-1.4B arm ran on a free Kaggle GPU, and its precision was not recorded. Every run that
 recorded its libraries used PyTorch 2.12.0 (CPU build) and Transformers 5.13.0 under Python
 3.12; 13 early runs did not record them. No arm needed
