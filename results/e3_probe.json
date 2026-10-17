@@ -1,0 +1,136 @@
+{
+ "layers": {
+  "EleutherAI/gpt-neo-125M L6": {
+   "model": "EleutherAI/gpt-neo-125M",
+   "layer": 6,
+   "flagged": true,
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.0645,
+   "near_constant": [
+    607
+   ],
+   "acc_std": 0.9995,
+   "acc_raw": 0.99775,
+   "auc_std": 1.0,
+   "auc_raw": 0.999965768733564,
+   "share_std": 0.9469655015632255,
+   "share_raw": 7.120901580773727e-10,
+   "cv_agreement_std": 0.787373210853197,
+   "cos_std_raw": 0.20419422750538854,
+   "cos_std_diffmean": 0.13579802452333886,
+   "cos_raw_diffmean": 0.7939198252945758
+  },
+  "gpt2 L3": {
+   "model": "gpt2",
+   "layer": 3,
+   "flagged": true,
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.0645,
+   "near_constant": [
+    266
+   ],
+   "acc_std": 1.0,
+   "acc_raw": 0.9995,
+   "auc_std": 1.0,
+   "auc_raw": 1.0,
+   "share_std": 0.974218342411698,
+   "share_raw": 1.1960099725490588e-08,
+   "cv_agreement_std": 0.9995894720039694,
+   "cos_std_raw": 0.13733317569144082,
+   "cos_std_diffmean": 0.09587657489796697,
+   "cos_raw_diffmean": 0.7980175073767757
+  },
+  "facebook/opt-125m L5": {
+   "model": "facebook/opt-125m",
+   "layer": 5,
+   "flagged": true,
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.06925,
+   "near_constant": [
+    355
+   ],
+   "acc_std": 0.99925,
+   "acc_raw": 0.999,
+   "auc_std": 0.9999933885858657,
+   "auc_raw": 0.9999952775613327,
+   "share_std": 0.9983318028733582,
+   "share_raw": 3.032239931946173e-09,
+   "cv_agreement_std": 0.9999593499154267,
+   "cos_std_raw": 0.03577853956039877,
+   "cos_std_diffmean": 0.025057053627313468,
+   "cos_raw_diffmean": 0.7885981634327
+  },
+  "EleutherAI/gpt-neo-125M L10": {
+   "model": "EleutherAI/gpt-neo-125M",
+   "layer": 10,
+   "flagged": false,
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.0645,
+   "near_constant": [],
+   "acc_std": 0.9925,
+   "acc_raw": 0.9855,
+   "auc_std": 0.996637281473636,
+   "auc_raw": 0.9965597577231778,
+   "share_std": 0.008544165590137511,
+   "share_raw": 0.00013050843532742116,
+   "cv_agreement_std": 0.9525204200827825,
+   "cos_std_raw": 0.8862343208835822,
+   "cos_std_diffmean": 0.44904156084496466,
+   "cos_raw_diffmean": 0.6175369063939276
+  },
+  "gpt2 L6": {
+   "model": "gpt2",
+   "layer": 6,
+   "flagged": false,
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.0645,
+   "near_constant": [],
+   "acc_std": 0.99925,
+   "acc_raw": 0.99875,
+   "auc_std": 0.999980870762874,
+   "auc_raw": 0.9999355646749439,
+   "share_std": 2.3096536433980434e-05,
+   "share_raw": 5.44179214672e-05,
+   "cv_agreement_std": 0.9779793792700571,
+   "cos_std_raw": 0.8773496471204905,
+   "cos_std_diffmean": 0.5634765200692854,
+   "cos_raw_diffmean": 0.7507506080752663
+  },
+  "facebook/opt-125m L6": {
+   "model": "facebook/opt-125m",
+   "layer": 6,
+   "flagged": false,
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.06925,
+   "near_constant": [],
+   "acc_std": 0.999,
+   "acc_raw": 0.998,
+   "auc_std": 0.9999867771717315,
+   "auc_raw": 0.9999754433189298,
+   "share_std": 0.005012721857790274,
+   "share_raw": 1.0386435481198087e-06,
+   "cv_agreement_std": 0.976683225648188,
+   "cos_std_raw": 0.8644032154051087,
+   "cos_std_diffmean": 0.5899340348863139,
+   "cos_raw_diffmean": 0.7958569461717713
+  }
+ },
+ "P1 accuracy unaffected": {
+  "holds": true
+ },
+ "P2 collapse at flagged layers, none at controls": {
+  "holds": true
+ },
+ "P3 cross-validation agrees on the collapsed direction": {
+  "holds": false
+ },
+ "P4 the standardised direction is not the raw probe's": {
+  "holds": true
+ }
+}

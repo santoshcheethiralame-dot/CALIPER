@@ -43,7 +43,8 @@ def tokens(model, tok, layer, texts, n):
                 continue
             with torch.no_grad():
                 model(input_ids=x)
-            S.append(got["s"][0, 1:].float().numpy())
+            s = got["s"].reshape(x.shape[1], -1)  # OPT's MLP norm sees (batch * position, d)
+            S.append(s[1:].float().numpy())
             ids.extend(x[0, 1:].tolist())
             if len(ids) >= n:
                 break
