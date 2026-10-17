@@ -1,0 +1,102 @@
+{
+ "GPT-Neo L6 (B-17)": {
+  "estimator": "least squares",
+  "units": 20,
+  "near_constant": [
+   607
+  ],
+  "as_fitted": 0,
+  "zeroed": 15,
+  "identifiable": 14,
+  "median": {
+   "as_fitted": 0.010048911626458996,
+   "zeroed": 0.9746192465064036,
+   "identifiable": 0.9834730098112845,
+   "refit_dropped": 0.9765162587401959
+  },
+  "refit_dropped": 13,
+  "refit_units": 20
+ },
+ "GPT-2 L3 (B-17c)": {
+  "estimator": "least squares",
+  "units": 20,
+  "near_constant": [
+   266
+  ],
+  "as_fitted": 0,
+  "zeroed": 7,
+  "identifiable": 5,
+  "median": {
+   "as_fitted": 0.05255170512323257,
+   "zeroed": 0.8551770156745989,
+   "identifiable": 0.707856441616247,
+   "refit_dropped": 0.9111928823358534
+  },
+  "refit_dropped": 9,
+  "refit_units": 20
+ },
+ "OPT-125m L5 (F-3a)": {
+  "estimator": "least squares",
+  "units": 18,
+  "near_constant": [
+   355
+  ],
+  "as_fitted": 0,
+  "zeroed": 3,
+  "identifiable": 3,
+  "median": {
+   "as_fitted": 0.0193953737842613,
+   "zeroed": 0.4173818158462455,
+   "identifiable": 0.3813064022177861,
+   "refit_dropped": 0.42041172085757234
+  },
+  "refit_dropped": 2,
+  "refit_units": 18
+ },
+ "OPT-125m L3 (F-3a)": {
+  "estimator": "least squares",
+  "units": 10,
+  "near_constant": [
+   174,
+   526
+  ],
+  "as_fitted": 0,
+  "zeroed": 0,
+  "identifiable": 0,
+  "median": {
+   "as_fitted": 0.007976045357273955,
+   "zeroed": 0.1622085676901459,
+   "identifiable": 0.013075412524466857
+  }
+ },
+ "GPT-Neo L6 (E-2b)": {
+  "estimator": "MID",
+  "units": 20,
+  "near_constant": [
+   607
+  ],
+  "as_fitted": 0,
+  "zeroed": 20,
+  "identifiable": 19,
+  "median": {
+   "as_fitted": 0.011796478782799326,
+   "zeroed": 0.9946939083485218,
+   "identifiable": 0.9924219943069184
+  }
+ },
+ "GPT-2 L3 (E-2b)": {
+  "estimator": "MID",
+  "units": 20,
+  "near_constant": [
+   266
+  ],
+  "as_fitted": 0,
+  "zeroed": 19,
+  "identifiable": 13,
+  "median": {
+   "as_fitted": 0.14490025408100513,
+   "zeroed": 0.984987321519535,
+   "identifiable": 0.9828374110790616
+  }
+ }
+}

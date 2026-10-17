@@ -1,0 +1,103 @@
+{
+ "layers": {
+  "meta-llama/Llama-3.2-1B-Instruct L3": {
+   "model": "meta-llama/Llama-3.2-1B-Instruct",
+   "layer": 3,
+   "flagged": "near-constant",
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.067875,
+   "near_constant": [
+    146,
+    2023
+   ],
+   "acc_std": 0.9985,
+   "acc_raw": 0.99825,
+   "auc_std": 0.9989963840736333,
+   "auc_raw": 0.9999447283982581,
+   "share_std": 0.9998675092315035,
+   "share_raw": 1.0438364548178318e-11,
+   "cv_agreement_std": 0.9968728094936037,
+   "cos_std_raw": 0.009154839792823508,
+   "cos_std_diffmean": 0.006039637576360703,
+   "cos_raw_diffmean": 0.6993932220665721
+  },
+  "meta-llama/Llama-3.2-1B-Instruct L10": {
+   "model": "meta-llama/Llama-3.2-1B-Instruct",
+   "layer": 10,
+   "flagged": "control",
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.067875,
+   "near_constant": [],
+   "acc_std": 0.997,
+   "acc_raw": 0.99675,
+   "auc_std": 0.9997701864980204,
+   "auc_raw": 0.9998041252008444,
+   "share_std": 4.2995536630560034e-05,
+   "share_raw": 9.80793832806777e-07,
+   "cv_agreement_std": 0.915121754326946,
+   "cos_std_raw": 0.832128604119599,
+   "cos_std_diffmean": 0.4251494742031338,
+   "cos_raw_diffmean": 0.598027296975741
+  },
+  "google/gemma-3-270m L13": {
+   "model": "google/gemma-3-270m",
+   "layer": 13,
+   "flagged": "near-constant",
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.071875,
+   "near_constant": [
+    163
+   ],
+   "acc_std": 0.98875,
+   "acc_raw": 0.991,
+   "auc_std": 0.9943612592755247,
+   "auc_raw": 0.9960197124297822,
+   "share_std": 0.9047788412668926,
+   "share_raw": 5.906456345634425e-05,
+   "cv_agreement_std": 0.9730236947703983,
+   "cos_std_raw": 0.2279553502764709,
+   "cos_std_diffmean": 0.08174140345383127,
+   "cos_raw_diffmean": 0.4061417660323469
+  },
+  "google/gemma-3-270m L5": {
+   "model": "google/gemma-3-270m",
+   "layer": 5,
+   "flagged": "exactly constant",
+   "train_tokens": 8000,
+   "test_tokens": 4000,
+   "positive_rate": 0.071875,
+   "near_constant": [
+    163,
+    400
+   ],
+   "acc_std": 0.999,
+   "acc_raw": 0.99875,
+   "auc_std": 0.9999944409391478,
+   "auc_raw": 0.9999944409391478,
+   "share_std": 0.0,
+   "share_raw": 0.0,
+   "cv_agreement_std": 0.9685182713465752,
+   "cos_std_raw": 0.815376644142586,
+   "cos_std_diffmean": 0.44734550702958736,
+   "cos_raw_diffmean": 0.6448667976998448
+  }
+ },
+ "P1 collapse at Llama-3.2-1B L3": {
+  "holds": true
+ },
+ "P2 collapse at Gemma-3-270m L13": {
+  "holds": true
+ },
+ "P3 no collapse on exactly constant coordinates (Gemma L5)": {
+  "holds": true
+ },
+ "P4 control clean (Llama L10)": {
+  "holds": true
+ },
+ "P5 accuracy unaffected": {
+  "holds": true
+ }
+}
