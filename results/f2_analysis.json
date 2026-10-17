@@ -1,0 +1,378 @@
+{
+ "units_scored": 40,
+ "population B": {
+  "complete": 30,
+  "active_pass": 20,
+  "natural_pass": 15,
+  "reseed_pass": 13,
+  "random_pass": 27,
+  "targeted_pass": 26,
+  "median_alignment": {
+   "active": 0.9788323671716095,
+   "natural": 0.9524877871466173,
+   "reseed": 0.9245389361243497,
+   "random": 0.9987364066708291,
+   "targeted": 0.9986357734289544
+  },
+  "primary_active_vs_natural": {
+   "a_only": 7,
+   "b_only": 2,
+   "p_one_sided": 0.08984375,
+   "holds": false
+  },
+  "active_vs_reseed": {
+   "a_only": 10,
+   "b_only": 3,
+   "p_two_sided": 0.09228515625
+  },
+  "active_vs_random": {
+   "a_only": 2,
+   "b_only": 9,
+   "p_two_sided": 0.0654296875
+  }
+ },
+ "population C": {
+  "complete": 10,
+  "active_pass": 10,
+  "natural_pass": 9,
+  "reseed_pass": 9,
+  "random_pass": 10,
+  "targeted_pass": 10,
+  "median_alignment": {
+   "active": 0.9992272878827233,
+   "natural": 0.9969164207027057,
+   "reseed": 0.993030040897461,
+   "random": 0.9996095446243851,
+   "targeted": 0.9996765462472741
+  },
+  "harm": {
+   "active": 0,
+   "natural": 1,
+   "reseed": 1,
+   "random": 0,
+   "targeted": 0
+  }
+ },
+ "per_unit": {
+  "gpt2_b15a:882": {
+   "active": 0.992,
+   "natural": 0.994,
+   "reseed": 0.776,
+   "random": 0.9987,
+   "targeted": 0.9983,
+   "population": "B"
+  },
+  "gpt2_b15a:1348": {
+   "active": 0.78,
+   "natural": 0.9984,
+   "reseed": 0.9983,
+   "random": 0.9951,
+   "targeted": 0.9996,
+   "population": "B"
+  },
+  "gpt2_b15a:1951": {
+   "active": 0.9088,
+   "natural": 0.9333,
+   "reseed": 0.8827,
+   "random": 0.9994,
+   "targeted": 0.9988,
+   "population": "B"
+  },
+  "gpt2_b15a:2142": {
+   "active": 0.9979,
+   "natural": 0.9994,
+   "reseed": 0.9991,
+   "random": 0.9988,
+   "targeted": 0.9992,
+   "population": "B"
+  },
+  "gpt2_b15a:2705": {
+   "active": 0.9978,
+   "natural": 0.9988,
+   "reseed": 0.9987,
+   "random": 0.856,
+   "targeted": 0.9803,
+   "population": "B"
+  },
+  "gpt2_b15b:168": {
+   "active": 0.9994,
+   "natural": 0.9281,
+   "reseed": 0.9977,
+   "random": 0.9996,
+   "targeted": 0.9998,
+   "population": "B"
+  },
+  "gpt2_b15b:198": {
+   "active": 0.9981,
+   "natural": 0.9572,
+   "reseed": 0.9252,
+   "random": 0.9998,
+   "targeted": 0.9997,
+   "population": "B"
+  },
+  "gpt2_b15b:390": {
+   "active": 0.9483,
+   "natural": 0.8684,
+   "reseed": 0.8831,
+   "random": 0.9998,
+   "targeted": 0.9999,
+   "population": "B"
+  },
+  "gpt2_b15b:909": {
+   "active": 0.9786,
+   "natural": 0.9988,
+   "reseed": 0.9408,
+   "random": 0.9999,
+   "targeted": 0.9998,
+   "population": "B"
+  },
+  "gpt2_b15b:1485": {
+   "active": 0.9896,
+   "natural": 0.9984,
+   "reseed": 0.9975,
+   "random": 0.9998,
+   "targeted": 0.9994,
+   "population": "B"
+  },
+  "gpt2_b15b:1839": {
+   "active": 0.9924,
+   "natural": 0.9839,
+   "reseed": 0.0035,
+   "random": 0.9994,
+   "targeted": 0.9996,
+   "population": "B"
+  },
+  "neo10_c0:100": {
+   "active": 0.9896,
+   "natural": 0.6,
+   "reseed": 0.9232,
+   "random": 0.9976,
+   "targeted": 0.9982,
+   "population": "B"
+  },
+  "neo10_c0:110": {
+   "active": 0.9584,
+   "natural": 0.7584,
+   "reseed": 0.6376,
+   "random": 0.919,
+   "targeted": 0.7712,
+   "population": "B"
+  },
+  "neo10_c0:1448": {
+   "active": 0.8821,
+   "natural": 0.0827,
+   "reseed": 0.0438,
+   "random": 0.7705,
+   "targeted": 0.9518,
+   "population": "B"
+  },
+  "neo10_c0:1560": {
+   "active": 0.9976,
+   "natural": 0.9281,
+   "reseed": 0.9687,
+   "random": 0.9988,
+   "targeted": 0.9985,
+   "population": "B"
+  },
+  "neo10_c0:1674": {
+   "active": 0.9985,
+   "natural": 0.9877,
+   "reseed": 0.9645,
+   "random": 0.999,
+   "targeted": 0.998,
+   "population": "B"
+  },
+  "neo10_c0:2199": {
+   "active": 0.6285,
+   "natural": 0.7883,
+   "reseed": 0.9527,
+   "random": 0.9987,
+   "targeted": 0.9415,
+   "population": "B"
+  },
+  "neo10_c0:2351": {
+   "active": 0.7301,
+   "natural": 0.8932,
+   "reseed": 0.9727,
+   "random": 0.9987,
+   "targeted": 0.9745,
+   "population": "B"
+  },
+  "neo10_c0:2358": {
+   "active": 0.9879,
+   "natural": 0.9975,
+   "reseed": 0.9239,
+   "random": 0.9996,
+   "targeted": 0.9995,
+   "population": "B"
+  },
+  "neo10_c0:2657": {
+   "active": 0.2341,
+   "natural": 0.7835,
+   "reseed": 0.5155,
+   "random": 0.9895,
+   "targeted": 0.5748,
+   "population": "B"
+  },
+  "neo10_c0:2797": {
+   "active": 0.7966,
+   "natural": 0.8839,
+   "reseed": 0.091,
+   "random": 0.957,
+   "targeted": 0.9113,
+   "population": "B"
+  },
+  "neo10_c0:2920": {
+   "active": 0.9937,
+   "natural": 0.9835,
+   "reseed": 0.9868,
+   "random": 0.9995,
+   "targeted": 0.9885,
+   "population": "B"
+  },
+  "neo10_c0:3003": {
+   "active": 0.8563,
+   "natural": 0.6795,
+   "reseed": 0.8737,
+   "random": 0.9996,
+   "targeted": 0.9956,
+   "population": "B"
+  },
+  "neo10_c0:3066": {
+   "active": 0.9634,
+   "natural": 0.8162,
+   "reseed": 0.6462,
+   "random": 0.9982,
+   "targeted": 0.9991,
+   "population": "B"
+  },
+  "neo10_c0:85": {
+   "active": 0.9517,
+   "natural": 0.977,
+   "reseed": 0.9362,
+   "random": 0.9987,
+   "targeted": 0.9987,
+   "population": "C"
+  },
+  "neo10_c0:224": {
+   "active": 0.9972,
+   "natural": 0.9978,
+   "reseed": 0.9866,
+   "random": 0.9996,
+   "targeted": 0.9958,
+   "population": "C"
+  },
+  "neo10_c0:1394": {
+   "active": 0.9992,
+   "natural": 0.9985,
+   "reseed": 0.9922,
+   "random": 0.9995,
+   "targeted": 0.9998,
+   "population": "C"
+  },
+  "neo10_c0:1543": {
+   "active": 0.9998,
+   "natural": 0.9998,
+   "reseed": 0.9662,
+   "random": 0.9999,
+   "targeted": 1.0,
+   "population": "C"
+  },
+  "neo10_c0:2009": {
+   "active": 0.9999,
+   "natural": 0.9954,
+   "reseed": 0.9939,
+   "random": 0.9999,
+   "targeted": 1.0,
+   "population": "C"
+  },
+  "neo10_c0:2136": {
+   "active": 0.9987,
+   "natural": 0.9997,
+   "reseed": 0.9998,
+   "random": 1.0,
+   "targeted": 1.0,
+   "population": "C"
+  },
+  "neo10_c0:2193": {
+   "active": 0.9992,
+   "natural": 0.9979,
+   "reseed": 0.9637,
+   "random": 0.9996,
+   "targeted": 0.9996,
+   "population": "C"
+  },
+  "neo10_c0:2309": {
+   "active": 0.9975,
+   "natural": 0.996,
+   "reseed": 0.9987,
+   "random": 1.0,
+   "targeted": 1.0,
+   "population": "C"
+  },
+  "neo10_c0:2442": {
+   "active": 1.0,
+   "natural": 0.9047,
+   "reseed": 0.9993,
+   "random": 0.9923,
+   "targeted": 0.9982,
+   "population": "C"
+  },
+  "neo10_c0:2571": {
+   "active": 0.9993,
+   "natural": 0.9945,
+   "reseed": 0.9945,
+   "random": 0.9994,
+   "targeted": 0.9983,
+   "population": "C"
+  },
+  "neo10_c1:625": {
+   "active": 0.979,
+   "natural": 0.9973,
+   "reseed": 0.0055,
+   "random": 0.996,
+   "targeted": 0.9872,
+   "population": "B"
+  },
+  "neo10_c1:1041": {
+   "active": 0.9709,
+   "natural": 0.9793,
+   "reseed": 0.9686,
+   "random": 0.9551,
+   "targeted": 0.9993,
+   "population": "B"
+  },
+  "neo10_c1:1854": {
+   "active": 0.9282,
+   "natural": 0.9933,
+   "reseed": 0.732,
+   "random": 0.9959,
+   "targeted": 0.9908,
+   "population": "B"
+  },
+  "neo6:1543": {
+   "active": 0.9693,
+   "natural": 0.7777,
+   "reseed": 0.7141,
+   "random": 0.9985,
+   "targeted": 0.9991,
+   "population": "B"
+  },
+  "neo6:2796": {
+   "active": 0.9969,
+   "natural": 0.9902,
+   "reseed": 0.9968,
+   "random": 0.9998,
+   "targeted": 0.9998,
+   "population": "B"
+  },
+  "gpt2_b15c:1698": {
+   "active": 0.9999,
+   "natural": 0.9478,
+   "reseed": 0.999,
+   "random": 0.9999,
+   "targeted": 1.0,
+   "population": "B"
+  }
+ }
+}

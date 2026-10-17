@@ -1,0 +1,73 @@
+{
+ "L5, as usual": {
+  "units": 18,
+  "near_constant_coords": 1,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 0,
+  "median_alignment": 0.0193953737842613,
+  "passes_identifiable": 3,
+  "median_alignment_identifiable": 0.3813064022177861,
+  "median_share": 0.998646467924118,
+  "fits_with_share_gt_0.5": 18,
+  "direct_fits_with_share_gt_0.5": 17,
+  "median_restart_agreement_of_those": 0.9991,
+  "median_restart_agreement_all": 0.99895
+ },
+ "L5, coordinate dropped": {
+  "units": 18,
+  "near_constant_coords": 1,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 2,
+  "median_alignment": 0.42041172085757234,
+  "passes_identifiable": 2,
+  "median_alignment_identifiable": 0.4205419844492321,
+  "median_share": 0.0,
+  "fits_with_share_gt_0.5": 0,
+  "direct_fits_with_share_gt_0.5": 0,
+  "median_restart_agreement_of_those": null,
+  "median_restart_agreement_all": 0.46140000000000003
+ },
+ "L3, as usual": {
+  "units": 10,
+  "near_constant_coords": 2,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 0,
+  "median_alignment": 0.007976045357273955,
+  "passes_identifiable": 0,
+  "median_alignment_identifiable": 0.013075412524466857,
+  "median_share": 0.9976150989532471,
+  "fits_with_share_gt_0.5": 10,
+  "direct_fits_with_share_gt_0.5": 10,
+  "median_restart_agreement_of_those": 0.57325,
+  "median_restart_agreement_all": 0.57325
+ },
+ "L6, as usual (control)": {
+  "units": 20,
+  "near_constant_coords": 0,
+  "share_measured_on": "lowest-SD coordinate",
+  "passes": 2,
+  "median_alignment": 0.27573653143660676,
+  "passes_identifiable": 2,
+  "median_alignment_identifiable": 0.3185535156501462,
+  "median_share": 0.09318993613123894,
+  "fits_with_share_gt_0.5": 0,
+  "direct_fits_with_share_gt_0.5": 0,
+  "median_restart_agreement_of_those": null,
+  "median_restart_agreement_all": 0.4424
+ },
+ "P1 map predicts the artifact at L5": {
+  "holds": true
+ },
+ "P1b map predicts the artifact at L3": {
+  "holds": true
+ },
+ "P2 restart agreement certifies it": {
+  "holds": true
+ },
+ "P3 dropping the coordinate repairs it": {
+  "holds": true
+ },
+ "P4 control layer clean": {
+  "holds": true
+ }
+}

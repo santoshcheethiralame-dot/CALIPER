@@ -1,0 +1,37 @@
+{
+ "GPT-Neo L6": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 0,
+  "median_alignment": 0.011796478782799326,
+  "passes_identifiable": 19,
+  "median_alignment_identifiable": 0.9924219943069184,
+  "median_share": 0.9998644590377808,
+  "fits_with_share_gt_0.5": 20,
+  "median_restart_agreement_of_those": 0.9999865,
+  "median_restart_agreement_all": 0.9999865
+ },
+ "GPT-2 L3": {
+  "units": 20,
+  "near_constant_coords": 1,
+  "share_measured_on": "near-constant coordinates",
+  "passes": 0,
+  "median_alignment": 0.14490025408100513,
+  "passes_identifiable": 13,
+  "median_alignment_identifiable": 0.9828374110790616,
+  "median_share": 0.9783418774604797,
+  "fits_with_share_gt_0.5": 17,
+  "median_restart_agreement_of_those": 0.991071,
+  "median_restart_agreement_all": 0.978334
+ },
+ "P1 MID collapses at GPT-Neo L6": {
+  "holds": true
+ },
+ "P1b MID collapses at GPT-2 L3": {
+  "holds": true
+ },
+ "P2 restart agreement certifies it": {
+  "holds": true
+ }
+}
