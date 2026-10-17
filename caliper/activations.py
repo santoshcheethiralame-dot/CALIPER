@@ -71,7 +71,7 @@ def _mlp_ln(block):
     parallel residual (use_parallel_residual=True), so the MLP still reads this
     layernorm's output directly and the identity holds either way.
     """
-    for name in ("ln_2", "post_attention_layernorm", "post_attention_norm"):
+    for name in ("ln_2", "pre_feedforward_layernorm", "post_attention_layernorm", "post_attention_norm"):
         if hasattr(block, name):
             return getattr(block, name)
     if hasattr(block, "do_layer_norm_before"):      # OPT: 350m is post-LN, the rest pre-LN

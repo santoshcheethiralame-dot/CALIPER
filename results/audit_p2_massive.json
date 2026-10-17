@@ -1,0 +1,247 @@
+{
+ "Qwen2.5-3B": {
+  "vectors": 90,
+  "live": 34,
+  "dimension": 2048,
+  "median_top1_share": 0.034082211363759655,
+  "median_share_on_heavy": 0.023229826760066692,
+  "most_common_top_coordinate": [
+   1874,
+   16
+  ],
+  "heavy_coordinates": [
+   318,
+   1874,
+   1819,
+   1484,
+   1715
+  ],
+  "by_arm": {
+   "concept token": {
+    "median_share_on_heavy": 0.05027228039356654,
+    "median_max_cos": 0.40193031679241153,
+    "median_max_cos_without_heavy": 0.39655208829242494
+   },
+   "template tail": {
+    "median_share_on_heavy": 0.011446210244860172,
+    "median_max_cos": 0.7701570128193757,
+    "median_max_cos_without_heavy": 0.7683286054484216
+   },
+   "sentence mean": {
+    "median_share_on_heavy": 0.026996201590443372,
+    "median_max_cos": 0.354000601080536,
+    "median_max_cos_without_heavy": 0.35533885392260434
+   }
+  },
+  "distinctness": {
+   "auc": 0.7815126050420168,
+   "ci95": [
+    0.6819721638655463,
+    0.8765821953781512
+   ]
+  },
+  "distinctness_without_heavy": {
+   "auc": 0.7778361344537815,
+   "ci95": [
+    0.6777704831932774,
+    0.8728991596638656
+   ]
+  }
+ },
+ "Qwen2.5-7B": {
+  "vectors": 90,
+  "live": 32,
+  "dimension": 3584,
+  "median_top1_share": 0.022946494175245233,
+  "median_share_on_heavy": 0.011700620318978661,
+  "most_common_top_coordinate": [
+   2570,
+   11
+  ],
+  "heavy_coordinates": [
+   458,
+   2570,
+   2718,
+   1491,
+   1111
+  ],
+  "by_arm": {
+   "concept token": {
+    "median_share_on_heavy": 0.021346849313061307,
+    "median_max_cos": 0.4077002420138913,
+    "median_max_cos_without_heavy": 0.40470400914399596
+   },
+   "template tail": {
+    "median_share_on_heavy": 0.007748129862177277,
+    "median_max_cos": 0.8421218401732433,
+    "median_max_cos_without_heavy": 0.8403034202397346
+   },
+   "sentence mean": {
+    "median_share_on_heavy": 0.00949830835000392,
+    "median_max_cos": 0.36022319441812645,
+    "median_max_cos_without_heavy": 0.3584336204246579
+   }
+  },
+  "distinctness": {
+   "auc": 0.822198275862069,
+   "ci95": [
+    0.7294652478448276,
+    0.9038389008620689
+   ]
+  },
+  "distinctness_without_heavy": {
+   "auc": 0.8119612068965517,
+   "ci95": [
+    0.7147090517241379,
+    0.8973666487068965
+   ]
+  }
+ },
+ "Gemma-3-4B, KL grid": {
+  "vectors": 90,
+  "live": 9,
+  "dimension": 2560,
+  "median_top1_share": 0.28856809826334384,
+  "median_share_on_heavy": 0.2975944472258957,
+  "most_common_top_coordinate": [
+   443,
+   81
+  ],
+  "heavy_coordinates": [
+   443,
+   1387,
+   1209,
+   1728,
+   1980
+  ],
+  "by_arm": {
+   "concept token": {
+    "median_share_on_heavy": 0.5936511910532769,
+    "median_max_cos": 0.785833459302912,
+    "median_max_cos_without_heavy": 0.4692424105476236
+   },
+   "template tail": {
+    "median_share_on_heavy": 0.1201694477685185,
+    "median_max_cos": 0.7793591729709826,
+    "median_max_cos_without_heavy": 0.7957338219868575
+   },
+   "sentence mean": {
+    "median_share_on_heavy": 0.2555084810452361,
+    "median_max_cos": 0.5578663527940435,
+    "median_max_cos_without_heavy": 0.3611302445360406
+   }
+  },
+  "distinctness": {
+   "auc": 0.6083676268861454,
+   "ci95": [
+    0.4594821673525377,
+    0.7531035665294924
+   ]
+  },
+  "distinctness_without_heavy": {
+   "auc": 0.6282578875171467,
+   "ci95": [
+    0.47866941015089165,
+    0.766803840877915
+   ]
+  }
+ },
+ "Qwen3.5-2B": {
+  "vectors": 90,
+  "live": 28,
+  "dimension": 2048,
+  "median_top1_share": 0.024009153227415016,
+  "median_share_on_heavy": 0.021179419320755875,
+  "most_common_top_coordinate": [
+   1201,
+   8
+  ],
+  "heavy_coordinates": [
+   1201,
+   1403,
+   536,
+   1357,
+   1221
+  ],
+  "by_arm": {
+   "concept token": {
+    "median_share_on_heavy": 0.036675928899164836,
+    "median_max_cos": 0.38372398621278203,
+    "median_max_cos_without_heavy": 0.3705383002289495
+   },
+   "template tail": {
+    "median_share_on_heavy": 0.017316857511044306,
+    "median_max_cos": 0.8507447956733246,
+    "median_max_cos_without_heavy": 0.8482985878631192
+   },
+   "sentence mean": {
+    "median_share_on_heavy": 0.020466765888991656,
+    "median_max_cos": 0.3362798393542647,
+    "median_max_cos_without_heavy": 0.33884025329584455
+   }
+  },
+  "distinctness": {
+   "auc": 0.6448732718894009,
+   "ci95": [
+    0.5253384216589861,
+    0.7557747695852534
+   ]
+  },
+  "distinctness_without_heavy": {
+   "auc": 0.6442972350230415,
+   "ci95": [
+    0.5253384216589861,
+    0.7540394585253456
+   ]
+  }
+ },
+ "Qwen3.5-0.8B": {
+  "vectors": 90,
+  "live": 30,
+  "dimension": 1024,
+  "median_top1_share": 0.03125783912723969,
+  "median_share_on_heavy": 0.029625188520181707,
+  "most_common_top_coordinate": [
+   7,
+   14
+  ],
+  "heavy_coordinates": [
+   7,
+   31,
+   4,
+   162,
+   169
+  ],
+  "by_arm": {
+   "concept token": {
+    "median_share_on_heavy": 0.038937146542556506,
+    "median_max_cos": 0.41477945448468984,
+    "median_max_cos_without_heavy": 0.39799254604724765
+   },
+   "template tail": {
+    "median_share_on_heavy": 0.026966106047891153,
+    "median_max_cos": 0.8172594333281478,
+    "median_max_cos_without_heavy": 0.8135957161697027
+   },
+   "sentence mean": {
+    "median_share_on_heavy": 0.02347832016160329,
+    "median_max_cos": 0.34293562333043526,
+    "median_max_cos_without_heavy": 0.3443475432436076
+   }
+  },
+  "distinctness": {
+   "auc": 0.7194444444444444,
+   "ci95": [
+    0.6027569444444444,
+    0.8266805555555554
+   ]
+  },
+  "distinctness_without_heavy": {
+   "auc": 0.7133333333333334,
+   "ci95": [
+    0.5988333333333333,
+    0.8205625
+   ]
+  }
+ }
+}
