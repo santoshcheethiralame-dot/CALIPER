@@ -43,38 +43,108 @@
 \newcommand{\dThreeChange}{$-0.089$}
 \newcommand{\dThreeChangeCI}{$[-0.266, +0.053]$}
 \newcommand{\dThreeChangeReading}{no change detected}
-\newcommand{\eOneUnits}{\tbd{eOneUnits}}
-\newcommand{\eOneFail}{\tbd{eOneFail}}
-\newcommand{\eOneReading}{\tbd{eOneReading}}
-\newcommand{\eOneCw}{\tbd{eOneCw}}
-\newcommand{\eOneUf}{\tbd{eOneUf}}
-\newcommand{\eOneAucRestart}{\tbd{eOneAucRestart}}
-\newcommand{\eOneAucTest}{\tbd{eOneAucTest}}
-\newcommand{\eOneDelta}{\tbd{eOneDelta}}
-\newcommand{\eOneCI}{\tbd{eOneCI}}
-\newcommand{\eOneP}{\tbd{eOneP}}
-\newcommand{\eOneEucDelta}{\tbd{eOneEucDelta}}
-\newcommand{\eOneEucCI}{\tbd{eOneEucCI}}
-\newcommand{\eOneValTest}{\tbd{eOneValTest}}
-\newcommand{\eOneNeoUnits}{\tbd{eOneNeoUnits}}
-\newcommand{\eOneNeoFail}{\tbd{eOneNeoFail}}
-\newcommand{\eOneNeoReading}{\tbd{eOneNeoReading}}
-\newcommand{\eOneNeoCw}{\tbd{eOneNeoCw}}
-\newcommand{\eOneNeoUf}{\tbd{eOneNeoUf}}
-\newcommand{\eOneNeoAucRestart}{\tbd{eOneNeoAucRestart}}
-\newcommand{\eOneNeoAucTest}{\tbd{eOneNeoAucTest}}
-\newcommand{\eOneNeoDelta}{\tbd{eOneNeoDelta}}
-\newcommand{\eOneNeoCI}{\tbd{eOneNeoCI}}
-\newcommand{\eOneNeoP}{\tbd{eOneNeoP}}
-\newcommand{\eOneNeoEucDelta}{\tbd{eOneNeoEucDelta}}
-\newcommand{\eOneNeoEucCI}{\tbd{eOneNeoEucCI}}
-\newcommand{\eOneNeoValTest}{\tbd{eOneNeoValTest}}
-\newcommand{\eOneLowVar}{\tbd{eOneLowVar}}
-\newcommand{\eOneRuleCorrect}{\tbd{eOneRuleCorrect}}
-\newcommand{\eOneRuleRestartCorrect}{\tbd{eOneRuleRestartCorrect}}
-\newcommand{\eOneRuleFcr}{\tbd{eOneRuleFcr}}
-\newcommand{\eOneRuleRestartFcr}{\tbd{eOneRuleRestartFcr}}
-\newcommand{\eOneRuleFcrCI}{\tbd{eOneRuleFcrCI}}
-\newcommand{\eOneRuleHolds}{\tbd{eOneRuleHolds}}
-\newcommand{\eOneHours}{\tbd{eOneHours}}
+\newcommand{\eOneUnits}{200}
+\newcommand{\eOneFail}{41}
+\newcommand{\eOneReading}{holds}
+\newcommand{\eOneCw}{0}
+\newcommand{\eOneUf}{41}
+\newcommand{\eOneAucRestart}{0.900}
+\newcommand{\eOneAucTest}{0.962}
+\newcommand{\eOneDelta}{$-0.062$}
+\newcommand{\eOneCI}{$[-0.106, -0.022]$}
+\newcommand{\eOneP}{0.0069}
+\newcommand{\eOneEucDelta}{$-0.068$}
+\newcommand{\eOneEucCI}{$[-0.111, -0.027]$}
+\newcommand{\eOneValTest}{$+0.019$}
+\newcommand{\eOneNeoUnits}{100}
+\newcommand{\eOneNeoFail}{20}
+\newcommand{\eOneNeoReading}{not replicated}
+\newcommand{\eOneNeoCw}{0}
+\newcommand{\eOneNeoUf}{20}
+\newcommand{\eOneNeoAucRestart}{0.896}
+\newcommand{\eOneNeoAucTest}{0.957}
+\newcommand{\eOneNeoDelta}{$-0.061$}
+\newcommand{\eOneNeoCI}{$[-0.146, +0.022]$}
+\newcommand{\eOneNeoP}{0.15}
+\newcommand{\eOneNeoEucDelta}{$+0.011$}
+\newcommand{\eOneNeoEucCI}{$[-0.073, +0.097]$}
+\newcommand{\eOneNeoValTest}{$+0.036$}
+\newcommand{\eOneCodeUnits}{100}
+\newcommand{\eOneCodeFail}{52}
+\newcommand{\eOneCodeReading}{holds}
+\newcommand{\eOneCodeCw}{0}
+\newcommand{\eOneCodeUf}{52}
+\newcommand{\eOneCodeAucRestart}{0.835}
+\newcommand{\eOneCodeAucTest}{0.954}
+\newcommand{\eOneCodeDelta}{$-0.119$}
+\newcommand{\eOneCodeCI}{$[-0.212, -0.028]$}
+\newcommand{\eOneCodeP}{0.014}
+\newcommand{\eOneCodeEucDelta}{$-0.119$}
+\newcommand{\eOneCodeEucCI}{$[-0.212, -0.028]$}
+\newcommand{\eOneCodeValTest}{$+0.036$}
+\newcommand{\eOneLowVar}{not scored}
+\newcommand{\eOneRuleCorrect}{213}
+\newcommand{\eOneRuleRestartCorrect}{102}
+\newcommand{\eOneRuleFcr}{1.4\%}
+\newcommand{\eOneRuleRestartFcr}{1.0\%}
+\newcommand{\eOneRuleFcrCI}{$[-0.021, +0.028]$}
+\newcommand{\eOneRuleHolds}{fails}
+\newcommand{\eOneHours}{7}
+\newcommand{\eOneCodePassProse}{81}
+\newcommand{\eOneCodePassCode}{48}
+\newcommand{\eOneCodeLost}{34}
+\newcommand{\eOneCodeGained}{1}
+\newcommand{\poolK}{5}
+\newcommand{\poolHeld}{$-0.165$}
+\newcommand{\poolHeldCI}{$[-0.233, -0.097]$}
+\newcommand{\poolTest}{$-0.105$}
+\newcommand{\poolTestCI}{$[-0.173, -0.038]$}
+\newcommand{\eThreeShareLo}{0.947}
+\newcommand{\eThreeShareHi}{0.998}
+\newcommand{\eThreeCosLo}{0.04}
+\newcommand{\eThreeCosHi}{0.20}
+\newcommand{\eThreeBLlamaShare}{0.9999}
+\newcommand{\eThreeBLlamaAcc}{0.9985}
+\newcommand{\eThreeBLlamaCos}{0.009}
+\newcommand{\eThreeBLlamaFold}{0.997}
+\newcommand{\eThreeBGemmaShare}{0.905}
+\newcommand{\repNeoLs}{15}
+\newcommand{\repNeoLsRefit}{13}
+\newcommand{\repNeoMid}{20}
+\newcommand{\repThreeMid}{19}
+\newcommand{\mapModels}{36}
+\newcommand{\mapExposed}{28}
+\newcommand{\mapChecked}{5}
+\newcommand{\mapLayers}{70}
+\newcommand{\mapAgree}{every}
+\newcommand{\eTwoUnits}{200}
+\newcommand{\eTwoFail}{1}
+\newcommand{\eTwoLsFail}{41}
+\newcommand{\eTwoMidOnly}{40}
+\newcommand{\eTwoLsOnly}{0}
+\newcommand{\eTwoP}{$2\times10^{-12}$}
+\newcommand{\eTwoNeoUnits}{100}
+\newcommand{\eTwoNeoFail}{3}
+\newcommand{\eTwoNeoLsFail}{20}
+\newcommand{\eTwoNeoMidOnly}{17}
+\newcommand{\eTwoNeoLsOnly}{0}
+\newcommand{\eTwoNeoP}{$2\times10^{-5}$}
+\newcommand{\eTwoBNeoOn}{20}
+\newcommand{\eTwoBNeoUnits}{20}
+\newcommand{\eTwoBNeoAlign}{0.012}
+\newcommand{\eTwoBNeoIdent}{19}
+\newcommand{\eTwoBNeoAgree}{1.000}
+\newcommand{\eTwoBThreeOn}{17}
+\newcommand{\eTwoBThreeUnits}{20}
+\newcommand{\eTwoBThreeAlign}{0.145}
+\newcommand{\eTwoBThreeIdent}{13}
+\newcommand{\eTwoBThreeAgree}{0.991}
+\newcommand{\fThreeOn}{18}
+\newcommand{\fThreeUnits}{18}
+\newcommand{\fThreeAlign}{0.019}
+\newcommand{\fThreeAgree}{0.999}
+\newcommand{\fThreeDropAlign}{0.42}
+\newcommand{\fThreeLThreeOn}{10}
+\newcommand{\fThreeLThreeUnits}{10}
+\newcommand{\fThreeControlOn}{0}
 \newcommand{\bRReplicateNote}{the primary's replicate (B-14r) is listed first}

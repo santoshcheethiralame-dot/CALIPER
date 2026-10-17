@@ -43,16 +43,13 @@ re-checked once E-1 (`docs/preregistration-e1-fair-comparison.md`) is scored and
 ## Still to do before submission
 
 - (Done 15 Oct) The licence list of item 12 is in Appendix E.
-- Item 1, after E-1 (16 Oct), for the author to word:
-  - The abstract and contribution 2 quote the six earlier conditions pooled at -0.134 [-0.189, -0.078].
-    That pooling used held-out R2 on the fit's own documents. On unseen documents
-    (`results/test_r2_saved_arms.json`) every earlier arm keeps the negative sign, but the gaps
-    shrink (B-14r -0.199 to -0.069 [-0.174, +0.032]; D-1 -0.147 to -0.100 [-0.179, -0.018]) and
-    most intervals now include zero. E-1's -0.062 is the honest size; the pooled figure should be
-    labelled as same-document held-out fit, or replaced.
-  - The practitioner rule: 213 against 102 correct holds, but its filed prediction fails (1.4% of
-    accepted fits wrong against 1.0%, difference CI [-0.021, +0.028]). "A rule that transfers"
-    must say the error rate was not lower.
-  - "Fits that predict as well as the reference but point elsewhere ... differ only where the
-    stimulus barely varies": E-1 has no converged-wrong fit (41 of 41 failures under-fitted), so
-    P4 was not scorable; the claim rests on the earlier arms only.
+- Item 1, after E-1 (16 Oct), drafted 17 Oct (violet, for the author to reword):
+  - The pooled -0.134 is no longer in the abstract or contribution 3; the post hoc pool on unseen
+    documents (`\poolTest`, five arms) is reported beside the filed pool in Section 5.
+  - Contribution 4 now states that the rule's share of wrong accepted fits was not lower.
+  - The abstract and a new contribution 2 lead with the standardisation failure across families,
+    estimators and the scikit-learn probe (new Section `sec:general`, Tables `tab:general`,
+    `tab:probe`, Appendix `app:map`). The previous abstract is kept as a comment.
+  - The 'wrong but fits well' mechanism rests on the earlier arms only (E-1 had no such fit);
+    still to say where it is claimed.
+- Title: still about agreement checks; consider whether it should name the preprocessing failure.

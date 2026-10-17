@@ -182,7 +182,7 @@ def late(m):
             m.update({f"eTwo{tag}Units": str(a["mcnemar"]["units"]), f"eTwo{tag}Fail": str(a["failures_identifiable"]),
                       f"eTwo{tag}LsFail": str(a["mcnemar"]["units"] - a["mcnemar"]["pass_ln"]),
                       f"eTwo{tag}MidOnly": str(a["mcnemar"]["mid_only"]), f"eTwo{tag}LsOnly": str(a["mcnemar"]["ln_only"]),
-                      f"eTwo{tag}P": f"{a['mcnemar']['p']:.1g}"})
+                      f"eTwo{tag}P": "${}\\times10^{{{}}}$".format(*f"{a['mcnemar']['p']:.0e}".replace("e-0", "e-").split("e"))})
     b = load("results/e2b_analysis.json")
     if b:
         for tag, arm in (("Neo", "GPT-Neo L6"), ("Three", "GPT-2 L3")):
@@ -201,7 +201,35 @@ def late(m):
                  fThreeLThreeUnits=str(u3["units"]), fThreeControlOn=str(c6["fits_with_share_gt_0.5"]))
 
 
-LATE_NAMES = (["poolK", "poolHeld", "poolHeldCI", "poolTest", "poolTestCI"]
+    e3, e3b = load("results/e3_probe.json"), load("results/e3b_probe.json")
+    if e3 and e3b:
+        fl = [r for r in e3["layers"].values() if r["flagged"] is True]
+        m.update(eThreeShareLo=f"{min(r['share_std'] for r in fl):.3f}", eThreeShareHi=f"{max(r['share_std'] for r in fl):.3f}",
+                 eThreeCosLo=f"{min(r['cos_std_raw'] for r in fl):.2f}", eThreeCosHi=f"{max(r['cos_std_raw'] for r in fl):.2f}")
+        ll, g13 = e3b["layers"]["meta-llama/Llama-3.2-1B-Instruct L3"], e3b["layers"]["google/gemma-3-270m L13"]
+        m.update(eThreeBLlamaShare=f"{ll['share_std']:.4f}", eThreeBLlamaAcc=f"{ll['acc_std']:.4f}",
+                 eThreeBLlamaCos=f"{ll['cos_std_raw']:.3f}", eThreeBLlamaFold=f"{ll['cv_agreement_std']:.3f}",
+                 eThreeBGemmaShare=f"{g13['share_std']:.3f}")
+    rt = load("results/repair_table.json")
+    if rt:
+        m.update(repNeoLs=str(rt["GPT-Neo L6 (B-17)"]["zeroed"]), repNeoLsRefit=str(rt["GPT-Neo L6 (B-17)"]["refit_dropped"]),
+                 repNeoMid=str(rt["GPT-Neo L6 (E-2b)"]["zeroed"]), repThreeMid=str(rt["GPT-2 L3 (E-2b)"]["zeroed"]))
+    mp, mv = load("results/layer_map_weights.json"), load("results/layer_map_validation.json")
+    if mp and mv:
+        ok = [v for v in mp["models"].values() if "candidates" in v]
+        def n_layers(k, v):  # the first three validations kept no per-layer rows; take the count from the map
+            if "per_layer" in v:
+                return len(v["per_layer"])
+            return mp["models"][k]["layers"] if "layers" in mp["models"].get(k, {}) else 12  # OPT-125m: 12 blocks
+        m.update(mapModels=str(len(ok)), mapExposed=str(sum(bool(v["candidates"]) for v in ok)),
+                 mapChecked=str(len(mv)), mapLayers=str(sum(n_layers(k, v) for k, v in mv.items())),
+                 mapAgree="every" if all(v["agree"] for v in mv.values()) else "not every")
+
+
+LATE_NAMES = (["poolK", "poolHeld", "poolHeldCI", "poolTest", "poolTestCI",
+               "eThreeShareLo", "eThreeShareHi", "eThreeCosLo", "eThreeCosHi", "eThreeBLlamaShare", "eThreeBLlamaAcc",
+               "eThreeBLlamaCos", "eThreeBLlamaFold", "eThreeBGemmaShare", "repNeoLs", "repNeoLsRefit", "repNeoMid",
+               "repThreeMid", "mapModels", "mapExposed", "mapChecked", "mapLayers", "mapAgree"]
               + [f"eTwo{t}{k}" for t in ("", "Neo") for k in ("Units", "Fail", "LsFail", "MidOnly", "LsOnly", "P")]
               + [f"eTwoB{t}{k}" for t in ("Neo", "Three") for k in ("On", "Units", "Align", "Ident", "Agree")]
               + ["fThreeOn", "fThreeUnits", "fThreeAlign", "fThreeAgree", "fThreeDropAlign", "fThreeLThreeOn",

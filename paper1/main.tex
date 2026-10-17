@@ -38,29 +38,35 @@
 \maketitle
 
 \begin{abstract}
-\draft{Interpretability results are often vouched for by checks that need no ground truth, such as
-agreement across restarts or fit on held-out data. That agreement can be high for a wrong answer is
-known in principle; how often it happens on real models, and why, has not been measured, because the
-right answer is usually missing. We release \benchname{}, a calibration bench built on one place where
-it is not missing: an MLP neuron's pre-activation is the inner product of its layer-norm output with
-the neuron's input weight column, so the direction the neuron reads is written in the weights.
-Scoring a single-index direction estimator and its checks against this reference on GPT-2, GPT-Neo
-and Pythia, we find a failure mode created by a common preprocessing step. The layer norm gives every
-token the same projection onto $1/\gamma$, so a fit's component along it is invisible to the data;
-per-coordinate standardisation magnifies that component and every restart reproduces it, so restart
-agreement certifies wrong directions. On one GPT-Neo layer all 20 units fail, at a median alignment of
-0.01, while their restarts agree at 1.0. A pre-registered test predicted the same failure at GPT-2
-layer 3 from the weights alone (0 of 20 units pass) and its fix. In the main comparison, filed before
-its data (one estimator route, five independent restarts and a test set of unseen documents), restart
-agreement predicts failure with AUC \eOneAucRestart{} and test fit with \eOneAucTest{} on
-\eOneUnits{} GPT-2 units (difference \eOneDelta{} \eOneCI); six earlier conditions pooled give
-$-0.134$, 95\% CI $[-0.189,-0.078]$. Held-out fit's advantage comes from under-fitted estimates. Fits
-that predict the response as well as the reference but point elsewhere escape both checks, and
-differ from the reference only where the stimulus barely varies. Applied to new units, a simple rule
-(remove the null direction, then accept fits with validation $R^2 \geq 0.995$) certifies
-\eOneRuleCorrect{} correct directions against \eOneRuleRestartCorrect{} for restart agreement. The
-setting is narrow by design: MLP units of small LayerNorm models, noiseless responses and fixed
-stimuli. We release the bench, every pre-registration and every run.}
+\draft{Interpretability results are often vouched for by checks that need no ground truth: agreement
+across restarts or folds, and fit or accuracy on held-out data. We release \benchname{}, a calibration
+bench built on one place where ground truth exists: an MLP neuron's pre-activation is the inner
+product of its layer-norm output with the neuron's input weight column, so the direction it reads is
+written in the weights. Scoring direction estimators and their checks against this reference, we find
+a failure mode created by a common preprocessing step. Standardising each coordinate before fitting
+magnifies any weight on a nearly constant coordinate, and such coordinates appear wherever a norm gain
+is near zero; every restart and every fold then reproduces the same wrong direction. On one GPT-Neo
+layer all 20 units fail at a median alignment of 0.01 while their restarts agree at 1.0. Pre-registered
+tests reproduce the failure in a third model family (OPT), with a second estimator family (maximally
+informative dimensions), and with the standard scikit-learn probe, whose direction on a Llama-3.2-1B
+layer is \eThreeBLlamaShare{} one coordinate at test accuracy \eThreeBLlamaAcc. The exposed layers can
+be read from the weights: the rule agreed with the activations on all \mapLayers{} layers we checked,
+and flags layers in \mapExposed{} of \mapModels{} public models. Zeroing the coordinates repairs
+saved directions after the fact. In a comparison filed before its data, restart agreement predicts
+failure less well than fit on unseen documents (AUC difference \eOneDelta{} \eOneCI{} on GPT-2;
+\poolTest{} \poolTestCI{} pooled over five earlier conditions), but those failures belong to the
+estimator: a second estimator recovers \eTwoMidOnly{} of the \eTwoLsFail{} units ours misses. The
+setting is narrow by design: MLP units and linear probes of models up to 1B parameters, noiseless
+unit responses and one probed property. We release the bench, a pre-fit check, every
+pre-registration and every run.}
+%
+% Abstract of 16 Oct, kept for comparison:
+% Interpretability results are often vouched for by checks that need no ground truth, such as
+% agreement across restarts or fit on held-out data. ... We find a failure mode created by a common
+% preprocessing step ... restart agreement certifies wrong directions. On one GPT-Neo layer all 20 units
+% fail ... A pre-registered test predicted the same failure at GPT-2 layer 3 from the weights alone
+% ... six earlier conditions pooled give -0.134, 95% CI [-0.189, -0.078] ... a simple rule ...
+% certifies \eOneRuleCorrect{} correct directions against \eOneRuleRestartCorrect{} for restart agreement.
 %
 % Previous abstract (15 Oct), kept for comparison:
 % Interpretability methods are usually trusted on the strength of checks that need no ground
@@ -160,17 +166,26 @@ contributions are:
   that component. The near-zero gains that cause it can be read from public weights, and a
   pre-registered test predicted both the failure at an unseen layer and its fix
   (Section~\ref{sec:identifiability}, Table~\ref{tab:lnnull}).}
+  \item \draft{\textbf{The failure belongs to the preprocessing, and it is common.} Pre-registered
+  tests find it in a third model family, with a second estimator family, and in the standard
+  scikit-learn probe on GPT-2, GPT-Neo, OPT, Llama-3.2 and Gemma-3, where accuracy and
+  cross-validation give no warning. A rule on the gains, which agreed with the activations on every
+  layer we checked, flags exposed layers in \mapExposed{} of \mapModels{} public models; zeroing the
+  coordinates repairs saved directions, and \texttt{caliper.lint} finds them before any fit
+  (Section~\ref{sec:general}, Tables~\ref{tab:general} and~\ref{tab:probe}).}
   \item \draft{\textbf{Restart agreement is the weaker check, in a comparison built to be fair.}
   With one estimator route, five independent restarts, a test set of unseen documents and the
   identifiable label, filed before its data, the difference is \eOneDelta{} \eOneCI{} on GPT-2 and
-  \eOneNeoDelta{} \eOneNeoCI{} on GPT-Neo (Section~\ref{sec:eone}). Six earlier conditions agree in
-  sign (pooled $-0.134$, 95\% CI $[-0.189, -0.078]$); held-out fit's lead comes from under-fitted
-  estimates, and fits that are wrong but fit well escape both checks (Section~\ref{sec:results};
-  every run is listed in Appendix~\ref{app:arms}).}
-  \item \draft{\textbf{A rule that transfers.} Removing the null direction and then thresholding
-  validation fit certifies about twice as many correct directions as restart agreement on the
-  arms where it was found, and \eOneRuleCorrect{} against \eOneRuleRestartCorrect{} on E-1's new
-  units, where it was filed in advance (Section~\ref{sec:discussion}).}
+  \eOneNeoDelta{} \eOneNeoCI{} on GPT-Neo (Section~\ref{sec:eone}). Five earlier conditions re-scored
+  on unseen documents give \poolTest{} \poolTestCI{} (\poolHeld{} on the fit's own documents). The
+  failures being compared are the estimator's: a second estimator family recovers almost all of them
+  (Section~\ref{sec:eone}; every run is listed in Appendix~\ref{app:arms}).}
+  \item \draft{\textbf{A rule that transfers, with a caveat.} Removing the null direction and then
+  thresholding validation fit certifies about twice as many correct directions as restart agreement
+  on the arms where it was found, and \eOneRuleCorrect{} against \eOneRuleRestartCorrect{} on E-1's
+  new units, where it was filed in advance; but its share of wrong accepted fits was not lower
+  (\eOneRuleFcr{} against \eOneRuleRestartFcr), so that part of its filed prediction failed
+  (Section~\ref{sec:discussion}).}
   \item \textbf{Limits and an error budget.} Restart agreement does not improve as restarts are
   added, and about a quarter of units are not recovered by the direct route within four random
   restarts (Section~\ref{sec:restarts}). Verdicts move with restart count, token sample, held-out
@@ -382,6 +397,14 @@ filed prediction \eOneReading. On GPT-Neo (\eOneNeoFail{} failures) the differen
 (the same GPT-2 units, filed as a secondary), the difference is \eOneCodeDelta{} \eOneCodeCI{}
 (\eOneCodeReading); \eOneCodePassProse{} of these units pass on prose and \eOneCodePassCode{} on code,
 \eOneCodeLost{} passing on prose only and \eOneCodeGained{} on code only.
+The comparison is between checks on one estimator's failures. A pre-registered second family,
+maximally informative dimensions (MID; mutual information between a soft-binned projection and the
+binned response, no link function), fitted to the same units, data, splits and test set, fails on
+\eTwoFail{} of \eTwoUnits{} GPT-2 units and \eTwoNeoFail{} of \eTwoNeoUnits{} GPT-Neo units, against
+\eTwoLsFail{} and \eTwoNeoLsFail{} for ours. It recovers \eTwoMidOnly{} and \eTwoNeoMidOnly{} units that
+ours misses and loses none that ours recovers (McNemar $p$ \eTwoP{} and \eTwoNeoP). E-1's failures, all
+under-fitted, therefore belong to our estimator rather than to the 8{,}000-token sample, and MID fails
+too rarely for its own check comparison to be scored (both of its filed predictions are underpowered).
 Applied without change to these new units, the practitioner rule of Section~\ref{sec:discussion}
 certifies \eOneRuleCorrect{} correct directions at validation $R^2 \geq 0.995$ against
 \eOneRuleRestartCorrect{} at restart agreement $\geq 0.97$, with \eOneRuleFcr{} and
@@ -391,7 +414,8 @@ its safeguards.}
 
 \begin{table}[t]
 \centering
-\small
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrcccl}
 \toprule
 arm & units & failures & AUC restart & AUC test $R^2$ & $\Delta$ [95\% CI] & reading \\
@@ -496,7 +520,13 @@ Table~\ref{tab:arms} pools six conditions that share no units. Absolute AUCs var
 from a held-out-$R^2$ AUC of 0.76 on GPT-Neo to 0.97 on Pythia-1.4B, but the gap varies
 less. Random-effects pooling gives $\Delta$AUC $-0.134$, with a Hartung-Knapp-Sidik-Jonkman
 95\% CI of $[-0.189,-0.078]$ and a 95\% prediction interval of $[-0.194,-0.074]$. Pooling only
-the four corrected-estimator arms gives $-0.134$ $[-0.212,-0.057]$. Six arms give little power
+the four corrected-estimator arms gives $-0.134$ $[-0.212,-0.057]$. \draft{These held-out fits were
+scored on held-out tokens of the fit's own documents. Three of the six pooled arms (the two depth
+arms and Pythia-1.4B) saved no fitted directions and cannot be re-scored. The \poolK{} earlier arms
+that did save them and share no units (the primary's replicate, Pythia-160m, GPT-Neo layer 10 and two
+later new-unit replications), re-scored on unseen documents, give \poolTest{} \poolTestCI, against
+\poolHeld{} \poolHeldCI{} for the same arms on their own documents (post hoc): reusing documents
+inflated the gap by about a third, and it stays negative without them.} Six arms give little power
 to detect heterogeneity ($Q = 1.05$), so we read $I^2 = 0$ as an absence of evidence. Held-out
 $R^2$ is ahead in all six point estimates (Figure~\ref{fig:forest}), but the stratified
 bootstrap interval includes zero for Pythia-160m and GPT-2 layer 10 (Table~\ref{tab:arms}).
@@ -785,6 +815,74 @@ against passing units, separately for under-fitted failures (held-out $R^2 \le 0
 converged-wrong fits, with bootstrap 95\% intervals.}
 \label{fig:classes}
 \end{figure}
+
+\subsection{\draft{The failure belongs to the preprocessing, and it is common}}
+\label{sec:general}
+\draft{Nothing in the mechanism above depends on the estimator. Any fit made in coordinates
+standardised one by one and mapped back divides by each coordinate's standard deviation, so any weight
+it places on a nearly constant coordinate is magnified by the ratio of the median standard deviation
+to that coordinate's. Four pre-registered tests took this beyond the two LayerNorm models of
+Table~\ref{tab:lnnull} (Table~\ref{tab:general}). In OPT-125m, a third family with a ReLU link, the
+gains predicted near-constant coordinates at layers 3 and 5 only. At layer 5, \fThreeOn{} of
+\fThreeUnits{} fits put more than half their norm on the predicted coordinate, at a median alignment of
+\fThreeAlign{} and restart agreement \fThreeAgree; the control layer had \fThreeControlOn. MID, which
+shares no objective with our estimator, collapses the same way at GPT-Neo layer 6 (\eTwoBNeoOn{} of
+\eTwoBNeoUnits{} fits, median alignment \eTwoBNeoAlign, restart agreement \eTwoBNeoAgree) and at GPT-2
+layer 3 (\eTwoBThreeOn{} of \eTwoBThreeUnits).}
+
+\draft{The most common probing pipeline, scikit-learn's \texttt{StandardScaler} followed by
+logistic regression, fails the same way (Table~\ref{tab:probe}). Trained to read whether a token
+starts with a capital letter, it reaches test accuracy of at least 0.99 at every flagged layer, as does
+the same probe without the scaler, but in the three small models its direction puts \eThreeShareLo{}
+to \eThreeShareHi{} of its squared norm on the near-constant coordinate, and its cosine with the
+unscaled probe's direction is \eThreeCosLo{} to \eThreeCosHi. In Llama-3.2-1B layer 3 the share is
+\eThreeBLlamaShare, at accuracy \eThreeBLlamaAcc, five-fold agreement \eThreeBLlamaFold{} and a cosine
+of \eThreeBLlamaCos{} with the unscaled direction; in Gemma-3-270m layer 13 it is \eThreeBGemmaShare.
+Fold agreement certified the collapse in four of the five collapsed probes (GPT-Neo layer 6, 0.787, is
+the exception). Controls show none of it. One case is immune, as predicted: a coordinate that is exactly
+constant has zero variance, which scikit-learn's scaler leaves unscaled (Gemma-3-270m layer 5).
+Implementations that add a small constant to the scale, as ours do, are not immune.}
+
+\draft{\paragraph{How common, and how to repair it (exploratory).} The smallest gain of the norm feeding
+the MLP, below 1\% of that norm's median gain, marked a near-constant MLP input on \mapAgree{} one of
+the \mapLayers{} layers of the \mapChecked{} models where we measured both: GPT-2, GPT-Neo, OPT,
+Gemma-3-270m and Llama-3.2-1B (Appendix~\ref{app:map}). Read from the weights alone, the same rule
+flags layers in \mapExposed{} of \mapModels{} public models, among them Llama-3.2, Llama-3.1-8B,
+Mistral-7B, Qwen2.5, Qwen3 and Gemma-3, often at most of their layers; none of the seven Pythia models.
+The damage can be undone after the fact: setting the near-constant coordinates of an already fitted
+direction to zero and renormalising passes \repNeoLs{} of 20 least-squares fits at GPT-Neo layer 6
+(\repNeoLsRefit{} for a re-fit that never saw the coordinate) and \repNeoMid{} and \repThreeMid{} of 20
+MID fits (Table~\ref{tab:general}); it recovers only what the fit underneath had, which in OPT at
+8{,}000 tokens is little. \benchname{} ships the check as \texttt{caliper.lint}, which reports these
+coordinates before any fit.}
+
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/tab_general}
+\caption{\draft{The standardisation failure across model families and estimators, at layers the gains
+flag. On the coordinate: fits with more than half their squared norm on the near-constant
+coordinates. Median $|\cos|$: Euclidean alignment with the weight column. Restart agreement: median
+over fits. Passes at the 0.95 bar as fitted, and after zeroing the near-constant coordinates of the
+same fitted direction (post hoc; no re-fit). OPT is under-fitted at 8{,}000 tokens, so few of its fits
+pass after repair. At OPT layer 3 the restarts split between its two coordinates.}}
+\label{tab:general}
+\end{table}
+
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/tab_probe}
+\caption{\draft{A \texttt{StandardScaler} + \texttt{LogisticRegression} probe for ``the token starts
+with a capital letter'', on the input of the layer's MLP (8{,}000 training tokens; 4{,}000 test tokens
+from unseen documents). Share: squared norm of the probe direction (in the input's own coordinates) on
+the near-constant coordinates, or on the lowest-variance coordinate at controls. Accuracy on the test
+tokens, with the same probe without the scaler in brackets. Fold agreement: median $|\cos|$ between
+five cross-validation fits. Upper block E-3, lower block E-3b, both pre-registered.}}
+\label{tab:probe}
+\end{table}
 
 \subsection{More restarts do not fix it}
 \label{sec:restarts}
@@ -1098,6 +1196,17 @@ in progress} \\
 the repair projected both the fit and the reference, so it scored a changed reference} & yes &
 \draft{Replaced by two scores that need no reference: the fit's share on $1/\boldsymbol{\gamma}$,
 and its low-variance share with $1/\boldsymbol{\gamma}$ removed} \\
+\draft{E-2 cost} & \draft{About 12 CPU-hours against the filed 3 to 7} & no & \draft{None; settings
+unchanged} \\
+\draft{F-3a runs} & \draft{Three of four runs stopped at a unit silent on every validation row
+(held-out $R^2$ undefined); such units are now reported as unscoreable and the runs were resumed.
+The scorer was run once on the partial rows before the cause was found} & yes (partial rows) &
+\draft{Two units reported as unscoreable; the completed runs agree with the partial ones} \\
+\draft{E-3 run} & \draft{The first run stopped at OPT (its norm returns a flattened tensor); the
+shape was fixed and the whole run repeated} & yes (two layers) & \draft{The two layers already
+printed reproduced exactly} \\
+\draft{Pooled gap} & \draft{The filed pool cannot be re-scored on unseen documents; a post hoc pool
+of the five arms that can be is reported beside it} & yes & \draft{Reported as post hoc} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1434,6 +1543,28 @@ recovers all 18. For those units the reference is identifiable from the data and
 failed to reach it: practical, not structural, non-identifiability. The comparison favours the
 regression, which is given the link; our estimator learns it, as a practitioner facing an
 unknown unit must.}
+
+\FloatBarrier
+\section{\draft{Which public models are exposed}}
+\label{app:map}
+\draft{For each model we fetched only the weights of the norm feeding each MLP (HTTP range requests
+into the published safetensors files) and flagged a layer when its smallest absolute gain is below
+1\% of that norm's median (the gain is $1+w$ for Gemma-3 and Qwen3.5, whose norms scale that way).
+Against the activations, a coordinate of the MLP's input with standard deviation below 1\% of the
+median over 4{,}000 to 8{,}000 tokens, the rule agreed on \mapAgree{} one of \mapLayers{} layers in
+the \mapChecked{} models we checked. In 17 of Gemma-3-270m's 18 layers the flagged coordinates are
+exactly constant (gain exactly 0), which scikit-learn's scaler is immune to but an estimator that adds
+a constant to the scale is not. The OPT repositories publish no safetensors and were not fetched;
+OLMo-2 normalises after its sublayers, so its MLP reads an unnormalised input. Exploratory, not
+pre-registered.}
+
+\begin{table}[h]
+\centering
+\scriptsize
+\input{tables/tab_map}
+\caption{\draft{Layers flagged by the gain rule in each model, read from the weights alone.}}
+\label{tab:map}
+\end{table}
 
 \FloatBarrier
 \end{document}
