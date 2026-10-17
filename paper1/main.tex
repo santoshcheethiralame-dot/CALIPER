@@ -58,7 +58,7 @@ saved directions after the fact. In a comparison filed before its data, restart 
 failure less well than fit on unseen documents (AUC difference \eOneDelta{} \eOneCI{} on GPT-2;
 \poolTest{} \poolTestCI{} pooled over five earlier conditions), but those failures belong to the
 estimator: a second estimator recovers \eTwoMidOnly{} of the \eTwoLsFail{} units ours misses. The
-setting is narrow by design: MLP units and linear probes of models up to 1B parameters, noiseless
+setting is narrow by design: MLP units and linear probes of models from 124M to 1.4B parameters, noiseless
 unit responses and one probed property. We release the bench, a pre-fit check, every
 pre-registration and every run.}
 %
@@ -1068,10 +1068,19 @@ training seeds, and calibrating it needs a substrate with planted features
   \item The reference standard covers MLP units reading their own layer. A pre-registered
   transfer attempt to sparse-autoencoder latents failed at the estimator (3 of 100 recovered),
   so the calibration is untested beyond MLP units.
-  \item Models are small: 124M to 160M parameters, plus a single 1.4B arm that needed twice
-  the optimisation budget.
-  \item One estimator family, a single-index model fitted by least squares. The checks are
-  estimator-agnostic, but their AUCs are not.
+  \item \draft{Models are small to mid-sized. Fitted units come from models of 124M to 160M
+  parameters, plus a single 1.4B arm that needed twice the optimisation budget; probes reach
+  Llama-3.2-1B and Gemma-3-270m. Exposure in larger models is read from their weights only: the
+  gain rule agreed with the activations on every layer of the five models where both were measured,
+  which shows where the risk is, not that a given analysis of those models failed.}
+  \item \draft{Two estimator families (least squares and MID) and one probe family (logistic
+  regression). The standardisation failure appears in all three. The comparison of checks (E-1)
+  concerns the failures of one estimator, which the second family mostly does not make, so it is a
+  bounded result about that estimator, not a ranking of checks in general.}
+  \item \draft{Several pre-registered predictions failed or could not be tested: the GPT-Neo
+  replication of the E-1 gap (interval includes zero), the practitioner rule's lower error rate,
+  the transfer to sparse-autoencoder latents, MID's own check comparison (too few failures), and
+  fold agreement certifying the collapse at GPT-Neo layer 6 (0.787 against the filed 0.95).}
   \item Responses are noiseless functions of the reference direction, so the attainable fit is
   known and equal to 1 for every unit. \draft{A pre-registered noise experiment on 100 primary
   units keeps the lead when that ceiling varies by unit, but mostly because held-out fit reads
@@ -1079,9 +1088,9 @@ training seeds, and calibrating it needs a substrate with planted features
   includes zero (Section~\ref{sec:noise}). The noise is
   Gaussian and added to the response, not produced by the model.}
   \item \draft{The pre-registered label does not remove the layer-norm null direction from the
-  fit. Doing so changes many verdicts and strengthens the headline (Table~\ref{tab:lnnull}); it is
-  reported as a deviation, and the primary run is being re-run with directions saved so that it
-  can be scored the same way.}
+  fit. Doing so changes many verdicts and strengthens the comparison (Table~\ref{tab:lnnull}); it is
+  reported as a deviation. The primary run saved no directions; its replicate (B-14r) is scored on
+  both labels.}
   \item The 0.95 bar is Euclidean, and the stimulus leaves part of each reference direction
   unidentifiable (Section~\ref{sec:identifiability}). Threshold sweeps and a functional label
   are reported as sensitivity analyses.
@@ -1114,10 +1123,11 @@ readings are trusted.
 \draft{This is a methods paper about measurement. Its intended effect is fewer false claims about
 what a model represents: interpretability results are increasingly used to argue that a model is
 safe, and a check that certifies wrong answers makes those arguments weaker than they look. The
-main risk is over-generalisation in the other direction. The calibration holds for MLP units of
-small LayerNorm language models, one estimator family and noiseless responses; it does not show
-that held-out fit can be trusted everywhere, and it should not be cited as validating
-interpretability methods outside that setting. The study uses publicly released model weights and
+main risk is over-generalisation in the other direction. The failure is shown for MLP units and
+linear probes of models from 124M to 1.4B parameters, two estimator families and one probe family;
+the comparison of checks holds for one estimator's failures. None of it shows that held-out fit can
+be trusted everywhere, and it should not be cited as validating interpretability methods outside
+that setting. The study uses publicly released model weights and
 public-domain text, involves no human subjects or personal data, and releases no model.}
 
 \bibliography{references}
@@ -1192,8 +1202,8 @@ yes & \draft{No pre-registered number changes; a filed re-fit confirms the predi
 second label removes the layer-norm null direction $1/\boldsymbol{\gamma}$ from the fit and
 the reference, since the data cannot determine a fit's component along it} & yes &
 \draft{Changes 3 to 17 verdicts per arm; every arm's gap widens (Table~\ref{tab:lnnull}). Not
-computable for the primary run, which saved no fitted directions; a re-run that saves them is
-in progress} \\
+computable for the primary run, which saved no fitted directions; its replicate (B-14r) saved them
+and is scored on both labels (\bRIdentDelta{} \bRIdentCI{} on this one)} \\
 \draft{Low-variance-share diagnostic and ``repairs 40 of 43''} & \draft{Withdrawn as stated:
 the repair projected both the fit and the reference, so it scored a changed reference} & yes &
 \draft{Replaced by two scores that need no reference: the fit's share on $1/\boldsymbol{\gamma}$,
@@ -1282,10 +1292,12 @@ the true pre-activation, so we also report a baseline built from the response al
 Appendix~\ref{app:deviations} are fixed in the primary run. Held-out tokens share sequences
 with training tokens in most runs; repeating 100 primary units under a sequence-level split
 changes held-out $R^2$ by a median of $2\times10^{-6}$ and leaves its lead intact.
-\paragraph{External.} The models are small and come from three families, two of which
-(GPT-Neo and Pythia) share a training corpus. The units are
-GELU MLP neurons reading a layer-norm output, the stimulus is English prose, and there is one
-estimator family. The checks themselves are estimator-agnostic, but their AUCs need not be.
+\paragraph{External.} \draft{The fitted units come from small models of four families (GPT-2,
+GPT-Neo, Pythia, OPT), two of which (GPT-Neo and Pythia) share a training corpus; the probes add
+Llama-3.2 and Gemma-3. The units are GELU or ReLU MLP neurons reading a layer-norm output, the
+stimulus is English prose (with one Python-code arm), and there are two estimator families and one
+probe family. The checks themselves are estimator-agnostic, but their AUCs need not be: on the same
+data a second estimator family fails on far fewer units (Section~\ref{sec:eone}).}
 The one transfer attempt, to sparse-autoencoder latents, failed at the estimator.
 \paragraph{Statistical conclusion.} DeLong's variance estimate is unstable when there are few
 failures. Every primary comparison is therefore also given as a paired bootstrap and a
@@ -1301,7 +1313,8 @@ those components, so that a failure rate carries its conditions.
 10 PyTorch threads, 16 GB of memory). The 35 local runs with recorded timings, including pilots
 and batch-size controls, took 169 CPU-hours in all, from under an hour to 19 hours each; each
 run's summary file records its seconds per unit, and Appendix~\ref{app:arms} lists the arms. E-1's
-three arms took a further \eOneHours{} CPU-hours. The
+three arms took a further \eOneHours{} CPU-hours, E-2 about 12, and E-2b, F-3a, the probes, the
+layer map and the repair tests about 10 more. The
 Pythia-1.4B arm ran on a free Kaggle GPU, and its precision was not recorded. Every run that
 recorded its libraries used PyTorch 2.12.0 (CPU build) and Transformers 5.13.0 under Python
 3.12; 13 early runs did not record them. No arm needed
