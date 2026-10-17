@@ -1,6 +1,7 @@
 """E-3: a standard linear probe at the near-constant layers (docs/preregistration-e3-standardised-probe.md).
 
-    PYTHONPATH=. python experiments/e3_probe.py      # writes results/e3_probe.json (fits and scores once)
+    PYTHONPATH=. python experiments/e3_probe.py              # E-3 -> results/e3_probe.json (fits and scores once)
+    PYTHONPATH=. python experiments/e3_probe.py --set e3b    # E-3b, two current models -> results/e3b_probe.json
 
 The practitioner's pipeline, sklearn StandardScaler + LogisticRegression (defaults, max_iter 5000),
 trained to read "the current token starts with a capital letter" from the stimulus the layer's MLP
@@ -71,9 +72,16 @@ def std_probe(X, y):
     return p, unit(lr.coef_[0] / sc.scale_)
 
 
+E3B = [  # E-3b (docs/preregistration-e3b-modern-probe.md): (model, layer, kind)
+    ("meta-llama/Llama-3.2-1B-Instruct", 3, "near-constant"), ("meta-llama/Llama-3.2-1B-Instruct", 10, "control"),
+    ("google/gemma-3-270m", 13, "near-constant"), ("google/gemma-3-270m", 5, "exactly constant"),
+]
+
+
 def main():
+    e3b = "--set" in sys.argv and sys.argv[sys.argv.index("--set") + 1] == "e3b"
     rep = {"layers": {}}
-    for name, layer, flagged in LAYERS:
+    for name, layer, flagged in (E3B if e3b else LAYERS):
         model, tok = load_model(name, dtype=torch.float32)
         Xtr, itr = tokens(model, tok, layer, sample_corpus(n_docs=300, seed=0), N_TRAIN)
         seen = set(sample_corpus(n_docs=300, seed=0))
@@ -99,6 +107,18 @@ def main():
              "cos_raw_diffmean": float(abs(v_raw @ v_dm))}
         rep["layers"][f"{name} L{layer}"] = r
         print({k: (round(v, 4) if isinstance(v, float) else v) for k, v in r.items()}, flush=True)
+    if e3b:
+        R = rep["layers"]
+        ll, lc = R["meta-llama/Llama-3.2-1B-Instruct L3"], R["meta-llama/Llama-3.2-1B-Instruct L10"]
+        g13, g5 = R["google/gemma-3-270m L13"], R["google/gemma-3-270m L5"]
+        rep["P1 collapse at Llama-3.2-1B L3"] = {"holds": ll["share_std"] > 0.5 and ll["cos_std_raw"] < 0.3}
+        rep["P2 collapse at Gemma-3-270m L13"] = {"holds": g13["share_std"] > 0.5}
+        rep["P3 no collapse on exactly constant coordinates (Gemma L5)"] = {"holds": g5["share_std"] <= 0.05}
+        rep["P4 control clean (Llama L10)"] = {"holds": lc["share_std"] <= 0.05 and lc["cos_std_raw"] > 0.7}
+        rep["P5 accuracy unaffected"] = {"holds": all(abs(r["acc_std"] - r["acc_raw"]) <= 0.01 for r in (ll, g13))}
+        print(json.dumps({k: v for k, v in rep.items() if k != "layers"}, indent=1))
+        json.dump(rep, open(ROOT / "results/e3b_probe.json", "w"), indent=1)
+        return
     F = [r for r in rep["layers"].values() if r["flagged"]]
     C = [r for r in rep["layers"].values() if not r["flagged"]]
     hit = [r for r in F if r["share_std"] > 0.5]
