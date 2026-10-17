@@ -52,4 +52,4 @@ re-checked once E-1 (`docs/preregistration-e1-fair-comparison.md`) is scored and
     `tab:probe`, Appendix `app:map`). The previous abstract is kept as a comment.
   - The 'wrong but fits well' mechanism rests on the earlier arms only (E-1 had no such fit);
     still to say where it is claimed.
-- Title: still about agreement checks; consider whether it should name the preprocessing failure.
+- Title changed 17 Oct to "Agreement Certifies the Wrong Direction: How Per-Coordinate Standardisation Breaks Probes and Direction Estimators" (previous title kept as a comment in main.tex).
