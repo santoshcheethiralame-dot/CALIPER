@@ -9,6 +9,16 @@ all, in this order, leaving about 13 hours for a failed session or a re-run.
 | 2 | `NEXT_SESSION_B1.md` | B1: what Gemma-3-27B emits when YES and NO lose their probability (P2-R Amendment 1) | 2-3 | Paper 2 C5, the second review's ruling 10 |
 | 3 | `NEXT_SESSION_F4F6_v2.md` | F-4 gated units (Qwen2.5-0.5B) and F-6 unembedding (GPT-2, 32k tokens) | about 7.5 (deadline guard) | Flagship Gate F-B (31 Jan) needs three new substrates |
 
+## Re-checked on 17 Oct (quota reset)
+
+- Sessions 1 and 2: the three scripts are unchanged since their sheets (v2026-10-13a, v2026-10-13a,
+  v2026-10-11b); every sheet cell parses.
+- Session 3: **the 15 Oct note below no longer holds.** `experiments/e01_gate.py` (unscoreable-unit
+  screen, active arm) and `caliper/activations.py` (OPT and Gemma MLP norms) changed this week, so
+  `kaggle/caliper-bundle.zip` was rebuilt on 17 Oct and the sheet's stale check now requires it.
+  Neither change alters F-4 (Qwen gated units) or F-6 (unembedding) fits; the rebuild keeps the code
+  that ran on Kaggle identical to the repository's.
+
 ## Checked on 15 Oct
 
 - **Script versions match the sheets.** `kaggle_s3_positive_control.py` v2026-10-11b,

@@ -7,7 +7,9 @@ GPT-2 row. Measured costs: F-4 Qwen 27 s/unit (8k), Pythia-410m control 84 s/row
 ## Before you start
 
 - **Stop the old session** (F-6 fit A, started with the 4-6 hour sheet). Its output is not needed.
-- Input: **caliper-bundle**, the 10 Oct (night) version (unchanged; the cell checks it).
+- Input: **caliper-bundle**, the **17 Oct** version: upload `kaggle/caliper-bundle.zip` as a new
+  version first (the 10 Oct one predates the OPT/Gemma norm lookup and the unscoreable-unit screen;
+  the cell refuses it).
 - **GPU T4 x2** (both are used now), **Internet On**.
 
 ## The cell (paste as the only cell; Save Version -> Save & Run All)
@@ -21,7 +23,7 @@ hits = glob.glob("/kaggle/input/**/caliper/estimator.py", recursive=True)
 assert hits, "bundle not found under /kaggle/input - is caliper-bundle attached?"
 root = os.path.dirname(os.path.dirname(hits[0]))
 sys.path.insert(0, root); os.chdir(root); os.environ["PYTHONPATH"] = root
-assert '"--corpus-docs"' in open("experiments/e01_gate.py").read(), "STALE BUNDLE"
+assert "unscoreable (silent on the validation rows)" in open("experiments/e01_gate.py").read(), "STALE BUNDLE: upload the 17 Oct caliper-bundle.zip"
 import torch
 assert torch.cuda.device_count() >= 2, "turn on GPU T4 x2"
 print("bundle OK |", torch.cuda.device_count(), "GPUs", flush=True)

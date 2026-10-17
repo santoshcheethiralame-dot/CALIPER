@@ -99,6 +99,10 @@ ap.add_argument("--drop-constant-coords", type=float, default=None, metavar="FRA
 ap.add_argument("--exclude-corpus-seed", type=int, default=None,
                 help="drop every document that corpus seed would sample, so this run's "
                      "stimulus is document-disjoint from that seed's (X-1)")
+ap.add_argument("--corpus-docs", type=int, default=None,
+                help="documents to sample before any exclusion (default: 300 up to 32k tokens, "
+                     "else the whole pool). A disjoint-document fit at a large budget needs more "
+                     "than 300, because excluding the other seed's documents removes some")
 ap.add_argument("--split-seed", type=int, default=0,
                 help="seed for collect's row order, which decides the 20%% held-out set. "
                      "0 reproduces every earlier run")
@@ -111,13 +115,16 @@ ap.add_argument("--snr", type=float, default=None,
 ap.add_argument("--snr-range", type=float, nargs=2, default=None, metavar=("LO", "HI"),
                 help="as --snr, but each unit draws its own SNR log-uniformly from [LO, HI], "
                      "so the attainable R2 differs between units and is unknown to the checks")
-ap.add_argument("--augment", choices=("targeted", "random", "natural"), default=None,
+ap.add_argument("--augment", choices=("targeted", "random", "natural", "active"), default=None,
                 help="F-1: add --augment-n samples to the fitting set only. 'targeted': stimulus "
                      "rows pushed into the eigen-directions carrying the bottom 1%% of stimulus "
                      "variance; 'random': pushed isotropically; both answered by the unit's exact "
                      "function. 'natural': fresh tokens from documents disjoint from the corpus. "
-                     "The held-out rows are unchanged (docs/preregistration-f1-interventional.md)")
+                     "The held-out rows are unchanged (docs/preregistration-f1-interventional.md). "
+                     "'active' (F-2, one unit per run): the --augment-n fresh tokens with the "
+                     "largest response out of --augment-pool (docs/preregistration-f2-active.md)")
 ap.add_argument("--augment-n", type=int, default=2000)
+ap.add_argument("--augment-pool", type=int, default=20000)
 ap.add_argument("--out", default="results/e01_gate.jsonl")
 a = ap.parse_args()
 
@@ -125,7 +132,11 @@ t0 = time.time()
 
 
 def corpus():
-    texts = sample_corpus(n_docs=300, seed=a.corpus_seed)
+    # 300 documents give about 33-35k tokens, which covers every run up to 32k and keeps
+    # their sample unchanged. Larger budgets take the whole pool (about 1,080 documents,
+    # 125-135k tokens); before 10 Oct they silently capped at about 34k.
+    n_docs = a.corpus_docs or (300 if a.tokens <= 32000 else 2000)
+    texts = sample_corpus(n_docs=n_docs, seed=a.corpus_seed)
     if a.exclude_corpus_seed is not None:
         seen = set(sample_corpus(n_docs=300, seed=a.exclude_corpus_seed))
         texts = [t for t in texts if t not in seen]
@@ -166,6 +177,8 @@ p = collect(model, tok, corpus(), layer=a.layer,
             neurons=neurons, max_tokens=a.tokens, seed=a.split_seed,
             shuffle="sequence" if a.sequence_split else "token", sae=sae,
             target=a.target if a.target in ("unembed", "glu") else "mlp")
+if len(p.stimulus) < a.tokens:
+    raise SystemExit(f"corpus gave {len(p.stimulus)} tokens, fewer than --tokens {a.tokens}")
 glu = a.target == "glu"
 snr = {}
 if a.snr is not None or a.snr_range is not None:
@@ -184,14 +197,23 @@ if a.augment is not None:
         raise SystemExit("--augment is defined for noiseless MLP units only")
     n_test = int(len(p.stimulus) * 0.2)
     fit_rows = p.stimulus[n_test:]
-    if a.augment == "natural":
+    if a.augment in ("natural", "active"):
+        if a.augment == "active" and len(neurons) != 1:
+            raise SystemExit("--augment active selects tokens for one unit; pass a single --units")
+        n_draw = a.augment_n if a.augment == "natural" else a.augment_pool
         seen = set(corpus())
         fresh = [t for t in sample_corpus(n_docs=300, seed=a.corpus_seed + 1) if t not in seen]
         q = collect(model, tok, fresh, layer=a.layer, neurons=neurons,
-                    max_tokens=a.augment_n, seed=a.split_seed, shuffle="token")
-        extra_s, extra_r = q.stimulus[:a.augment_n], q.response[:a.augment_n]
-        if len(extra_s) < a.augment_n:
-            raise SystemExit(f"only {len(extra_s)} fresh tokens for --augment-n {a.augment_n}")
+                    max_tokens=n_draw, seed=a.split_seed, shuffle="token")
+        if len(q.stimulus) < n_draw:
+            raise SystemExit(f"only {len(q.stimulus)} fresh tokens for {n_draw}")
+        pick = (np.arange(a.augment_n) if a.augment == "natural"
+                else np.sort(np.argsort(-q.response[:n_draw, 0], kind="stable")[:a.augment_n]))
+        extra_s, extra_r = q.stimulus[pick], q.response[pick]
+        if a.augment == "active":
+            print(f"  augment active: top {a.augment_n} of {n_draw}; pool firing fraction "
+                  f"{float((q.response[:n_draw, 0] > 0).mean()):.4f}, selected minimum response "
+                  f"{float(extra_r[:, 0].min()):.4f}", flush=True)
     else:
         g = np.random.default_rng(0)
         base = fit_rows[g.choice(len(fit_rows), a.augment_n, replace=False)].astype(np.float64)
@@ -238,6 +260,12 @@ if a.drop_constant_coords is not None:
 alive = p.response.std(0) > 1e-4
 print(f"  alive: {int(alive.sum())}/{len(alive)} (screened units are reported, not dropped)",
       flush=True)
+# A unit silent on every validation row has no defined held-out R2, so early stopping never keeps a
+# state and the fit cannot run (F-3a, 16 Oct). It is reported as unscoreable, like a dead unit.
+silent = alive & (p.response[:int(len(p.response) * test_frac)].std(0) <= 1e-4)
+if silent.any():
+    print(f"  unscoreable (silent on the validation rows): {p.neurons[silent].tolist()}", flush=True)
+alive &= ~silent
 
 todo = [i for i in range(len(p.neurons)) if alive[i] and not ck.done(int(p.neurons[i]))]
 for start in range(0, len(todo), a.batch):
@@ -268,7 +296,7 @@ for start in range(0, len(todo), a.batch):
         if dirs is not None:
             # Written before the row, so a recorded row always has its directions.
             np.savez_compressed(
-                dirs / f"n{n}.npz", w=p.weights[:, i].astype(np.float32),
+                dirs / f"n{n}.npz", w=p.weights[..., i].astype(np.float32),
                 direct=prim[j].subspace.astype(np.float32),
                 cascade=c.subspace.astype(np.float32),
                 k2=d2[j].subspace.astype(np.float32),
@@ -283,6 +311,7 @@ for start in range(0, len(todo), a.batch):
             **({"k": 2} if glu else {}),
             **({"snr": round(snr[int(n)], 4)} if snr else {}),
             **({"augment": a.augment, "augment_n": a.augment_n} if a.augment else {}),
+            **({"augment_pool": a.augment_pool} if a.augment == "active" else {}),
             "k2_gain": round(float(d2[j].test_r2 - d1[j].test_r2) if glu else
                              float(d2[j].test_r2 - max(d1[j].test_r2, c.test_r2)), 4),
             # NOT ground-truth-free: both terms are alignments to w. Kept so every

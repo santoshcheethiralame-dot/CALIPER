@@ -71,9 +71,11 @@ def _mlp_ln(block):
     parallel residual (use_parallel_residual=True), so the MLP still reads this
     layernorm's output directly and the identity holds either way.
     """
-    for name in ("ln_2", "post_attention_layernorm", "post_attention_norm"):
+    for name in ("ln_2", "pre_feedforward_layernorm", "post_attention_layernorm", "post_attention_norm"):
         if hasattr(block, name):
             return getattr(block, name)
+    if hasattr(block, "do_layer_norm_before"):      # OPT: 350m is post-LN, the rest pre-LN
+        return block.final_layer_norm if block.do_layer_norm_before else block.self_attn_layer_norm
     return None
 
 
@@ -176,9 +178,8 @@ def collect(
             captured["pre"] = out.detach()
 
         ln = _mlp_ln(block)
-        # Where the model has a pre-MLP layernorm its output is the stimulus, as in every run
-        # before F-3. OPT has none on the MLP path (OPT-350m is post-LN), so the stimulus is
-        # taken at the input projection itself, which is what the pre-activation reads.
+        # The stimulus is the output of the layernorm the MLP reads, or the input projection's
+        # input where there is none; for every model here the two are the same tensor.
         handles = [
             ln.register_forward_hook(hook_stim) if ln is not None
             else _mlp_in(block).register_forward_pre_hook(hook_stim_in),
