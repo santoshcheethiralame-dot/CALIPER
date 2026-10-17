@@ -18,7 +18,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from .estimator import Fit, _to_original_frame
+from .estimator import Fit, _scale, _to_original_frame
 
 
 def _per_neuron_stack(n, d, k, width, seed, ids=None):
@@ -117,7 +117,7 @@ def fit_batch(stimulus, responses, k=1, n_restarts=3, steps=2500, lr=3e-3,
     n_neurons = Y.shape[1]
 
     s = torch.as_tensor(X, device=device)
-    scale = s.std(0) + 1e-6
+    scale = _scale(s)
     s = (s - s.mean(0)) / scale
     scale_np = scale.cpu().numpy()
 

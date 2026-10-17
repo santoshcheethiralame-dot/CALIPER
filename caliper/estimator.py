@@ -10,6 +10,7 @@ with V a D x K subspace and f a flexible nonlinearity. All K directions are fitt
 jointly; greedy dimension-by-dimension search is biased under correlated stimuli.
 """
 
+import os
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -109,6 +110,14 @@ def whitening_frame(stimulus, eps=1e-3, n_components=None):
     return vt.T / np.sqrt(lam + eps * lam.max()), mean
 
 
+def _scale(s):
+    """Per-coordinate scale. CALIPER_SCALE_FLOOR=f floors it at f x the median scale (repair test C);
+    unset, it is the scale every run used."""
+    sd = s.std(0) + 1e-6
+    f = float(os.environ.get("CALIPER_SCALE_FLOOR", "0"))
+    return torch.clamp(sd, min=f * float(sd.median())) if f else sd
+
+
 def fit(
     stimulus,
     response,
@@ -151,7 +160,7 @@ def fit(
     # of basis: a direction v in standardised space corresponds to v / scale in the
     # original frame, since s' . v = s . (v / scale). Every subspace this function
     # returns is mapped back, so callers always work in the original coordinates.
-    scale = (s.std(0) + 1e-6)
+    scale = _scale(s)
     s = (s - s.mean(0)) / scale
     a = (a - a.mean()) / (a.std() + 1e-6)
     scale_np = scale.cpu().numpy()

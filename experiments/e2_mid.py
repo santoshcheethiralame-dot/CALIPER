@@ -16,6 +16,7 @@ standardisation of the stimulus, test R^2 through a 60-bin link fitted on the tr
 """
 import argparse
 import json
+import os
 import time
 from itertools import combinations
 from pathlib import Path
@@ -58,6 +59,8 @@ St, Yt = q.stimulus[:a.test_tokens].astype(np.float64), q.response[:a.test_token
 n_val = int(len(S) * TEST_FRAC)
 S_tr, Y_tr = S[n_val:], Y[n_val:]
 mu, sd = S.mean(0), S.std(0) + 1e-6
+if float(os.environ.get("CALIPER_SCALE_FLOOR", "0")):  # repair test C
+    sd = np.maximum(sd, float(os.environ["CALIPER_SCALE_FLOOR"]) * np.median(sd))
 X = torch.as_tensor((S - mu) / sd, dtype=torch.float32)
 X_val, X_tr = X[:n_val], X[n_val:]
 centres = torch.linspace(-4, 4, a.z_bins)

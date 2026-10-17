@@ -1,6 +1,7 @@
 """Post hoc (17 Oct): how much of the standardisation failure a free repair recovers, by estimator.
 
-    PYTHONPATH=. python experiments/repair_table.py      # writes results/repair_table.json
+    PYTHONPATH=. python experiments/repair_table.py          # writes results/repair_table.json
+    PYTHONPATH=. python experiments/repair_table.py --r2     # R-2 -> results/r2_scale_floor.json
 
 Not filed; no new fit. For every saved run at a near-constant layer, four scores of the same units on
 the Euclidean bar (|cos| >= 0.95 with the weight column):
@@ -80,5 +81,42 @@ def main():
     json.dump(rep, open(ROOT / "results/repair_table.json", "w"), indent=1)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--r2" not in sys.argv:
     main()
+
+
+R2 = [  # R-2 (docs/preregistration-r2-scale-floor.md): (name, stem, model, layer, format, comparison stem, comparison format)
+    ("GPT-Neo L6, least squares, floor", "results/r2_ls_gptneo_l6_floor", NEO, 6, "e01", "results/b17b_gptneo125m_l6_drop", "drop"),
+    ("GPT-2 L3, least squares, floor", "results/r2_ls_gpt2_l3_floor", "gpt2", 3, "e01", "results/b17d_gpt2_l3_drop", "drop"),
+    ("GPT-Neo L6, MID, floor", "results/r2_mid_gptneo_l6_floor", NEO, 6, "mid", "results/e2b_mid_gptneo_l6", "zeroed"),
+    ("GPT-2 L3, MID, floor", "results/r2_mid_gpt2_l3_floor", "gpt2", 3, "mid", "results/e2b_mid_gpt2_l3", "zeroed"),
+]
+
+
+def score_r2():
+    rep = {}
+    for name, stem, model, layer, fmt, cstem, how in R2:
+        ks, V = directions(stem, fmt)
+        const = near_constant(cstem if fmt == "mid" else stem, model, layer, ks, fmt)
+        W, n = reference(model, layer, ks)
+        euc, _ = alignments(V, W, n)
+        share = ((V / np.linalg.norm(V, axis=1, keepdims=True))[:, const] ** 2).sum(1)
+        kc, Vc = directions(cstem, "e01" if how == "drop" else "mid")
+        if how == "zeroed":
+            Vc = Vc.copy()
+            Vc[:, const] = 0
+        ec, _ = alignments(Vc, *reference(model, layer, kc))
+        r = {"units": len(ks), "passes": int((euc >= BAR).sum()), "median": float(np.median(euc)),
+             "median_share": float(np.median(share)), "comparison": how,
+             "comparison_passes": int((ec >= BAR).sum()), "comparison_median": float(np.median(ec))}
+        rep[name] = r
+        print(name, r, flush=True)
+    rep["P1 floor leaves no weight on the coordinates"] = {"holds": all(r["median_share"] <= 0.05 for r in rep.values())}
+    rep["P2 floor repairs as well as the comparison"] = {"holds": all(
+        abs(r["passes"] - r["comparison_passes"]) <= 3 for k, r in rep.items() if not k.startswith("P"))}
+    print({k: v for k, v in rep.items() if k.startswith("P")})
+    json.dump(rep, open(ROOT / "results/r2_scale_floor.json", "w"), indent=1)
+
+
+if __name__ == "__main__" and "--r2" in sys.argv:
+    score_r2()
